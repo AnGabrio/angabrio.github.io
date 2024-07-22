@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2022-10-10">
+
+<title>angabrio.github.io - How to handle longitudinal data in economic evaluations</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">How to handle longitudinal data in economic evaluations</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">health economics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 10, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Hello and welcome back for a new update on my blog. Today we go through another “practical” post where I provide some suggestions and examples on how to fit health economic evaluations and learn how to us the appropriate statistical methods to get the results you want. Last post we had a look at how <strong>bootstrapping</strong> could be implemented for analysing aggregated health economics outcome data (i.e.&nbsp;QALYs and Total costs) collected and computed using data from a trial. Now, we take a step back as calculation of such aggregated outcomes is typically done on the basis of some longitudinal data that were collected during the duration of the trial at different time points. For example, it is common that QALYs are compute using an <em>Area Under the Curve</em> approach as a weighted function of quality of life utility scores:</p>
+<p><span class="math display">\[
+\text{QALY}_{i} = \sum_{j=1}^J \frac{(u_{ij-1}+u_{ij})}{2}\delta_j ,
+\]</span></p>
+<p>where <span class="math inline">\(u_{ij}\)</span> is the utility score evaluated for the <span class="math inline">\(i\)</span>-th patient at the <span class="math inline">\(j\)</span>-th time point in the trial (with <span class="math inline">\(J\)</span> being the last time), while <span class="math inline">\(\delta_j\)</span> is the fraction of total time period (usually 1 year) between two consecutive collected measurements (e.g.&nbsp;if 6 months, then <span class="math inline">\(\delta_j=0.5\)</span>). The individual utility scores <span class="math inline">\(u_{ij}\)</span> are obtained after applying some national tariff system values to patients’ answers to some validated questionnaires, e.g.&nbsp;EQ-5D-5L. For each individual, utility scores are calculated based on their answers to the questionnaire items at each time point and the tariff system (usually specific to each country) is used to numerically “value” their health states according to some pre-specified and assumed population model.</p>
+<p>Similarly, Total costs are computed for each individual as the sum of all corresponding cost components collected at different times during the trial</p>
+<p><span class="math display">\[
+\text{Total costs}_i=\sum_j^{J}c_{ij},
+\]</span></p>
+<p>where <span class="math inline">\(c_{ij}\)</span> denotes the cost component collected for patient <span class="math inline">\(i\)</span>-th at the <span class="math inline">\(j\)</span>-th time in the trial. These components are typically calculated out of resource use data obtained from either self-reported questionnaires administered to the patients, their clinic records, or a combination of these. Resource use data are then combined with national unit prices for each type of healthcare service used to derive the individual costs associated with each cost component (i.e.&nbsp;<span class="math inline">\(\text{cost}=\text{resource use}\times \text{unit price}\)</span>) for each individual at each time point.</p>
+<p>As perhaps you noticed, it is possible to simply ignore the longitudinal nature of the data by first computing the aggregated outcome measures (QALYs and Total costs) and fit the statistical models directly to these quantities to derive the treatment effect of interest, e.g.&nbsp;mean incremental QALYs and Total costs between a new intervention (<span class="math inline">\(t=1\)</span>) and a control (<span class="math inline">\(t=0\)</span>) group. This also simplified the modelling task substantially since the complexities associated with the intrinsic dependence between outcome observations collected from the same individuals over time can be ignored (i.e.&nbsp;it is already summarised into the aggregated measures). However, there are situations in which it would be preferable to fit the model using the original longitudinal data collected throughout the trial and use the estimated quantitis from this model to derive the main treatment effects of interest, i.e.&nbsp;mean incremental QALYs and Total costs between treatment groups. See reference paper <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510">here</a>.</p>
+<p>First, let’s simulate some longitudinal health economics data. For the sake of this exercise I will create a balanced design in which utilities and costs are collected at three equally spaced time points (baseline, 6 and 12 months) on <span class="math inline">\(n=300\)</span> individuals randomised to two interventions (new and old group) over a period of 1 year.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mean_ut0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.3</span>,<span class="fl">0.3</span>,<span class="fl">0.3</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>mean_ut1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.3</span>,<span class="fl">0.4</span>,<span class="fl">0.5</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>sigma_u <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">3</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(sigma_u) <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>u_t0 <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(n<span class="sc">/</span><span class="dv">2</span>,<span class="at">mean =</span> mean_ut0, <span class="at">sigma =</span> sigma_u)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>u_t1 <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(n<span class="sc">/</span><span class="dv">2</span>,<span class="at">mean =</span> mean_ut1, <span class="at">sigma =</span> sigma_u)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>mean_ct0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">500</span>,<span class="dv">500</span>,<span class="dv">500</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>mean_ct1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">500</span>,<span class="dv">1300</span>,<span class="dv">1500</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>sigma_c <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">3</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(sigma_c) <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>c_t0 <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(n<span class="sc">/</span><span class="dv">2</span>,<span class="at">mean =</span> mean_ct0, <span class="at">sigma =</span> sigma_c)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>c_t1 <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(n<span class="sc">/</span><span class="dv">2</span>,<span class="at">mean =</span> mean_ct1, <span class="at">sigma =</span> sigma_c)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>u_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(u_t0[,<span class="dv">1</span>],u_t1[,<span class="dv">1</span>])</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>c_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(c_t0[,<span class="dv">1</span>],c_t1[,<span class="dv">1</span>])</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>u_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(u_t0[,<span class="dv">2</span>],u_t1[,<span class="dv">2</span>])</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>c_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(c_t0[,<span class="dv">2</span>],c_t1[,<span class="dv">2</span>])</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>u_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(u_t0[,<span class="dv">3</span>],u_t1[,<span class="dv">3</span>])</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>c_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(c_t0[,<span class="dv">3</span>],c_t1[,<span class="dv">3</span>])</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>data_sim_uc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, u_1, c_1, u_2, c_2, u_3, c_3)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>data_sim_uc <span class="ot">&lt;-</span> data_sim_uc[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_uc)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With the above commands I have generated, separately for each treatment group, utility and cost data at three different time points assuming a multivariate normal distribution assuming independence over time. Although this is a rather strong assumption in real scenarios here I merely focus on the implementation of the models for longitudinal data. In future posts I will provide more realistic examples to show how changing the data structure actually requires an accurate choice of the methods to deal with them to avoid bias or misleading inferences.</p>
+<p>We can inspect the generated data using histograms:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data_sim_uc<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_uc<span class="sc">$</span>trt)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_uc<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>u1_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>u_1))<span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>u2_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>u_2))<span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>u3_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>u_3))<span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>c1_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>c_1))<span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>c2_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>c_2))<span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>c3_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>c_3))<span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u1_hist, c1_hist, u2_hist, c2_hist, u3_hist, c3_hist, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From the graphs it is apparent that the new intervention is associated with higher costs compared to the old one when focussing on the follow-up period. We can then inspect some summary statistics to have a better idea about these differences:</p>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data_sim_uc_stats <span class="ot">&lt;-</span> data_sim_uc[,<span class="fu">c</span>(<span class="st">"u_1"</span>,<span class="st">"c_1"</span>,<span class="st">"u_2"</span>,<span class="st">"c_2"</span>,<span class="st">"u_3"</span>,<span class="st">"c_3"</span>,<span class="st">"trtf"</span>)]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>d.summary <span class="ot">&lt;-</span> data_sim_uc_stats <span class="sc">%&gt;%</span>                               </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(trtf) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">meanu1 =</span> <span class="fu">mean</span>(u_1), <span class="at">sdu1 =</span> <span class="fu">sd</span>(u_1), </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanc1 =</span> <span class="fu">mean</span>(c_1), <span class="at">sdc1 =</span> <span class="fu">sd</span>(c_1),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanu2 =</span> <span class="fu">mean</span>(u_2), <span class="at">sdu2 =</span> <span class="fu">sd</span>(u_3), </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanc2 =</span> <span class="fu">mean</span>(c_2), <span class="at">sdc2 =</span> <span class="fu">sd</span>(c_2),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanu3 =</span> <span class="fu">mean</span>(u_3), <span class="at">sdu3 =</span> <span class="fu">sd</span>(u_3), </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanc3 =</span> <span class="fu">mean</span>(c_3), <span class="at">sdc3 =</span> <span class="fu">sd</span>(c_3)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(d.summary, <span class="at">caption =</span> <span class="st">"Summary statistics"</span>, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<table class="caption-top table" data-quarto-postprocess="true">
+<caption>Summary statistics</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">trtf</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanu1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdu1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanc1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdc1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanu2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdu2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanc2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdc2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanu3</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdu3</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">meanc3</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdc3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">old</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">499.9</td>
+<td style="text-align: right;">42.2</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">507.4</td>
+<td style="text-align: right;">39.5</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">503.4</td>
+<td style="text-align: right;">43.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">new</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">505.2</td>
+<td style="text-align: right;">41.6</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">1304.9</td>
+<td style="text-align: right;">43.8</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">1498.0</td>
+<td style="text-align: right;">47.4</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>We can see that both groups have similar sd while the means show some noticeable differences with <span class="math inline">\(t=1\)</span> being associated with both higher utility and cost post-baseline values (<span class="math inline">\(j&gt;1\)</span>). How do we proceed from here? Normally the approach consists in computing QALYs and Total costs and fit models to these data (see previous post). However, it is also possible to fit models directly to the utility and cost data in the form of <strong>linear mixed or random-effects regression models</strong>. The main idea behind this models is to treat individuals as random effects so that the observations collected at each time can be assigned a two-level multilevel structure in which individuals are nested within time points. In this way dependence between observations for the same individual is taken into account by means of random effects specification, thus preserving the dependence relationships present in the longitudinal data.</p>
+<p>Before fitting the model it is necessary to re-arrange out current dataset (wide-format) into a longitudinal format where the utility and cost outcome variables consists in single vectors each of length <span class="math inline">\(n \times J\)</span> and for each outcome value create an indicator variable associated with the different time at which each value refers to (i.e.&nbsp;taking value 1, 2 or 3). This can be achieved as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="ot">&lt;-</span><span class="fu">reshape</span>(data_sim_uc, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"u_1"</span>,<span class="st">"u_2"</span>,<span class="st">"u_3"</span>,<span class="st">"c_1"</span>,<span class="st">"c_2"</span>,<span class="st">"c_3"</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">direction =</span> <span class="st">"long"</span>,<span class="at">idvar =</span> <span class="st">"id"</span>,<span class="at">sep =</span> <span class="st">"_"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>time_2<span class="ot">&lt;-</span><span class="fu">ifelse</span>(data_long_uc<span class="sc">$</span>time <span class="sc">==</span> <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>time_3<span class="ot">&lt;-</span><span class="fu">ifelse</span>(data_long_uc<span class="sc">$</span>time <span class="sc">==</span> <span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>trt_time_2<span class="ot">&lt;-</span>data_long_uc<span class="sc">$</span>trt<span class="sc">*</span>data_long_uc<span class="sc">$</span>time_2</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>trt_time_3<span class="ot">&lt;-</span>data_long_uc<span class="sc">$</span>trt<span class="sc">*</span>data_long_uc<span class="sc">$</span>time_3</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>timef <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_uc<span class="sc">$</span>time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the code above, in addition to the creation of the variable <code>time</code>, additional indicator variables have been created to denote each individual time point (<code>time_2</code>,<code>time_3</code>) and interaction between time point and treatment assignment (<code>trt_time_2</code>,<code>trt_time_3</code>). Although not necessary, these additional indicators can simply the interpretation of the model specification in terms of retrieving estimates for the main effects of interest, e.g.&nbsp;mean utility and cost at each time point by treatment group. After converting our dataset into long format we can now fit the longitudinal random effects model for the two outcomes separately.</p>
+<p><span class="math display">\[
+u_{ij} = \alpha_1\times\text{time}_j + \alpha_2 \times \text{trt}\times\text{time}_2 + \alpha_3 \times \text{trt}\times\text{time}_3 + \omega^u_i + \varepsilon^u_{ij},
+\]</span></p>
+<p><span class="math display">\[
+c_{ij} = \beta_1\times\text{time}_j + \beta_2 \times \text{trt}\times\text{time}_2 + \beta_3 \times \text{trt}\times\text{time}_3 + \omega^c_{i} + \varepsilon^c_{ij},
+\]</span></p>
+<p>where the set of regression coefficients <span class="math inline">\(\boldsymbol \alpha\)</span> and <span class="math inline">\(\boldsymbol \beta\)</span> capture the association between each predictor included into the model and the outcome, while the terms <span class="math inline">\(\omega_i\)</span> and <span class="math inline">\(\varepsilon_{ij}\)</span> denote the random effects and residual error term of the model, respectively. Key aspects to highlight from the model specifications are:</p>
+<ol type="1">
+<li><p>The models do not include a fixed constant as removal of the intercept term allows to interpret the regression parameters and linear combination thereof as functions of the mean utility and cost for each treatment group and time point. For example, when considering time = 1 (baseline), it is clear how the first regression coefficient (<span class="math inline">\(\alpha_1\)</span> or <span class="math inline">\(\beta_1\)</span>) represents the mean outcome in the old group at that time point (i.e.&nbsp;setting time=1 and trt=0 gets rid of all other terms into the models).</p></li>
+<li><p>Different assumptions about the covariance structure of the data can be encoded into the model by specifying a given structure for the error terms. Here, for simplicity, we focus on the simplest case where the error terms are associated with a constant variance of <span class="math inline">\(\sigma^2_{\varepsilon}\)</span>. More sophisticated assumptions can be incorporated by assuming for example a compound symmetry, autocorrelation or fully unstructured covariance matrix for the error terms.</p></li>
+</ol>
+<p>Finally, we note that here the models are fitted assuming independence between utilities and costs to make easier to interpret the results from each model, while in reality correlation between outcomes should be taken into account even at the modelling stage. The model can be fitted in <code>R</code> using different packages and functions. Here we use the <code>nlme</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>LMM_u <span class="ot">&lt;-</span> <span class="fu">lme</span>(u <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data =</span> data_long_uc, <span class="at">method =</span> <span class="st">"ML"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>LMM_c <span class="ot">&lt;-</span> <span class="fu">lme</span>(c <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data =</span> data_long_uc, <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can look at summary results for the fixed effects components of the model (i.e.&nbsp;regression parameters) by typing:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_u)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+  Data: data_long_uc 
+       AIC       BIC   logLik
+  -139.812 -106.1953 76.90602
+
+Random effects:
+ Formula: ~1 | id
+         (Intercept)  Residual
+StdDev: 3.737738e-05 0.2221528
+
+Fixed effects:  u ~ -1 + timef + trt_time_2 + trt_time_3 
+               Value  Std.Error  DF   t-value p-value
+timef1     0.2952213 0.01286178 596 22.953386  0.0000
+timef2     0.3275948 0.01818930 596 18.010304  0.0000
+timef3     0.3122918 0.01818930 596 17.168985  0.0000
+trt_time_2 0.0822815 0.02572355 596  3.198682  0.0015
+trt_time_3 0.1931791 0.02572355 596  7.509813  0.0000
+ Correlation: 
+           timef1 timef2 timef3 trt__2
+timef2      0.000                     
+timef3      0.000  0.000              
+trt_time_2  0.000 -0.707  0.000       
+trt_time_3  0.000  0.000 -0.707  0.000
+
+Standardized Within-Group Residuals:
+         Min           Q1          Med           Q3          Max 
+-3.331350319 -0.695732577  0.008706237  0.671322522  3.136293527 
+
+Number of Observations: 900
+Number of Groups: 300 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_u, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Approximate 95% confidence intervals
+
+ Fixed effects:
+                lower       est.     upper
+timef1     0.27003168 0.29522134 0.3204110
+timef2     0.29197127 0.32759482 0.3632184
+timef3     0.27666827 0.31229182 0.3479154
+trt_time_2 0.03190217 0.08228147 0.1326608
+trt_time_3 0.14279979 0.19317910 0.2435584</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed-effects model fit by maximum likelihood
+  Data: data_long_uc 
+       AIC      BIC    logLik
+  9338.145 9371.761 -4662.072
+
+Random effects:
+ Formula: ~1 | id
+        (Intercept) Residual
+StdDev:  0.01878518 42.99749
+
+Fixed effects:  c ~ -1 + timef + trt_time_2 + trt_time_3 
+              Value Std.Error  DF  t-value p-value
+timef1     502.5422  2.489386 596 201.8740       0
+timef2     507.4234  3.520524 596 144.1329       0
+timef3     503.3765  3.520524 596 142.9834       0
+trt_time_2 797.4610  4.978772 596 160.1722       0
+trt_time_3 994.5890  4.978772 596 199.7659       0
+ Correlation: 
+           timef1 timef2 timef3 trt__2
+timef2      0.000                     
+timef3      0.000  0.000              
+trt_time_2  0.000 -0.707  0.000       
+trt_time_3  0.000  0.000 -0.707  0.000
+
+Standardized Within-Group Residuals:
+        Min          Q1         Med          Q3         Max 
+-3.34872571 -0.70290153 -0.03622616  0.70767638  2.95503948 
+
+Number of Observations: 900
+Number of Groups: 300 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_c, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Approximate 95% confidence intervals
+
+ Fixed effects:
+              lower     est.     upper
+timef1     497.6668 502.5422  507.4177
+timef2     500.5285 507.4234  514.3183
+timef3     496.4816 503.3765  510.2714
+trt_time_2 787.7102 797.4610  807.2119
+trt_time_3 984.8381 994.5890 1004.3399</code></pre>
+</div>
+</div>
+<p>and we can derive the marginal mean estimates (and corresponding CIs) for the utility and cost at each time point by treatment group using the <code>emmeans</code> function included in the <code>emmeans</code> package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mu_u <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(LMM_u, <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_u</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> timef trt_time_2 trt_time_3 emmean     SE  df lower.CL upper.CL
+ 1              0          0  0.295 0.0129 596    0.270    0.320
+ 2              0          0  0.328 0.0182 596    0.292    0.363
+ 3              0          0  0.312 0.0182 596    0.277    0.348
+ 1              1          0  0.378 0.0288 596    0.321    0.434
+ 2              1          0  0.410 0.0182 596    0.374    0.446
+ 3              1          0  0.395 0.0315 596    0.333    0.456
+ 1              0          1  0.488 0.0288 596    0.432    0.545
+ 2              0          1  0.521 0.0315 596    0.459    0.583
+ 3              0          1  0.505 0.0182 596    0.470    0.541
+ 1              1          1  0.571 0.0386 596    0.495    0.646
+ 2              1          1  0.603 0.0315 596    0.541    0.665
+ 3              1          1  0.588 0.0315 596    0.526    0.650
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(LMM_c, <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mu_c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> timef trt_time_2 trt_time_3 emmean    SE  df lower.CL upper.CL
+ 1              0          0  502.5 2.489 596    497.7    507.4
+ 2              0          0  507.4 3.521 596    500.5    514.3
+ 3              0          0  503.4 3.521 596    496.5    510.3
+ 1              1          0 1300.0 5.566 596   1289.1   1310.9
+ 2              1          0 1304.9 3.521 596   1298.0   1311.8
+ 3              1          0 1300.8 6.098 596   1288.9   1312.8
+ 1              0          1 1497.1 5.566 596   1486.2   1508.1
+ 2              0          1 1502.0 6.098 596   1490.0   1514.0
+ 3              0          1 1498.0 3.521 596   1491.1   1504.9
+ 1              1          1 2294.6 7.468 596   2279.9   2309.3
+ 2              1          1 2299.5 6.098 596   2287.5   2311.4
+ 3              1          1 2295.4 6.098 596   2283.5   2307.4
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>Finally, we can compute a linear combination of these marginal mean estimates in order to derive the main effects of interest for the analysis, that is the mean QALYs and Total cost estimates evaluated over the whole trial period. Indeed, it suffices to apply the usual formulae used for computing the aggregated quantities to the mean estimates instead, so to derive the corresponding mean estimates for such quantities by group. We can do this as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mu_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">mu_e_old =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="fl">0.25+0.25</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">mu_e_new =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25+0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>mu_QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df t.ratio p.value
+ mu_e_old    0.316 0.0107 596  29.601  &lt;.0001
+ mu_e_new    0.405 0.0107 596  37.987  &lt;.0001
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_QALYs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df lower.CL upper.CL
+ mu_e_old    0.316 0.0107 596    0.295    0.337
+ mu_e_new    0.405 0.0107 596    0.384    0.426
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">mu_tc_old =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">mu_tc_new =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast  estimate    SE  df t.ratio p.value
+ mu_tc_old     1011 4.979 596 203.022  &lt;.0001
+ mu_tc_new     2803 4.979 596 562.960  &lt;.0001
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_Totalcosts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast  estimate    SE  df lower.CL upper.CL
+ mu_tc_old     1011 4.979 596     1001     1021
+ mu_tc_new     2803 4.979 596     2793     2813
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>and, in a similar way, we can also compute the incremental means between treatment groups by taking a linear combination of these estimates:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>delta_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">QALYs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="fl">0.25-0.25</span>,<span class="sc">-</span><span class="fl">0.25</span>,<span class="dv">0</span>,<span class="fl">0.25+0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>delta_QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df t.ratio p.value
+ QALYs      0.0894 0.0144 596   6.219  &lt;.0001
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_QALYs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df lower.CL upper.CL
+ QALYs      0.0894 0.0144 596   0.0612    0.118
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">TCs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate   SE  df t.ratio p.value
+ TCs          1792 7.04 596 254.515  &lt;.0001
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_Totalcosts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate   SE  df lower.CL upper.CL
+ TCs          1792 7.04 596     1778     1806
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>After fitting the model and having retrieved these estimates, it is possible apply bootstrap methods to resample the estimates over a large number of bootstrap samples so to quantify the uncertainty surrounding these estimates and obtain different replications that can be plotted to produce standard graphical tools such as the cost-effectiveness plane and acceptability curve to assess cost-effectiveness. We refer to the previous post to see how the code looks like for implementing bootstrapping. I will show examples on how to use bootstrap methods in combination with mixed models in future posts.</p>
+<p>Satisfied? well perhaps you are asking yourself: why do I need to bother with this stuff if I can simply compute my aggregated variables and fit simpler models to those instead of complicating my life with longitudinal models? Well you are certainly right that in theory there is no practical advantage of using these models over cross-sectional models fitted at the level of QALYs and Total costs. However, in practice there is always a problem with some people dropping out from the study and thus being unable to observe all utility and cost data that were intended to be measured at each time point. As I will show in future posts, this poses a huge threat to the reliability of the estimates based on the available data (e.g.&nbsp;if only people with worse conditions drop out) which may lead in turn to misleading cost-effectiveness conclusions. Well, it turns out that by fitting models at the original level at which data were collected, i.e.&nbsp;longitudinally, you avoid getting rid of precious information from the data and use it in order to make your results more robust to less restrictive missing data assumptions.</p>
+<p>This is a huge topic for which I will not start a new discussion right now. However, it is enough to say that if you simply ignore the unobserved cases you may come up with completely wrong answers that are based on very specific and often unrealistic assumptions about these unobserved data!!!</p>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

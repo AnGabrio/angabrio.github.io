@@ -1,0 +1,56 @@
+---
+title: "And now what?"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2022-01-05
+categories: [Quarto, R, Academia, publication, statistics] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.jpg){fig-align="center"}
+
+Hello folks and happy new year! 
+
+Despite all the problems that occurred in this period in relation to the pandemic and travel restrictions, I hope you had a nice break and recharged your batteries for the upcoming months. As for me, my holidays were decent, let's say that. To start the new year in the best possible way, I thought today I could share my opinion on a recently published work in my research area, specifically missing data models in trial-based economic analyses. The first author of this paper entitled *Flexible Bayesian longitudinal models for cost-effectiveness analyses with informative missing data* is one of my ex PhD supervisor, Dr. [Alexina Mason](https://www.lshtm.ac.uk/aboutus/people/mason.alexina), which by itself is already a guarantee of some nice and careful research work. I take this chance to go through her most recent work (of course Bayesian) and try to summarise the key aspects I am interested in. 
+
+The paper is a well-written and structured illustration of how standard modelling in trial-based CEAs can be extended, taking advantage of the Bayesian flexibility in model specification, in order to take into account some of the typical statistical idiosyncrasies that affect health economic outcome data, including:
+
+  - The correlation between cost and effectiveness measures
+  
+  - The skewness in the distributions of costs and utilities
+  
+  - The presence of "structural values", e.g. many people having a perfect health state corresponding to an utility of one, that cause a huge spike in the observed distributions
+  
+  - The need to take into account missing data uncertainty under MAR while also exploring some MNAR departures through a proper modelling approach and external information
+  
+These are all very valid and important aspects that, despite having been mentioned and discussed by many authors in the literature, are usually only partially tackled in routine analyses due to complexity of model specification based on standard software commands. Nonetheless, I believe this is still an important point that must be highlighted until people will start to move away from standard methods towards the implementation of more advanced approaches, either by using more powerful software (e.g. `R` instead of Excel) or by acquiring some basic knowledge to implement more advanced methods (e.g. multiple imputation or Bayesian approach). But I am getting away from the topic at hand. So, let's go back to it.
+
+The paper first summarises the literature that has been done in relation to discussing the issues and potential pitfalls of standard methods that do not properly recognise all the features of the data and provides a real case study characterised by the majority of these statistical issues. Next, the modelling framework is provided following the typical and very intuitive (in my opinion!) Bayesian structure based on submodules linked and built one on top of the other to create a coherent and fully probabilistic approach.
+
+  1   The first module consists in the main analysis model required in order to derive the key estimates of interest, formed by the **marginal** model of the effectiveness variables (HRQoL data collected a five different time points) and the **conditional** model of the cost variables (aggregated over the whole trial duration). This corresponds to a longitudinal model for the utilities which is linked to a model for the total costs, therefore taking into account the longitudinal structure of the available data as well as the correlation between the two types of outcome. The authors accounts for the skewness in the distribution of the costs using Gamma distributions, while also dealing with the presence of structural ones in the HRQoL data via hurdle models in combination with Gamma distributions which are used to model the complement of the utilities, i.e. $u^\star=1-u$ (this transformation is done to allow Gamma distributions to be fitted to the data).
+  
+  2   The second module is optional and consists in an imputation model for any partially-observed covariate that enters the model in step 1. This is important as any unobserved covariate value will cause the removal of the corresponding case from the analysis unless the missing value is first imputed. Within a Bayesian framework this requires the specification of a distribution for these covariates or, when considered acceptable, some simple imputation methods may be used prior to the analysis.
+
+  3   The third module is related to the missingness model for the utilities, which is specified in terms of a multinomial model in which different types of missingness (e.g. intermittent vs dropout) are associated with different probabilities, estimated based on the available missingness indicator patterns and prior probabilities. In addition, covariates may also be included in this module to make missingness assumptions more plausible.
+  
+In my opinion this third step is perhaps the most innovative compared to other literature works. Indeed, although this modelling framework is nothing new as it refers to a *selection model* specification based on a model for the outcome $\boldsymbol u$ and a conditional model for missingness $\boldsymbol m$:
+
+$$
+p(\boldsymbol u,\boldsymbol m) = p(\boldsymbol u)p(\boldsymbol m \mid \boldsymbol u), 
+$$
+
+the use of a multinomial distribution within this context was not really considered before. This is because usually a Bernoulli distribution would be considered enough to distinguish missing from observed data. However, through this framework, analysts are free to choose different types of missingness patterns and assign to each of this a different prior probability, perhaps related to different reasons associated with the missing data. Thus, even if the selection model framework notoriously suffers from problems related to the not transparent identification of the unobserved distribution of the model (e.g. unclear weight of the choice of the modelling distributions on missingness assumptions or unclear definition of sensitivity parameters), the possibility to allow for different types of missingness within the same model specification gives more flexibility with respect to the formulation of the missingness assumptions. For example, analysts may wish to explore some MNAR assumption for a specific pattern of missing data (e.g. dropout) while keeping a MAR assumption for other patterns (e.g. intermittent). Of course, an inconvenience of this approach, compared to standard selection models, is that under MNAR the number of parameters to be identified via external information is increased since there are multiple types of missingness patterns. It is therefore required extra-care in the choice of these parameters (or informative priors on these parameters) in that different estimates should be considered for each pattern that is modelled. In addition, since *sensitivity analysis* is en essential component for any type of missing data model, the presence of additional informative parameters requires the exploration of more alternative scenarios in order to have a general idea of the impact that different assumptions for each of these parameters may have on the final conclusions. 
+
+Finally, the authors conclude with applying the proposed methods to the case study data and elicit alternative prior specifications for the unidentified parameters of the missingness model to assess the robustness of their conclusions to alternative missingness assumptions. In total they consider up to $8$ different missingness scenarios. These are distinguished in terms of different assumptions about the strength and direction for each missing data pattern (dropout vs intermitten) and treatment arm (control and intervention) in the study. The also compared the results obtained under the different MNAR scenarios with those from the complete cases and under MAR to give an idea of what is the impact that a change in the assumptions related to the different types of missingness may have on the final cost-effectiveness conclusions. They chose to summarise this using the the *net benefit* measure as the key indicator to reflect changes in cost-effectiveness under the different missingness scenarios.
+
+Overall, I must say that I really enjoed myself reading this paper since it provides a ver well-written piece of work which illustrates how relatively complex models can be fitted to health economic data using software that are available to everybody although they may require some time to be learned (authors provided the entire model code in `JAGS`). I really liked the model specification which sorts of corresponds to an extension of one of my previous works to take into account the longitudinal nature of the data and, especially, the specification of alternative MNAR scenarios via sensitivity analysis based on multinomial distributions. I think that providing these methods in some sort of package in `R` would be really helpful for analysts who are not familiar with Bayesian software. Otherwise, I am afraid that people will continue using more standardised methods (e.g. MI) simply on the basis of the fact that they can be implemented in more straightforward ways (although these are likely to be less flexible).
+
+Really some nice work Alexina, well done! This reminds me that I need to get back to my current projects (oh no, so much to do!) 

@@ -1,0 +1,256 @@
+---
+title: "How to handle longitudinal data in economic evaluations"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2022-10-10
+categories: [Quarto, R, Academia, health economics] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.png){fig-align="center"}
+
+Hello and welcome back for a new update on my blog. Today we go through another "practical" post where I provide some suggestions and examples on how to fit health economic evaluations and learn how to us the appropriate statistical methods to get the results you want. Last post we had a look at how **bootstrapping** could be implemented for analysing aggregated health economics outcome data (i.e. QALYs and Total costs) collected and computed using data from a trial. Now, we take a step back as calculation of such aggregated outcomes is typically done on the basis of some longitudinal data that were collected during the duration of the trial at different time points. For example, it is common that QALYs are compute using an *Area Under the Curve* approach as a weighted function of quality of life utility scores:
+
+$$
+\text{QALY}_{i} = \sum_{j=1}^J \frac{(u_{ij-1}+u_{ij})}{2}\delta_j ,
+$$
+
+where $u_{ij}$ is the utility score evaluated for the $i$-th patient at the $j$-th time point in the trial (with $J$ being the last time), while $\delta_j$ is the fraction of total time period (usually 1 year) between two consecutive collected measurements (e.g. if 6 months, then $\delta_j=0.5$). The individual utility scores $u_{ij}$ are obtained after applying some national tariff system values to patients' answers to some validated questionnaires, e.g. EQ-5D-5L. For each individual, utility scores are calculated based on their answers to the questionnaire items at each time point and the tariff system (usually specific to each country) is used to numerically "value" their health states according to some pre-specified and assumed population model.
+
+Similarly, Total costs are computed for each individual as the sum of all corresponding cost components collected at different times during the trial 
+
+$$
+\text{Total costs}_i=\sum_j^{J}c_{ij},
+$$
+
+where $c_{ij}$ denotes the cost component collected for patient $i$-th at the $j$-th time in the trial. These components are  typically calculated out of resource use data obtained from either self-reported questionnaires administered to the patients, their clinic records, or a combination of these. Resource use data are then combined with national unit prices for each type of healthcare service used to derive the individual costs associated with each cost component (i.e. $\text{cost}=\text{resource use}\times \text{unit price}$) for each individual at each time point. 
+
+As perhaps you noticed, it is possible to simply ignore the longitudinal nature of the data by first computing the aggregated outcome measures (QALYs and Total costs) and fit the statistical models directly to these quantities to derive the treatment effect of interest, e.g. mean incremental QALYs and Total costs between a new intervention ($t=1$) and a control ($t=0$) group. This also simplified the modelling task substantially since the complexities associated with the intrinsic dependence between outcome observations collected from the same individuals over time can be ignored (i.e. it is already summarised into the aggregated measures). However, there are situations in which it would be preferable to fit the model using the original longitudinal data collected throughout the trial and use the estimated quantitis from this model to derive the main treatment effects of interest, i.e. mean incremental QALYs and Total costs between treatment groups. See reference paper [here](https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510).
+
+First, let's simulate some longitudinal health economics data. For the sake of this exercise I will create a balanced design in which utilities and costs are collected at three equally spaced time points (baseline, 6 and 12 months) on $n=300$ individuals randomised to two interventions (new and old group) over a period of 1 year. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+set.seed(768)
+n <- 300
+id <- seq(1:n)
+trt <- c(rep(0, n/2),rep(1, n/2))
+library(mvtnorm)
+mean_ut0 <- c(0.3,0.3,0.3)
+mean_ut1 <- c(0.3,0.4,0.5)
+sigma_u <- diag(3)
+diag(sigma_u) <- 0.05
+u_t0 <- rmvnorm(n/2,mean = mean_ut0, sigma = sigma_u)
+u_t1 <- rmvnorm(n/2,mean = mean_ut1, sigma = sigma_u)
+mean_ct0 <- c(500,500,500)
+mean_ct1 <- c(500,1300,1500)
+sigma_c <- diag(3)
+diag(sigma_c) <- 2000
+c_t0 <- rmvnorm(n/2,mean = mean_ct0, sigma = sigma_c)
+c_t1 <- rmvnorm(n/2,mean = mean_ct1, sigma = sigma_c)
+u_1 <- c(u_t0[,1],u_t1[,1])
+c_1 <- c(c_t0[,1],c_t1[,1])
+u_2 <- c(u_t0[,2],u_t1[,2])
+c_2 <- c(c_t0[,2],c_t1[,2])
+u_3 <- c(u_t0[,3],u_t1[,3])
+c_3 <- c(c_t0[,3],c_t1[,3])
+data_sim_uc <- data.frame(id, trt, u_1, c_1, u_2, c_2, u_3, c_3)
+data_sim_uc <- data_sim_uc[sample(1:nrow(data_sim_uc)), ]
+```
+
+With the above commands I have generated, separately for each treatment group, utility and cost data at three different time points assuming a multivariate normal distribution assuming independence over time. Although this is a rather strong assumption in real scenarios here I merely focus on the implementation of the models for longitudinal data. In future posts I will provide more realistic examples to show how changing the data structure actually requires an accurate choice of the methods to deal with them to avoid bias or misleading inferences. 
+
+We can inspect the generated data using histograms:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+library(ggplot2)
+data_sim_uc$trtf <- factor(data_sim_uc$trt)
+levels(data_sim_uc$trtf) <- c("old","new")
+u1_hist <- ggplot(data_sim_uc, aes(x=u_1))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+u2_hist <- ggplot(data_sim_uc, aes(x=u_2))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+u3_hist <- ggplot(data_sim_uc, aes(x=u_3))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+c1_hist <- ggplot(data_sim_uc, aes(x=c_1))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+c2_hist <- ggplot(data_sim_uc, aes(x=c_2))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+c3_hist <- ggplot(data_sim_uc, aes(x=c_3))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+
+gridExtra::grid.arrange(u1_hist, c1_hist, u2_hist, c2_hist, u3_hist, c3_hist, nrow = 3, ncol = 2)
+```
+
+From the graphs it is apparent that the new intervention is associated with higher costs compared to the old one when focussing on the follow-up period. We can then inspect some summary statistics to have a better idea about these differences:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| results: asis
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+data_sim_uc_stats <- data_sim_uc[,c("u_1","c_1","u_2","c_2","u_3","c_3","trtf")]
+d.summary <- data_sim_uc_stats %>%                               
+  group_by(trtf) %>% 
+  summarize(meanu1 = mean(u_1), sdu1 = sd(u_1), 
+            meanc1 = mean(c_1), sdc1 = sd(c_1),
+            meanu2 = mean(u_2), sdu2 = sd(u_3), 
+            meanc2 = mean(c_2), sdc2 = sd(c_2),
+            meanu3 = mean(u_3), sdu3 = sd(u_3), 
+            meanc3 = mean(c_3), sdc3 = sd(c_3)
+)
+kable(d.summary, caption = "Summary statistics", format = "html", digits = 1)
+```
+
+We can see that both groups have similar sd while the means show some noticeable differences with $t=1$ being associated with both higher utility and cost post-baseline values ($j>1$). How do we proceed from here? Normally the approach consists in computing QALYs and Total costs and fit models to these data (see previous post). However, it is also possible to fit models directly to the utility and cost data in the form of **linear mixed or random-effects regression models**. The main idea behind this models is to treat individuals as random effects so that the observations collected at each time can be assigned a two-level multilevel structure in which individuals are nested within time points. In this way dependence between observations for the same individual is taken into account by means of random effects specification, thus preserving the dependence relationships present in the longitudinal data.
+
+Before fitting the model it is necessary to re-arrange out current dataset (wide-format) into a longitudinal format where the utility and cost outcome variables consists in single vectors each of length $n \times J$ and for each outcome value create an indicator variable associated with the different time at which each value refers to (i.e. taking value 1, 2 or 3). This can be achieved as follows:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(reshape)
+data_long_uc<-reshape(data_sim_uc, varying = c("u_1","u_2","u_3","c_1","c_2","c_3"),
+                        direction = "long",idvar = "id",sep = "_")
+data_long_uc$time_2<-ifelse(data_long_uc$time == 2,1,0)
+data_long_uc$time_3<-ifelse(data_long_uc$time == 3,1,0)
+data_long_uc$trt_time_2<-data_long_uc$trt*data_long_uc$time_2
+data_long_uc$trt_time_3<-data_long_uc$trt*data_long_uc$time_3
+data_long_uc$timef <- factor(data_long_uc$time)
+```
+
+In the code above, in addition to the creation of the variable `time`, additional indicator variables have been created to denote each individual time point (`time_2`,`time_3`) and interaction between time point and treatment assignment (`trt_time_2`,`trt_time_3`). Although not necessary, these additional indicators can simply the interpretation of the model specification in terms of retrieving estimates for the main effects of interest, e.g. mean utility and cost at each time point by treatment group. After converting our dataset into long format we can now fit the longitudinal random effects model for the two outcomes separately. 
+
+$$
+u_{ij} = \alpha_1\times\text{time}_j + \alpha_2 \times \text{trt}\times\text{time}_2 + \alpha_3 \times \text{trt}\times\text{time}_3 + \omega^u_i + \varepsilon^u_{ij},
+$$
+
+$$
+c_{ij} = \beta_1\times\text{time}_j + \beta_2 \times \text{trt}\times\text{time}_2 + \beta_3 \times \text{trt}\times\text{time}_3 + \omega^c_{i} + \varepsilon^c_{ij},
+$$
+
+where the set of regression coefficients $\boldsymbol \alpha$ and $\boldsymbol \beta$ capture the association between each predictor included into the model and the outcome, while the terms $\omega_i$ and $\varepsilon_{ij}$ denote the random effects and residual error term of the model, respectively. Key aspects to highlight from the model specifications are:
+
+  1. The models do not include a fixed constant as removal of the intercept term allows to interpret the regression parameters and linear combination thereof as functions of the mean utility and cost for each treatment group and time point. For example, when considering time = 1 (baseline), it is clear how the first regression coefficient ($\alpha_1$ or $\beta_1$) represents the mean outcome in the old group at that time point (i.e. setting time=1 and trt=0 gets rid of all other terms into the models). 
+  
+  2. Different assumptions about the covariance structure of the data can be encoded into the model by specifying a given structure for the error terms. Here, for simplicity, we focus on the simplest case where the error terms are associated with a constant variance of $\sigma^2_{\varepsilon}$. More sophisticated assumptions can be incorporated by assuming for example a compound symmetry, autocorrelation or fully unstructured covariance matrix for the error terms. 
+
+Finally, we note that here the models are fitted assuming independence between utilities and costs to make easier to interpret the results from each model, while in reality correlation between outcomes should be taken into account even at the modelling stage. The model can be fitted in `R` using different packages and functions. Here we use the `nlme` package.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(nlme)
+LMM_u <- lme(u ~ -1 + timef + trt_time_2 + trt_time_3, random = ~ 1 | id, data = data_long_uc, method = "ML")
+LMM_c <- lme(c ~ -1 + timef + trt_time_2 + trt_time_3, random = ~ 1 | id, data = data_long_uc, method = "ML")
+```
+
+We can look at summary results for the fixed effects components of the model (i.e. regression parameters) by typing:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(nlme)
+summary(LMM_u)
+intervals(LMM_u, level = 0.95, which = "fixed")
+summary(LMM_c)
+intervals(LMM_c, level = 0.95, which = "fixed")
+```
+
+and we can derive the marginal mean estimates (and corresponding CIs) for the utility and cost at each time point by treatment group using the `emmeans` function included in the `emmeans` package:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(emmeans)
+mu_u <- emmeans(LMM_u, ~ -1 + timef + trt_time_2 + trt_time_3)
+mu_u
+
+mu_c <- emmeans(LMM_c, ~ -1 + timef + trt_time_2 + trt_time_3)
+mu_c
+```
+
+Finally, we can compute a linear combination of these marginal mean estimates in order to derive the main effects of interest for the analysis, that is the mean QALYs and Total cost estimates evaluated over the whole trial period. Indeed, it suffices to apply the usual formulae used for computing the aggregated quantities to the mean estimates instead, so to derive the corresponding mean estimates for such quantities by group. We can do this as follows:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+mu_QALYs <- contrast(mu_u, list(mu_e_old = c(0.25,0.25+0.25,0.25,0,0,0,0,0,0,0,0,0),
+                                mu_e_new = c(0.25,0,0,0,0.25+0.25,0,0,0,0.25,0,0,0)))
+mu_QALYs
+confint(mu_QALYs)
+
+mu_Totalcosts <- contrast(mu_c, list(mu_tc_old = c(0,1,1,0,0,0,0,0,0,0,0,0),
+                                mu_tc_new = c(0,0,0,0,1,0,0,0,1,0,0,0)))
+mu_Totalcosts
+confint(mu_Totalcosts)
+```
+
+and, in a similar way, we can also compute the incremental means between treatment groups by taking a linear combination of these estimates:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+delta_QALYs <- contrast(mu_u, list(QALYs = c(0,-0.25-0.25,-0.25,0,0.25+0.25,0,0,0,0.25,0,0,0)))
+delta_QALYs
+confint(delta_QALYs)
+
+delta_Totalcosts <- contrast(mu_c, list(TCs = c(0,-1,-1,0,1,0,0,0,1,0,0,0)))
+delta_Totalcosts
+confint(delta_Totalcosts)
+```
+
+After fitting the model and having retrieved these estimates, it is possible apply bootstrap methods to resample the estimates over a large number of bootstrap samples so to quantify the uncertainty surrounding these estimates and obtain different replications that can be plotted to produce standard graphical tools such as the cost-effectiveness plane and acceptability curve to assess cost-effectiveness. We refer to the previous post to see how the code looks like for implementing bootstrapping. I will show examples on how to use bootstrap methods in combination with mixed models in future posts. 
+
+Satisfied? well perhaps you are asking yourself: why do I need to bother with this stuff if I can simply compute my aggregated variables and fit simpler models to those instead of complicating my life with longitudinal models? Well you are certainly right that in theory there is no practical advantage of using these models over cross-sectional models fitted at the level of QALYs and Total costs. However, in practice there is always a problem with some people dropping out from the study and thus being unable to observe all utility and cost data that were intended to be measured at each time point. As I will show in future posts, this poses a huge threat to the reliability of the estimates based on the available data (e.g. if only people with worse conditions drop out) which may lead in turn to misleading cost-effectiveness conclusions. Well, it turns out that by fitting models at the original level at which data were collected, i.e. longitudinally, you avoid getting rid of precious information from the data and use it in order to make your results more robust to less restrictive missing data assumptions. 
+
+This is a huge topic for which I will not start a new discussion right now. However, it is enough to say that if you simply ignore the unobserved cases you may come up with completely wrong answers that are based on very specific and often unrealistic assumptions about these unobserved data!!!
+
