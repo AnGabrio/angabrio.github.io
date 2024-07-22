@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2020-12-20">
+<meta name="dcterms.date" content="2021-10-10">
 
-<title>angabrio.github.io - It is Xmas again Yeah</title>
+<title>angabrio.github.io - Baseline adjustment in trial based CEA</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -70,6 +104,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -137,12 +200,12 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">It is Xmas again Yeah</h1>
+<h1 class="title">Baseline adjustment in trial based CEA</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Quarto</div>
     <div class="quarto-category">R</div>
     <div class="quarto-category">Academia</div>
-    <div class="quarto-category">publication</div>
+    <div class="quarto-category">health economics</div>
   </div>
   </div>
 
@@ -169,7 +232,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 20, 2020</p>
+      <p class="date">October 10, 2021</p>
     </div>
   </div>
   
@@ -183,21 +246,115 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
-<p>It is Xmas again! Wow, how quickly time flies. The situation here in the Netherlands is not ideal as the number of infected is on the rise again and the government has declared a full lockdown until January 19th. Starting from next month I will start teaching in the department but everything will still be online due to the uncertainty of the pandemic. It is unfortunate but there is nothing we can do about it and let us just hope the situation will improve in the next few weeks/months.</p>
-<p>Aside from sad stuff, I have some good news about my research. My paper about longitudinal models in trial-based CEA, whose pre-print is available on my <a href="https://arxiv.org/abs/1805.07149">ArXiv account</a>, has been officially accepted for publication in Value in Health, after a very long time (more than 2 years of peer-review process I believe!). I am really happy as this is a paper for which I spent a lot of time and effort, so it is nice to see some ouput out of it. I am also glad to announce that a new paper I am co-authoring with <a href="https://www.lshtm.ac.uk/aboutus/people/leurent.baptiste">Baptiste</a> (LSHTM) and <a href="https://www.bangor.ac.uk/health-sciences/staff/catrin-plumpton/en">Catrin</a> (Bangor University) which is a tutorial on the use of mixed effects models for trial-based CEAs. The main idea is to make available and spread awareness in the HE community about the possibility to use these models to derive CEA results, rather than relying on the standard linear regression models. The methods are nothing special but we believe health economists are not well aware of the fact that sometimes they can be implemented in a much easier way compared to standard approaches. We tried to summarise the main advantages and disadvantages of the methods while also providing software code (in STATA and R) to show how they can be fitted. The paper has been accepted as a contributed presentation at the next <a href="https://hesg.org.uk/meetings/winter-2021-the-london-school-of-hygiene-tropical-medicine/">HESG meeting</a>. Unfortunately, I will not be able to attend the meeting as I will be quite busy with the teaching that week but Catrin has kindly agreed to present in behalf of all authors. I look forward to receive the feedback from the people attending the conference!</p>
-<p>The past month I have been quite busy with some teaching and consultancy work here at UM, mostly for medical students about basic statistical concepts and techniques but nonetheless very interesting for me in order to get acquainted with the new job and duties. A big thank is due to my new colleagues who have been incredibly nice to me and have helped me a lot to get into the system. I was actually planning to post my news earlier this month but with incredible disappointment I found out that the most recent updated of Hugo (the system used by blogdown for building this site) completely messed up my previous version of the website which was broken. I had to rebuild the website again copying and pasting all my previous material. Nothing crazy, but certainly very annoying to do. I just hope the next update will not force me to do it again! So, if you see something different compared to before, you know why (especially in the sections for the tutorials on using BUGS/JAGS/STAN). Related to this, I must acknowledge Mr.&nbsp;Kim who recently contacted me with regard to an incorrect specification for one of the STAN models in the tutorial on generalised linear mixed models. I would like to thank him again very much for noticing this mistake which I fixed in the new version of the website now online (apologies for the long time it took for me to make the changes!). I am happy to see that my code can be of help to anyone who might be interested in doing some nice modelling.</p>
-<p>Finally, a quick note about somehting I found curious. A medical statistician who I deeply respect and admire, Dr.<a href="https://iris.ucl.ac.uk/iris/browse/profile?upi=TNMOR17">Tim Morris</a> from <a href="https://www.ctu.mrc.ac.uk/">MRCCTU</a>, posted the following provocative tweet</p>
-<p></p><div id="tweet-96431"></div><script>tweet={"url":"https:\/\/twitter.com\/tmorris_mrc\/status\/1330420633646325763","author_name":"Tim Morris","author_url":"https:\/\/twitter.com\/tmorris_mrc","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EBayesians: a request from \u003Ca href=\"https:\/\/twitter.com\/TheStatsGeek?ref_src=twsrc%5Etfw\"\u003E@TheStatsGeek\u003C\/a\u003E to explain what a credible interval actually means.\u003Cbr\u003E\u003Cbr\u003EPersonally I’d like to see something beyond a pithy ‘it’s the prob that’ or ‘tells you how to bet’, without appealing to freq. calibration.\u003Ca href=\"https:\/\/t.co\/g8ZtH4VaT3\"\u003Ehttps:\/\/t.co\/g8ZtH4VaT3\u003C\/a\u003E\u003C\/p\u003E&mdash; Tim Morris (@tmorris_mrc) \u003Ca href=\"https:\/\/twitter.com\/tmorris_mrc\/status\/1330420633646325763?ref_src=twsrc%5Etfw\"\u003ENovember 22, 2020\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-96431").innerHTML = tweet["html"];</script><p></p>
-<p>where he asks about the interpretation of a Bayesian credible interval while also saying that quick and simple answers will not be considered reliable. Well, I have much to say on this but I feel like twitter is not the best location to try and argument a proper discussion. I hope I will be able to find some time to post on my website a more constructive answer. The topic is not very quick to grasp, especially if someone is used to think in frequentist terms and theory which, by definition, are not very useful to think at statistics from a Bayesian point of view. For the moment, as a quick answer, I would just say that in my opinion statistics is not a uniquely defined discipline but there are different ways it can be approached, and the rules and theory of one approach do not necessarily apply to others!</p>
-<p>Next time, perhaps, I will follow this with a proper argument, stay tuned!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://media.giphy.com/media/xTkcEHkC6P3I5VCDpm/giphy.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
+<p>Recently I have come across something I found a little odd when performing a statistical analysis of trial-based CEA data and I would like to share here my experience in the hope that anybody may be able to read it (and correct me if I am wrong). It is something related to the implementation of baseline adjustment for utility score data via regression approach.</p>
+<p>To give an idea of the context of the analysis I quickly use some simulated data as an example of a dataset that could be object for this type of analysis. To make things simple, I simulated individual-level utility score data which are measured at baseline (<span class="math inline">\(u_0\)</span>), 6 (<span class="math inline">\(u_1\)</span>) and 12 (<span class="math inline">\(u_12\)</span>) months follow up for two competing intervention groups, say a control (t=0) and an intervention (t=1). Again, to make things super easy I simulated these assuming a multivariate normal distribution with constant variance and no time correlation. Although this is not realistic it only serves the purpose to illustrate the issue I am facing. So let’s simulate the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load and pre-process the simulated dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readstata13)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#wide format</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>data_wide<span class="ot">&lt;-</span><span class="fu">read.dta13</span>(<span class="st">"ex_data.dta"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(data_wide<span class="sc">$</span>arm)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>subjects<span class="ot">&lt;-</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(data_wide<span class="sc">$</span>arm))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>data_wide <span class="ot">&lt;-</span> data_wide[data_wide<span class="sc">$</span>arm <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Placebo"</span>,<span class="st">"Mirtazapine"</span>),]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data_wide<span class="sc">$</span>trt <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_wide))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>eq5d_1 <span class="ot">&lt;-</span> data_wide<span class="sc">$</span>eq5d0</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>eq5d_2 <span class="ot">&lt;-</span> data_wide<span class="sc">$</span>eq5d13</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>eq5d_3 <span class="ot">&lt;-</span> data_wide<span class="sc">$</span>eq5d39</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#long format</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="ot">&lt;-</span><span class="fu">reshape</span>(data_wide, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"eq5d_1"</span>,<span class="st">"eq5d_2"</span>,<span class="st">"eq5d_3"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">direction =</span> <span class="st">"long"</span>,<span class="at">idvar =</span> <span class="st">"id"</span>,<span class="at">sep =</span> <span class="st">"_"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="sc">$</span>time_u <span class="ot">&lt;-</span> data_long.eq5d<span class="sc">$</span>time</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="ot">&lt;-</span>data_long.eq5d[,<span class="fu">c</span>(<span class="st">"id"</span>,<span class="st">"trt"</span>,<span class="st">"time_u"</span>,<span class="st">"eq5d"</span>,<span class="st">"eq5d0"</span>,<span class="st">"qaly"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Next, I previously computed individual-level QALYs (<span class="math inline">\(e_i\)</span>) in each group by aggregating the utilities over the duration of the analysis, i.e.&nbsp;1 year, using the AUC formula (see post thumbnail):</p>
+<p><span class="math display">\[
+e_i = \sum_{j=1}^{J}\frac{u_{ij-1} + u_{j}}{2} \times \delta,
+\]</span></p>
+<p>where the subscript <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> denote the individual and time indices, while <span class="math inline">\(\delta\)</span> is the portion of time covered between each successive pair of measurements. Since these measures are assumed to be collected at 6 months intervals, then in our case <span class="math inline">\(\delta=0.5\)</span>. At this point I have all the data I need to perform a regression analysis and try to estimate the mean QALYs in each group, adjusting for baseline values. The simplest way to do this is to fit a linear regression model at the level of the QALY variable and then include treatment to obtain estimates of unadjusted mean QALYs. If I also add <span class="math inline">\(u_{i0}\)</span> as a covariate into the model, then I obtain adjusted mean estimates. The model is:</p>
+<p><span class="math display">\[
+e_i = \boldsymbol \beta \boldsymbol X_i + \varepsilon_i,
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of regression parameters, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model (including an intercept, trt and <span class="math inline">\(u_{i0}\)</span>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#linear regression for QALYs (focus on complete cases for simplicity)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>data_wide<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_wide<span class="sc">$</span>trt)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data_wide.cc<span class="ot">&lt;-</span>data_wide[<span class="sc">!</span><span class="fu">is.na</span>(data_wide<span class="sc">$</span>qaly),]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ols.cc.wide.qalys<span class="ot">&lt;-</span><span class="fu">lm</span>(qaly <span class="sc">~</span> trtf <span class="sc">+</span> eq5d0,<span class="at">data =</span> data_wide.cc)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ci_ols.cc_qalys.means<span class="ot">&lt;-</span><span class="fu">emmeans</span>(ols.cc.wide.qalys,<span class="sc">~</span>trtf<span class="sc">+</span> eq5d0)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci_ols.cc_qalys.means)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> trtf eq5d0 emmean     SE  df lower.CL upper.CL
+ 0    0.718  0.553 0.0152 103    0.523    0.583
+ 1    0.718  0.582 0.0164 103    0.549    0.614
+
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>So far so good right? well now the problem pops up. It is generally known that, when some missing utility data occur, then it is more efficient (in the sense of using more information) to fit the model at the longitudinal level, i.e.&nbsp;at the level of the utility scores rather than at the QALYs level. In this was information from partially-observed cases will be used in the model when deriving the estimates for the mean utilities at each time, which can then be combined via the AUC formula to obtain the final QALY mean estimates. Here for simplicity we fit this longitudinal model even without any missingness. Although there is not much literature about this type of approach, let’s say that we want to fit a linear mixed-effects model to our data and then combine the model parameter estimates to derive the final estimates of interest. The model can be specified by including treatment, time, their first order interaction, and baseline values to derive the adjusted mean estimates.</p>
+<p><span class="math display">\[
+u_{ij} = \boldsymbol \beta \boldsymbol X_i + \omega_i + \varepsilon_{ij},
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of fixed effects, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model. This includes: an intercept; trt; <span class="math inline">\(u_{i0}\)</span> and time, which is often expressed as a dummy-coded variable (with reference time <span class="math inline">\(j=0\)</span>), and the interaction between trt and time. Finally, <span class="math inline">\(\omega_i\)</span> is the random effects term.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis </span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data_long_cc <span class="ot">&lt;-</span> data_long.eq5d[<span class="sc">!</span><span class="fu">is.na</span>(data_long.eq5d<span class="sc">$</span>qaly),]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data_long_cc<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_cc<span class="sc">$</span>trt)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data_long_cc<span class="sc">$</span>timef_u <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_cc<span class="sc">$</span>time_u)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#mixed model for utilities (focus on complete cases for simplicity)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc<span class="ot">&lt;-</span><span class="fu">lme</span>(eq5d <span class="sc">~</span> timef_u <span class="sc">*</span> trtf <span class="sc">+</span> eq5d0, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data=</span>data_long_cc, <span class="at">method =</span> <span class="st">"ML"</span>,<span class="at">na.action =</span> na.omit)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean utilities</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>em3_u_ml.cc.eq5d<span class="ot">&lt;-</span><span class="fu">emmeans</span>(cgm3_u_ml.cc,<span class="sc">~</span>timef_u <span class="sc">*</span> trtf)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean QALYs as linear combination of mean utilities</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc.qalys <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em3_u_ml.cc.eq5d,<span class="fu">list</span>(<span class="at">mue1 =</span> <span class="fu">c</span>(<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mue2=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>)))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>ci.cgm3_u_ml.cc.qalys <span class="ot">&lt;-</span> <span class="fu">confint</span>(cgm3_u_ml.cc.qalys)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df lower.CL upper.CL
+ mue1        0.555 0.0126 103    0.530    0.580
+ mue2        0.580 0.0136 103    0.553    0.607
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>Do you see the issue? the derived mean QALYs for both groups do not exactly match those obtained from the linear regression fitted to the QALYs despite the fact that the data used are the same, i.e.&nbsp;complete cases. This is a bit odd. However, what happens when I run the adjusted analysis including the interaction between time and baseline utilities alongside the main effects of <span class="math inline">\(u_{i0}\)</span> ?</p>
+<p><span class="math display">\[
+u_{ij} = \boldsymbol \beta \boldsymbol X_i + \omega_i + \varepsilon_{ij},
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of fixed effects, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model. This includes: an intercept; trt; <span class="math inline">\(u_{i0}\)</span> and time, which is often expressed as a dummy-coded variable (with reference time <span class="math inline">\(j=0\)</span>), the interaction between trt and time, and also the interaction between time and <span class="math inline">\(u_{i0}\)</span>. Finally, <span class="math inline">\(\omega_i\)</span> is the random effects term.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc2 <span class="ot">&lt;-</span> <span class="fu">lme</span>(eq5d <span class="sc">~</span> timef_u <span class="sc">*</span> trtf <span class="sc">+</span> timef_u<span class="sc">*</span>eq5d0, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data=</span>data_long_cc, <span class="at">method =</span> <span class="st">"ML"</span>,<span class="at">na.action =</span> na.omit)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean utilities</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>em3_u_ml.cc.eq5d2 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(cgm3_u_ml.cc2,<span class="sc">~</span>timef_u <span class="sc">*</span> trtf <span class="sc">+</span> timef_u<span class="sc">*</span>eq5d0)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean QALYs as linear combination of mean utilities</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc.qalys2 <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em3_u_ml.cc.eq5d2,<span class="fu">list</span>(<span class="at">mue1 =</span> <span class="fu">c</span>(<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mue2=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>)))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ci.cgm3_u_ml.cc.qalys2<span class="ot">&lt;-</span><span class="fu">confint</span>(cgm3_u_ml.cc.qalys2)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate     SE  df lower.CL upper.CL
+ mue1        0.553 0.0125 103    0.528    0.578
+ mue2        0.582 0.0135 103    0.555    0.608
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>Ta da! the estimates now perfectly coincide. It turns out that when fitting this longitudinal model for the utility, it is important that an interaction between time and baseline utilities is included in the model to match the adjusted estimates that would be obtained via standard linear regressions fitted at the QALY level.</p>
+<p>I am not totally convinced of why this is the case but perhaps it has something to do with the fact that baseline utilities are used as outcome and covariate at the same time in both types of models ? I need to study this in more detail.</p>
 
 
 
@@ -629,5 +786,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
