@@ -1,0 +1,201 @@
+---
+title: "Structural values in health economics data"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2023-02-08
+categories: [Quarto, R, Academia, health economics] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpeg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.jpeg){fig-align="center"}
+
+Hello everybody and welcome to my second post of the year. I try to be as consistent as possible with these monthly updates as I would like to keep my blog alive and hopefully post something interesting for somebody involved in data analysis tasks. So, continuing the thread of the past posts, I would like today to deal with a common problem affecting health economics outcome data (e.g. QALYs and Total costs), especially in the context of trial-based cost-effectiveness analysis. The last few times we saw why statistical idiosyncrasies, such as **correlation** and **skewness**, represent a possible issue when modelling the data and require the adoption of specific methods to deal with them. Today we take a step further and look at a specific problem which often occurs with individual health economics data: the presence of **structural values** for the outcome variables, i.e. there is some ceiling effects at one of the boundary of the observed data distributions. 
+
+Typical examples of such values are people associated with zero total costs or one QALY (perfect health status) which are located at the boundaries of the range of possible values that such variables may take, namely lower bound for costs and upper bound for QALYs. When the proportions of the individuals associated with these specific values is small, then hey typically do not cause large problems in that they can be simply treated as other values (e.g. using Normal distributions) or some simple tricks can be implemented to ensure they do not cause an issue when fitting the model (e.g. add/subtract small constant to all individual outcomes to ensure the fitting of alternative parametric distributions). However, it is often the case that the proportions of individuals associated with these values is considerable (e.g. above $20-30\%$), therefore implying the existence in the data of a "subset" of cases that have clearly distinct outcome values from all the others. They can then be defined as "structural" in the sense that they relate to specific sub-population conditions (e.g. those in perfect health or experiencing no costs) that are clearly different form the others and whose typical characteristics need to be properly recognised and taken into account at the modelling stage of the analysis (they cannot be treated as the others!).    
+Today we will see some examples of these structural values and possible ways to deal with them, although I have to say that in current practice they are rarely addressed via appropriate methods and are instead often treated as other individuals in the samples. For example, let's reproduce the example in the previous post by simulating some non-Normal bivariate cost and QALY data for a total of $300$ patients assigned to two competing intervention groups ($t=0,1$). When generating the data, we can try to mimic the typical skewness features of the outcome data by using alternative distributions such as Gamma for costs and Beta for QALYs. However, in contrast to what done before, we now also generate indicator variables that are used in order to determine which individuals should be assigned "structural values", namely zero costs and one QALYs. The proportions of individuals assigned to these values is obtained by setting the probability of the Bernoulli distribution used to create the indicators.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+set.seed(768)
+n <- 300
+id <- seq(1:n)
+trt <- c(rep(0, n/2),rep(1, n/2))
+mean_e1 <- c(0.5)
+mean_e2 <- c(0.7)
+sigma_e <- 0.15
+tau1_e <- ((mean_e1*(1-mean_e1))/(sigma_e^2)-1)
+tau2_e <- ((mean_e2*(1-mean_e2))/(sigma_e^2)-1)
+alpha1_beta <- tau1_e*mean_e1
+beta1_beta <- tau1_e*(1-mean_e1)
+alpha2_beta <- tau2_e*mean_e2
+beta2_beta <- tau2_e*(1-mean_e2)
+e1 <- rbeta(n/2, alpha1_beta, beta1_beta)
+e2 <- rbeta(n/2, alpha2_beta, beta2_beta)
+
+mean_c1 <- 500
+mean_c2 <- 1000
+sigma_c <- 300
+tau1_c <- mean_c1/(sigma_c^2)
+tau2_c <- mean_c2/(sigma_c^2)
+ln.mean_c1 <- log(500) + 5*(e1-mean(e1)) 
+c1 <- rgamma(n/2, (exp(ln.mean_c1)/sigma_c)^2, exp(ln.mean_c1)/(sigma_c^2))
+ln.mean_c2 <- log(1000) + 5*(e2-mean(e2)) + rgamma(n/2,0,tau2_c)
+c2 <- rgamma(n/2, (exp(ln.mean_c2)/sigma_c)^2, exp(ln.mean_c2)/(sigma_c^2))
+
+QALYs <- c(e1,e2)
+Costs <- c(c1,c2)
+
+p_zeros <- 0.25
+d_zeros <- rbinom(n, 1, p_zeros)
+p_ones <- 0.25
+d_ones <- rbinom(n, 1, p_ones)
+
+QALYs <- ifelse(d_ones==1,1,QALYs)
+Costs <- ifelse(d_zeros==1,0,Costs)
+
+data_sim_ec <- data.frame(id, trt, QALYs, Costs, d_zeros, d_ones)
+data_sim_ec <- data_sim_ec[sample(1:nrow(data_sim_ec)), ]
+```
+
+In the code above, after simulating QALY and Cost data using Beta and Gamma distribution, indicator variables for the zero and one values were generated for each individual in the sample from a Bernoulli distribution. Whenever the indicator takes value 1, it denotes the presence of a structural value and the corresponding outcome value is then set equal to zero (Costs) or one (QALYs). We can now compute the correlation between variables and plot the two outcome variables against each other to show how the presence of these structural values affect their corresponding association pattern.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+#empirical correlation between e and c (across groups)
+cor(data_sim_ec$QALYs,data_sim_ec$Costs)
+
+#scatterplot of e and c data by group
+library(ggplot2)
+data_sim_ec$trtf <- factor(data_sim_ec$trt)
+levels(data_sim_ec$trtf) <- c("old","new")
+ggplot(data_sim_ec, aes(x=QALYs, y=Costs)) +
+  geom_point(size=2, shape=16) + theme_classic() +
+  facet_wrap(~trtf)
+```
+
+In addition, we can also produce histograms of the distribution of the outcomes by treatment group to have a rough idea of the amount of structural values by type of outcome and treatment group in our sample.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+data_sim_ec$trtf <- factor(data_sim_ec$trt)
+levels(data_sim_ec$trtf) <- c("old","new")
+QALY_hist <- ggplot(data_sim_ec, aes(x=QALYs))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+Tcost_hist <- ggplot(data_sim_ec, aes(x=Costs))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+gridExtra::grid.arrange(QALY_hist, Tcost_hist, nrow = 1, ncol = 2)
+```
+
+It is clear from the graphs above that the considerable proportions of these structural values in both outcomes cannot be simply ignored and must be addressed properly. When conducting the main analysis, two possible approaches can be used to deal with such situation without relying on Normality assumptions of standard methods:
+
+  1. Simply **add/subtract some small constant** (e.g. $0.001$) to all individuals in the sample to ensure that no zero or one values occur, therefore allowing the implementation of methods relying on alternative parametric distributions (e.g. Gamma or Beta regression) that are not defined at such values. Although very simple and easy to implement, this method is a sort of a "trick" which is used in order to dodge the problem of these values therefore not recognising their systematic difference with respect to all other individuals in the sample. It is usually reasonable to use only when the proportion of such values is small, thus likely not affecting the overall conclusions of the analysis (i.e. estimate of mean difference in the outcomes between groups). In `R` we can do this using the following commands: 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+data_sim_ec$QALYs_new <- data_sim_ec$QALYs - 0.001
+data_sim_ec$Costs_new <- data_sim_ec$Costs + 0.001
+
+library(betareg) 
+model_qaly_new <- betareg(QALYs_new ~ trtf, data = data_sim_ec, link = c("log")) 
+summary(model_qaly_new) 
+exp(coef(model_qaly_new))[1:2]
+confint(model_qaly_new)[1:2,1:2] 
+exp(confint(model_qaly_new))[1:2,1:2]
+
+model_tcost_new <- glm(Costs_new ~ trtf, data = data_sim_ec, family = Gamma(link="log")) 
+summary(model_tcost_new) 
+exp(coef(model_tcost_new))[1:2]
+confint(model_tcost_new)[1:2,1:2]
+exp(confint(model_tcost_new))[1:2,1:2]
+```  
+
+The code above proceeds to fist add/subtract the small constant to all outcome values, followed by fitting a **Beta regression** and a **Gamma regression** models with logarithmic link function (for the mean) to estimate the main treatment effect of interest for the two outcomes, namely mean total costs and QALYs difference between groups (converted on the original scale using the exponential function and with related $95\%$CI). In the Beta regression output, an estimate for the parameters $\phi$ is also provided as this precision parameter ($\text{variance}=\mu(1-\mu)/(1-\phi)$) is linked to the mean and variance of the distribution and must be estimated. However, its interpretation is not usually of interest and is mostly provided in order to check for potential estimation problems in case the Beta distribution has a poor fit to the data. 
+  2. Properly account for the existence of the structural values by fitting two separate models for the structural and non-structural component in the data, also referred to **two-part regression models**. The idea is to separate the two sets of observations: fit standard non-Normal distributions to the non-structural values (to handle skewness) and; fit logistic regression models using as outcomes the indicators for the structural values for each outcome type. The first type of models will provide an estimate for the treatment effect (mean Cost and QALY difference between groups) among the non-structural components of the data ($\Delta^e_{ns}, \Delta^c_{ns}$), while the second type of models will provide estimates for the proportions of structural zeros/ones ($\pi^e,\pi^c$). As a final step, it is possible to combine the results from the two types of models in order to obtain an overall estimate of treatment effect which takes into account the presence of the structural values. This is achieved for the QALY analysis by computing:
+  
+$$
+\Delta^e = \Delta^e_{ns}\times(1-\pi^e),
+$$
+  
+that is the overall mean QALY difference between groups $\Delta^e$ will be equal to the product of the mean difference among the non-structural component $\Delta^e_{ns}$ and the probability of having non-structural values $(1-\pi^e)$. Note that here we assume that the proportion of structural values $\pi^e$ is estimated across groups but in theory also a different estimate per group can be obtained, for example by including treatment as a predictor in the logistic regression model. In such case, then also the difference between $\pi^e$ in the two groups should also be incuded in the above formula to derive the overall estimate of $\Delta^e$. 
+
+Similarly for costs, we can do:
+
+$$
+\Delta^c = \Delta^c_{ns}\times(1-\pi^c),
+$$
+  
+that is the overall mean Cost difference between groups $\Delta^c$ will be equal to the product of the mean difference among the non-structural component $\Delta^c_{ns}$ and the probability of having non-structural values $(1-\pi^c)$. 
+
+In `R` we can fit these models as follows:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+data_sim_e_ns <- data_sim_ec[data_sim_ec$QALYs<1,]
+data_sim_c_ns <- data_sim_ec[data_sim_ec$Costs>0,]
+
+model_qaly_ns <- betareg(QALYs ~ trtf, data = data_sim_e_ns, link = c("log")) 
+summary(model_qaly_ns) 
+exp(coef(model_qaly_ns))[1:2]
+confint(model_qaly_ns)[1:2,1:2] 
+exp(confint(model_qaly_ns))[1:2,1:2]
+mue_ns <- exp(coef(model_qaly_ns))[2]
+
+library(boot)
+model_qaly_ones <- glm(d_ones ~ 1, data = data_sim_ec, family = binomial(link = logit)) 
+summary(model_qaly_ones) 
+pe_ones <- inv.logit(coef(model_qaly_ones))
+
+mue_all <- mue_ns*(1-pe_ones)
+
+
+model_tcost_ns <- glm(Costs ~ trtf, data = data_sim_c_ns, family = Gamma(link="log")) 
+summary(model_tcost_ns) 
+exp(coef(model_tcost_ns))[1:2]
+confint(model_tcost_ns)[1:2,1:2]
+exp(confint(model_tcost_ns))[1:2,1:2]
+muc_ns <- exp(coef(model_tcost_ns))[2]
+
+model_tcost_zeros <- glm(d_zeros ~ 1, data = data_sim_ec, family = binomial(link = logit)) 
+summary(model_tcost_zeros) 
+pc_zeros <- exp(coef(model_tcost_zeros))
+
+muc_all <- muc_ns*(1-pc_zeros)
+```  
+
+It is clear how, although this approach allows to take into account for the structural component of the data, it suffers from practical limitations: the non-structural regression models are effectively fitted to a smaller sample compared to the original one since all individuals with structural values are removed from the analysis and are only used to estimate the proportion of values in the second step. In case there is a considerable mismatch between the individuals with structural ones and zeros in the data, then the validity of the estimates for the non-structural components may become questionable, e.g. if the sample size becomes too small. In addition, standard regression output such as p-values, CIs or other summary statistics obtained from the non-structural regression are only applicable to the specific subset of non-structural values and it is generally difficult to derive similar estimates for the overall mean difference (only point estimate). This last limitation can be overcome by nesting the two-part procedure within a bootstrap method, therefore re-fitting the models to a series of bootstrap samples sampled with replacement from the original sample a large number of times so to obtain at the end a distribution of values for the overall treatment effect, which can then be used to generate standard CEA output, e.g. CEAC, CEP, CIs based on percentile method, etc ...
+
+Regardless of the approach used, I believe it is important to account for ceiling effects in the data if the structural values are present in a substantial way. Simply ignoring the presence of structural values can be very dangerous in that these values suggest how these people are systematically different from the others with respect to their outcomes and should therefore be treated differently form all the others in the analysis stage. When only a few values are present, then simply adding/subtracting some constant values may be sufficient. However, when the proportion of such values becomes considerable, more advanced approaches should be pursued to deal with them. The typical problem is that such values occur in combination with other complexities that characterise the data, e.g. skewness, making even more important to use methods that are tailored to address multiple data idiosyncrasies at the same time. In future posts we will see how the existence of these complex features in HE data make the use of standard frequentist methods often difficult and instead favour the use of more flexible **Bayesian approaches** as more suited to model and quantify uncertainty associated with CEAs.

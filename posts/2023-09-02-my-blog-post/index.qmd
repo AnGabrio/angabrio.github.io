@@ -1,0 +1,304 @@
+---
+title: "Bayesian statistics in health economic evaluations"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2023-09-02
+categories: [Quarto, R, Academia, health economics] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.png){fig-align="center"}
+
+Hello folks, I hope you had some break time during summer as surely I did! After a whole year of stress and work it was nice to have some vacation period and to clear my mind for a while. Now that I am back to work I feel recharged and I am ready for a new year. One of my objective for this academic year is to find more time to dedicate to some new research projects as last year I only managed to do very little as most of my research energies went into the writing up of a research grant application. This year I hope to find more time to do something different, at least research wise. 
+
+So, with that spirit in mind, let's start from today's post where I follow-up from a past post introducing the concept of how to perform economic evaluations using standard statistical methods and power it up to what I normally do in this field, use Bayesian statistics! Perhaps some of you will not believe me but over time I am really sure that using Bayesian statistics made my life much easier when coming down to fit relatively complex models to health economics data. Since nowadays this seems to be very common in the literature, there is even more reason to go fully Bayesian when doing these analyses as the degree of flexibility it grants is so much more compared to what standard methods can typically achieve. Of course this is the opinion of someone **totally biased**! But before raising your finger, please try to come to the end of this post.
+
+As I already mentioned in previous posts, the usual analysis task in economic evaluation based on individual-level data (e.g. QALYs and Total costs computed over a trial period) can be quite challenging due to the presence of a series of complexities that affect the data that need to be taken into account when choosing the statistical methods to use in the analysis; examples include: **correlation between effects and costs**, **skewness of the outcome data**, **presence of structural values in the data**. We saw before that different types of methods exist to deal with each of these problems but the general challenge comes from the fact that often these elements are present jointly in a single dataset and therefore the different methods used to handle each of them need to be combined in some way to perform the analysis. This, however, is easier said than done since, particularly under a frequentist framework, the complexity of fitting all these methods in combination with the need to quantify the impact of uncertainty on the results (e.g. via **bootstrapping** methods) can lead to extremely difficult-to-fit or expensive-to-implement models. This I believe the key reason why analysts often pretend to ignore some of these problems and prefer to implement easier methods in the hope that results will not be too much affected. Despite understanding their point, I feel that if they knew models that can account for all these problems together, then they would also like to fit them to improve the reliability of the results they obtain. Well, that is why today I talk about fitting the model under a Bayesian framework, which allows to achieve this task at the cost of learning a bit about Bayesian inference and how to interpret it.
+
+Let's start by simulating some non-Normal bivariate cost and QALY data from an hypothetical study for a total of $300$ patients assigned to two competing intervention groups ($t=0,1$). When generating the data, we can try to mimic the typical skewness features of the outcome data by using alternative distributions such as Gamma for costs and Beta for QALYs. We also generate indicator variables that are used in order to determine which individuals should be assigned "structural values", namely zero costs and one QALYs. The proportions of individuals assigned to these values is obtained by setting the probability of the Bernoulli distribution used to create the indicators.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+set.seed(768)
+n <- 300
+id <- seq(1:n)
+trt <- c(rep(0, n/2),rep(1, n/2))
+mean_e1 <- c(0.5)
+mean_e2 <- c(0.7)
+sigma_e <- 0.15
+tau1_e <- ((mean_e1*(1-mean_e1))/(sigma_e^2)-1)
+tau2_e <- ((mean_e2*(1-mean_e2))/(sigma_e^2)-1)
+alpha1_beta <- tau1_e*mean_e1
+beta1_beta <- tau1_e*(1-mean_e1)
+alpha2_beta <- tau2_e*mean_e2
+beta2_beta <- tau2_e*(1-mean_e2)
+e1 <- rbeta(n/2, alpha1_beta, beta1_beta)
+e2 <- rbeta(n/2, alpha2_beta, beta2_beta)
+
+mean_c1 <- 500
+mean_c2 <- 1000
+sigma_c <- 300
+tau1_c <- mean_c1/(sigma_c^2)
+tau2_c <- mean_c2/(sigma_c^2)
+ln.mean_c1 <- log(500) + 5*(e1-mean(e1)) 
+c1 <- rgamma(n/2, (exp(ln.mean_c1)/sigma_c)^2, exp(ln.mean_c1)/(sigma_c^2))
+ln.mean_c2 <- log(1000) + 5*(e2-mean(e2)) + rgamma(n/2,0,tau2_c)
+c2 <- rgamma(n/2, (exp(ln.mean_c2)/sigma_c)^2, exp(ln.mean_c2)/(sigma_c^2))
+
+QALYs <- c(e1,e2)
+Costs <- c(c1,c2)
+
+p_zeros <- 0.25
+d_zeros <- rbinom(n, 1, p_zeros)
+p_ones <- 0.25
+d_ones <- rbinom(n, 1, p_ones)
+
+QALYs <- ifelse(d_ones==1,1,QALYs)
+Costs <- ifelse(d_zeros==1,0,Costs)
+
+data_sim_ec <- data.frame(id, trt, QALYs, Costs, d_zeros, d_ones)
+data_sim_ec <- data_sim_ec[sample(1:nrow(data_sim_ec)), ]
+```
+
+In the code above, after simulating QALY and Cost data using Beta and Gamma distribution, indicator variables for the zero and one values were generated for each individual in the sample from a Bernoulli distribution. Whenever the indicator takes value 1, it denotes the presence of a structural value and the corresponding outcome value is then set equal to zero (Costs) or one (QALYs). We can now compute the correlation between variables and plot the two outcome variables against each other to show how the presence of these structural values affect their corresponding association pattern.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+#empirical correlation between e and c (across groups)
+cor(data_sim_ec$QALYs,data_sim_ec$Costs)
+
+#scatterplot of e and c data by group
+library(ggplot2)
+data_sim_ec$trtf <- factor(data_sim_ec$trt)
+levels(data_sim_ec$trtf) <- c("old","new")
+ggplot(data_sim_ec, aes(x=QALYs, y=Costs)) +
+  geom_point(size=2, shape=16) + theme_classic() +
+  facet_wrap(~trtf)
+```
+
+In addition, we can also produce histograms of the distribution of the outcomes by treatment group to have a rough idea of the amount of structural values by type of outcome and treatment group in our sample.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+data_sim_ec$trtf <- factor(data_sim_ec$trt)
+levels(data_sim_ec$trtf) <- c("old","new")
+QALY_hist <- ggplot(data_sim_ec, aes(x=QALYs))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+Tcost_hist <- ggplot(data_sim_ec, aes(x=Costs))+
+  geom_histogram(color="black", fill="grey")+
+  facet_grid(trtf ~ .) + theme_classic()
+gridExtra::grid.arrange(QALY_hist, Tcost_hist, nrow = 1, ncol = 2)
+```
+
+## Step 1: fit a standard normal model
+
+In order to explain the basics of how to fit a Bayesian model, let's start by considering a (kind of) standard model based on Normal distributions for both QALYs and Total costs. However, I will slightly modify the model to allow for the correlation between the two outcomes, that is we fit a bivariate normal model $p(e,c\mid  \boldsymbol \theta)$, where $e$ and $c$ denote the QALYs and Total cost variables measured for each patient in the trial while $\boldsymbol \theta$ denote the set of parameters indexing the model, including the key quantities of  interest for the economic evaluations, i.e. the treatment-specific mean effect and cost $\mu_{et}$ and $\mu_{ct}$. To ease the task of modelling the data, we can re-express the joint distribution as: 
+
+$$
+p(e,c\mid \boldsymbol \theta) = p(e\mid \boldsymbol \theta_e) p(c \mid e, \boldsymbol \theta_c),
+$$
+
+where $p(e\mid \boldsymbol \theta_e)$ is the marginal distribution of the effects and $p(c \mid e, \boldsymbol \theta_c)$ is the conditional distribution of the cost given the effects, each indexed by corresponding set of parameters. The main reason for factoring the joint distribution into this product is the possibility to specify univariate distributions for $e$ and $c$, rather than a single bivariate distribution. This can be helpful when, for example, different covariates are considered for the two outcomes as it allows a higher degree of flexibility in specifying the model for each variable. But how are we going to fit the model? well, for that we can rely on freely-available Bayesian software which allows model fitting in a relatively simple way at the cost of learning how to code up the model in this new language. In this post I will consider the [**JAGS**](https://mcmc-jags.sourceforge.io/) software although this is only one of the many that can be used. For the sake of making things clearer I will not focus here on the details of how the software works and which types of algorithms it uses to implement the model, but I will jump straight into the coding part. First, we need to write the code of the model into a txt file that will then be read by the program after providing the data as input. We can do all this in `R`.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+model_bn <- "
+model {
+
+#model specification
+for(i in 1:n){
+QALYs[i] ~ dnorm(nu_e[i],tau_e)
+nu_e[i] <- beta0 + beta1*trt[i]
+
+Costs[i] ~ dnorm(nu_c[i],tau_c)
+nu_c[i] <- gamma0 + gamma1*trt[i] + gamma2*QALYs[i]
+}
+
+#prior specification
+tau_e <- 1/ss_e
+ss_e <- s_e*s_e
+tau_c <- 1/ss_c
+ss_c <- s_c*s_c
+
+s_c ~ dunif(0,1000)
+s_e ~ dunif(0,1000)
+beta0 ~ dnorm(0,0.000001)
+beta1 ~ dnorm(0,0.000001)
+gamma0 ~ dnorm(0,0.000001)
+gamma1 ~ dnorm(0,0.000001)
+gamma2 ~ dnorm(0,0.000001)
+
+}
+"
+writeLines(model_bn, con = "model_bn.txt")
+```
+
+In the code above I first specify the model structure, i.e. assign normal distributions to QLAYs and Costs variable indexed by two parameters, the means $\nu$ and precisions $\tau$ (note that precisions correspond to inverse of the variance $\tau=1/\sigma^2$) since these are the default parameters used by `JAGS` to specify a normal distribution. For each outcome then I specify the mean structure, i.e. the mean of $e$ depennds only on the treatment indicator while the mean of $c$ depend both on treatment indicator and $e$ (this is a conditional cost model!). Next, I specify the priors for non-deterministic parameters, namely using uniform distributions for standard deviations and normal distributions for regression coefficients. Finally, I save the model as a txt file in the current wd using the *writeLines* function. The model is now written and we can fit it by calling the JAGS software directly from R through dedicated functions. Before that, we need to convert the data as input for the software. Then, we load the package **R2jags** which allows to call the software from R through the function **jags** and after providing some technical parameters needed to run the model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#save data input
+n <- dim(data_sim_ec)[1]
+QALYs <- data_sim_ec$QALYs
+Costs <- data_sim_ec$Costs
+trt <- data_sim_ec$trt
+
+#load package and provide algorithm parameters
+library(R2jags)
+set.seed(2345) #set seed for reproducibility
+datalist<-list("n","QALYs","Costs","trt") #pass data into a list
+#set up initial values for algorithm
+inits1 <- list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1)
+inits2 <- list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 2)
+#set parameter easimates to save
+params<-c("beta0","beta1","gamma0","gamma1","gamma2","s_c","s_e","nu_c","nu_e")
+filein<-"model_bn.txt" #name of model file
+n.iter<-20000 #n of iterations
+```
+
+We are now ready to fit the model, which we can do by typing
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#fit model
+jmodel_bn<-jags(data=datalist,inits=list(inits1,inits2),
+                parameters.to.save=params,model.file=filein,
+                n.chains=2,n.iter=n.iter,n.thin=1)
+```
+
+After some time needed for the model to run, we end up with something like this
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#posterior results
+print(jmodel_bn)
+```
+
+The print function allows to see key posterior summaries for all parameters saved from the model, including values for posterior mean estimates, different quantiles of the posterior distribution for each parameter and diagnostic statistics such as **potential scale-reduction factor** or Rhat and the **number of effective sample size** or n.eff. Here I will not go into details about these quantities but it is enough to say that they can be used to check whether some problems occurred in the algorithm. From a first look everything seems ok. Additional checks should also be done to ensure the model behaves somewhat reasonably (e.g. no incorrect prior specification), such as **posterior predictive checks**, but given the simplicity of the setting I will not go into that now.
+
+At this point however you should be asking, but what about the quantities I want to estimate, i.e. the mean QALYs and Total costs per treatment arm? how can I obtain these? Well a possible way to retrieve these is to post-process the results of the model. In particular, we can use our estimates for the conditional means $\nu_e, \nu_c$ and standard deviations $s_e,s_c$ in order to generate, through simulation methods, estimates for the marginal means $\mu_e,\mu_c$ we are looking for. Although this process may seem quite complicated it is relatively simple to implement and, most importantly, can be done for most of the models we will fit, even the most complicated ones. So, in `R`, we do this by typing.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#obtain estimates of means by arm
+
+#extract estimates for each mean parameter by trt group
+nu_e0 <- jmodel_bn$BUGSoutput$sims.list$nu_e[,trt==0]
+nu_e1 <- jmodel_bn$BUGSoutput$sims.list$nu_e[,trt==1]
+nu_c0 <- jmodel_bn$BUGSoutput$sims.list$nu_c[,trt==0]
+nu_c1 <- jmodel_bn$BUGSoutput$sims.list$nu_c[,trt==1]
+#extract estimates for std
+s_e <- jmodel_bn$BUGSoutput$sims.list$s_e
+s_c <- jmodel_bn$BUGSoutput$sims.list$s_c
+
+#create empty vectors to contain results for means by trt group
+mu_e0 <- mu_c0 <- c()
+mu_e1 <- mu_c1 <- c()
+
+#set number of replications
+L <- 5000
+
+set.seed(2345) #set seed for reproducibility
+#generate replications and take mean at each iteration of the posterior
+for(i in 1:n.iter){
+ mu_e0[i] <- mean(rnorm(L,nu_e0[i,],s_e[i])) 
+ mu_e1[i] <- mean(rnorm(L,nu_e1[i,],s_e[i]))
+ mu_c0[i] <- mean(rnorm(L,nu_c0[i,],s_c[i])) 
+ mu_c1[i] <- mean(rnorm(L,nu_c1[i,],s_c[i])) 
+}
+```
+
+At this point we obtained the final posterior estimates for our desired quantities, namely $\mu_{ct}$ and $\mu_{et}$, which can be summarised as usual, or we can even compute the incremental quantities $\Delta_e=\mu_{e1}-\mu_{e0}$ and $\Delta_c=\mu_{c1}-\mu_{c0}$ to see the distribution of the differences between mean outcomes by trt group (i.e. we look at the usual **Cost-Effectivenss Plane**).
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+#compute differences by arm
+Delta_e <- mu_e1 - mu_e0
+Delta_c <- mu_c1 - mu_c0
+
+#plot the differences against each other
+data_delta_ec <- data.frame(Delta_e,Delta_c)
+ggplot(data_delta_ec, aes(x=Delta_e, y=Delta_c)) +
+  geom_point(size=2, shape=16) + theme_classic()
+```
+
+We can then produce all standard CEA output, e.g. CEAC or CE Plane, by post-processing these posterior distributions. If you want to skip the fun, we can take advantage of the `R` package **BCEA** which is dedicated to post-processing the results from a Bayesian CEA model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+#load package and provide means e and c by group as input 
+library(BCEA)
+mu_e <- cbind(mu_e0,mu_e1)
+mu_c <- cbind(mu_c0,mu_c1)
+#produce CEA output
+cea_res <- bcea(eff = mu_e, cost = mu_c, ref = 2)
+
+#CE Plane (set wtp value)
+ceplane.plot(cea_res, graph = "ggplot2", wtp = 10000)
+
+#CEAC 
+ceac.plot(cea_res, graph = "ggplot2")
+
+#other output
+summary(cea_res)
+```
+
+So, what you think? pretty cool.... Today we only scratch the surface of fitting Bayesian models for CEA with a very simple example based on normal distributions. In next posts I will show how these models can be tailored in a way to handle all problems of CEA data without the need to become crazy to figure out a way to fit the model or how to quantify the impact of uncertainty on the CEA results.I hope that I was able to catch your attention!
+
