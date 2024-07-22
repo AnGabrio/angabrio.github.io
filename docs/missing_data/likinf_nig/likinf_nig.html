@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2016-04-27">
+<meta name="description" content="Specific methods are required to make inference under nonignorable nonresponse assumptions, that is when the value of the variable that is missing is related to some values which are not observed by the analyst (e.g.&nbsp;the missing values themselves)">
+
+<title>angabrio.github.io - Likelihood Based Inference with Incomplete Data (Nonignorable)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#selection-and-pattern-mixture-models" id="toc-selection-and-pattern-mixture-models" class="nav-link active" data-scroll-target="#selection-and-pattern-mixture-models">Selection and Pattern Mixture Models</a>
+  <ul class="collapse">
+  <li><a href="#normal-models-for-mnar-data" id="toc-normal-models-for-mnar-data" class="nav-link" data-scroll-target="#normal-models-for-mnar-data">Normal Models for MNAR data</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Likelihood Based Inference with Incomplete Data (Nonignorable)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Missing Data</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Specific methods are required to make inference under nonignorable nonresponse assumptions, that is when the value of the variable that is missing is related to some values which are not observed by the analyst (e.g.&nbsp;the missing values themselves)
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 27, 2016</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In many cases, analysis methods for missing data are based on the ignorable likelihood</p>
+<p><span class="math display">\[
+L_{ign}\left(\theta \mid Y_0, X \right) \propto f\left(Y_0 \mid X, \theta \right),
+\]</span></p>
+<p>regarded as a function of the parameters <span class="math inline">\(\theta\)</span> for fixed observed data <span class="math inline">\(Y_0\)</span> and some fully observed covariates <span class="math inline">\(X\)</span>. The density <span class="math inline">\(f(Y_0 \mid X, \theta)\)</span> is obtained by integrating out the missing data <span class="math inline">\(Y_1\)</span> from the joint density <span class="math inline">\(f(Y \mid X, \theta)=f(Y_0,Y_1\mid X, \theta)\)</span>. Sufficient conditions for basing inference about <span class="math inline">\(\theta\)</span> on the ignorbale likelihood are that the missingness mechanism is <em>Missing At Random</em>(MAR) and the parameters of the model of analysis <span class="math inline">\(\theta\)</span> and those of the missingness mechanism <span class="math inline">\(\psi\)</span> are distinct. Here we focus our attention on the situations where the missingness mechanism is <em>Missing Not At Random</em>(MNAR) and valid <em>Maximum Likelihood</em>(ML), <em>Bayesian</em> and <em>Multiple Imputation</em>(MI) inferences generally need to be based on the full likelihood</p>
+<p><span class="math display">\[
+L_{full}\left(\theta, \psi \mid Y_0, X, M \right) \propto f\left(Y_0, M \mid X, \theta, \psi \right),
+\]</span></p>
+<p>regarded as a function of <span class="math inline">\((\theta,\psi)\)</span> for fixed <span class="math inline">\((Y_0,M)\)</span>. Here, <span class="math inline">\(f(Y_0,M\mid \theta, \psi)\)</span> is obtained by integrating out <span class="math inline">\(Y_1\)</span> from the joint density <span class="math inline">\(f(Y,M \mid X, \theta, \psi)\)</span>. Two main approaches for formulating MNAR models can be distinguished, namely <em>selection models</em>(SM) and <em>pattern mixture models</em>(PMM).</p>
+<section id="selection-and-pattern-mixture-models" class="level2">
+<h2 class="anchored" data-anchor-id="selection-and-pattern-mixture-models">Selection and Pattern Mixture Models</h2>
+<p>SMs factor the joint distribution of <span class="math inline">\(m_i\)</span> and <span class="math inline">\(y_i\)</span> as</p>
+<p><span class="math display">\[
+f(m_i,y_i \mid x_i, \theta, \psi) = f(y_i \mid x_i, \theta)f(m_i \mid x_i,y_i,\psi),
+\]</span></p>
+<p>where the first factor is the distribution of <span class="math inline">\(y_i\)</span> in the population while the second factor is the missingness mechanism, with <span class="math inline">\(\theta\)</span> and <span class="math inline">\(\psi\)</span> which are assumed to be distinct. Alternatively, PMMs factor the joint distribution as</p>
+<p><span class="math display">\[
+f(m_i,y_i \mid x_i, \theta, \psi) = f(y_i \mid x_i, m_i,\xi)f(m_i \mid x_i),
+\]</span></p>
+<p>where the first factor is the distribution of <span class="math inline">\(y_i\)</span> in the strata defined by different patterns of missingness <span class="math inline">\(m_i\)</span> while the second factor models the probabilities of the different patterns, with <span class="math inline">\(\xi\)</span> which are assumed to be distinct (<span class="citation" data-cites="little1993pattern">Little (<a href="#ref-little1993pattern" role="doc-biblioref">1993</a>)</span>,<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>). The distinction between the two factorisations becomes clearer when considering a specific example.</p>
+<p>Suppose thta missing values are confined to a single variable and let <span class="math inline">\(y_i=(y_{i,1},y_{i2})\)</span> be a bivariate response outcome where <span class="math inline">\(y_{i1}\)</span> is fully observed and <span class="math inline">\(y_{i2}\)</span> is observed for <span class="math inline">\(i=1,\ldots,n_{cc}\)</span> but missing for <span class="math inline">\(i=n_{cc}+1,\ldots,n\)</span>. Let <span class="math inline">\(m_{i2}\)</span> be the missingness indicator for <span class="math inline">\(y_{i2}\)</span>, then a PMM factors the denisty of <span class="math inline">\(Y_0\)</span> and <span class="math inline">\(M\)</span> given <span class="math inline">\(X\)</span> as</p>
+<p><span class="math display">\[
+f(y_0, M \mid X, \xi)=\prod_{i=1}^{n_{cc}}f(y_{i1},y_{i2}\mid x_i, m_{i2}=0,\xi)Pr(m_{i2}=0 \mid x_i, \omega) \times \prod_{i=n_{cc}+1}^{n}f(y_{i1} \mid x_i, m_{i2}=1,\xi)Pr(m_{i2}=1 \mid x_i, \omega).
+\]</span></p>
+<p>This expression shows that there are no data with which to estimate directly the distribution <span class="math inline">\(f(y_{i2} \mid x_i, m_{i2}=1,\xi)\)</span>, because all units with <span class="math inline">\(m_{i2}=1\)</span> have <span class="math inline">\(y_{i2}\)</span> missing. Under MAR, this is identified using the distribution of the observed data <span class="math inline">\(f(y_{i2} \mid x_i, m_{i2}=1,\xi)=f(y_{i2} \mid x_i, m_{i2}=0,\xi)\)</span>, while under MNAR it must be identified using other assumptions. The SM formulation is</p>
+<p><span class="math display">\[
+f(y_i, m_{i2} \mid \theta, \psi) = f(y_{i1} \mid x_i, \theta)f(y_{i2} \mid x_i, y_{i1},\theta)f(m_{i2}\mid x_i,y_{i1},y_{i2},\psi).
+\]</span></p>
+<p>Typically, the missingness mechanism <span class="math inline">\(f(m_{i2} \mid x_i,y_{i1},y_{i2},\psi)\)</span> is modelled using some additive probit or logit regression of <span class="math inline">\(m_{i2}\)</span> on <span class="math inline">\(x_i\)</span>,<span class="math inline">\(y_{i1}\)</span> and <span class="math inline">\(y_{i2}\)</span>. However, the coefficient of <span class="math inline">\(y_{i2}\)</span> in this regression is not directly estimable from the data and hence the model cannot be fully estimated without extra assumptions.</p>
+<section id="normal-models-for-mnar-data" class="level3">
+<h3 class="anchored" data-anchor-id="normal-models-for-mnar-data">Normal Models for MNAR data</h3>
+<p>Assume we have a complete sample <span class="math inline">\((y_i,x_i)\)</span> on a continuous variable <span class="math inline">\(Y\)</span> and a set of fully observed covariates <span class="math inline">\(X\)</span>, for <span class="math inline">\(i=1,\ldots,n\)</span>. Suppose that <span class="math inline">\(i=1,\ldots,n_{cc}\)</span> units are observed while the remaining <span class="math inline">\(i=n_{cc}+1,\ldots,n\)</span> units are missing, with <span class="math inline">\(m_i\)</span> being the corresponding missingness indicator. Heckman (<span class="citation" data-cites="heckman1976common">Heckman (<a href="#ref-heckman1976common" role="doc-biblioref">1976</a>)</span>) proposed the following selection model to handle missingness:</p>
+<p><span class="math display">\[
+y_i \mid x_i, \theta, \psi \sim N(\beta_0 + \beta_1x_i, \sigma^2) \;\;\; \text{and} \;\;\; m_i \mid x_i,y_i,\theta,\psi \sim Bern\left(\Phi(\psi_0 + \psi_1x_i + \psi_2y_i) \right),
+\]</span></p>
+<p>where <span class="math inline">\(\theta=(\beta_0,\beta_1,\sigma^2)\)</span> and <span class="math inline">\(\Phi\)</span> denotes the probit (cumulative normal) distribution function. Note that if <span class="math inline">\(\psi_2=0\)</span>, the missing data are MAR, while if <span class="math inline">\(\psi_2 \neq 0\)</span> the missing data are MNAR since missingness in <span class="math inline">\(Y\)</span> depends on the unobserved value of <span class="math inline">\(Y\)</span>. This model can be estimated using either a two-step least squares method, ML in combination with an EM algorithm, or a Bayesian approach. The main issue is the lack of information about <span class="math inline">\(\psi_2\)</span>, which can be partly identified through the specific assumptions about the distribution of the observed data of <span class="math inline">\(Y\)</span>. This, however, makes the implicit assumption that the assumed distribution can well described the distribution of the complete (observed and missing) data which can never be tested or checked. An alternative approach is to use a PMM factorisation and model:</p>
+<p><span class="math display">\[
+y_i \mid m_i=m,x_i,\xi,\omega \sim N(\beta_0^m + \beta_1^mx_i, \sigma^{2m})\;\;\; \text{and} \;\;\; m_i \mid x_i,\xi,\omega \sim Bern\left(\Phi(\omega_0 + \omega_1x_i) \right),
+\]</span></p>
+<p>where <span class="math inline">\(\xi=(\beta_0^m,\beta_1^m,\sigma^{2m},\;\;\; m=0,1)\)</span>. This model implies that the distribution of <span class="math inline">\(y_i\)</span> given <span class="math inline">\(x_i\)</span> in the population is a mixture of two normal distributions with mean</p>
+<p><span class="math display">\[
+\left[1 - \Phi(\omega_0 + \omega_1x_i) \right] \left[\beta_0^0 + \beta_1^0 x_i \right] + \left[\Phi(\omega_0 + \omega_1x_i) \right] \left[\beta_0^1 + \beta_1^1 x_i \right].
+\]</span></p>
+<p>The parameters <span class="math inline">\((\beta_0^0,\beta_1^0,\sigma^{20},\omega)\)</span> can be estimated from the data but the parameters <span class="math inline">\((\beta_0^1,\beta_1^1,\sigma^{21})\)</span> are not estimable because <span class="math inline">\(y_i\)</span> is missing when <span class="math inline">\(m_i=1\)</span>. Under MAR, the distribution of <span class="math inline">\(Y\)</span> given <span class="math inline">\(X\)</span> is the same for units with <span class="math inline">\(Y\)</span> observed and missing, such that <span class="math inline">\(\beta_0^0=\beta_0^1=\beta_0\)</span> (as well as for <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\sigma^2\)</span>). Under MNAR, other assumptions are needed to esitmate the parameters indexed by <span class="math inline">\(m=1\)</span>.</p>
+<p>Some final considerations:</p>
+<ul>
+<li><p>Both SM and PMM model the joint distribution of <span class="math inline">\(Y\)</span> and <span class="math inline">\(M\)</span>.</p></li>
+<li><p>The SM formulation is more natural when the substantive interest concerns the relationship between <span class="math inline">\(Y\)</span> and <span class="math inline">\(X\)</span> in the population. However, these parameters can also be derived in PMM by averaging the patterns specific parameters over the missingness patterns.</p></li>
+<li><p>The PMM factorisation is more transparent in terms of the underlying assumptions about the unidentified parameters of the model, while SM tends to impose some obscure constraints in order to identify these parameters, which are also difficult to interpret.</p></li>
+<li><p>Given specific assumptions to identify all the parameters in the model, PMMs are often easier to fit than SMs. In addition, imputations of the missing values are based on the predictive distribution of <span class="math inline">\(Y\)</span> given <span class="math inline">\(X\)</span> and <span class="math inline">\(M=0\)</span>.</p></li>
+</ul>
+<p>These considerations seem to favour PMM over SM as MNAR approaches, especially when considering <em>sensitivity analysis</em>. Bayesian approaches can also be used to identify these models, by assigning prior distributions which can be used to identify those parameters which cannot be estimated from the data. Justifications for the choice of these priors are therefore necessary to ensure the plausibility of the assumptions assessed and the impact of these assumptions on the posterior inference.</p>
+</section>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-heckman1976common" class="csl-entry" role="listitem">
+Heckman, James J. 1976. <span>“The Common Structure of Statistical Models of Truncation, Sample Selection and Limited Dependent Variables and a Simple Estimator for Such Models.”</span> In <em>Annals of Economic and Social Measurement, Volume 5, Number 4</em>, 475–92. NBER.
+</div>
+<div id="ref-little1993pattern" class="csl-entry" role="listitem">
+Little, Roderick JA. 1993. <span>“Pattern-Mixture Models for Multivariate Incomplete Data.”</span> <em>Journal of the American Statistical Association</em> 88 (421): 125–34.
+</div>
+<div id="ref-little2019statistical" class="csl-entry" role="listitem">
+Little, Roderick JA, and Donald B Rubin. 2019. <em>Statistical Analysis with Missing Data</em>. Vol. 793. John Wiley &amp; Sons.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

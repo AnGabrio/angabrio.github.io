@@ -1,0 +1,101 @@
+---
+title: "Multiple Imputation by Chained Equations"
+description: "Multiple Imputation by Chained Equations (MICE) allows most models to be fit to a dataset with missing values on the independent and/or dependent variables, and provides rigorous standard errors for the fitted parameters. The basic idea is to treat each variable with missing values as the dependent variable in a regression, with some or all of the remaining variables as its predictors"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: mi.bib
+---
+
+*Multiple Imputation*(MI) refers to the procedure of replacing each missing value by a set of $H\geq 2$ imputed values. These are ordered in the sense that $H$ completed data sets can be created from the sets of imputations, where the first imputed value replaces the missing value in the first completed data set, the second imputed value in the second completed data set, and so on. Next, standard complete data methods are used to analyse each completed data set. When the $H$ sets of imputations are repeated random draws from the predictive distribution of the missing data under a particular model of missingness, the $H$ completed data inferences can be combined to form one inference that properly reflects uncertainty due to missing values under that model. In general, MI procedures can be summarised in three main steps:
+
+1. Specify an **imputation model** to generate $H$ imputed values, typically taken as random draws from the predictive distribution of the missing values given the observed values, and create $H$ completed data sets using these imputations and the observed data.
+
+2. Analyse each completed data sets using standard complete data methods based on an **analysis model**, and derive $H$ completed data inferences
+
+3. Pool together the $H$ completed data inferences into a single inference using standard MI formulas, which ensure that missing data uncertainty is taken into account 
+
+
+Mi was first proposed by Rubin (@rubin1978multiple) and has become more popular over time (@rubin1996multiple, @schafer2002missing, @little2019statistical),  as well as the focus of research for methodological and practical applications in a variety of fields (@herzog1983using, @rubin1987interval, @schafer1999multiple, @carpenter2012multiple, @molenberghs2014handbook, @van2018flexible). MI shares both advantages of *Single Imputaiton* (SI) methods and solves both disadvantages. Indeed, like SI, MI methods allow the analyst to use familiar complete data methods when analysing the completed data sets. The only disadvantage of MI compared with SI methods is that it takes more time to generate the imputations and analyse the completed data sets. However, @rubin2004multiple showed that in order to obtain sufficiently precise estimates, a relatively small number of imputations (typically $10$) is required. For example, considering a situation with $\lambda=50\%$ missing information and $H=10$ imputations, the efficiency of MI can be shown to be equal to $(1+\frac{\lambda}{H})^{-1}=95\%$. In addition, in today's computing environments, the work of analysing the completed data sets is quite modest since it involves performing the same task $H$ times. Thus, once a precedure to combine multiple completed data sets is established, the additonal time and effort to handle $50$, $20$, or $10$ imputations if often of little consequence.   
+
+In the first step of MI, imputations should ideally be created as repeated draws from the *posterior predictive distribution* of the missing values $y_{mis}$ given the observed values $y_{obs}$, each repetition being an independent drawing of the parameters and missing values. In practice, implicit imputation models can also be used in place of explicit imputation models (@herzog1983using). In the second step, each completed data set is analysed using the same complete data method that would be used in the absence of missingness. Finally, in the last step, standard procedures should be used to combine the compelted data inferences into a single one. The simplest and most popular method for combining the reuslts of $H$ completed data sets is known as *Rubin's rules* (@rubin2004multiple), which can be explained with a simple example.
+
+## Rubin's rules
+
+Let $\hat{\theta}_h$ and $V_h$, for $h=1,\ldots,H$, be the completed data estimates and sampling variances for a scalar estimand $\theta$, calculated from $H$ repeated imputations under a given imputation model. Then, according to Rubin's rules, the combined estimate is simply the average of the $H$ completed data estimates, that is
+
+$$
+\bar{\theta}_{H}=\frac{1}{H}\sum_{h=1}^{H}\hat{\theta}_{h}.
+$$
+
+Because the imputations under MI are conditional draws, under a good imputaton model, they provide valid estimates for a wide range of estimands. In addition, the averaging over $H$ imputed data sets increases the efficiency of estimation over that obtained from a single completed data set. The variability associated with the pooled estimate has two components: the *average within-imputation variance* $\bar{V}_H$ and the *between-imputation variance* $B_H$, defined as
+
+$$
+\bar{V}_{H}=\frac{1}{H}\sum_{h=1}^{H}V_{h} \;\;\; \text{and} \;\;\; B_{H}=\frac{1}{H-1}\sum_{h=1}^{H}(\hat{\theta}_{h}-\bar{\theta}_{H})^2.
+$$
+
+The total variability associated with $\bar{\theta}_H$ is the computed as
+
+$$
+T_{H}=\bar{V}_H + \frac{H+1}{H}B_{H},
+$$
+
+where $(1+\frac{1}{H})$ is an adjustment factor for finite due to estimating $\theta$ by $\bar{\theta}_H$. Thus, $\hat{\lambda}_H=(1+\frac{1}{H})\frac{B_H}{T_H}$ is known as the *fraction of missing information* and is an estimate of the fraction of information about $\theta$ that is missing due to nonresponse. For large sample sizes and scalar quantities like $\theta$, the reference distribution for interval estimates and significance tests is a $t$ distribution 
+
+$$
+(\theta - \bar{\theta}_H)\frac{1}{\sqrt{T^2_H}} \sim t_v, 
+$$
+
+where the degrees of freedom $v$ can be approximated with the quantity $v=(H-1)\left(1+\frac{1}{H+1}\frac{\bar{V}_H}{B_H} \right)^2$ (@rubin1987interval). In small data sets, an improved version of $v$ can be obtained as $v^\star=(\frac{1}{v}+\frac{1}{\hat{v}_{obs}})^{-1}$, where
+
+$$
+\hat{v}_{obs}=(1-\hat{\lambda}_{H})\left(\frac{v_{com}+1}{v_{com}+3}\right)v_{com},
+$$
+
+with $v_{com}$ being the degrees of freedom for appropriate or exact $t$ inferences about $\theta$ when there are no missing values (@barnard1999miscellanea). 
+
+The validity of MI rests on how the imputations are created and how that procedure relates to the model used to subsequently analyze the data. Creating MIs often requires special algorithms (@schafer1997analysis). In general, they should be drawn from a distribution for the missing data that reflects uncertainty about the parameters of the data model.  Recall that with SI methods, it is desirable to impute from the conditional distribution $p(y_{mis}\mid y_{obs},\hat{\theta})$, where $\hat{\theta}$ is an estimate derived from the observed data. MI extends this approach by first simulating $H$ independent plausible values for the parameters $\theta_1,\ldots,\theta_H$ and then drawing the missing values $y_{mis}^h$ from $p(y_{mis}\mid y_{obs}, \theta_h)$. Treating parameters as random rather than fixed is
+an essential part of MI. For this reason, it is natural (but not essential) to motivate MI from the Bayesian perspective, in which the state of knowledge about parameters is represented through a posterior distribution.
+
+
+## Multiple Imputation by Chained Equations
+
+MI by Chained Equations, also known as *Fully Conditional Specification*(FCS), imputes multivariate missing data on a variable-by-variable basis, and therefore requires the specification of an imputation model for each incomplete variable to create imputations per variable in an iterative fashion (@van2007multiple). In contrast to Joint MI, MICE specifies the multivariate distribution for the outcome and missingness pattern $p(y,r\mid \theta, \phi)$, indexed by the parameter vectors of the outcome ($\theta$) and missingness models ($\phi$), through a set of conditional densities $p(y_j \mid y_{-j},r,\theta_j, \phi_j)$, which is used to impute $y_j$ given the other variables. Starting from a random draw from the marginal distribution of $y_1$, imputation is then carried out by iterating over the conditionally  specified imputation models for each $y_j=(y_2,\ldots,y_J)$ separately given the set of all the other variables $y_{-j}$.
+
+Tha main idea of MICE is to directly draw the missing data from the predictive distribution of conditional densities, therefore avoiding the need to specify a joint multivariate model for all the data. Different approaches can be used to implement MICE. For example, a possible strategy is the following:
+
+1. Start at iteration $t=0$ by drawing randomly from the the distribution of the missing data given the observed data and all other variables, according to some probability model for each variable $y_j$, that is 
+
+$$
+\hat{y}^{mis}_{j,0} \sim p(y^{mis}_{j} \mid y^{obs}_{j}, y_{-j}, r)
+$$
+
+2. At each iteration $t=1,\ldots,T$ and for each variable $j=\ldots,J$, set 
+
+$$
+\hat{y}^{mis}_{-j,t}=\left(\hat{y}_{1,t},\ldots, \hat{y}_{j-1,t}, \hat{y}_{j+1,t}, \ldots, \hat{y}_{J,t} \right)
+$$
+
+as the currently completed data except $y_j$
+
+3. Draw $h=1,\ldots,H$ imputations for each variable $y_j$ from the predictive distribution of the missing data given the observed data and the currently imputed data at $t$, that is 
+
+$$
+\hat{y}^{mis}_{j,t} \sim p(y^{mis}_{j} \mid y^{obs}_{j}, \hat{y}_{-j,t}, r)
+$$
+
+and repeat the steps 2 and 3 until convergence. It is important to stress out that MICE is essentially a *Markov Chain Monte Carlo*(MCMC) algorithm (@brooks2011handbook), where the state space is the collection of all imputed values. More specifically, when the conditional distributions of all variables are compatible with a joint multivariate distribution, the algorithm corresponds to a Gibbs sampler, a Bayesian simulation method that samples from the conditional distributions in order to obtain samples from the joint multivariate distribution of all variables via some conditional factorisation of the latter (@casella1992explaining, @gilks1996introducing). A potential issue of MICE is that, since the conditional distributions are specified freely by the user, these may not be compatible with a joint distribution and therefore it is not clear from which distribution the algorithm is sampling from. However, a general advatage of MICE is that it gives freedom to the user for the specification of the univariate models for the variables, which can be tailored to handle different types of variabes (e.g. continuous and categorical) and different statistical issues for each variable (e.g. skewness and non-liner associations). 
+
+Regardless of the theoretical implications of MICE, as a MCMC method, the algorithm converges to a stationary distribution when three conditions are satisfied (@roberts1996markov,@brooks2011handbook):
+
+* The chain is *irreducible*, i.e. must be able to reach any state from any state in the state space
+
+* The chain is *aperiodic*, i.e. must be able to return to each state after some unknown number of steps or transitions
+
+* The chain is *recurrent*, i.e. there is probability of one of eventually returning to each state after some number of steps
+
+Typically periodicity and non-recurrence can be a problem in MICE when the imputation models are not compatible, possibly leading to different inferences based on the stopping point of the chain or to non-stationary behaviours of the chain.
+
+
+
+# References

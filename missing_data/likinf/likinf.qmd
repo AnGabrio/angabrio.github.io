@@ -1,0 +1,128 @@
+---
+title: "Likelihood Based Inference with Incomplete Data"
+description: "When making inference with missing data, any statistical method must rely on either explicit or implicit assumptions about the mechanism which lead some of the values to be missing"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: likelihoodignorable.bib
+---
+
+As for the inference under complete data, inference under incomplete data consists in deriving the likelihood for the parameters based on the available data, either using a *Maximum Likelihood* (ML) approach (solving the likelihood equation) or using the *Bayes' rule* incorporating a prior distribution (performing necessary integrations to obtain the posterior distribution). However, asymptotic standard errors obtained from the information matrix, are more questionable when dealing with missing data since the sample will not be typically iid and results that imply the large sample normality of the likelihood function do not immediately apply. More complications arise when dealing with the process that lead to some of the data to be missing. This can be explained with a simple example.
+
+Let $Y=(y_{ij})$, for $i=1,\ldots,n$ and $j=1,\ldots,J$, denote the complete dataset if there were no missing values, with a total of $n$ units and $J$ variables. Let $M=(m_{ij})$ denote the fully observed matrix of binary missing data indicators with $m_{ij}=1$ if $y_{ij}$ is missing and $0$ otherwise. As an example, we can model the density of the joint distribution of $Y$ and $M$ using the *selection model factorisation* (@little2019statistical)  
+
+$$
+p(Y=y,M=m \mid \theta, \psi) = f(y \mid \theta)f(m \mid y, \psi),
+$$
+
+where $\theta$ is the parameter vector indexing the response model and $\psi$ is the parameter vector indexing the missingness mechanism. The observed values $m$ effect a partition $y=(y_1,y_0)$, where $y_0=[y_{ij} : m_{ij}=0]$ is the observed component and $y_1=[y_{ij} : m_{ij}=1]$ is the missing component of $y$. The full likelihood based on the observed data and the assumed model is
+
+$$
+L_{full}(\theta, \psi \mid y_{0},m) = \int f\left(y_{0},y_{1} \mid \theta \right) f\left(m \mid y_{0},y_{1}, \psi \right)dy_{1}
+$$
+
+and is a function of the parameters $(\theta,\psi)$. Next, we define the likelihood of ignoring the missingness mechanism or *ignorable likelihood* as
+
+$$
+L_{ign}\left(\theta \mid y_{0} \right) = \int f(y_{0},y_{1}\mid \theta)dy_{1},
+$$
+
+which does not involve the model for $M$. In practice, modelling the joint distribution of $Y$ and $M$ is often challenging and, in fact, many approaches to missing data do not model $M$ and (explicitly or implicitly) base inference about $\theta$ on the ignorable likelihood. It is therefore important to assess under which conditions inferences about $\theta$ based on $L_{ign}$ can be considered appropriate. More specifically, the missingness mechanism is said to be *ignorable* if inferences about $\theta$ based on the ignorable likelihood equation evauluated at some realisations of $y_0$ and $m$ are the same as inferences about $\theta$ based on the full likelihood equation, evaluated at the same realisations of $y_0$ and $m$. The conditions for ignoring the missingness mechanism depend on whether the inferences are direct likelihood, Bayesian or frequentist.
+
+## Direct Likelihood Inference
+
+*Direct Likelihood Inference* refers to inference based solely on likelihood ratios for pair of values of the parameters, with the data fixed at their observed values. The missingness mechanism can be ignored for direct likelihood if the likelihood ratio based on the ignorable likelihood is the same as the ratio based on the full likelihood. More precisely, the missingness mechanism is said to be ignorable for direct likelihood inference at some realisations of $(y_0,m)$ if the likelihood ratio for two values $\theta$ and $\theta^\star$ is the same whether based on the full or ignorable likelihood. That is
+
+$$
+\frac{L_{full}\left( \theta, \psi \mid y_{0}, m \right)}{L_{full}\left( \theta^{\star}, \psi \mid y_{0}, m \right)}=\frac{L_{ign}\left( \theta \mid y_{0} \right)}{L_{ign}\left( \theta^{\star} \mid y_{0}\right)},
+$$
+
+for all $\theta$, $\theta^\star$ and $\psi$. In general, the missingnes mechanism is ignorable for direct likelihood inference if the following two conditions hold:
+
+1. Parameter distinctness. The parameters $\theta$ and $\psi$ are distinct, in the sense that the joint parameter space $\Omega_{\theta,\psi}$ is the product of the two parameter spaces $\Omega_{\theta}$ and $\Omega_{\psi}$.
+2. Factorisation of the full likelihood. The full likelihood factors as
+
+$$
+L_{full}\left(\theta, \psi \mid y_{0},m \right) = L_{ign}\left(\theta \mid y_{0} \right)  L_{rest}\left(\psi \mid y_{0},m \right)
+$$
+
+for all values of $\theta,\psi \in \Omega_{\theta,\psi}$. The distinctness condition ensures that each value of $\psi \in \Omega_{\psi}$ is compatible with different values of $\theta \in \Omega_{\theta}$. A sufficient condition for the factorisation of the full likelihood is that the missing data are *Missing At Random*(MAR) at the specific realisations of $y_{0},m$. This means that the distribution function of $M$, evaluated at the given realisations $(y_{0},m)$, does not depend on the missing values $y_1$, that is
+
+$$
+f\left(m \mid y_{0}, y_{1}, \psi \right)=f\left(m \mid y_{0}, y^{\star}_{1} \psi \right),
+$$
+
+for all $y_{1},y^\star_{1},\psi$. Thus, we have
+
+$$
+f\left(y_{0}, m \mid \theta, \psi \right) = f\left(m \mid y_{0}, \psi \right) \int f\left(y_{0},y_{1} \mid \theta \right)dy_{1} = f\left(m \mid y_{0}, \psi \right) f\left( y_{0} \mid \theta \right). 
+$$
+
+From this it follows that, if the missing data are MAR at the given realisations of $(y_{0},m)$ and $\theta$ and $\psi$ are distinct, the missingnes mechanism is ignorable for likelihood inference.
+
+## Bayesian Inference
+
+*Bayesian Inference* under the full model for $Y$ and $M$ requires that the full likelihood is combined with a prior distribution $p(\theta,\psi)$ for the parameters $\theta$ and $\psi$, that is
+
+$$
+p\left(\theta, \psi \mid y_{0}, m \right) \propto p(\theta, \psi) L_{full}\left(\theta, \psi \mid y_{0}, m \right).
+$$
+
+Bayesian inference ignoring the missingness mechanism combines the ignorable likelihood with a prior distribution for $\theta$ alone, that is
+
+$$
+p(\theta \mid y_{0}) \propto p(\theta) L_{ign}\left(\theta \mid y_{0} \right).
+$$
+
+More formally, the missingness mechanism is said to be ignorable for Bayesian inference at the given realisations of $(y_{0},m)$ if the posterior distribution for $\theta$ based on the posterior distribution for the full likelihood and prior distribution for $(\theta,\psi)$ is the same as the posterior distribution for the ignorable likelihood and the prior distribution for $\theta$ alone. This holds when the following conditions are satisfied:
+
+1. The parameters $\theta$ and $\psi$ are *a priori* independent, that is the prior distribution has the form
+
+$$
+p(\theta , \psi) = p(\theta) p(\psi)
+$$
+
+2. The full likelihood evaluated at the realisations of $(y_{0},m)$ factors as for direct likelihood inference
+
+Under these conditions:
+
+$$
+p(\theta, \psi \mid y_{0}, m) \propto \left(p(\theta)L_{ign}\left( \theta \mid y\_{0} \right) \right) \left(p(\psi)L_{rest}\left(\psi \mid y_{0},m \right)  \right).
+$$
+
+As for direct likelihood inference, MAR is a sufficient condition for the factorisation of the full likelihood. This means that, if the data are MAR at the given realisations of $(y_{0},m)$ and the parameters $\theta$ and $\psi$ are a prior independent, then the missingness mechanism is ignorable for Bayesian inference. We note that the a priori condition is more stringent than the distinctness condition because paramerers with distinct parameter spaces might have dependent prior distributions.
+
+## Frequentist Asymptotic Inference
+
+*Frequentist Asymptotic Inference* requires that, in order to ignore the missingness mechanism, the factorisation of the full likelihood needs to be valid for values of the observed data under repeated sampling. This means that we require
+
+$$
+L_{full}\left(\theta,\psi \mid y_{0}, m \right) = L_{ign}\left(\theta \mid y_{0} \right) L_{rest}\left(\psi \mid y_{0}, m \right)
+$$
+
+for all $y_{0},m$ and $\theta,\psi \in \Omega_{\theta,\psi}$. For this form of inference, a sufficient condition for ignoring the missingness mechanism is given by the following conditions:
+
+1. Parameter distinctness as defined for direct likelihood inference.
+
+2. Missing data are *Missing Always At Random* (MAAR), that is
+
+$$
+f\left(m \mid y_{0},y_{1},\psi \right) = f\left(m \mid y_{0}, y^{\star}_{1},\psi \right)
+$$
+
+for all $m,y_{0},y_{1},y^\star_{1},\psi$. In the following example we discuss conditions for ignoring the missingness mechanism for direct likelihood and Bayesian inference, which can be extended to the case of frequentist asymptotic inference by requiring that they hold for for values of $y_{0},m$ other than those observed that could arise in repeated sampling.
+
+
+## Bivariate Normal Sample with One Variable Subject to Missingness
+
+Consider a bivariate normal sample $y=(y_{i1},y_{i2})$, for $i=1,\ldots,n$ units, but with the values of $y_{i2}$ being missing for $i=(n_{cc}+1),\ldots,n$. This leads to a monotone missing data pattern with two variables. The loglikelihood of ignoring the missingness mechanism is
+
+$$
+l_{ign}\left(\mu, \Sigma \mid y_{0} \right) = \log\left(L_{ign}\left(\mu,\Sigma \mid y_{0} \right) \right) = - \frac{1}{2}n_{cc}ln \mid \Sigma \mid - \frac{1}{2}\sum_{i=1}^{n_{cc}}(y_i - \mu ) \Sigma^{-1}(y_i - \mu)^{T} - \frac{1}{2}(n-n_{cc})ln\sigma_{1} - \frac{1}{2}\sum_{i=n_{cc}+1}^{n}\frac{(y_{i1}-\mu_1)^2}{\sigma_{1}}. 
+$$
+
+This loglikelihood is appropriate for inference provided the conditional distribution of $M$ does not depend on the values of $y_{i2}$, and $\theta=(\mu,\Sigma)$ is distinct from $\psi$. Under these conditions, ML estimates of $\theta$ can be found by maximising this loglikelihood. For Bayesian inference, if these conditions hold and the prior distribution for $(\theta,\psi)$ has the form $p(\theta)p(\psi)$, then the joint posterior distribution of $\theta$ is proportional to the product of $p(\theta)$ and $L_{ign}(\theta \mid y_{0})$.
+
+
+# References
+

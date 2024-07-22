@@ -1,0 +1,212 @@
+---
+title: "Introduction to Maximum Likelihood Estimation"
+description: "Maximum Likelihood Estimation (MLE) is a method of estimating the parameters of a probability distribution by maximising a likelihood function, so that under the assumed statistical model the observed data is most probable"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: mle.bib
+---
+
+A possible approach to analyse missing data is to use methods based on the likelihood function under specific modelling assumptions. In this section, I review maximum likelihood methods based on fully observed data alone.
+
+## Maximum Likelihood Methods for Complete Data
+
+Let $Y$ denote the set of data, which are assumed to be generated according to a certain probability density function $f(Y= y,\mid \theta)=f(y \mid \theta)$ indexed by the set of parameters $\theta$, which lies on the parameter space $\Theta$ (i.e. set of values of $\theta$ for which $f(y\mid \theta)$ is a proper density function). The *Likelihood* function, indicated with $L(\theta \mid y)$, is defined as any function of $\theta \in \Theta$ proportional that is to $f(y \mid \theta)$. Note that, in contrast to the density function which is defined as a function of the data $Y$ given the values of the parameters $\theta$, instead the likelihood is defined as a function of the parameters $\theta$ for fixed data $y$. In addition, the *loglikelihood* function, indicated with $l(\theta\mid y)$ is defined as the natural logarithm of $L(\theta \mid y)$.
+
+### Univariate Normal Example
+
+The joint density function of $n$ independent and identially distributed units $y=(y_1,\ldots,y_n)$ from a Normal distribution with mean $\mu$ and variance $\sigma^2$, is 
+
+$$
+f(y \mid \mu, \sigma^2)=\frac{1}{\sqrt{\left(2\pi\sigma^2\right)^n}}\text{exp}\left(-\frac{1}{2}\sum_{i=1}^n \frac{(y_i-\mu)^2}{\sigma^2} \right),
+$$
+
+and therefore the loglikelihood is 
+
+$$
+l(\mu, \sigma^2 \mid y)= -\frac{n}{2}\text{ln}(2\pi)-\frac{n}{2}\text{ln}(\sigma^2)-\frac{1}{2}\sum_{i=1}^n \frac{(y_i-\mu)^2}{\sigma^2},
+$$
+
+which is considered as a function of $\theta=(\mu,\sigma^2)$ for fixed data $y$.
+
+### Multivariate Normal Example
+
+If the sample considered has dimension $J>1$, e.g. we have a set of idependent and identically distributed variables $y=(y_{ij})$, for $i=1,\ldots,n$ units and $j=1,\ldots,J$ variables, which comes from a Multivariate Normal distribution with mean vector $\mu=(\mu_1,\ldots\mu_J)$ and covariance matrix $\Sigma=(\sigma_{jk})$ for $ j=1,\ldots,J, k=1,\ldots,K$ and $J=K$, then its density function is
+
+$$
+f(y \mid \mu, \Sigma)=\frac{1}{\sqrt{\left(2\pi \right)^{nK}\left(\mid \Sigma \mid \right)^n}} \text{exp}\left(-\frac{1}{2}\sum_{i=1}^{n}(y_i-\mu)\Sigma^{-1}(y_i-\mu)^{T}  \right),
+$$
+
+where $|\Sigma|$ denotes the determinant of the matrix $\Sigma$ and the superscript $T$ denotes the transpose of a matrix or vector, while $y_i$ denotes the row vector of observed values for unit $i$. The loglikelihood of $\theta=(\mu,\Sigma)$ is 
+
+$$
+l(\mu,\Sigma \mid y)= - \frac{n}{2}\text{ln}(2\pi) - \frac{n}{2}\text{ln}(|\Sigma|)-\frac{1}{2}\sum_{i=1}^{n}(y_i-\mu)\Sigma^{-1}(y_i-\mu)^T.
+$$
+
+## MLE estimation
+
+Finding the maximum value of $\theta$ that is most likely to have generated the data $y$, corresponding to maximising the likelihood or *Maximum Likelihood Estimation*(MLE), is a standard approach to make inference about $\theta$. Suppose a specific value for the parameter $\hat{\theta}$ such that $L(\hat{\theta}\mid y)\geq L(\theta \mid y)$ for any other value of $\theta$. This implies that the observed data $y$ is at least as likely under $\hat{\theta}$ as under any other value of $\theta$, i.e. $\hat{\theta}$ is the value best supported by the data. More specifically, a maximum likelihood estimate of $\theta$ is a value of $\theta \in \Theta$ that maximises the likelihood $L(\theta \mid y)$ or, equivalently, that maximises the loglikelihood $l(\theta \mid y)$. In general, when the likelihood is differentiable and bounded from above, typically the MLE can be found by differentiating $L(\theta \mid y)$ or $l(\theta \mid y)$ with respect to $\theta$, setting the result equal to zero, and solving for $\theta$. The resulting equation, $D_l(\theta)=\frac{\partial l(\theta \mid y)}{\partial \theta}=0$, is known as the *likelihood equation* and the derivative of the loglikelihood as the *score function*. When $\theta$ consists in a set of $j=1,\ldots,J$ components, then the likelihood equation corresponds to a set of $J$ simultaneous equations, obtained by differentiating $l(\theta \mid y)$ with respect to each component of $\theta$.
+
+### Univariate Normal Example
+
+Recall that, for a Normal sample with $n$ units, the loglikelihood is indexed by the set of parameters $\theta=(\mu,\sigma^2)$ and has the form
+
+$$
+l(\mu, \sigma^2 \mid y)= -\frac{n}{2}\text{ln}(2\pi)-\frac{n}{2}\text{ln}(\sigma^2)-\frac{1}{2}\sum_{i=1}^n \frac{(y_i-\mu)^2}{\sigma^2}.
+$$
+
+Next, the MLE can be derived by first differentiating $l(\theta \mid y)$ with respect to $\mu$ and set the result equal to zero, that is
+
+$$
+\frac{\partial l(\theta \mid y)}{\partial \mu}= -\frac{2}{2\sigma^2}\sum_{i=1}^n(y_i-\mu)(-1)=\frac{\sum_{i=1}^n y_i - n\mu}{\sigma^2}=0,
+$$
+
+Next, after simplifying a bit, we can retrieve the solution
+
+$$
+\hat{\mu}=\frac{1}{n}\sum_{i=1}^n y_i=\bar{y},
+$$
+
+which corresponds to the sample mean of the observations. Next, we differentiate $l(\theta \mid y)$ with respect to $\sigma^2$, that is we set
+
+$$
+\frac{\partial l(\theta \mid y)}{\partial \sigma^2}= -\frac{n}{2\sigma^2}+\frac{1}{2(\sigma^2)^2}\sum_{i=1}^n (y_i-\mu)^2=0.
+$$
+
+We then simplify and move things around to get
+
+$$
+\frac{1}{\sigma^3}\sum_{i=1}^n(y_i-\mu)^2=\frac{n}{\sigma} \;\;\; \rightarrow \;\;\;  \sigma^2=\frac{1}{n}\sum\_{i=1}^n(y_i-\mu)^2.
+$$
+
+Finally, we replace $\mu$ in the expression above with the value $\hat{\mu}=\bar{y}$ found before and obtain the solution
+
+$$
+\hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n(y_i-\bar{y})^2=s^2,
+$$
+
+which, however, is a biased estimator of $\sigma^2$ and therefore is often replaced with the unbiased estimator $\frac{s^2}{(n-1)}$. In particular, given a population parameter $\theta$, the estimator $\hat{\theta}$ for $\theta$ is said to be unbiased when $E[\hat{\theta}]=\theta$. This is the case, for example, of the sample mean $\hat{\mu}=\bar{y}$ which is an unbiased estimator of the population mean $\mu$:
+
+$$
+E\left[\hat{\mu} \right]=E\left[\frac{1}{n}\sum_{i=1}^n y_i \right]=\frac{1}{n}\sum_{i=1}^n E\left[y_i \right]=\frac{1}{n} (n\mu)=\mu.
+$$
+
+However, this is not true for the sample variance $s^2$. This can be seen by first rewriting the expression of the estimator as
+
+$$
+\hat{\sigma}^2=\frac{1}{n}\sum_{i=1}^n (y_i^2 -2y_i\bar{y}+\bar{y}^2)=\frac{1}{n}\sum_{i=1}^n y_i^2 -2\bar{y}\sum_{i=1}^n y_i + \frac{1}{n}n\bar{y}^2=\frac{1}{n}\sum_{i=1}^n y_i^2 - \bar{y}^2,
+$$
+
+and then by computing the expectation of this quantity:
+
+$$
+E\left[\hat{\sigma}^2 \right]=E\left[\frac{1}{n}\sum_{i=1}^n y_i^2 - \bar{y}^2 \right]=\frac{1}{n}\sum_{i=1}^n E\left[y_i^2 \right] - E\left[\bar{y}^2 \right]=\frac{1}{n}\sum_{i=1}^n (\sigma^2 + \mu^2) - (\frac{\sigma^2}{n}+\mu^2)=\frac{1}{n}\left(n\sigma^2+n\mu^2\right) - \frac{\sigma^2}{n}-\mu^2=\frac{(n-1)\sigma^2}{n}.
+$$
+
+The above result is obtained by pluggin in the expression for the variance of a general variable $y$ and retrieving the expression for $E[y^2]$ as a function of the variance and $E[y]^2$. More specifically, given that
+
+$$
+Var(y)=\sigma^2=E\left[y^2 \right]-E\left[y \right]^2,
+$$
+
+then we know that for $y$, $E\left[y^2 \right]=\sigma^2+E[y]^2$, and similarly we can derive the same expression for $\bar{y}$. However, we can see that $\hat{\sigma}^2$ is biased by a factor of $(n-1)/n$. Thus, an unbiased estimator for $\sigma^2$ is given by multiplying $\hat{\sigma}^2$ by $\frac{n}{(n-1)}$, which gives the unbiased estimator $\hat{\sigma}^{2\star}=\frac{s^2}{n-1}$, where $E\left[\hat{\sigma}^{2\star}\right]=\sigma^2$. 
+
+### Multivariate Normal Example
+
+The same procedure can be applied to an independent and identically distributed multivariate sample $y=(y_{ij})$, for $i=1,\ldots,n$ units and $j=1,\ldots,J$ variables (@anderson1962introduction,@rao1973linear,@gelman2013bayesian). It can be shown that, maximising the loglikelihood with respect to $\mu$ and $\Sigma$ yields the MLEs 
+
+$$
+\hat{\mu}=\bar{y} \;\;\; \text{and} \;\;\; \Sigma=\frac{(n-1)\hat{\sigma}^{2\star}}{n},
+$$
+
+where $\bar{y}=(\bar{y}_1,\ldots,\bar{y}_{J})$ is the row vectors of sample means and $\hat{\sigma}^{2\star}=(s^{\star_{jk}})$ is the sample covariance matrix with $jk$-th element $s^\star_{jk}=\frac{\Sigma_{i=1}^n(y_{ij} - \bar{y}_j)}{(n-1)}$. In addition, in general, given a function $g(\theta)$ of the parameter $\theta$, if $\hat{\theta}$ is a MLE of $\theta$, then $g(\hat{\theta})$ is a MLE of $g(\theta)$. 
+
+## Conditional Distribution of a Bivariate Normal
+
+Consider an indpendent and identically distributed sample formed by two variables $y=(y_1,y_2)$, each measured on $i=1\ldots,n$ units, which come from a Bivariate Normal distribution with mean vector and covariance matrix
+
+$$
+\mu=(\mu_1,\mu_2) \;\;\; \text{and} \;\;\; \Sigma = \begin{pmatrix} \sigma^2_1 & \rho\sigma_1\sigma_2 \\ \rho\sigma_2\sigma_1 & \sigma_2^2 \ \end{pmatrix},
+$$
+
+where $\rho$ is a correlation parameter between the two variables. Thus, intuitive MLEs for these parameters are
+
+$$
+\hat{\mu}_j=\bar{y}_j \;\;\; \text{and} \;\;\; \hat{\sigma}_{jk}=\frac{(n-1)s_{jk}}{n},
+$$
+
+where $\sigma^2_j=\sigma_{jj}$, $\rho\sigma_{j}\sigma_{k}=\sigma_{jk}$, for $j,k=1,2$. By properties of the Bivariate Normal distribution (@ord1994kendall), the marginal distribution of $y_1$ and the conditional distribution of $y_2 \mid y_1$ are
+
+$$
+y_1 \sim \text{Normal}\left(\mu\_1,\sigma^2_1 \right) \;\;\; \text{and} \;\;\; y_2 \mid y_1 \sim \text{Normal}\left(\mu_2 + \beta(y_1-\mu_1 \right), \sigma^2_2 - \sigma^2_1\beta^2),
+$$
+
+where $\beta=\rho\frac{\sigma_2}{\sigma_1}$ is the parameter that quantifies the linear dependence between the two variables. The MLEs of $\beta$ and $\sigma^2_2$ can also be derived from the likelihood based on the conditional distribution of $y_2 \mid y_1$, which have strong connections with the least squares estimates derived in a multiple linear regression framework.
+
+## Multiple Linear Regression
+
+Suppose the data consist in $n$ units measured on an outcome variable $y$ and a set of $J$ covariates $x=(x_{1},\ldots,x_{J})$ and assume that the distribution of $y$ given $x$ is Normal with mean $\mu_i=\beta_0+\sum_{j=1}^J\beta_jx_{ij}$ and variance $\sigma^2$. The loglikelihood of $\theta=(\beta,\sigma^2)$ given the observed data $(y,x)$ is given by
+
+$$
+l(\theta \mid y) = -\frac{n}{2}\text{ln}(2\pi) -\frac{n}{2}\text{ln}(\sigma^2) - \frac{\sum_{i=1}^n \left(y_i - \mu_i \right)^2}{2\sigma^2}.
+$$
+
+Maximising this expression with respect to $\theta$, the MLEs are found to be equal to the least squares estimates of the intercept and regression coefficients. Using a matrix notation for the $n$-th vector of the outcome values $Y$ and the $n\times (J+1)$ matrix of the covariate values (including the constant term), then the MLEs are:
+
+$$
+\hat{\beta}=(X^{T}X)^{-1}X^{T}Y \;\;\; \text{and} \;\;\; \hat{\sigma}^{2}=\frac{(Y-X\hat{\beta})(Y-X\hat{\beta})}{n},
+$$
+
+where the numerator of the fraction is known as the *Residual Sum of Squares*(RSS). Because the denominator of is equal to $n$, the MLE of $\sigma^2$ does not correct for the loss of degrees of freedom when estimating the $J+1$ location parameters. Thus, the MLE should instead divide the RSS by $n-(J+1)$ to obtain an unbiased estimator. An extension of standard multiple linear regression is the so called *weighted* multiple linear regression, in which the regression variance is assumed to be equal to$\frac{\sigma^2}{w_i}$, for $(w_i) > 0$. Thus, the variable $(y_i-\mu)\sqrt{w_i}$ is Normally distributed with mean $0$ and variance $\sigma^2$, and the loglikelihood is
+
+$$
+l(\theta \mid y)= - \frac{n}{2}\text{ln}(2\pi) - \frac{n}{2}\text{ln}(\sigma^2) - \frac{\sum_{i=1}^n w_i(y_i - \mu_i)^2}{2\sigma^2}.
+$$
+
+Maximising this function yields MLEs given by the weighted least squares estimates
+
+$$
+\hat{\beta}=\left(X^{T}WX\right)\^{-1}\left(X^{T}WY \right) \;\;\; \text{and} \;\;\; \sigma^{2}=\frac{\left(Y-X\hat{\beta}\right)^{T}W\left(Y-X\hat{\beta}\right)}{n},
+$$
+
+where $W=\text{Diag}(w_1,\ldots,w_n)$.
+
+## Generalised Linear Models
+
+Consider the previous example where we had an outcome variable $y$ and a set of $J$ covariates, each measured on $n$ units. A more general class of models, compare with the Normal model, assumes that, given $x$, the values of $y$ are an independent sample from a regular exponential family distribution 
+
+$$
+f(y \mid x,\beta,\phi)=\text{exp}\left(\frac{\left(y\delta\left(x,\beta \right) - b\left(\delta\left(x,\beta\right)\right)\right)}{\phi} + c\left(y,\phi\right)\right),
+$$
+
+where $\delta()$ and $b()$ are known functions that determine the distribution of $y$, and $c()$ is a known function indexed by a scale parameter $\phi$. The mean of $y$ is assumed to linearly relate to the covariates via
+
+$$
+E\left[y \mid x,\beta,\phi \right]=g^{-1}\left(\beta_0 + \sum_{j=1}^J\beta_jx_{j} \right),
+$$
+
+where $E\left[y \mid x,\beta,\phi \right]=\mu_i$ and $g()$ is a known one to one function which is called *link function* because it "links" the expectation of $y$ to a linear combination of the covariates. The canonical link function
+
+$$
+g_c(\mu_i)=\delta(x_{i},\beta)=\beta_0+\sum_{j=1}^J\beta_jx_{ij},
+$$
+
+which is obtained by setting $g()$ equal to the inverse of the derivative of $b()$ with respect to its argument. Examples of canonical links include
+
+* Normal linear regression: $g_c=\text{identity}$, $b(\delta)=\frac{\delta^2}{2},\phi=\sigma^2$
+
+* Poisson regression: $g_c=\log$, $b(\delta)=\text{exp}(\delta),\phi=1$ 
+
+* Logistic regression: $g_c=\text{logit}$, $b(\delta)=\log(1+\text{exp}(\delta)),\phi=1$
+
+The loglikelihood of $\theta=(\beta,\phi)$ given the observed data $(y,x)$, is 
+
+$$
+l(\theta \mid y,x)=\sum_{i=1}^n \left[\frac{\left(y_i\delta\left(x_i,\beta\right)-b\left(\delta\left(x_i,\beta\right)\right) \right)}{\phi}+c\left(y_i,\phi\right)\right],
+$$
+
+which for non-normal cases does not have explicit maxima and numerical maximisation can be achieved using iterative algorithms.
+
+
+# References
+

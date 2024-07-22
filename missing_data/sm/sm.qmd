@@ -1,0 +1,71 @@
+---
+title: "Selection Models"
+description: "Selection Models (SM) are typically used to handle nonignorable missingness. They factorise the joint likelihood of measurement process and missingness process into a marginal density of the measurement process and the density of the missingness process conditional on the outcomes, which describes the missing data selection based on the complete data."
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: sm.bib
+---
+
+It is possible to summarise the steps involved in drawing inference from incomplete data as (@daniels2008missing):
+
+* Specification of a full data model for the response and missingness indicators $f(y,r)$
+
+* Specification of the prior distribution (within a Bayesian approach)
+
+* Sampling from the posterior distribution of full data parameters, given the observed data $Y_{obs}$ and the missingness indicators $R$ 
+
+Identification of a full data model, particularly the part involving the missing data $Y_{mis}$, requires making unverifiable assumptions about the full data model $f(y,r)$. Under the assumption of the ignorability of the missingness mechanism, the model can be identified using only the information from the observed data. When ignorability is not believed to be a suitable assumption, one can use a more general class of models that allows missing data indicators to depend on missing responses themselves. These models allow to parameterise the conditional dependence between $R$ and $Y_{mis}$, given $Y_{obs}$. Without the benefit of untestable assumptions, this association structure cannot be identified from the observed data and therefore inference depends on some combination of two elements:
+
+1. Unverifiable parametric assumptions
+
+2. Informative prior distributions (under a Bayesian approach)
+
+We show some simple examples about how these *nonignorable* models can be constructed, identified and applied. In this section, we specifically focus on the class of nonignorable models known as *Selection Models*(SM).
+
+## Selection Models
+
+The selection model approach factors the full data distribution as
+
+$$
+f(y,r \mid \omega) = f(y \mid \theta) f(r \mid y,\psi),
+$$
+
+where it is typically assumed that the set of full data parameters $\omega$ can be decomposed as separate parameters for each factor $(\theta,\psi)$. Thus, under the SM approach, the *response model* $f(y \mid \theta)$ and the *missing data mechanism* $f(r \mid y, \psi)$ must be specified by the analyst. SMs can be attractive for several reasons, including 
+
+* The possibility to directly specify the model of interest $f(y \mid \theta)$
+
+* The SM factorisation appeals to Rubin's missing data taxonomy, enabling easy characterisation of the missing data mechanism
+
+* When the missingness pattern is monotone, the missigness mechanism can be formulated as a hazard function, where the hazard of dropout at some time point $j$ can depend on parts of the full data vector $Y$
+
+### Example of SM for bivariate normal data
+
+Consider a sample of $i=1,\ldots,n$ units from a bivariate normal distribution $Y=(Y_1,Y_2)$. Assume also that $Y_1$ is always observed while $Y_2$ may be missing, and let $R=R_2$ be the missingness indicator for the partially-observed response $Y_2$. A SM factors the full data distribution as
+
+$$
+f(y_1,y_2,r \mid \omega) = f(y_1 \mid \theta)f(r \mid y_1,y_2,\psi),
+$$
+
+where we assume $\omega=(\theta,\psi)$. Suppose we specify $f(y_1,y_2 \mid \theta)$ as a bivariate normal density with mean $\mu$ and $2\times2$ covariance matrix $\Sigma$. The distribution of $r$ is assumed to be distributed as a Bernoulli variable with probability $\pi_i$, such that 
+
+$$
+g(\pi_i) = \psi_0 + \psi_1y_{i1} + \psi_2y_{i2},
+$$
+
+where $g()$ denotes a given *link function* which relates the expected value of the response to the linear predictors in the model. When this is taken as the inverse normal cumulative distribution function $\Phi^{-1}()$ the model corresponds to the Heckman probit selection model (@heckman1976common). In general, setting $\psi_2=0$ leads to a *Missing At Random*(MAR) assumption; if, in addition, we have distinctness of the parameters $f(\mu,\Sigma,\psi)=f(\mu,\Sigma)f(\psi)$, we have *ignorability*. We note that, even though the parameter $\psi_2$ characterises the association between $R$ and $Y_2$, the parametric assumptions made in this example will identify $\psi_2$ even in the absence of informative priors, that is the observed data likelihood is a function of $\psi_2$. Moreover, the parameter indexes the joint distribution of observables $Y_{obs}$ and $R$ and in general can be identified from the observed data. This property of parametric SMs make them ill-suited to assessing sensitivity to assumptions about the missingness mechanism.
+
+The model can also be generalised to longitudinal data assuming a multivariate normal distribution for $Y=(Y_1,\ldots,Y_J)$ and replacing $\pi_i$ with a discrete time hazard function for dropout
+
+$$
+h\left(t_j \mid \bar{Y}_{j}\right) = \text{Prob}\left(R_j = 0 \mid R_{j-1} = 1, Y_{1},\ldots,Y_{j} \right).
+$$
+
+Using the logit function to model the discrete time hazard in terms of observed response history $\bar{Y}_{j-1}$ and the current but possibly unobserved $Y_j$ corresponds to the model of @diggle1994informative.
+
+## Conlcusions
+
+To summarise, SMs allows to generalise ignorable models to handle nonignorable missingness by letting $f(r \mid y_{obs},y_{mis})$ to depend on $y_{mis}$ and their structure directly appeals to Rubin's taxonomy. However, identification of the missing data distribution is accomplished through parametric assumptions about the full data response model $f(y \mid \theta)$ and the explicit form of the missingness mechanism. This makes it difficult to disentagle the type of information that is used to identify the model, i.e. parametric modelling assumptions or information from the observed data, therefore complicating the task of assessing the robustness of the results to a range of transparent and plausible assumptions.     
+
+# References
+

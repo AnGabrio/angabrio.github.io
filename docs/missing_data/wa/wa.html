@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2016-04-27">
+<meta name="description" content="Weighting to compensate for nonresponse attaches weights to subjects included in the analysis to restore the representation in the original sample which is distorted because of missing values">
+
+<title>angabrio.github.io - Weighting Adjustments</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#weighting-class-estimator-of-the-mean" id="toc-weighting-class-estimator-of-the-mean" class="nav-link active" data-scroll-target="#weighting-class-estimator-of-the-mean">Weighting Class Estimator of the Mean</a></li>
+  <li><a href="#propensity-weighting" id="toc-propensity-weighting" class="nav-link" data-scroll-target="#propensity-weighting">Propensity Weighting</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Weighting Adjustments</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Missing Data</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Weighting to compensate for nonresponse attaches weights to subjects included in the analysis to restore the representation in the original sample which is distorted because of missing values
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 27, 2016</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The notion of reducing bias due to missingness through <em>reweighting methods</em> has its root in the survey literature and the basic idea is closely related to weighting in randomisation inference for finite population surveys (<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>). In particular, in probability sampling, a unit selected from a target population with probability <span class="math inline">\(\pi_i\)</span> can be thought as “representing” <span class="math inline">\(\pi^{-1}_i\)</span> units in the population and hence should be given weight <span class="math inline">\(\pi^{-1}_i\)</span> when estimating population quantities. For example, in a stratified random sample, a selected unit in stratum <span class="math inline">\(j\)</span> represents <span class="math inline">\(\frac{N_j}{n_j}\)</span> population units, where <span class="math inline">\(n_j\)</span> indicates the units sampled from the <span class="math inline">\(N_j\)</span> population units in stratum <span class="math inline">\(j=1,\ldots,J\)</span>. The population total <span class="math inline">\(T\)</span> can then be estimated by the weighted sum</p>
+<p><span class="math display">\[
+T = \sum_{i=1}^{n}y_i\pi^{-1}_i,
+\]</span></p>
+<p>known as the Horvitz-Thompson estimate (<span class="citation" data-cites="horvitz1952generalization">Horvitz and Thompson (<a href="#ref-horvitz1952generalization" role="doc-biblioref">1952</a>)</span>), while the stratified mean can be written as</p>
+<p><span class="math display">\[
+\bar{y}_{w} = \frac{1}{n}\sum_{i=1}^{n}w_iy_i,
+\]</span></p>
+<p>where <span class="math inline">\(w_i=\frac{n\pi^{-1}_i}{\sum_{k=1}^n\pi^{-1}_k}\)</span> is the sampling weight attached to the <span class="math inline">\(i\)</span>-th unit scaled tosum up to the sample size <span class="math inline">\(n\)</span>. Weighting class estimators extend this approach to handle missing data such that, if the probabilities of response for unit <span class="math inline">\(\phi_i\)</span> were known, then the probability of selection and response is <span class="math inline">\(\pi_i\phi_i\)</span> and we have</p>
+<p><span class="math display">\[
+\bar{y}_{w} = \frac{1}{n_r}\sum_{i=1}^{n_r}w_iy_i,
+\]</span></p>
+<p>where the sum is now over responding units and <span class="math inline">\(w_i=\frac{n_r(\pi_i\phi_i)^{-1}}{\sum_{k=1}^{n_r}(\pi_k\phi_k)^{-1}}\)</span>. In practice, the response probability <span class="math inline">\(\phi_i\)</span> is not known and is typically estimated based on the information available for respondents and nonrespondents (<span class="citation" data-cites="schafer2002missing">Schafer and Graham (<a href="#ref-schafer2002missing" role="doc-biblioref">2002</a>)</span>).</p>
+<section id="weighting-class-estimator-of-the-mean" class="level2">
+<h2 class="anchored" data-anchor-id="weighting-class-estimator-of-the-mean">Weighting Class Estimator of the Mean</h2>
+<p>A simple reweighting approach is to partition the sample into <span class="math inline">\(J\)</span> “weighting classes” according to the variables observed for respondents and nonrespondents. If <span class="math inline">\(n_j\)</span> is the sample size, <span class="math inline">\(n_{rj}\)</span> the number of respondents in class <span class="math inline">\(j\)</span>, with <span class="math inline">\(n_r=\sum_{j=1}^Jr_j\)</span>, then a simple estimator of the response probability for units in class <span class="math inline">\(j\)</span> is given by <span class="math inline">\(\frac{n_{rj}}{n_j}\)</span>. Thus, responding units in class <span class="math inline">\(j\)</span> receive weight <span class="math inline">\(w_i=\frac{n_r(\pi_i\hat{\phi}_i)^{-1}}{\sum_{k=1}^{n_r}(\pi_k\hat{\phi}_k)^{-1}}\)</span>, where <span class="math inline">\(\hat{\phi}_i=\frac{n_{rj}}{n_j}\)</span> for unit <span class="math inline">\(i\)</span> in class <span class="math inline">\(j\)</span>. The weighting class estimate of the mean is then</p>
+<p><span class="math display">\[
+\bar{y}_{w} = \frac{1}{n_r}\sum_{i=1}^{n_r}w_iy_i,
+\]</span></p>
+<p>which is unbiased under the <em>quasirandomisation</em> assumption (<span class="citation" data-cites="oh1983weighting">Oh and Scheuren (<a href="#ref-oh1983weighting" role="doc-biblioref">1983</a>)</span>), which requires respondents in weighting class <span class="math inline">\(j\)</span> to be a random sample of the sampled units, i.e.&nbsp;data are <em>Missing Completely At Random</em> (MCAR) within adjustment class <span class="math inline">\(j\)</span>. Weighting class adjustments are simple because the same weights are obtained regardless of the outcome tp which they are applied, but these are inefficient and generally involves an increase in sampling variance for outcomes that are weakly related to the weighting class variable. Assuming random sampling within weighting classes, a constant variance <span class="math inline">\(\sigma^2\)</span> for an outcome <span class="math inline">\(y\)</span>, and ignoring sampling variation in the weights, the increase in sampling variance of a sample mean is</p>
+<p><span class="math display">\[
+\text{Var}\left(\frac{1}{n_{r}}\sum_{i=1}^{n_{r}}w_iy_i \right) = \frac{\sigma^2}{n_{r}^2}\left(\sum_{i=1}^{n_{r}}w_{i}^{2} \right) = \frac{\sigma^2}{n_{r}}(1+\text{cv}^2(w_i)),
+\]</span></p>
+<p>where <span class="math inline">\(\text{cv}(w_i)\)</span> is the coefficient of variation of the weights (scaled to average one), which is a rough measure of the proportional increase in sampling variance due to weighting (<span class="citation" data-cites="kish1992weighting">Kish (<a href="#ref-kish1992weighting" role="doc-biblioref">1992</a>)</span>). When the weighting class variable is predictive of <span class="math inline">\(y\)</span>, weighting methods can lead to a reduction in sampling variance. <span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span> summarise the effect of weighting on the bias and sampling variance of an estimated mean, according to whether the associations between the adjustment cells and the outcome <span class="math inline">\(y\)</span> and missing indicator <span class="math inline">\(m\)</span> are high or low.</p>
+<table class="table caption-top" data-quarto-postprocess="true">
+<caption>Effect of weighting adjustments on bias and sampling variance of a mean.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Low (y)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">High (y)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Low (m)</td>
+<td style="text-align: left;">bias: /, var: /</td>
+<td style="text-align: left;">bias: /, var: -</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">High (m)</td>
+<td style="text-align: left;">bias: /, var: +</td>
+<td style="text-align: left;">bias: -, var: -</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Thus, weighting is only effective when the outcome is associated with the adjustment cell variable because otherwise the sampling variance is increased with no bias reduction.</p>
+</section>
+<section id="propensity-weighting" class="level2">
+<h2 class="anchored" data-anchor-id="propensity-weighting">Propensity Weighting</h2>
+<p>In some settings, weighting class estimates cannot be feasibly derived by all recorded variables X because the number of classes become too large and some may include cells with nonrespondents but no respondents for which the nonresponse weight is infinite. The theory of propensity scores (<span class="citation" data-cites="rosenbaum1983central">Rosenbaum and Rubin (<a href="#ref-rosenbaum1983central" role="doc-biblioref">1983</a>)</span>) provides a prescription for choosing the coarsest reduction of the variables to a weighting class variable <span class="math inline">\(c\)</span>. Suppose the data are <em>Missing At Random</em> (MAR) such that</p>
+<p><span class="math display">\[
+p(m\mid X,y,\phi)=p(m\mid X,\phi),
+\]</span></p>
+<p>where <span class="math inline">\(\phi\)</span> are unknown parameters and define the nonresponse propensity for unit <span class="math inline">\(i\)</span> as</p>
+<p><span class="math display">\[
+\rho(x_i,\phi)=p(m_i=1 \mid \phi),
+\]</span></p>
+<p>assuming that this is strictly positive for all values of <span class="math inline">\(x_i\)</span>. Then, it can be shown that</p>
+<p><span class="math display">\[
+p(m\mid \rho(X,\phi),y,\phi)=p(m\mid \rho(X,\phi),\phi),
+\]</span></p>
+<p>so that respondents are a random subsample within strata defined by the propensity score <span class="math inline">\(\rho(X,\phi)\)</span>. In practice the parameter <span class="math inline">\(\phi\)</span> is unknown and must be estimated from sample data, for example via logistic, probit or robit regressions of the missingness indicator <span class="math inline">\(m\)</span> on <span class="math inline">\(X\)</span> based on respondent and nonrespondent data (<span class="citation" data-cites="liu2004robit">Liu (<a href="#ref-liu2004robit" role="doc-biblioref">2004</a>)</span>). A variant of this procedure is to weight respondents <span class="math inline">\(i\)</span> directly by the inverse of the estimated propensity score <span class="math inline">\(\rho(X,\hat{\phi})^{-1}\)</span> (<span class="citation" data-cites="cassel1983some">Cassel, Sarndal, and Wretman (<a href="#ref-cassel1983some" role="doc-biblioref">1983</a>)</span>), which allows to remove bias but may cause two problems: 1) estimates may be associated with very high sampling variances due to nonrespondents with low response propensity estimates receiving large nonresponse weights; 2) more reliance on correct model specification of the propensity score regression than response propensity stratification.</p>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-cassel1983some" class="csl-entry" role="listitem">
+Cassel, Claes M, Carl-Erik Sarndal, and Jan H Wretman. 1983. <span>“Some Uses of Statistical Models in Connection with the Nonresponse Problem.”</span> <em>Incomplete Data in Sample Surveys</em> 3: 143–60.
+</div>
+<div id="ref-horvitz1952generalization" class="csl-entry" role="listitem">
+Horvitz, Daniel G, and Donovan J Thompson. 1952. <span>“A Generalization of Sampling Without Replacement from a Finite Universe.”</span> <em>Journal of the American Statistical Association</em> 47 (260): 663–85.
+</div>
+<div id="ref-kish1992weighting" class="csl-entry" role="listitem">
+Kish, Leslie. 1992. <span>“Weighting for Unequal Pi.”</span> <em>Journal of Official Statistics</em> 8 (2): 183.
+</div>
+<div id="ref-little2019statistical" class="csl-entry" role="listitem">
+Little, Roderick JA, and Donald B Rubin. 2019. <em>Statistical Analysis with Missing Data</em>. Vol. 793. John Wiley &amp; Sons.
+</div>
+<div id="ref-liu2004robit" class="csl-entry" role="listitem">
+Liu, Chuanhai. 2004. <span>“Robit Regression: A Simple Robust Alternative to Logistic and Probit Regression.”</span> <em>Applied Bayesian Modeling and Casual Inference from Incomplete-Data Perspectives</em>, 227–38.
+</div>
+<div id="ref-oh1983weighting" class="csl-entry" role="listitem">
+Oh, H, and F Scheuren. 1983. <span>“Weighting Adjustment for Unit Nonresponse. Chap. 13 in Vol. 2, Part 4 of Incomplete Data in Sample Surveys, Edited by William g. Madow, Harold Nisselson, and Ingram Olkin.”</span> New York: Academic Press.
+</div>
+<div id="ref-rosenbaum1983central" class="csl-entry" role="listitem">
+Rosenbaum, Paul R, and Donald B Rubin. 1983. <span>“The Central Role of the Propensity Score in Observational Studies for Causal Effects.”</span> <em>Biometrika</em> 70 (1): 41–55.
+</div>
+<div id="ref-schafer2002missing" class="csl-entry" role="listitem">
+Schafer, Joseph L, and John W Graham. 2002. <span>“Missing Data: Our View of the State of the Art.”</span> <em>Psychological Methods</em> 7 (2): 147.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

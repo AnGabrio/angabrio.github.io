@@ -1,0 +1,47 @@
+---
+title: "Available Case Analysis"
+description: "Available-case analysis also arises when a researcher simply excludes a variable or set of variables from the analysis because of their missing-data rates"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: aca.bib
+---
+
+Complete case analysis (CCA) can be particularly inefficient for data sets with a large number of variables which are partially observed. An alternative approach that can be used to conduct univariate analyses in known as *Available Case Analysis* (ACA), which uses all the available cases, separately for each variable under examination, to estimate the quantities of interest. 
+
+The main drawback of ACA is that the sample used to perform the analysis varies from variable to variable according to the patterns of missing data, which generates problems of comparability across variables if the missingness mechanism is not *missing completely at random* (MCAR), i.e. the missing data probabilities depend on the variables under study. While estimates of means and variances can be easily computed, measures of covariation need to be adjusted. In particular, for estimating sample covariances, this approach is known as *pairwise deletion* or *pairwise inclusion*
+
+## Pairwise measures of covariation
+
+One possible approach to estimate pairwise measures of covariation for $y_j$ and $y_k$ is to use only those units $i=1,\ldots,n_{ac}$ for which both variables are observed (@little2019statistical). For example, one can compute pairwise sample covariances as:
+
+$$
+s^{ac}_{jk} = \frac{\sum_{i \in I_{ac}}(y_{ij}-\bar{y}_{j}^{ac})(y_{ik}-\bar{y}_{k}^{ac})}{(n_{ac}-1)},
+$$
+
+where $I_{ac}$ is the set of $n_{ac}$ with both $y_j$ and $y_k$ observed, while the sample means $\bar{y}^{ac}_{j}$ and $\bar{y}^{ac}_{k}$ are calculated over this set of units. We can also estimate the sample correlation 
+
+$$
+r^{\star}_{jk} = \frac{s^{ac}_{jk}}{\sqrt{s^2_{j}s^{2}_{k}}},
+$$
+
+where $s^2_{j}$ and $s^2_{k}$ are the sample variances computed over the sets of observed units $I_{j}$ and $I_{k}$, respectively. A problem of this type of correlation estimate is that it can lie outside the range $(-1,1)$, which is typically addressed by computing *pairwise correlations* (@wilks1932moments), where variances are estimated from the set of units with both variables observed $I_{jk}$, i.e.   
+
+$$
+r^{ac}_{jk} = \frac{s^{ac}_{jk}}{\sqrt{s^{2,ac}_{j}s^{2,ac}_{k}}}.
+$$
+
+In addition, we could also replace the sample means $\bar{y}^{ac}_{j}$ and $\bar{y}^{ac}_{k}$, evaluated on the common set of units $I_{jk}$, with $\bar{y}_{j}$ and $\bar{y}_{k}$, which are evaluated on the sets of units $I_{j}$ and $I_{k}$, respectively. This leads to the following estimates for the sample covariances (@matthai1951estimation):
+
+$$
+s^{\star}_{jk} = \frac{\sum_{i \in I_{ac}}(y_{ij}-\bar{y}_{j})(y_{ik}-\bar{y}_{k})}{(n_{ac}-1)},
+$$
+
+Pairwise AC estimates aim at recovering information from partially-observed units that are lost by CCA. However, when considered together, the estimates suffer from inconsistencies that undermine the validity of these methods. For example, pairwise correlation matrices may be not positive definite. Because parameters are estimated from different sets of units, different approaches can be used to obtain estimate of the measures of uncertainty (@schafer2002missing).
+
+## Conclusions
+
+AC estimates allow to make use of all the available evidence in the data and may be more efficient that CCA when the missingness mechanism is MCAR and correlations are modest (@kim1977treatment). However, when correlations are more substantial, ACA may become even less efficient than CCA (@haitovsky1968missing, @azen1981conclusions).
+
+
+# References

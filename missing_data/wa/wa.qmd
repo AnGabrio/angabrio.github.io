@@ -1,0 +1,94 @@
+---
+title: "Weighting Adjustments"
+description: "Weighting to compensate for nonresponse attaches weights to subjects included in the analysis to restore the representation in the original sample which is distorted because of missing values"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: weightingadj.bib
+---
+
+The notion of reducing bias due to missingness through *reweighting methods* has its root in the survey literature and the basic idea is closely related to weighting in randomisation inference for finite population surveys (@little2019statistical). In particular, in probability sampling, a unit selected from a target population with probability $\pi_i$ can be thought as "representing" $\pi^{-1}_i$ units in the population and hence should be given weight $\pi^{-1}_i$ when estimating population quantities. For example, in a stratified random sample, a selected unit in stratum $j$ represents $\frac{N_j}{n_j}$ population units, where $n_j$ indicates the units sampled from the $N_j$ population units in stratum $j=1,\ldots,J$. The population total $T$ can then be estimated by the weighted sum
+
+
+$$
+T = \sum_{i=1}^{n}y_i\pi^{-1}_i,
+$$
+
+known as the Horvitz-Thompson estimate (@horvitz1952generalization), while the stratified mean can be written as
+
+$$
+\bar{y}_{w} = \frac{1}{n}\sum_{i=1}^{n}w_iy_i,
+$$
+
+where $w_i=\frac{n\pi^{-1}_i}{\sum_{k=1}^n\pi^{-1}_k}$ is the sampling weight attached to the $i$-th unit scaled tosum up to the sample size $n$. Weighting class estimators extend this approach to handle missing data such that, if the probabilities of response for unit $\phi_i$ were known, then the probability of selection and response is $\pi_i\phi_i$ and we have
+
+$$
+\bar{y}_{w} = \frac{1}{n_r}\sum_{i=1}^{n_r}w_iy_i,
+$$
+
+where the sum is now over responding units and $w_i=\frac{n_r(\pi_i\phi_i)^{-1}}{\sum_{k=1}^{n_r}(\pi_k\phi_k)^{-1}}$. In practice, the response probability $\phi_i$ is not known and is typically estimated based on the information available for respondents and nonrespondents (@schafer2002missing). 
+
+## Weighting Class Estimator of the Mean
+
+A simple reweighting approach is to partition the sample into $J$ "weighting classes" according to the variables observed for respondents and nonrespondents. If $n_j$ is the sample size, $n_{rj}$ the number of respondents in class $j$, with $n_r=\sum_{j=1}^Jr_j$, then a simple estimator of the response probability for units in class $j$ is given by $\frac{n_{rj}}{n_j}$. Thus, responding units in class $j$ receive weight $w_i=\frac{n_r(\pi_i\hat{\phi}_i)^{-1}}{\sum_{k=1}^{n_r}(\pi_k\hat{\phi}_k)^{-1}}$, where $\hat{\phi}_i=\frac{n_{rj}}{n_j}$ for unit $i$ in class $j$. The weighting class estimate of the mean is then
+
+$$
+\bar{y}_{w} = \frac{1}{n_r}\sum_{i=1}^{n_r}w_iy_i,
+$$
+
+which is unbiased under the *quasirandomisation* assumption (@oh1983weighting), which requires respondents in weighting class $j$ to be a random sample of the sampled units, i.e. data are *Missing Completely At Random* (MCAR) within adjustment class $j$. Weighting class adjustments are simple because the same weights are obtained regardless of the outcome tp which they are applied, but these are inefficient and generally involves an increase in sampling variance for outcomes that are weakly related to the weighting class variable. Assuming random sampling within weighting classes, a constant variance $\sigma^2$ for an outcome $y$, and ignoring sampling variation in the weights, the increase in sampling variance of a sample mean is
+
+$$
+\text{Var}\left(\frac{1}{n_{r}}\sum_{i=1}^{n_{r}}w_iy_i \right) = \frac{\sigma^2}{n_{r}^2}\left(\sum_{i=1}^{n_{r}}w_{i}^{2} \right) = \frac{\sigma^2}{n_{r}}(1+\text{cv}^2(w_i)),
+$$
+
+where $\text{cv}(w_i)$ is the coefficient of variation of the weights (scaled to average one), which is a rough measure of the proportional increase in sampling variance due to weighting (@kish1992weighting). When the weighting class variable is predictive of $y$, weighting methods can lead to a reduction in sampling variance. @little2019statistical summarise the effect of weighting on the bias and sampling variance of an estimated mean, according to whether the associations between the adjustment cells and the outcome $y$ and missing indicator $m$ are high or low. 
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+#| results: asis
+
+library(knitr)
+library(kableExtra)
+table<-matrix(NA,2,2)
+table[1,1]<-"bias: /, var: /"
+table[1,2]<-"bias: /, var: -"
+table[2,1]<-"bias: /, var: +"
+table[2,2]<-"bias: -, var: -"
+rownames(table)<-c("Low (m)","High (m)")
+colnames(table)<-c("Low (y)","High (y)")
+latkab<-kable(table, caption = "Effect of weighting adjustments on bias and sampling variance of a mean.")
+kable_styling(latkab, position = "center")
+```
+
+Thus, weighting is only effective when the outcome is associated with the adjustment cell variable because otherwise the sampling variance is increased with no bias reduction.
+
+## Propensity Weighting
+
+In some settings, weighting class estimates cannot be feasibly derived by all recorded variables X because the number of classes become too large and some may include cells with nonrespondents but no respondents for which the nonresponse weight is infinite. The theory of propensity scores (@rosenbaum1983central) provides a prescription for choosing the coarsest reduction of the variables to a weighting class variable $c$. Suppose the data are *Missing At Random* (MAR) such that
+
+$$
+p(m\mid X,y,\phi)=p(m\mid X,\phi),
+$$
+
+where $\phi$ are unknown parameters and define the nonresponse propensity for unit $i$ as
+
+$$
+\rho(x_i,\phi)=p(m_i=1 \mid \phi),
+$$
+
+assuming that this is strictly positive for all values of $x_i$. Then, it can be shown that
+
+$$
+p(m\mid \rho(X,\phi),y,\phi)=p(m\mid \rho(X,\phi),\phi),
+$$
+
+so that respondents are a random subsample within strata defined by the propensity score $\rho(X,\phi)$. In practice the parameter $\phi$ is unknown and must be estimated from sample data, for example via logistic, probit or robit regressions of the missingness indicator $m$ on $X$ based on respondent and nonrespondent data (@liu2004robit). A variant of this procedure is to weight respondents $i$ directly by the inverse of the estimated propensity score $\rho(X,\hat{\phi})^{-1}$ (@cassel1983some), which allows to remove bias but may cause two problems: 1) estimates may be associated with very high sampling variances due to nonrespondents with low response propensity estimates receiving large nonresponse weights; 2) more reliance on correct model specification of the propensity score regression than response propensity stratification.
+
+
+# References

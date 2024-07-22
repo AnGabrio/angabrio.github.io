@@ -1,0 +1,70 @@
+---
+title: "Implicit Single Imputation"
+description: "Implicit Single imputation denotes a method not based on an explicit model which replaces a missing datum with a single value. In this method the sample size is retrieved. However, the imputed values are assumed to be the real values that would have been observed when the data would have been complete"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: lvcf.bib
+---
+
+All case deletion methods, such as *Complete Case Analysis*(CCA) or *Available Case Analysis*(ACA) make no use of units with partially observed data, when estimating the marginal distribution of the variables under study or the covariation between variables. Clearly, this is inefficient and a tempting alternative would be to *impute* or "fill in" the unobserved data with some plausible values. When a single value is used to replace each missing data, we talk about *Single Imputation*(SI) methods and, according to the precedure used to generate these imputations, different SI methods can be used. In general, the idea of imputing the missing values is really appealing as it allows to recover the full sample on which standard complete data methods can be applied to derive the estimates of interest. 
+
+However, it is important to be aware of the potential problems of imputing missing data without a clear understanding about the process underlying the values we want to impute, which is the key factor to determine whether the selected approach would be plausible in the context considered. Indeed, imputation should be conceptualised as draws from a predictive distribution of the missing values and require methods for creating a predictive distribution for the imputation based on the observed data. According to @little2019statistical, these predictive distributions can be created using
+
+1. *Explicit modelling*, when the distribution is based on formal statistical models which make the underlying assumptions explicit.
+
+2. *Implicit modelling*, when the distribution is based on an algorithm which implicitly relies on some underlying model assumptions.
+
+
+In this part, we focus on some of the most popular *Implicit Single Imputation* methods. These include: *Hot Deck Imputation*(SI-HD), where missing values are imputed using observed values from similar responding units in the sample; *Substitution*(SI-S), where nonresponding units are replaced with alternative units not yet selected into the sample; *Cold Deck Imputation*(SI-CD), where missing values are replaced with a constant value from an external source; *Composite Methods*, which combine procedures from the previous approaches. We will specifically focus on SI-HD methods, which are the most popular among these.
+
+## Hot Deck Imputation
+
+SI-HD procedures refer to the deck of match [Hollerith cards](https://en.wikipedia.org/wiki/Punched_card#Hollerith's_early_punched_card_formats) for the donors available for a nonrespondent. Suppose that a sample of $n$ out of $N$ units is selected and that $n_{cc}$ out of $n$ are recorded. Given an equal probability sampling scheme, the mean of $y$ can be estimated from the filled-in data as the mean of the responding and the imputed units
+
+$$
+\bar{y}_{HD}=\frac{(n_{cc}\bar{y}_{cc}+(n-n_{cc})\bar{y}^{\star})}{n},
+$$
+
+where $\bar{y}_{cc}$ is the mean of the responding units, and $\bar{y}^\star=\sum_{i=1}^{n_{cc}}\frac{H_iy_i}{n-n_{cc}}$. $H_i$ is the number of times $y_i$ is used as substitute for a missing value of $y$, with $\sum_{i=1}^{n_{cc}}H_i=n-n_{cc}$ being the number of missing units. The proprties of $bar{y}_{HD}$ depend on the procedure used to generate the numbers $H_i$ and in general the mean and sampling variance of this estimator can be written as
+
+$$
+E[\bar{y}_{HD}]=E[E[\bar{y}_{HD}\mid y_{obs}]] \;\;\; \text{and} \;\;\; Var(\bar{y}_{HD})=Var(E[\bar{y}_{HD} \mid y_{obs}]) + E[Var(\bar{y}_{HD} \mid y_{obs})],
+$$
+
+where the inner expectations and variances are taken over the distribution of $H_i$ given the observed data $y_{obs}$, and the outer expectations and variances are taken over the model distribution of $y$. The term $E[Var(\bar{y}_{HD} \mid y_{obs})]$ represents the additional sampling variance from the stochastic imputation procedure. Examples of these procedures include *predictive mean matching* or PMM(@little2019statistical) and *last value carried forward* or LVCF(@little2019statistical).
+
+### Predictive Mean Matching
+
+A general approach to hot-deck imputation is to define a metric $d(i,j)$ measuring the distance between units based on observed variables $x_{i1},\ldots,x_{iJ}$ and then choose the imputed values that come from responding units close to the unit with the missing value, i.e. we choose the imputed value for $y_i$ from a *donor pool* of units $j$ that are such that $y_j,x_1,\ldots,x_J$ are observed and $d(i,j)$ is less than some value $d_0$. Varying the value for $d_0$ can control the number of available donors $j$. When the choice of the metric has the form
+
+$$
+d(i,j)=(\hat{y}(x_i)-\hat{y}(x_j))^2,
+$$
+
+where $\hat{y}(x_i)$ is the predicted value of $y$ from the regression of $y$ on $x$ from the complete units, then the procedure is known as PMM. A powerful aspect of this metric is that it weights predictors according to their ability to predict the missing variable, which allows to have some protection against misspecification of the regression of $y$ on $x$, even though better approaches are available when good matches to donor units cannot be found or the sample size is small. 
+
+### Last Value Carried Forward
+
+Longitudinal data are often subject to attrition when units leave the study prematurely. Let $y_i=(y_{i1},\ldots,y_{iJ})$ be a $(J\times1)$ vector of partially-observed outcomes for subject $i$, and denote with $y_{i,obs}$ and $y_{i,mis}$ the observed and missing components of $y_i$, i.e. $y=(y_{i,obs},y_{i,mis})$. Define the indicator variable $m_i$ taking value 0 for complete units and $j$ if subject $i$ drops out between $j-1$ and $j$ time points. LVCF, also called *last observation carried forward*(@pocock2013clinical), imputes all missing values for individual $i$ (for whom $m_i=j$) using the last recorded value for that unit, that is
+
+$$
+\hat{y}_{it}=y_{i,j-1},
+$$
+
+where $t=j,\ldots,J$. Although simple, this approach makes the often unrealistic assumption that the value of the outcome remains unchanged after dropout.
+
+## Conclusions
+
+According to @little2019statistical, imputation should generally be
+
+1. **Conditional** on observed variables, to reduce bias, improve precision and preserve association between variables.
+
+2. **Multivariate**, to preserve association between missing variables.
+
+3. **Draws** from the predictive distributions rather than means, to provide valid estimates of a wide range of estimands.
+
+Nevertheless, a main problem of SI methods is that inferences based on the imputed data do not account for imputation uncertainty and standard errors are therefore systematically underestimated, p-values of tests are too significant and confidence intervals are too narrow.
+
+
+# References

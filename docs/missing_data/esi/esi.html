@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2016-04-27">
+<meta name="description" content="Explicit Single imputation denotes a method based on an explicit model which replaces a missing datum with a single value. In this method the sample size is retrieved. However, the imputed values are assumed to be the real values that would have been observed when the data would have been complete">
+
+<title>angabrio.github.io - Explicit Single Imputation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#mean-imputation" id="toc-mean-imputation" class="nav-link active" data-scroll-target="#mean-imputation">Mean Imputation</a></li>
+  <li><a href="#regression-imputation" id="toc-regression-imputation" class="nav-link" data-scroll-target="#regression-imputation">Regression Imputation</a></li>
+  <li><a href="#stochastic-regression-imputation" id="toc-stochastic-regression-imputation" class="nav-link" data-scroll-target="#stochastic-regression-imputation">Stochastic Regression Imputation</a>
+  <ul class="collapse">
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Explicit Single Imputation</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Missing Data</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Explicit Single imputation denotes a method based on an explicit model which replaces a missing datum with a single value. In this method the sample size is retrieved. However, the imputed values are assumed to be the real values that would have been observed when the data would have been complete
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 27, 2016</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>All case deletion methods, such as <em>Complete Case Analysis</em>(CCA) or <em>Available Case Analysis</em>(ACA) make no use of units with partially observed data, when estimating the marginal distribution of the variables under study or the covariation between variables. Clearly, this is inefficient and a tempting alternative would be to <em>impute</em> or “fill in” the unobserved data with some plausible values. When a single value is used to replace each missing data, we talk about <em>Single Imputation</em>(SI) methods and, according to the precedure used to generate these imputations, different SI methods can be used. In general, the idea of imputing the missing values is really appealing as it allows to recover the full sample on which standard complete data methods can be applied to derive the estimates of interest.</p>
+<p>However, it is important to be aware of the potential problems of imputing missing data without a clear understanding about the process underlying the values we want to impute, which is the key factor to determine whether the selected approach would be plausible in the context considered. Indeed, imputation should be conceptualised as draws from a predictive distribution of the missing values and require methods for creating a predictive distribution for the imputation based on the observed data. According to <span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>, these predictive distributions can be created using</p>
+<ol type="1">
+<li><p><em>Explicit modelling</em>, when the distribution is based on formal statistical models which make the underlying assumptions explicit.</p></li>
+<li><p><em>Implicit modelling</em>, when the distribution is based on an algorithm which implicitly relies on some underlying model assumptions.</p></li>
+</ol>
+<p>In this part, we focus on some of the most popular <em>Explicit Single Imputation</em> methods. These include: <em>Mean Imputation</em>(SI-M), where means from the observed data are used as imputed values; <em>Regression Imputation</em>(SI-R), where missing values are replaced with values predicited from a regression of the missing variable on some other observed variables; and <em>Stochastic Regression Imputation</em>(SI-SR), where unobserved data are substituted with the predicted values from a regression imputation plus a randomly selected residual drawn to reflect uncertainty in the predicted values.</p>
+<section id="mean-imputation" class="level2">
+<h2 class="anchored" data-anchor-id="mean-imputation">Mean Imputation</h2>
+<p>The simplest type of SI-M consists in replacing the missing values in a variable with the mean of the observed units from the same variable, a method known as <em>Unconditional Mean Imputation</em> (<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>,<span class="citation" data-cites="schafer2002missing">Schafer and Graham (<a href="#ref-schafer2002missing" role="doc-biblioref">2002</a>)</span>). Let <span class="math inline">\(y_{ij}\)</span> be the value of variable <span class="math inline">\(j\)</span> for unit <span class="math inline">\(i\)</span>, such that the unconditional mean based on the observed values of <span class="math inline">\(y_j\)</span> is given by <span class="math inline">\(\bar{y}_j\)</span>. The sample mean of the observed and imputed values is then <span class="math inline">\(\bar{y}^{m}_j=\bar{y}^{ac}_j\)</span>, i.e.&nbsp;the estimate from ACA, while the sample variance is given by</p>
+<p><span class="math display">\[
+s^{m}_{j}=s^{ac}_{j}\frac{(n^{ac}-1)}{(n-1)},
+\]</span></p>
+<p>where <span class="math inline">\(s^{ac}_j\)</span> is the sample variance estimated from the <span class="math inline">\(n^{ac}\)</span> available units. Under a <em>Missing Completely At Random</em>(MCAR) assumption, <span class="math inline">\(s^{ac}_j\)</span> is a consistent estimator of the tru variance so that the sample variance from the imputed data <span class="math inline">\(s^m_j\)</span> systematically underestimates the true variance by a factor of <span class="math inline">\(\frac{(n^{ac}-1)}{(n-1)}\)</span>, which clearly comes from the fact that missing data are imputed using values at the centre of the distribution. The imputation distorts the empirical distribution of the observed values as well as any quantities that are not linear in the data (e.g.&nbsp;variances, percentiles, measures of shape). The sampel covariance of <span class="math inline">\(y_j\)</span> and <span class="math inline">\(y_k\)</span> from the imputed data is</p>
+<p><span class="math display">\[
+s^{m}_{jk}=s^{ac}_{jk}\frac{(n^{as}_{jk}-1)}{(n-1)},
+\]</span></p>
+<p>where <span class="math inline">\(n^{ac}_{jk}\)</span> is the number of units with both variables observed and <span class="math inline">\(s^{ac}_{jk}\)</span> is the corresponding covariance estimate from ACA. Under MCAR <span class="math inline">\(s^{ac}_{jk}\)</span> is a consistent estimator of the true covariance, so that <span class="math inline">\(s^{m}_{jk}\)</span> underestimates the magnitude of the covariance by a factor of <span class="math inline">\(\frac{(n^{ac}_{jk}-1)}{(n-1)}\)</span>. Obvious adjustments for the variance (<span class="math inline">\(\frac{(n-1)}{(n^{ac}_j-1)}\)</span>) and the covariance (<span class="math inline">\(\frac{(n-1)}{(n^{ac}_{jk}-1)}\)</span>) yield ACA estimates, which could lead to covariance matrices that are not positive definite.</p>
+</section>
+<section id="regression-imputation" class="level2">
+<h2 class="anchored" data-anchor-id="regression-imputation">Regression Imputation</h2>
+<p>An improvement over SI-M is to impute each missing data using the conditional means given the observed values, a method known SI-R or <em>Conditional Mean Imputation</em>. To be precise, it would also be possible to impute conditional means without using a regression approach, for example by grouping individuals into adjustment classes (analogous to weighting methods) based on the observed data and then impute the missing values using the observed means in each adjustment class (<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>). However, for the sake of simplicity, here we will assume that SI-R and conditional mean imputation are the same.</p>
+<p>To generate imputations under SI-R, consider a set of <span class="math inline">\(J-1\)</span> fully observed response variables <span class="math inline">\(y_1,\ldots,y_{J-1}\)</span> and a partially observed response variable <span class="math inline">\(y_J\)</span> which has the first <span class="math inline">\(n_{cc}\)</span> units observed and the remaiing <span class="math inline">\(n-n_{cc}\)</span> units missing. SI-R computes the regression of <span class="math inline">\(y_J\)</span> on <span class="math inline">\(y_1,\ldots,y_{J-1}\)</span> based on the <span class="math inline">\(n_{cc}\)</span> complete units and then fills in the missing values as predictions from the regression. For example, for unit <span class="math inline">\(i\)</span>, the missing value <span class="math inline">\(y_{iJ}\)</span> is imputed using</p>
+<p><span class="math display">\[
+\hat{y}_{iJ}=\hat{\beta}_{J0}+\sum_{j=1}^{J-1}\hat{\beta}_{Jj}y_{ij},
+\]</span></p>
+<p>where <span class="math inline">\(\hat{\beta}_{J0}\)</span> is the intercept and <span class="math inline">\(\hat{\beta}_{Jj}\)</span> is the <span class="math inline">\(j\)</span> coefficient of of the regression of <span class="math inline">\(y_J\)</span> on <span class="math inline">\(y_1,\ldots,y_{J-1}\)</span> based on the <span class="math inline">\(n_{cc}\)</span> units.</p>
+<p>An extension of regression imputation to a general pattern of missing data is known as <em>Buck’s method</em> (<span class="citation" data-cites="buck1960method">Buck (<a href="#ref-buck1960method" role="doc-biblioref">1960</a>)</span>). This approach first estimates the population mean <span class="math inline">\(\mu\)</span> and covariance matrix <span class="math inline">\(\Sigma\)</span> from the sample mean and covariance matrix of the complete units and then uses these estimates to calculate the OLS regressions of the missing variables on the observed variables for each missing data pattern. Predictions of the missing data for each observation are obtained by replacing the values of the present variables in the regressions. The average of the observed and imputed values from this method are consistent estimates of the means and MCAR and mild assumptions about the moments of the distribution (<span class="citation" data-cites="buck1960method">Buck (<a href="#ref-buck1960method" role="doc-biblioref">1960</a>)</span>). They are also consistent when the missingness mechanism depends on observed variables, i.e.&nbsp;under a <em>Missing At Random</em>(MAR) assumption, although addtional assumptions are required in this case (e.g.&nbsp;using linear regressions it assumes that the “true” regression of the missing varables on the observed variables is linear).</p>
+<p>The filled in data from Buck’s method typically yield reasonable estimates of means, while the sample variances and covariances are biased, although the bias is less than the one associated with unconditional mean imputation. Specifically, the sample variance <span class="math inline">\(\sigma^{2,SI-R}_j\)</span> from the imputed data underestimates the true variance <span class="math inline">\(\sigma^2_j\)</span> by a factor of <span class="math inline">\(\frac{1}{n-1}\sum_{i=1}^n\sigma^{2}_{ji}\)</span>, where <span class="math inline">\(\sigma^{2}_{ji}\)</span> is the residual variance from regressing <span class="math inline">\(y_j\)</span> on the variables observed in unit <span class="math inline">\(i\)</span> if <span class="math inline">\(y_{ij}\)</span> is missing and zero if <span class="math inline">\(y_{ij}\)</span> is observed. The sample covariance of <span class="math inline">\(y_j\)</span> and <span class="math inline">\(y_k\)</span> has a bias of <span class="math inline">\(\frac{1}{n-1}\sum_{i=1}^n\sigma_{jki}\)</span>, where <span class="math inline">\(\sigma_{jki}\)</span> is the residual covariance from the multivariate regression of <span class="math inline">\((y_{ij},y_{ik})\)</span> on the variables observed in unit <span class="math inline">\(i\)</span> if both variables are missing and zero otherwise. A consistent estimator of <span class="math inline">\(\Sigma\)</span> can be constructed under MCAR by replacing consistent estimates of <span class="math inline">\(\sigma^{2}_{ji}\)</span> and <span class="math inline">\(\sigma_{jki}\)</span> in the expressions for bias and then adding the resulting quantities to the sample covariance matrix of the filled-in data.</p>
+</section>
+<section id="stochastic-regression-imputation" class="level2">
+<h2 class="anchored" data-anchor-id="stochastic-regression-imputation">Stochastic Regression Imputation</h2>
+<p>Any type of mean or regression imputation will lead to bias when the interest is in the tails of the distributions because “best prediction” imputation systematically underestimates variability and standard errors calculated from the imputed data are typically too small. These considerations suggest an alternative imputation strategy, where imputed values are drawn from a predictive distribution of a plausible set of values rather than from the centre of the distribution. This is the idea behind SI-SR, which imputes a conditional draw</p>
+<p><span class="math display">\[
+\hat{y}_{iJ}=\hat{\beta}_{J0}+\sum_{j=1}^{J-1}\hat{\beta}_{Jj}y_{ij}+z_{iJ},
+\]</span></p>
+<p>where <span class="math inline">\(z_{iJ}\)</span> is a random normal deviate with mean 0 and variance <span class="math inline">\(\hat{\sigma}^2_J\)</span>, the residual variance from the regression of <span class="math inline">\(y_J\)</span> on <span class="math inline">\(y_1,\ldots,y_{J-1}\)</span> based on the complete units. The addition of the random deviate makes the imputation a random draw from the predictive distribution of the missing values, rather than the mean, which is likely to ameliorate the distortion of the predictive distributions (<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>).</p>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<p>Consider a bivariate normal monotone missing data with <span class="math inline">\(y_1\)</span> fully observed and <span class="math inline">\(y_2\)</span> missing for a fraction <span class="math inline">\(\lambda=\frac{(n-n_{cc})}{n}\)</span> and a MCAR mechanism. The following table shows the large sample bias of standard OLS estimates obtained from the filled-in data about the mean, the variance of <span class="math inline">\(y_2\)</span>, the regression coefficient of <span class="math inline">\(y_2\)</span> on <span class="math inline">\(y_1\)</span>, and the regression coefficient of <span class="math inline">\(y_1\)</span> on <span class="math inline">\(y_2\)</span>, using four different single imputation methods: uncondtional mean (UM), unconditional draw (UD), conditional mean (CM), and conditional draw (CD).</p>
+<table class="table caption-top" data-quarto-postprocess="true">
+<caption>Bivariate normal monotone MCAR data; large sample bias of four imputation methods.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">mu_2</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">sigma_2</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">beta_21</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">beta_12</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">UM</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">-lambda * sigma_2</td>
+<td style="text-align: left;">-lambda * beta_21</td>
+<td style="text-align: left;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UD</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">-lambda * beta_21</td>
+<td style="text-align: left;">-lambda * beta_21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CM</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">-lambda * (1-rho^2) * sigma_2</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">((lambda * (1-rho^2)) / (1-lambda * (1-rho^2)) ) * beta_12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CD</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">0</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Under MCAR, all four methods yield consistent estimates of <span class="math inline">\(\mu_2\)</span> but both UM and CM underestimate the variance <span class="math inline">\(\sigma_2\)</span>, UD leads to attenuation of the regression coefficients, while CD yields consistent estimates of all four parameters. However, CD has some important drawbacks. First, adding random draws to the conditional mean imputations is inefficient as the large sample variance of the CD estimates of <span class="math inline">\(\mu_2\)</span> can be shown (<span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>) to be</p>
+<p><span class="math display">\[
+\frac{[1-\lambda\rho^2+(1-\rho^2)\lambda(1-\lambda)]\sigma_2}{n_{cc}},
+\]</span></p>
+<p>which is larger than the large sample sampling variance of the CM estimate of <span class="math inline">\(\mu_2\)</span>, namely <span class="math inline">\(\frac{[1-\lambda\rho^2]\sigma_2}{n_{cc}}\)</span>. Second, the standard errors of the CD estimates from the imputed data are too small because they do not incorporate imputation uncertainty.</p>
+<p>When the analysis involves units with some covariates missing and other observed, it is common practice to condition on the observed covariates when generating the imputations for the missing covariates. It is also possible to condition on the outcome <span class="math inline">\(y\)</span> to impute missing covariates, even if the final objective is to regress <span class="math inline">\(y\)</span> on the full set of covariates and conditioning on <span class="math inline">\(y\)</span> will lead to bias when conditional means are imputed. However, if predictive draws are imputed, this approach will yield consistent estimates of the regression coefficients. Imputing missing covariates using the means by conditioning only the observed covariates (and not also on <span class="math inline">\(y\)</span>) also yields consistent estimates of the regression coefficients under certain conditions, although these are typically less efficient then those from CCA, but yields inconsistent estimates of other parameters such as variances and correlations (<span class="citation" data-cites="little1992regression">Little (<a href="#ref-little1992regression" role="doc-biblioref">1992</a>)</span>).</p>
+</section>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>According to <span class="citation" data-cites="little2019statistical">Little and Rubin (<a href="#ref-little2019statistical" role="doc-biblioref">2019</a>)</span>, imputation should generally be</p>
+<ol type="1">
+<li><p><strong>Conditional</strong> on observed variables, to reduce bias, improve precision and preserve association between variables.</p></li>
+<li><p><strong>Multivariate</strong>, to preserve association between missing variables.</p></li>
+<li><p><strong>Draws</strong> from the predictive distributions rather than means, to provide valid estimates of a wide range of estimands.</p></li>
+</ol>
+<p>Nevertheless, a main problem of SI methods is that inferences based on the imputed data do not account for imputation uncertainty and standard errors are therefore systematically underestimated, p-values of tests are too significant and confidence intervals are too narrow.</p>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-buck1960method" class="csl-entry" role="listitem">
+Buck, Samuel F. 1960. <span>“A Method of Estimation of Missing Values in Multivariate Data Suitable for Use with an Electronic Computer.”</span> <em>Journal of the Royal Statistical Society: Series B (Methodological)</em> 22 (2): 302–6.
+</div>
+<div id="ref-little1992regression" class="csl-entry" role="listitem">
+Little, Roderick JA. 1992. <span>“Regression with Missing x’s: A Review.”</span> <em>Journal of the American Statistical Association</em> 87 (420): 1227–37.
+</div>
+<div id="ref-little2019statistical" class="csl-entry" role="listitem">
+Little, Roderick JA, and Donald B Rubin. 2019. <em>Statistical Analysis with Missing Data</em>. Vol. 793. John Wiley &amp; Sons.
+</div>
+<div id="ref-schafer2002missing" class="csl-entry" role="listitem">
+Schafer, Joseph L, and John W Graham. 2002. <span>“Missing Data: Our View of the State of the Art.”</span> <em>Psychological Methods</em> 7 (2): 147.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

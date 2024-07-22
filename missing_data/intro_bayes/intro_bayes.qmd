@@ -1,0 +1,254 @@
+---
+title: "Introduction to Bayesian Inference"
+description: "Bayesian inference is a method of statistical inference in which Bayes theorem is used to update the probability for a hypothesis as more evidence or information becomes available"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: bayes.bib
+---
+
+Bayesian inference offers a convenient framework to analyse missing data as it draws no distinction between missing values and parameters, both interprted as unobserved quantities who are associated with a joint posterior distribution conditional on the observed data. In this section, I review basic concepts of Bayesian inference based on fully observed data, with notation and structure mostly taken from @gelman2013bayesian. 
+
+## Bayesian Inference for Complete Data
+
+Bayesian inference is the process of fitting a probability model to a set of data $Y$ and summarising the results by a probability distribution on the parameters $\theta$ of the model and on unobserved quantities $\tilde{Y}$ (e.g. predictions). Indeed, Bayesian statistical conclusions about $\theta$ (or $\tilde{Y}$) are made in terms of probability statements, conditional on the observed data $Y$, typically indicated with the notation $p(\theta \mid y)$ or $p(\tilde{y} \mid y)$. Conditioning on the observed data is what makes Bayesian inference different from standard statistical approaches which are instead based on the retrospective evaluation of the procedures used to estimate $\theta$ (or $\tilde{y}$) over the distribution of possible $y$ values conditional on the "true" unknown value of $\theta$.
+
+### Bayes' Rule
+
+In order to make probability statements about $\theta$ given $y$, we start with a model providing a *joint probability distribution* $p(\theta,y)$. Thus, the joint probability mass or density function can be written as a product of two densities that are often referred to as the *prior distribution* $p(\theta)$ and the *sampling distribution* $p(y \mid \theta)$, respectively:
+
+$$
+p(\theta,y) = p(\theta)p(y \mid \theta), 
+$$
+
+and conditioning on the observed values of $y$, using the basic property of conditional probability known as *Bayes' rule*, yields the *posterior distribution*
+
+
+$$
+p(\theta \mid y) = \frac{p(\theta,y)}{p(y)} = \frac{p(\theta)p(y \mid \theta)}{p(y)},
+$$
+
+where $p(y)=\sum_{\theta \in \Theta}p(\theta)p(y\mid \theta)$ is the sum (or integral in the case of continous $\theta$) over all possible values of $\theta$ in the sample space $\Theta$. We can approximate the above equation by omitting the factor $p(y)$ which does not depend on $\theta$ and, given $y$, can be considered as fixed, yielding the *unnormalised posterior density* 
+
+$$
+p(\theta \mid y) \propto p(\theta) p(y \mid \theta),
+$$
+
+with the purpose of the analysis being to develop the model $p(\theta,y)$ and adequately summarise $p(\theta \mid y)$.
+
+### Univariate Normal Example (known variance)
+
+Let $y=(y_1,\ldots,y_n)$ denote an independent and identially distributed sample of $n$ units, which are assumed to come from a Normal distribution with mean $\mu$ and variance $\sigma^2$, whose sampling density function is 
+
+$$
+p(y \mid \mu)=\frac{1}{\sqrt{\left(2\pi\sigma^2\right)^n}}\text{exp}\left(-\frac{1}{2}\sum_{i=1}^n \frac{(y_i-\mu)^2}{\sigma^2} \right),
+$$
+
+where for the moment we assume the variance $\sigma^2$ to be known (i.e. constant). Consider now a prior probability distribution for the mean parameter $p(\mu)$, which belongs to the family of *conjugate prior densities*, for example a Normal distribution, and parameterised in terms of a prior mean $\mu_0$ and variance $\sigma^2_0$. Thus, its prior density function is 
+
+$$
+p(\mu) = \frac{1}{\sqrt{2\pi\sigma^2_0}}\text{exp}\left(-\frac{1}{2}\frac{(\mu -\mu_0)^2}{\sigma^2} \right),
+$$
+
+under the assumption tha the hyperparameters $\mu_0$ and $\sigma^2_0$ are known. The conjugate prior density implies that the posterior distribution for $\mu$ (with $\sigma^2$ assumed constant) belongs to the same family of distributions of the sampling function, that is Normal, but some algebra is required to reveal its specific form. In particular, the posterior density is
+
+$$
+p(\mu \mid y) = \frac{p(\mu)p(y\mid \mu)}{p(y)} \propto \frac{1}{\sqrt{2\pi\sigma^2_0}}\frac{1}{\sqrt{\left(2\pi\sigma^2\right)^n}}\text{exp}\left(-\frac{1}{2} \left[\frac{(\mu - \mu_0)^2}{\sigma^2_0} + \sum_{i=1}^n\frac{(y_i-\mu)^2}{\sigma^2} \right] \right).
+$$
+
+Exapanding the components, collecting terms and completing the square in $\mu$ gives
+
+$$
+p(\mu \mid y) \propto \text{exp}\left(-\frac{(\mu - \mu_1)}{2\tau^2_1} \right),
+$$
+
+that is the posterior distribution of $\mu$ given $y$ is Normal with posterior mean $\mu_1$ and variance $\tau^2_1$, where
+
+$$
+\mu_1 = \frac{\frac{1}{\tau^2_0}\mu_0 + \frac{n}{\sigma^2}\bar{y}}{\frac{1}{\tau^2_0} + \frac{n}{\sigma^2}} \;\;\; \text{and} \;\;\; \frac{1}{\tau^2_1}=\frac{1}{\tau^2_0} + \frac{n}{\sigma^2}.
+$$
+
+We can see that the posterior distribution depends on $y$ only through the sample mean $\bar{y}=\sum_{i=1}^ny_i$, which is a *sufficient statistic* in this model. When working with Normal distributions, the inverse of the variance plays a prominent role and is called the *precision* and, from the above expressions, it can be seen that for normal data and prior, the posterior precision $\frac{1}{\tau^2_1}$ equals the sum of the prior precision $\frac{1}{\tau^2_0}$ and the sampling precision $\frac{n}{\sigma^2}$. Thus, when $n$ is large, the posterior precision is largely dominated by $\sigma^2$ and the sample mean $\bar{y}$ compared to the corresponding prior parameters. In the specific case where $\tau^2_0=\sigma^2$, the prior has the same weight as one extra observation with the value of $\mu_0$ and, as $n\rightarrow\infty$, we have that $p(\mu\mid y)\approx N\left(\mu \mid \bar{y},\frac{\sigma^2}{n}\right)$. 
+
+### Univariate Normal Example (unknown variance)
+
+For $p(y \mid \mu,\sigma^2)=N(y \mid \mu, \sigma^2)$ with $\mu$ known and $\sigma^2$ unknown, the sampling distribution for a vector $y$ of $n$ units is
+
+$$
+p(y \mid \sigma^2)=\frac{1}{\sqrt{\left(2\pi\sigma^2\right)^n}}\text{exp}\left(-\frac{1}{2}\sum_{i=1}^n \frac{(y_i-\mu)^2}{\sigma^2} \right),
+$$
+
+with the corresponding conjugate prior for $\sigma^2$ being the Inverse-Gamma distribution $\Gamma^{-1}(\alpha,\beta)$ with density function 
+
+$$
+p(\sigma^2) \propto (\sigma^2)^{-(\alpha+1)}\text{exp}\left(-\frac{\beta}{\sigma^2}\right),
+$$
+
+indexed by the hyperparameters $\alpha$ and $\beta$. A convenient parameterisation is as a Scaled Inverse-Chi Squared distribution $\text{Inv-}\chi^2(\sigma^2_0,\nu_0)$ with scale and degrees of freedom parameters $\sigma^2_0$ and $\nu_0$, respectively. This means that the prior on $\sigma^2$ corresponds to the distribution of $\frac{\sigma^2_0 \nu_0}{X}$, where $X\sim \chi^2_{\nu_0}$ random variable. After some calculations, the resulting posterior for $\sigma^2$ is
+
+$$
+p(\sigma^2 \mid y) \propto (\sigma^2)^\left(\frac{n+\nu_0}{2}+1\right)\text{exp}\left(-\frac{\nu_0 \sigma^2_0 + n \nu}{2\sigma^2} \right)
+$$
+
+where $\nu=\frac{1}{n}\sum_{i=1}^n(y_i-\mu)^2$. This corresponds to say that 
+
+$$
+\sigma^2 \mid y \sim \text{Inv-}\chi^2\left(\nu_0 +n, \frac{\nu_0\sigma^2_0+n\nu}{\nu_0 + n} \right),
+$$
+
+with scale equal to the degrees of freedom-weighted average of the prior and data scales and degrees of freedom equal to the sum of the prior and data degrees of freedom.
+
+
+### Univariate Normal Example (unknown mean and variance)
+
+Suppose now that both the mean and variance parameters are unknown such that 
+
+$$
+p(y \mid \mu, \sigma^2) \sim N(\mu, \sigma^2), 
+$$
+
+and that the interest is centred on making inference about $\mu$, that is we seek the conditional posterior distribution of the parameters of interest given the observed data $p(\mu \mid y)$. This can be derived from the joint posterior distribution density $p(\mu, \sigma^2 \mid y)$ by averaging over all possible values of $\sigma^2$, that is
+
+$$
+p(\mu \mid y)=\int p(\mu, \sigma^2 \mid y)d\sigma^2,
+$$
+
+or, alternatively, the joint posterior can be factored as the product of the marginal distribution of one parameter and the conditional distribution of the other given the former and then taking the average over the values of the "nuisance" parameter
+
+$$
+p(\mu \mid y)=\int p(\mu \mid \sigma^2, y)p(\sigma^2 \mid y)d\sigma^2.
+$$
+
+The integral forms are rarely computed in practice but this expression helps us to understand that posterior distributions can be expressed in terms of the product of marginal and conditional densities, first drawing $\sigma^2$ from its marginal and then $\mu$ from its conditional given the drawn value of $\sigma^2$, so that the integration is indirectly performed. For example, consider the Normal model with both unknown mean and variance and assume a vague prior density $p(\mu,\sigma^2)\propto (\sigma^2)^{-1}$ (corresponding to uniform prior on $(\mu, \log\sigma)$), then the joint posterior distribution is proportional to the sampling distribution multiplied by the factor $(\sigma^2)^{-1}$, that is
+
+$$
+p(\mu,\sigma^2 \mid y)\propto \sigma^{-n-2}\text{exp}\left(-\frac{1}{2\sigma^2}\left[(n-1)s^2+n(\bar{y}-\mu)^2 \right] \right),
+$$
+
+where $s^2=\frac{1}{n-1}\sum_{i=1}^n(y_i-\bar{y})^2$ is the sample variance. Next, the conditional posterior density $p(\mu \mid \sigma^2)$ can be shown to be equal to
+
+$$
+p(\mu \mid \sigma^2,y) \sim N(\bar{y},\frac{\sigma^2}{n}),
+$$
+
+while the marginal posterior $p(\sigma^2 \mid y)$ can be obtained by averaging the joint $p(\mu,\sigma^2\mid y)$ over $\mu$, that is
+
+$$
+p(\sigma^2 \mid y)\propto \int \left(\sigma^{-n-2}\text{exp}\left(-\frac{1}{2\sigma^2}\left[(n-1)s^2+n(\bar{y}-\mu)^2 \right] \right)\right)d\mu,
+$$
+
+which leads to 
+
+$$
+p(\sigma^2 \mid ,y) \sim \text{Inv-}\chi^2(n-1,s^2).
+$$
+
+Typically, $\mu$ represents the estimand of interest and the obejective of the analysis is therefore to make inference about the marginal distribution $p(\mu \mid y)$, which can be obtained by integrating $\sigma^2$ out of the joint posterior
+
+$$
+p(\mu \mid y)=\int_{0}^{\infty}p(\mu,\sigma^2\mid y)d\sigma^2 \propto \left[1+\frac{n(\mu-\bar{y})}{(n-1)s^2} \right]
+$$
+
+which corresponds to a Student-$t$ density with $n-1$ degrees of freedom
+
+$$
+p(\mu \mid y)\sim t_{n-1}\left(\bar{y},\frac{s^2}{n}\right)
+$$
+
+
+### Multivariate Normal Example 
+
+Similar considerations to those applied to the univariate case can be extended to the multivariate case when $y$ is formed by $J$ components coming from the Multivariate Normal distribution
+
+$$
+p(y\mid \mu, \Sigma) \sim N(\mu, \Sigma),
+$$
+
+where $\mu$ is a vector of length $J$ and $\Sigma$ is a $J\times J$ covariance matrix, which is symmetric and positive definite. The sampling distribution for a sample of $n$ units is
+
+$$
+p(y\mid \mu, \Sigma) \propto \mid \Sigma \mid^{-n/2}\text{exp}\left(-\frac{1}{2}\sum_{i=1}^n(y_i-\mu)^{T}\Sigma^{-1}(y_i-\mu) \right),
+$$
+
+As with the univariate normal model, we can derive the posterior distribution for $\mu$ and $\Sigma$ according to the factorisation used of the joint posterior and the prior distributions specified. For example, using the conjugate normal prior for the mean $p(\mu)\sim N(\mu_0,\Sigma_0)$, given $\Sigma$ known, the posterior can be shown to be 
+
+$$
+p(\mu \mid y) \sim N(\mu_1,\Sigma_1),
+$$
+
+where the posterior mean is a weighted average of the data and prior mean with weights given by the data and prior precision matrices $\mu_1=(\Sigma^{-1}_0+n\Sigma^{-1})^{-1} (\Sigma_0^{-1}\mu_0 + n\Sigma^{-1}\bar{y})$, and the posterior precision is the sum of the data and prior precisions $\Sigma^{-1}_1=\Sigma^{-1}_0+n\Sigma^{-1}$.
+
+
+In the situation in which both $\mu$ and $\Sigma$ are unknown, convenient conjugate prior distributions which generalise those used in the univariate case are the Inverse-Wishart for the covariance matrix $\Sigma\sim \text{Inv-Wishart}(\Lambda_0,\nu_0)$ and the Multivariate Normal for the mean $\mu\sim N(\mu_0, \Sigma_0)$, where $\nu_0$ and $\Lambda_0$ represent the degrees of freedom and the scale matrix for the Inverse-Wishart distribution, while $\mu_0$ and $\Sigma_0=\frac{\Sigma}{\kappa_0}$ are the prior mean and covariance matrix for the Multivariate Normal. Woking out the form of the posterior, it can be shown that the joint posterior distribution has the same form of the sampling distribution with parameters
+
+$$
+p(\mu \mid \Sigma, y) \sim N(\mu_1,\Sigma_1) \;\;\; \text{and} \;\;\; p(\Sigma \mid y) \sim \text{Inv-Wishart}(\Lambda_1,\nu_1), 
+$$
+
+where $\Sigma_1=\frac{\Sigma}{\kappa_1}$, $\mu_1=\frac{1}{\kappa_0+n}\mu_0+\frac{n}{\kappa_0+n}\bar{y}$, $\kappa_1=\kappa_0+n$, $\nu_1=\nu_0+n$, and $\Lambda_1=\Lambda_0+\sum_{i=1}^n(y_i-\bar{y})(y_i-\bar{y})^T+\frac{\kappa_0 n}{\kappa_0+n}(\bar{y}-\mu_0)(\bar{y}-\mu_0)^2$.
+
+
+## Regression Models
+
+Suppose the data consist in $n$ units measured on an outcome variable $y$ and a set of $J$ covariates $X=(x_{1},\ldots,x_{J})$ and assume that the distribution of $y$ given $x$ is Normal with mean $\mu_i=\beta_0+\sum_{j=1}^J\beta_jx_{ij}$ and variance $\sigma^2$
+
+$$
+p(y \mid \beta,\sigma^2,X) \sim N(X\beta,\sigma^2I),
+$$
+
+where $\beta=(\beta_0,\ldots,\beta_J)$ is the set of regression coefficients and $I$ is the $n\times n$ identity matrix. Within the normal regression model, a convenient vague prior distribution is uniform on $(\beta,\log\sigma)$
+
+$$
+p(\beta,\sigma^2)\propto\sigma^{-2}.
+$$
+
+As with normal distributions with unknown mean and variance we can first determine the marginal posterior of $\sigma^2$ and factor the joint posterior as $p(\beta,\sigma^2)=p(\beta \mid \sigma^2, y)p(\sigma^2 \mid y)$ (omit X for simplicity). Then, the conditional distribtuion $p(\beta \mid \sigma^2,y)$ is Normal
+
+$$
+p(\beta \mid \sigma^2, y) \sim N(\hat{\beta},V_{\beta}\sigma^2),
+$$
+
+where $\hat{\beta}=(X^{T}X)^{-1}(X^{T}y)$ and $V_{\beta}=(X^{T}X)^{-1}$. The marginal posterior $p(\sigma^2 \mid y)$ has a scaled Inverse-$\chi^2$ form
+
+$$
+p(\sigma^2\mid y) \sim \text{Inv-}\chi^2(n-J,s^2),
+$$
+
+where $s^2=\frac{1}{n-J}(y-X\hat{\beta})^{T}(y-X\hat{\beta})$. Finally, the marginal posterior $p(\beta \mid y)$, averaging over $\sigma^2$, is multivariate $t$ with $n-J$ degrees of freedom, even though in practice since we can characterise the joint posterior by drawing from $p(\sigma^2)$ and then from $p(\beta \mid \sigma^2)$. When the analysis is based on improper priors (do not have finite integral), it is important to check that the posterior is proper. In the case of the regression model, the posterior for $\beta \mid \sigma^2$ is proper only if the number of observations is larger than the number of parameters $n>J$, and that the rank of $X$ equals $J$ (i.e. the columns of $X$ are linearly independent) in order for all $J$ coefficients to be uniquely identified from the data.
+
+## Generalised Linear Models
+
+The purpose of *Generalised Linear Models*(GLM) is to extend the idea of linear modelling to cases for which the linear relationship between $X$ and $E[y\mid X]$ or the Normal distribution is not appropriate. GLMs are specified in three stages
+
+1. Choose the linear predictor $\eta=X\beta$
+
+2. Choose the *link fuction* $g()$ that relates the linear predictor to the mean of the outcome variable $\mu=g^{-1}(\eta)$
+
+3. Choose the random component specifying the distribution of $y$ with mean $E[y\mid X]$
+
+Thus, the mean of the distribution of $y$ given $X$ is determined as $E[y\mid X]=g^{-1}(X\beta)$. The Normal linear model can be thought as a special case of GLMs where the link function is the identity $g(\mu)=\mu$ and the random component is normally distributed. Perhaps, the most commonly used GLMs are those based on Poisson and Binomial distributions to analyse count and binary data, respectively.
+
+### Poisson
+
+Counted data are often modelled using Poisson regression models which assume that $y$ is distributed according to a Poisson distribution with mean $\mu$. The link function is typically chosen to be the logarithm so that $\log \mu = X\beta$ and the distribution of the data has density 
+
+$$
+p(y\mid \beta)=\prod_{i=1}^n \frac{1}{y_i}\text{exp}\left(-\text{e}^{(\eta_i)}(\text{exp}(\eta_i))^{y_i}\right),
+$$
+
+where $\eta_i=(X\beta)_i$ is the linear predictor for the $i-$th unit.
+
+
+### Binomial
+
+Suppose there are some binomial data $y_i \sim \text{Bin}(n_i,\mu_i)$, with $n_i$ known. It is common to specify the model in terms of the mean of the proportions $\frac{y_i}{n_i}$ rather than the mean of $y_i$. Choosing the logit tranformation of the probability of success $g(\mu_i)=\log\left(\frac{\mu_i}{1-\mu_i}\right)$ as the link function leads to the logistic regression where data have distribution
+
+$$
+p(y \mid \beta)=\prod_{i=1}^n {n_i \choose y_i} {e^{\eta_i} \choose 1+e^{\eta_i}}^{y_i} {1 \choose 1+e^{\eta_i}}^{n_i-y_i}. 
+$$
+
+The link functions used in the previous models are known as the *canonical link* functions for each family of distributions, which is the function of the mean parameter that appears in the exponent of the exponential family form of the probability density. However, it is also possible to use link functions which are not canonical. 
+
+
+
+# References

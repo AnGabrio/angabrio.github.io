@@ -1,0 +1,76 @@
+---
+title: "Complete Case Analysis"
+description: "Complete case analysis is the term used to describe a statistical analysis that only includes participants for which we do not have missing data on the variables of interest"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: cca.bib
+---
+
+# Complete Case Analysis
+
+*Complete case analysis* (CCA), also known as *case* or *listwise deletion* (LD), is one of the oldest methods to handle missing data and consists in discarding any unit or case whose information is incomplete. Only the cases with observed values for all the variables under consideration are used in the analysis. For example, suppose we have a data set formed by $i=1,\ldots,n$ individuals and that we want to fit a linear regression on some outcome variable $y_i$ using some other variables $x_{i1},\ldots,x_{ik}$ as covariates. CCA uses only the subset of cases with observed values on all the variables included in the analysis (*completers*).
+
+CCA has been a quite popular approach to deal with missingness, mainly because it is very easy to implement (used by default in many statistical programs) and it allows the comparison of different univariate statistics in a straightforward way (calculated on a common set of cases). However, there are a number of potential disadvantages which threatens the validity of this method:
+
+1. Bias, when the missing data mechanism is not *missing completely at random* (MCAR) and the completers are not a random samples of all the cases
+
+2. Loss of efficiency, due to the potential loss of information in discarding the incomplete cases.
+
+CCA may be justified when the loss of precision and bias are minimal, which is more likley to occur when the proportion of completers is high, although it is difficult to formulate rules that apply in general circumstances. Indeed, both the degree of loss of precision and bias depend not only on the fraction of completers and missingness patterns, but also on the extent to which complete and incomplete cases differ and the parameters of interest. 
+
+Let $\hat{\theta}_{cc}$ be an estimate of a parameter of interest from the completers. One might measure the increase in variance of $\hat{\theta}_{cc}$ with respect to the estimate $\hat{\theta}$ that would be obtained in the absence of missing values. Using the notation of @little2019statistical:
+
+$$
+\text{Var}(\hat{\theta}_{cc}) = \text{Var}(\hat{\theta})(1 + \Delta^{\star}_{cc}),
+$$
+
+where $\Delta^{\star}_{cc}$ is the proportional increase in variance from the loss of information. A more practical measure of the loss of inofrmation is $\Delta_{cc}$, where
+
+$$
+\text{Var}(\hat{\theta}_{cc}) = \text{Var}(\hat{\theta}_{eff})(1 + \Delta_{cc}),
+$$
+
+and $\hat{\theta}_{eff}$ is an efficient estimate based on all the available data. 
+
+## Example 1
+
+Consider bivariate normal monotone data $\bf y = (y_1,y_2)$, where $n_{cc}$ out of $n$ cases are complete and $n - n_{cc}$ cases have observed values only on $y_1$. Assume for simplicity that the missingness mechanism is MCAR and that the mean of $y_j$ is estimated by the empirical mean from the complete cases $\bar{y}^{cc}_j$. Then, the loss in sample size for estimating the mean of $y_1$ is:
+
+$$
+\Delta_{cc}(\bar{y}_1) = \frac{n - n_{cc}}{n_{cc}},
+$$
+
+so that if half the cases are missing, the variance is doubled. For the mean of $y_2$, the loss of information alos depends on the squared correlation $\rho^{2}$ between the variables: (@little2019statistical)
+
+$$
+\Delta_{cc}(\bar{y}_2) \approx \frac{(n - n_{cc})\rho^{2}}{n_{cc}(1 - \rho^{2}) + n_{cc}\rho^{2}}.
+$$
+
+$\Delta_{cc}(\bar{y}_2)$ varies from zero (when $\rho=0$) to $\Delta_{cc}(\bar{y}_1)$ as $\rho^{2} \rightarrow 1$. However, for the regression coefficients of $y_2$ on $y_1$ we have that $\Delta_{cc}=0$ since the incomplete observations of $y_1$ provide no information for estimating the parameters of the regression of $y_2$ on $y_1$. 
+
+## Example 2
+
+For inference about the population mean $\mu$, the bias of CCA depends on the proportion of the completers $\pi_{cc}$ and the extent to which complete and incomplete cases differ on the variables of interest. Suppose a variable $y$ is partially-observed and that we partition the data into the subset of the completers $y_{cc}$ and incompleters $y_{ic}$, with associated population means $\mu_{cc}$ and $\mu_{ic}$, respectively. The overall mean can be written as a weighted average of the means of the two subsets
+
+$$
+\mu = \pi_{cc}\mu_{cc} + (1 - \pi_{cc})\mu_{ic}. 
+$$
+
+The bias of CCA is then equal to the expected fraction of incomplete cases multiplied by the differences in the means for complete and incomplete cases
+
+$$
+\mu_{cc} - \mu = (1 - \pi_{cc})(\mu_{cc} - \mu_{ic}).  
+$$
+
+Under MCAR, we have that $\mu_{cc} = \mu_{ic}$ and therefore the bias is zero.
+
+## Example 3
+
+Consider the estimation of the regression of $y$ on $x_1,\ldots,x_K$ from data with potential missing values on all variables and with the regression function correctly specified. The bias of CCA for estimating the regression coefficients $\beta_1,\ldots,\beta_K$ associated with the covariates is null if the probbaility of being a completer depends on the $x$s but not $y$, since the analysis conditions on the values of the covariates (@glynn1986regression, @white2010bias). This class of missing data mechanisms includes *missing not at random* (MNAR), where the probability that a covariate is missing depends on the value of that covariate. However, CCA is biased if the probability of being a completer depends on $y$ after conditioning on the covariates. A nice example of this particular topic and its implications for the analysis has been provided by professor [Bartlett](https://thestatsgeek.com/about-thestatsgeek-com/) using some nice [slides](http://thestatsgeek.com/wp-content/uploads/2016/08/Jonathan-Bartlett-28-06-2013.pdf) 
+
+## Conclusions
+
+The main virtue of case deletion is simplicity. If a missing data problem can be resolved by discarding only a small part of the sample, then the method can be quite effective. However, even in that situation, one should explore the data (@schafer2002missing). The discarded information from incomplete cases can be used to study whether the complete cases are plausibly a random subsample of the original sample, that is, whether MCAR is a reasonable assumption. A simple procedure is to compare the distribution of a particular variable $y$ based on complete cases with the distribution of $y$ based on incomplete cases for which $y$ is recorded. Significant differences indicate that the MCAR assumption is invalid, and the complete-case analysis yields potentially biased estimates. Such tests are useful but have limited power when the sample of incomplete cases is small. Also the tests can offer no direct evidence on the validity of the *missing at random* (MAR) assumption.
+
+# References

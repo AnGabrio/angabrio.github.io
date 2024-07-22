@@ -1,0 +1,84 @@
+---
+title: "Shared Parameter Models"
+description: "Shared Parameter Models (SPM) are typically used to handle nonignorable missingness. In these models a random effect is shared between the repeated measures model and the missing data mechanism model."
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: spm.bib
+---
+
+
+It is possible to summarise the steps involved in drawing inference from incomplete data as (@daniels2008missing):
+
+* Specification of a full data model for the response and missingness indicators $f(y,r)$
+
+* Specification of the prior distribution (within a Bayesian approach)
+
+* Sampling from the posterior distribution of full data parameters, given the observed data $Y_{obs}$ and the missingness indicators $R$ 
+
+Identification of a full data model, particularly the part involving the missing data $Y_{mis}$, requires making unverifiable assumptions about the full data model $f(y,r)$. Under the assumption of the ignorability of the missingness mechanism, the model can be identified using only the information from the observed data. When ignorability is not believed to be a suitable assumption, one can use a more general class of models that allows missing data indicators to depend on missing responses themselves. These models allow to parameterise the conditional dependence between $R$ and $Y_{mis}$, given $Y_{obs}$. Without the benefit of untestable assumptions, this association structure cannot be identified from the observed data and therefore inference depends on some combination of two elements:
+
+1. Unverifiable parametric assumptions
+
+2. Informative prior distributions (under a Bayesian approach)
+
+We show some simple examples about how these *nonignorable* models can be constructed, identified and applied. In this section, we specifically focus on the class of nonignorable models known as *Shared Parameter Models*(SPM).
+
+## Shared Parameter Models
+
+The shared parameter model approach consists in an explicit multilevel specification, where random effects $b$ are modelled jointly with $Y$ and $R$ (@wu1988estimation). The general form of the full data modelling using a SPM approach is
+
+$$
+f(y,r \mid \omega) = \int f(y, r, b \mid \omega)db.
+$$
+
+Next, specific SPMs are formulated by making assumptions about the joint distribution under the integral sign. Main advantages of this models is that they are quite easy to specify and that, through the use of random effects, high-dimensional or multilevel data modelling is relatively easy to accomplish. The main drawback is that the underlying missingness mechanism is often difficult to understand and may not have even a closed form.
+
+### Example random coefficients selection model
+
+@wu1988estimation specified a SPM assuming the response follow a linear random effects model
+
+$$
+Y_i \mid x_i,b_i \sim N(x_i\beta + w_ib_i, \Sigma_i(\phi)), 
+$$
+
+where $w_i$ are the random effects covariates with rows $w_i=(1,t_{ij})$, therefore implying that each individual has a random slope and intercept. The random effects $b_i=(b_{i1},b_{i2})$ are assumed to follow a bivariate normal distribution 
+
+$$
+b_i \sim N(0,\Omega),
+$$
+
+while the hazard of dropout is Bernoulli with
+
+$$
+R_{ij} \mid R_{ij-1}=1,b_i \sim Bern(\pi_{ij}),
+$$
+
+which depends on the random effects via
+
+$$
+g(\pi_{ij}) = \psi_0 + \psi_1b_{i1} + \psi_2b_{i2}.
+$$
+
+The model can be seen as a special case of the general SPM formulation by noticing that the joint distribution under the integral sign can be factored as
+
+$$
+f(y,r,b \mid x, \omega) = f(r \mid b,x,\psi)f(y \mid b,x,\beta,\phi)f(b \mid \Omega)
+$$
+
+under the assumption that $R$ is independent of both $Y_{obs}$ and $Y_{mis}$, conditionally on $b$. However, integrating over the random effects, dependence between $R$ and $Y_{mis}$, given $Y_{obs}$, is induced and therefore the model characterises a *Missing Not At Random*(MNAR) mechanism.
+
+The conditional linear model (@wu1989estimation) can also be seen as a version of the SPM, which is formulated as
+
+$$
+f(y,r,b \mid x) = f(y \mid r,b,x)f(b \mid r,x)f(r \mid x).
+$$
+
+
+## Conlcusions
+
+To summarise, shared parameter models are very useful for characterizing joint distributions of repeated measures and event times, and can be particularly useful as a method of data reduction when the dimension of $Y$ is high. Nonetheless, their application to the problem of making full data inference from incomplete longitudinal data should be made with caution and with an eye toward justifying the required assumptions. Sensitivity analysis is an open area of research for these models.
+
+
+# References
+

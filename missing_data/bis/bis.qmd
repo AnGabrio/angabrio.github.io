@@ -1,0 +1,99 @@
+---
+title: "Bayesian Iterative Simulation Methods"
+description: "The most popular class of Bayesian iterative methods is called Markov chain Monte Carlo (MCMC), which comprises different algorithms for sampling from a probability distribution. The more steps that are included, the more closely the distribution of the sample matches the actual desired distribution"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: bayesianmethods.bib
+---
+
+A useful alternative approach to *Maximum Likelihood*(ML) methods, particularly when the sample size is small, is to include a reasonable prior distribution for the parameters and compute the posterior distribution of the parameters of interest. The posterior distribution for a model with ignorable missingness is
+
+$$
+p(\theta \mid Y_0, M) \equiv p(\theta \mid Y_0) \propto p(\theta)f(Y_0 \mid \theta),
+$$
+
+where $p(\theta)$ is the prior and $f(Y_0 \mid \theta)$ is the density of the observed data $Y_0$. Simulation from the posterior without iteration can be accomplished if the likelihood can be factored into complete data components, while for general patterns of missing data, Bayesian simulation requires iteration.
+
+## Data Augmentation
+
+*Data Augmentation*(@tanner1987calculation), or DA, is an iterative method of simulating the posteiror distribution of $\theta$ that combines features of the *Expecation Maximisation*(EM) algorithm and *Multiple Imputation*(MI). Starting with an initial draw $\theta_0$ from an approximation to the posterior, then given the value $\theta_t$ at iteration $t$:
+
+1. Draw $Y_{1,t+1}$ with density $p(Y_1 \mid Y_0, \theta_t)$ (I step).
+
+2. Draw $\theta_{t+1}$ with density $p(\theta \mid Y_0, Y_{1,t+1})$ (P step).
+
+The procedure is motivated by the fact that the distributions in these two steps are often much easier to draw from than either of the posteriors $p(Y_1 \mid Y_0)$ and $p(\theta \mid Y_0)$, or the joint posterior $p(\theta, Y_1 \mid Y_0)$. The procedure can be shown to eventually yield a draw from the joint posterior of $Y_1$ and $\theta$ given $Y_0$, in the sense that as $t$ tends to infinity this sequence converges to a draw from the joint distribution.
+
+### Bivariate Normal Data Example
+
+Suppose having a sample $y_i=(y_{1i},y_{2i})$ from a Bivariate Normal distribution for $i=1,\ldots,n$ units, with mean vector $\mu=(\mu_1,\mu_2)$ and $2\times2$ covariance matrix $\Sigma$. Assume that one group of units has $Y_1$ observed and $Y_2$ missing, while a second group of units has both variables observed and a third group of units has $Y_1$ missing and $Y_2$ observed. Under DA methods, each iteration $t$ consists of an I step and a P step. In the first, missing data are replaced with draws from its conditional distribution given the observed data and current values of the parameters (rather then its conditional mean as in the EM algorithm). Because units are conditionally independent given the parameters, each missing $y_{2i}$ is drawn independently as
+
+$$
+y_{2i,t+1} \sim N\left(\beta_{20t} + \beta_{21t}y_{1i}, \sigma^2_{2t}  \right),
+$$
+
+where $\beta_{20t},\beta_{21t}$ and $\sigma^2_{2t}$ are the $t$-th iterates of the regression parameters of $Y_2$ on $Y_1$. Analogously, each missing $y_{1i}$ is drawn independently as
+
+$$
+y_{1i,t+1} \sim N\left(\beta_{10t} + \beta_{11t}y_{2i}, \sigma^2_{1t}  \right),
+$$
+
+where $\beta_{10t},\beta_{11t}$ and $\sigma^2_{1t}$ are the $t$-th iterates of the regression parameters of $Y_1$ on $Y_2$. In the second step, these drawn values are treated as if they were the observed values and one draw of the bivariate Normal parameters is made from the complete data posterior. In the limit, the draws are from the joint posterior of the missing values and the parameters. Thus, a run of DA generates both a draw from the posterior predictive distribution of $Y_1$ and a draw from the posterior of $\theta$, and the procedure can be run $D$ times to obtain $D$ iid draws from the joint posterior of $\theta$ and $Y_1$. Unlike the EM, estimates of the sampling covariance matrix from the filled-in data can be computed without any corrections to the estimated variances because draws from the posterior predictive distribution of the missing values are imputed in the I step of DA, rather than the conditional means as in the E step of EM. The loss of efficiency from imputing draws is limited when the posterior mean from DA is computed over many draws from the posterior.
+
+## The Gibbs' Sampler
+
+The *Gibbs's sampler* is an iterative simulation method that is designed to yield draws from the joint posterior distribution in the case of a general pattern of missingness and provides a Bayesian analogous to the *Expectation Conditonal Maximisation *(ECM) algorithm for ML estimation. The Gibbs' sampler eventually generates a draw from the distribution $p(x_1,\ldots,x_J)$ of a set of $J$ random variables $X_1,\ldots,X_J$ in settings where draws from the joint distribution are hard to compute but draws from the conditional distributions $p(x_j \mid x_1,\ldots,x_{j-1},x_{j+1},\ldots, x_J)$ are relatively easy to compute. Initial values $x_{10},\ldots,x_{J0}$ are chosen in some way and then, given current values of $x_{1t},\ldots,x_{Jt}$ at iteration $t$, new values are found by drawing from the following sequence of conditional distributions:
+
+$$
+x_{1t+1} \sim p\left(x_1 \mid x_{2t},\ldots,x_{Jt} \right),
+$$
+
+$$
+x_{2t+1} \sim p\left(x_2 \mid x_{1t+1},\ldots,x_{Jt} \right),
+$$
+
+up to
+
+$$
+x_{Jt+1} \sim p\left(x_J \mid x_{2t+1},\ldots,x_{J-1t+1} \right).
+$$
+
+It can be shown that, under general conditions, the sequence of $J$ iterates converges to a draw from the joint posterior of the variables. When $J=2$, the Gibbs' sampler is the same as DA if $x_1=Y_1$ and $x_2=\theta$ and the distributions condition on $Y_0$. We can then obtain a draw from the joint posterior of $Y_1,\theta \mid Y_0$ by applying the Gibbs' sampler, where at iteration $t$ for the $d$-th imputed data set:
+
+$$
+Y^d_{1t+1} \sim p\left(Y_1 \mid Y_0, \theta^d_{t}\right) \;\;\; \text{and} \;\;\; \theta^d_{t+1} \sim p\left(\theta \mid Y^d_{1t+1}, Y_0\right),
+$$
+
+such that one run of the sampler converges to a draw from the posterior predictive distribution of $Y_1$ and a draw from the posterior of $\theta$. The sampler can be run independently $D$ times to generate $D$ iid draws from the approximate joint posterior of $\theta$ and $Y_1$. The values of $Y_1$ are multiple imputations of the missing values, drawn from their posterior predictive distribution.
+
+## Assessing Convergence
+
+Assessing convergence of the sequence of draws to the target distribution is more difficult than assessing convergence of an EM-type algorithm because there is no single target quantity to monitor like the maximum value of the likelihood. Methods have been proposed to assess convergence of a single sequence (@geyer1992practical), but a more reliable approach is to simulate $D>1$ sequences with starting values dispersed throughout the parameter space, and the convergence of all quantities of interest can then be monitored by comparing variation between and within simulated sequences, until the "within" variation roughly equals the "between" variation. The idea is that when the distribution of each simulated sequence is close enough to the distribution of all the sequences mixed together, they can all be approximating the target distribution. @gelman1992single developed an explicit monitoring statistic based on the following idea. For each scalar estimand $\psi$, label the draws from $D$ parallel sequences as $\psi^d_{t}$, for $t=1,\ldots,T$ iterations and $d=1,\ldots,D$ sequences, and compute the between $B$ and within $\bar{V}$ sequence variances as:   
+
+$$
+B=\frac{T}{D-1}\sum_{d=1}^D(\bar{\psi}_{d.} - \bar{\psi}_{..})^2, \;\;\; \text{and} \;\;\; \bar{V}=\frac{1}{D}\sum_{d=1}^D s^2_{d},
+$$
+
+where $\bar{\psi}_{d.}=\frac{1}{T}\sum_{t=1}^T \psi_{dt}$, $\bar{\psi}_{..}=\frac{1}{D}\sum_{d=1}^D \bar{\psi}_{d}$, and $s^2_{d}=\frac{1}{T-1}\sum_{t=1}^T(\psi_{dt} - \bar{\psi}_{d.})^2$. We can then estimate the marginal posterior variance of the estimand as
+
+$$
+\widehat{Var}(\psi \mid Y_0) = \frac{T-1}{T}\hat{V} + \frac{1}{T} B,
+$$
+
+which will *overestimate* the marginal posterior variance assuming the starting distribution is appropriately over-dispersed but is *unbiased* under stationarity (starting distribution equals the target distribution). For any finte $T$, the within variance $\hat{V}$ will *underestimate* the marginal variance because individual sequences have not had time to range over all the target distribution and should have smaller variance then B. In the limit as $T \rightarrow \infty$ the expecation of $\hat{V}$ approaches the marginal variance. These facts suggest monitoring convergence by estimating the factor by which the scale of the current distribution for $\psi$ might be reduced if the simulations were continued. This is the *potential scale reduction factor* and is estimated by
+
+$$
+\sqrt{\hat{R}} = \sqrt{\frac{\widehat{Var}(\psi \mid Y_0)}{\hat{V}}},
+$$
+
+which declines to 1 as $T \rightarrow \infty$. When this quantity is high, there is evidence to proceed the simulations further to improve our inference about the target distribution.
+
+## Other Simulation Methods
+
+When draws from the sequence of conditional distributions forming the Gibbs' sampler are not easy to obtain, other simulation approaches are needed. Among these there are the *Sequential Imputation* (@kong1994sequential), *Sampling Imprtance Resampling* (@gelfand1990sampling), *Rejection Sampling* (@von1951general). One of these alternatives are the *Metropolis-Hastings* (@metropolis1953equation) algorithms, of which the Gibbs' sampler is a particular case, which constitute the so-called *Markov Chain Monte Carlo* (MCMC) algorithms as the sequence of iterates forms a Markov Chain (@gelman2013bayesian).
+
+
+
+# References
+

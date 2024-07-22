@@ -1,0 +1,89 @@
+---
+title: "Joint Multiple Imputation"
+description: "Joint Multiple Imputation (JOMO) commonly assumes that the incomplete variables follow a multivariate normal distribution, often referred to as multivariate normal imputation and, under this assumption, provides rigorous standard errors for the fitted parameters"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: mi.bib
+---
+
+*Multiple Imputation*(MI) refers to the procedure of replacing each missing value by a set of $H\geq 2$ imputed values. These are ordered in the sense that $H$ completed data sets can be created from the sets of imputations, where the first imputed value replaces the missing value in the first completed data set, the second imputed value in the second completed data set, and so on. Next, standard complete data methods are used to analyse each completed data set. When the $H$ sets of imputations are repeated random draws from the predictive distribution of the missing data under a particular model of missingness, the $H$ completed data inferences can be combined to form one inference that properly reflects uncertainty due to missing values under that model. In general, MI procedures can be summarised in three main steps:
+
+1. Specify an **imputation model** to generate $H$ imputed values, typically taken as random draws from the predictive distribution of the missing values given the observed values, and create $H$ completed data sets using these imputations and the observed data.
+
+2. Analyse each completed data sets using standard complete data methods based on an **analysis model**, and derive $H$ completed data inferences
+
+3. Pool together the $H$ completed data inferences into a single inference using standard MI formulas, which ensure that missing data uncertainty is taken into account 
+
+
+Mi was first proposed by Rubin (@rubin1978multiple) and has become more popular over time (@rubin1996multiple, @schafer2002missing, @little2019statistical),  as well as the focus of research for methodological and practical applications in a variety of fields (@herzog1983using, @rubin1987interval, @schafer1999multiple, @carpenter2012multiple, @molenberghs2014handbook, @van2018flexible). MI shares both advantages of *Single Imputaiton* (SI) methods and solves both disadvantages. Indeed, like SI, MI methods allow the analyst to use familiar complete data methods when analysing the completed data sets. The only disadvantage of MI compared with SI methods is that it takes more time to generate the imputations and analyse the completed data sets. However, @rubin2004multiple showed that in order to obtain sufficiently precise estimates, a relatively small number of imputations (typically $10$) is required. For example, considering a situation with $\lambda=50\%$ missing information and $H=10$ imputations, the efficiency of MI can be shown to be equal to $(1+\frac{\lambda}{H})^{-1}=95\%$. In addition, in today's computing environments, the work of analysing the completed data sets is quite modest since it involves performing the same task $H$ times. Thus, once a precedure to combine multiple completed data sets is established, the additonal time and effort to handle $50$, $20$, or $10$ imputations if often of little consequence.   
+
+In the first step of MI, imputations should ideally be created as repeated draws from the *posterior predictive distribution* of the missing values $y_{mis}$ given the observed values $y_{obs}$, each repetition being an independent drawing of the parameters and missing values. In practice, implicit imputation models can also be used in place of explicit imputation models (@herzog1983using). In the second step, each completed data set is analysed using the same complete data method that would be used in the absence of missingness. Finally, in the last step, standard procedures should be used to combine the compelted data inferences into a single one. The simplest and most popular method for combining the reuslts of $H$ completed data sets is known as *Rubin's rules* (@rubin2004multiple), which can be explained with a simple example.
+
+## Rubin's rules
+
+Let $\hat{\theta}_h$ and $V_h$, for $h=1,\ldots,H$, be the completed data estimates and sampling variances for a scalar estimand $\theta$, calculated from $H$ repeated imputations under a given imputation model. Then, according to Rubin's rules, the combined estimate is simply the average of the $H$ completed data estimates, that is
+
+$$
+\bar{\theta}_{H}=\frac{1}{H}\sum_{h=1}^{H}\hat{\theta}_{h}.
+$$
+
+Because the imputations under MI are conditional draws, under a good imputation model, they provide valid estimates for a wide range of estimands. In addition, the averaging over $H$ imputed data sets increases the efficiency of estimation over that obtained from a single completed data set. The variability associated with the pooled estimate has two components: the *average within-imputation variance* $\bar{V}_H$ and the *between-imputation variance* $B_H$, defined as
+
+$$
+\bar{V}_{H}=\frac{1}{H}\sum_{h=1}^{H}V_{h} \;\;\; \text{and} \;\;\; B_{H}=\frac{1}{H-1}\sum_{h=1}^{H}(\hat{\theta}_{h}-\bar{\theta}_{H})^2.
+$$
+
+The total variability associated with $\bar{\theta}_H$ is the computed as
+
+$$
+T_{H}=\bar{V}_H + \frac{H+1}{H}B_{H},
+$$
+
+where $(1+\frac{1}{H})$ is an adjustment factor for finite due to estimating $\theta$ by $\bar{\theta}_H$. Thus, $\hat{\lambda}_H=(1+\frac{1}{H})\frac{B_H}{T_H}$ is known as the *fraction of missing information* and is an estimate of the fraction of information about $\theta$ that is missing due to nonresponse. For large sample sizes and scalar quantities like $\theta$, the reference distribution for interval estimates and significance tests is a $t$ distribution 
+
+$$
+(\theta - \bar{\theta}_H)\frac{1}{\sqrt{T^2_H}} \sim t_v, 
+$$
+
+where the degrees of freedom $v$ can be approximated with the quantity $v=(H-1)\left(1+\frac{1}{H+1}\frac{\bar{V}_H}{B_H} \right)^2$ (@rubin1987interval). In small data sets, an improved version of $v$ can be obtained as $v^\star=(\frac{1}{v}+\frac{1}{\hat{v}_{obs}})^{-1}$, where
+
+$$
+\hat{v}_{obs}=(1-\hat{\lambda}_{H})\left(\frac{v_{com}+1}{v_{com}+3}\right)v_{com},
+$$
+
+with $v_{com}$ being the degrees of freedom for appropriate or exact $t$ inferences about $\theta$ when there are no missing values (@barnard1999miscellanea). 
+
+The validity of MI rests on how the imputations are created and how that procedure relates to the model used to subsequently analyze the data. Creating MIs often requires special algorithms (@schafer1997analysis). In general, they should be drawn from a distribution for the missing data that reflects uncertainty about the parameters of the data model.  Recall that with SI methods, it is desirable to impute from the conditional distribution $p(y_{mis}\mid y_{obs},\hat{\theta})$, where $\hat{\theta}$ is an estimate derived from the observed data. MI extends this approach by first simulating $H$ independent plausible values for the parameters $\theta_1,\ldots,\theta_H$ and then drawing the missing values $y_{mis}^h$ from $p(y_{mis}\mid y_{obs}, \theta_h)$. Treating parameters as random rather than fixed is
+an essential part of MI. For this reason, it is natural (but not essential) to motivate MI from the Bayesian perspective, in which the state of knowledge about parameters is represented through a posterior distribution.
+
+
+## Joint Multiple Imputation
+
+Joint MI starts from the assumption that the data can be described by a multivariate distribution which in many cases, mostly for practical reasons, corresponds to assuming a multivariate Normal distribution. The general idea is that, for a general missing data pattern $ r$, missingness may occur anywhere in the multivariate outcome vector $ y=(y_1,\ldots,y_J)$, so that the distribution from which imputations should be drawn varies based on the observed variables in each pattern. For example, given $ r=(0,0,1,1)$, then imputations should be drawn from the bivariate distribution of the missing variables given the observed variables in that pattern, that is from $f(y^{mis}_1,y^{mis}_2 \mid y^{obs}_3, y^{obs}_4, \phi_{12})$, where $\phi_{12}$ is the probability of being in pattern $ r$ where the first two variables are missing.   
+
+
+Consider the multivariate Normal distribution $y \sim N(\mu,\Sigma)$, where $\theta=(\mu,\Sigma)$ represent the vector of the parameters of interest which need to be identified. Indeed, for non-monotone missing data, $ \theta$ cannot be generally identified based on the observed data directly $ y^{obs}$, and the typical solution is to iterate imputation and parameter estimation using a general algorithm known as *data augmentation*(@tanner1987calculation). Following @van2018flexible, the general procedure of the algorithm can be summarised as follows:
+
+1. Define some plausible starting values for all parameters $\theta_0=(\mu_0,\Sigma_0)$ 
+
+2. At each iteration $t=1,\ldots,T$, draw $h=1,\ldots,H$ imputations for each missing value from the predictive distribution of the missing data given the observed data and the current value of the parameters at $t-1$, that is  
+
+$$
+\hat{y}^{mis}_{t} \sim p(y^{mis} \mid y^{obs},\theta_{t-1})
+$$
+
+3. Re-estimate the parameters $\theta$ using the observed and imputed data at $t$ based on the multivariate Normal model, that is 
+
+$$
+\hat{\theta}_{t} \sim p(\theta \mid y^{obs}, \hat{y}^{mis}_{t})
+$$
+
+And reiterate the steps 2 and 3 until convergence, where the stopping rule typically consists in imposing that the change in the parameters between iterations $t-1$ and $t$ should be smaller than a predefined "small" threshold $\epsilon$. @schafer1997analysis showed that imputations generated under the multivariate Normal model can be robust to non-normal data, even though it is generally more efficient to transform the data towards normality, especially when the parameters of interest are difficult to estimate, such as quantiles and variances.
+
+
+The multivariate Normal model is also often applied to categorical data, with different types of specifications that have been proposed in the literature (@schafer1997analysis,@horton2003potential,@allison2005imputation,@bernaards2007robustness,@yucel2008using,@demirtas2009rounding). For examples, missing data in contingency tables can be imputed using log-linear models (@schafer1997analysis); mixed continuous-categorical data can be imputed under the general location model which combines a log-linear and multivariate Normal model (@olkin1961multivariate); two-way imputation can be applied to missing test item responses by imputing missing categorical data by conditioning on the row and column sum scores of the multivariate data (@van2007two).
+
+
+
+# References

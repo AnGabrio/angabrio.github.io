@@ -1,0 +1,113 @@
+---
+title: "Explicit Single Imputation"
+description: "Explicit Single imputation denotes a method based on an explicit model which replaces a missing datum with a single value. In this method the sample size is retrieved. However, the imputed values are assumed to be the real values that would have been observed when the data would have been complete"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: meani.bib
+---
+
+All case deletion methods, such as *Complete Case Analysis*(CCA) or *Available Case Analysis*(ACA) make no use of units with partially observed data, when estimating the marginal distribution of the variables under study or the covariation between variables. Clearly, this is inefficient and a tempting alternative would be to *impute* or "fill in" the unobserved data with some plausible values. When a single value is used to replace each missing data, we talk about *Single Imputation*(SI) methods and, according to the precedure used to generate these imputations, different SI methods can be used. In general, the idea of imputing the missing values is really appealing as it allows to recover the full sample on which standard complete data methods can be applied to derive the estimates of interest. 
+
+However, it is important to be aware of the potential problems of imputing missing data without a clear understanding about the process underlying the values we want to impute, which is the key factor to determine whether the selected approach would be plausible in the context considered. Indeed, imputation should be conceptualised as draws from a predictive distribution of the missing values and require methods for creating a predictive distribution for the imputation based on the observed data. According to @little2019statistical, these predictive distributions can be created using
+
+1. *Explicit modelling*, when the distribution is based on formal statistical models which make the underlying assumptions explicit.
+
+2. *Implicit modelling*, when the distribution is based on an algorithm which implicitly relies on some underlying model assumptions.
+
+
+In this part, we focus on some of the most popular *Explicit Single Imputation* methods. These include: *Mean Imputation*(SI-M), where means from the observed data are used as imputed values; *Regression Imputation*(SI-R), where missing values are replaced with values predicited from a regression of the missing variable on some other observed variables; and *Stochastic Regression Imputation*(SI-SR), where unobserved data are substituted with the predicted values from  a regression imputation plus a randomly selected residual drawn to reflect uncertainty in the predicted values.
+
+
+## Mean Imputation
+
+The simplest type of SI-M consists in replacing the missing values in a variable with the mean of the observed units from the same variable, a method known as *Unconditional Mean Imputation* (@little2019statistical,@schafer2002missing). Let $y_{ij}$ be the value of variable $j$ for unit $i$, such that the unconditional mean based on the observed values of $y_j$ is given by $\bar{y}_j$. The sample mean of the observed and imputed values is then $\bar{y}^{m}_j=\bar{y}^{ac}_j$, i.e. the estimate from ACA, while the sample variance is given by
+
+$$
+s^{m}_{j}=s^{ac}_{j}\frac{(n^{ac}-1)}{(n-1)},
+$$
+
+where $s^{ac}_j$ is the sample variance estimated from the $n^{ac}$ available units. Under a *Missing Completely At Random*(MCAR) assumption, $s^{ac}_j$ is a consistent estimator of the tru variance so that the sample variance from the imputed data $s^m_j$ systematically underestimates the true variance by a factor of $\frac{(n^{ac}-1)}{(n-1)}$, which clearly comes from the fact that missing data are imputed using values at the centre of the distribution. The imputation distorts the empirical distribution of the observed values as well as any quantities that are not linear in the data (e.g. variances, percentiles, measures of shape). The sampel covariance of $y_j$ and $y_k$ from the imputed data is 
+
+$$
+s^{m}_{jk}=s^{ac}_{jk}\frac{(n^{as}_{jk}-1)}{(n-1)},
+$$
+
+where $n^{ac}_{jk}$ is the number of units with both variables observed and $s^{ac}_{jk}$ is the corresponding covariance estimate from ACA. Under MCAR $s^{ac}_{jk}$ is a consistent estimator of the true covariance, so that $s^{m}_{jk}$ underestimates the magnitude of the covariance by a factor of $\frac{(n^{ac}_{jk}-1)}{(n-1)}$. Obvious adjustments for the variance ($\frac{(n-1)}{(n^{ac}_j-1)}$) and the covariance ($\frac{(n-1)}{(n^{ac}_{jk}-1)}$) yield ACA estimates, which could lead to covariance matrices that are not positive definite. 
+
+## Regression Imputation
+
+An improvement over SI-M is to impute each missing data using the conditional means given the observed values, a method known SI-R or *Conditional Mean Imputation*. To be precise, it would also be possible to impute conditional means without using a regression approach, for example by grouping individuals into adjustment classes (analogous to weighting methods) based on the observed data and then impute the missing values using the observed means in each adjustment class (@little2019statistical). However, for the sake of simplicity, here we will assume that SI-R and conditional mean imputation are the same.
+
+To generate imputations under SI-R, consider a set of $J-1$ fully observed response variables $y_1,\ldots,y_{J-1}$ and a partially observed response variable $y_J$ which has the first $n_{cc}$ units observed and the remaiing $n-n_{cc}$ units missing. SI-R computes the regression of $y_J$ on $y_1,\ldots,y_{J-1}$ based on the $n_{cc}$ complete units and then fills in the missing values as predictions from the regression. For example, for unit $i$, the missing value $y_{iJ}$ is imputed using
+
+$$
+\hat{y}_{iJ}=\hat{\beta}_{J0}+\sum_{j=1}^{J-1}\hat{\beta}_{Jj}y_{ij},
+$$
+
+where $\hat{\beta}_{J0}$ is the intercept and $\hat{\beta}_{Jj}$ is the $j$ coefficient of of the regression of $y_J$ on $y_1,\ldots,y_{J-1}$ based on the $n_{cc}$ units. 
+
+An extension of regression imputation to a general pattern of missing data is known as *Buck's method* (@buck1960method). This approach first estimates the population mean $\mu$ and covariance matrix $\Sigma$ from the sample mean and covariance matrix of the complete units and then uses these estimates to calculate the OLS regressions of the missing variables on the observed variables for each missing data pattern. Predictions of the missing data for each observation are obtained by replacing the values of the present variables in the regressions. The average of the observed and imputed values from this method are consistent estimates of the means and MCAR and mild assumptions about the moments of the distribution (@buck1960method). They are also consistent when the missingness mechanism depends on observed variables, i.e. under a *Missing At Random*(MAR) assumption, although addtional assumptions are required in this case (e.g. using linear regressions it assumes that the "true" regression of the missing varables on the observed variables is linear). 
+
+The filled in data from Buck's method typically yield reasonable estimates of means, while the sample variances and covariances are biased, although the bias is less than the one associated with unconditional mean imputation. Specifically, the sample variance $\sigma^{2,SI-R}_j$ from the imputed data underestimates the true variance $\sigma^2_j$ by a factor of $\frac{1}{n-1}\sum_{i=1}^n\sigma^{2}_{ji}$, where $\sigma^{2}_{ji}$ is the residual variance from regressing $y_j$ on the variables observed in unit $i$ if $y_{ij}$ is missing and zero if $y_{ij}$ is observed. The sample covariance of $y_j$ and $y_k$ has a bias of $\frac{1}{n-1}\sum_{i=1}^n\sigma_{jki}$, where $\sigma_{jki}$ is the residual covariance from the multivariate regression of $(y_{ij},y_{ik})$ on the variables observed in unit $i$ if both variables are missing and zero otherwise. A consistent estimator of $\Sigma$ can be constructed under MCAR by replacing consistent estimates of $\sigma^{2}_{ji}$ and $\sigma_{jki}$ in the expressions for bias and then adding the resulting quantities to the sample covariance matrix of the filled-in data.
+
+## Stochastic Regression Imputation
+
+Any type of mean or regression imputation will lead to bias when the interest is in the tails of the distributions because "best prediction" imputation systematically underestimates variability and standard errors calculated from the imputed data are typically too small. These considerations suggest an alternative imputation strategy, where imputed values are drawn from a predictive distribution of a plausible set of values rather than from the centre of the distribution. This is the idea behind SI-SR, which imputes a conditional draw 
+
+$$
+\hat{y}_{iJ}=\hat{\beta}_{J0}+\sum_{j=1}^{J-1}\hat{\beta}_{Jj}y_{ij}+z_{iJ},
+$$
+
+where $z_{iJ}$ is a random normal deviate with mean 0 and variance $\hat{\sigma}^2_J$, the residual variance from the regression of $y_J$ on $y_1,\ldots,y_{J-1}$ based on the complete units. The addition of the random deviate makes the imputation a random draw from the predictive distribution of the missing values, rather than the mean, which is likely to ameliorate the distortion of the predictive distributions (@little2019statistical).
+
+### Example
+
+Consider a bivariate normal monotone missing data with $y_1$ fully observed and $y_2$ missing for a fraction $\lambda=\frac{(n-n_{cc})}{n}$ and a MCAR mechanism. The following table shows the large sample bias of standard OLS estimates obtained from the filled-in data about the mean, the variance of $y_2$, the regression coefficient of $y_2$ on $y_1$, and the regression coefficient of $y_1$ on $y_2$, using four different single imputation methods: uncondtional mean (UM), unconditional draw (UD), conditional mean (CM), and conditional draw (CD).
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+#| results: asis
+
+library(knitr)
+library(kableExtra)
+table<-matrix(NA,4,4)
+table[1,]<-c("0","-lambda * sigma_2","-lambda * beta_21","0")
+table[2,]<-c("0","0","-lambda * beta_21","-lambda * beta_21")
+table[3,]<-c("0","-lambda * (1-rho^2) * sigma_2","0","((lambda * (1-rho^2)) / (1-lambda * (1-rho^2)) ) * beta_12")
+table[4,]<-c("0","0","0","0")
+rownames(table)<-c("UM","UD","CM","CD")
+colnames(table)<-c("mu_2","sigma_2","beta_21","beta_12")
+latkab<-kable(table, caption = "Bivariate normal monotone MCAR data; large sample bias of four imputation methods.")
+kable_styling(latkab, position = "center")
+```
+
+Under MCAR, all four methods yield consistent estimates of $\mu_2$ but both UM and CM underestimate the variance $\sigma_2$, UD leads to attenuation of the regression coefficients, while CD yields consistent estimates of all four parameters. However, CD has some important drawbacks. First, adding random draws to the conditional mean imputations is inefficient as the large sample variance of the CD estimates of $\mu_2$ can be shown (@little2019statistical) to be
+
+$$
+\frac{[1-\lambda\rho^2+(1-\rho^2)\lambda(1-\lambda)]\sigma_2}{n_{cc}},
+$$
+
+which is larger than the large sample sampling variance of the CM estimate of $\mu_2$, namely $\frac{[1-\lambda\rho^2]\sigma_2}{n_{cc}}$. Second, the standard errors of the CD estimates from the imputed data are too small because they do not incorporate imputation uncertainty.
+
+When the analysis involves units with some covariates missing and other observed, it is common practice to condition on the observed covariates when generating the imputations for the missing covariates. It is also possible to condition on the outcome $y$ to impute missing covariates, even if the final objective is to regress $y$ on the full set of covariates and conditioning on $y$ will lead to bias when conditional means are imputed. However, if predictive draws are imputed, this approach will yield consistent estimates of the regression coefficients. Imputing missing covariates using the means by conditioning only the observed covariates (and not also on $y$) also yields consistent estimates of the regression coefficients under certain conditions, although these are typically less efficient then those from CCA, but yields inconsistent estimates of other parameters such as variances and correlations (@little1992regression). 
+
+## Conclusions
+
+According to @little2019statistical, imputation should generally be
+
+1. **Conditional** on observed variables, to reduce bias, improve precision and preserve association between variables.
+
+2. **Multivariate**, to preserve association between missing variables.
+
+3. **Draws** from the predictive distributions rather than means, to provide valid estimates of a wide range of estimands.
+
+Nevertheless, a main problem of SI methods is that inferences based on the imputed data do not account for imputation uncertainty and standard errors are therefore systematically underestimated, p-values of tests are too significant and confidence intervals are too narrow.
+
+
+# References

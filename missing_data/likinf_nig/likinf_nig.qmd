@@ -1,0 +1,92 @@
+---
+title: "Likelihood Based Inference with Incomplete Data (Nonignorable)"
+description: "Specific methods are required to make inference under nonignorable nonresponse assumptions, that is when the value of the variable that is missing is related to some values which are not observed by the analyst (e.g. the missing values themselves)"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: mnar.bib
+---
+
+In many cases, analysis methods for missing data are based on the ignorable likelihood
+
+$$
+L_{ign}\left(\theta \mid Y_0, X \right) \propto f\left(Y_0 \mid X, \theta \right),
+$$
+
+regarded as a function of the parameters $\theta$ for fixed observed data $Y_0$ and some fully observed covariates $X$. The density $f(Y_0 \mid X, \theta)$ is obtained by integrating out the missing data $Y_1$ from the joint density $f(Y \mid X, \theta)=f(Y_0,Y_1\mid X, \theta)$. Sufficient conditions for basing inference about $\theta$ on the ignorbale likelihood are that the missingness mechanism is *Missing At Random*(MAR) and the parameters of the model of analysis $\theta$ and those of the missingness mechanism $\psi$ are distinct. Here we focus our attention on the situations where the missingness mechanism is *Missing Not At Random*(MNAR) and valid *Maximum Likelihood*(ML), *Bayesian* and *Multiple Imputation*(MI) inferences generally need to be based on the full likelihood  
+ 
+$$
+L_{full}\left(\theta, \psi \mid Y_0, X, M \right) \propto f\left(Y_0, M \mid X, \theta, \psi \right),
+$$
+
+regarded as a function of $(\theta,\psi)$ for fixed $(Y_0,M)$. Here, $f(Y_0,M\mid \theta, \psi)$ is obtained by integrating out $Y_1$ from the joint density $f(Y,M \mid X, \theta, \psi)$. Two main approaches for formulating MNAR models can be distinguished, namely *selection models*(SM) and *pattern mixture models*(PMM). 
+
+## Selection and Pattern Mixture Models
+
+SMs factor the joint distribution of $m_i$ and $y_i$ as
+
+$$
+f(m_i,y_i \mid x_i, \theta, \psi) = f(y_i \mid x_i, \theta)f(m_i \mid x_i,y_i,\psi),
+$$
+
+where the first factor is the distribution of $y_i$ in the population while the second factor is the missingness mechanism, with $\theta$ and $\psi$ which are assumed to be distinct. Alternatively, PMMs factor the joint distribution as
+
+$$
+f(m_i,y_i \mid x_i, \theta, \psi) = f(y_i \mid x_i, m_i,\xi)f(m_i \mid x_i),
+$$
+
+where the first factor is the distribution of $y_i$ in the strata defined by different patterns of missingness $m_i$ while the second factor models the probabilities of the different patterns, with $\xi$ which are assumed to be distinct (@little1993pattern,@little2019statistical). The distinction between the two factorisations becomes clearer when considering a specific example.
+
+Suppose thta missing values are confined to a single variable and let $y_i=(y_{i,1},y_{i2})$ be a bivariate response outcome where $y_{i1}$ is fully observed and $y_{i2}$ is observed for $i=1,\ldots,n_{cc}$ but missing for $i=n_{cc}+1,\ldots,n$. Let $m_{i2}$ be the missingness indicator for $y_{i2}$, then a PMM factors the denisty of $Y_0$ and $M$ given $X$ as
+
+$$
+f(y_0, M \mid X, \xi)=\prod_{i=1}^{n_{cc}}f(y_{i1},y_{i2}\mid x_i, m_{i2}=0,\xi)Pr(m_{i2}=0 \mid x_i, \omega) \times \prod_{i=n_{cc}+1}^{n}f(y_{i1} \mid x_i, m_{i2}=1,\xi)Pr(m_{i2}=1 \mid x_i, \omega).
+$$
+
+This expression shows that there are no data with which to estimate directly the distribution $f(y_{i2} \mid x_i, m_{i2}=1,\xi)$, because all units with $m_{i2}=1$ have $y_{i2}$ missing. Under MAR, this is identified using the distribution of the observed data $f(y_{i2} \mid x_i, m_{i2}=1,\xi)=f(y_{i2} \mid x_i, m_{i2}=0,\xi)$, while under MNAR it must be identified using other assumptions. The SM formulation is
+
+$$
+f(y_i, m_{i2} \mid \theta, \psi) = f(y_{i1} \mid x_i, \theta)f(y_{i2} \mid x_i, y_{i1},\theta)f(m_{i2}\mid x_i,y_{i1},y_{i2},\psi).
+$$
+
+Typically, the missingness mechanism $f(m_{i2} \mid x_i,y_{i1},y_{i2},\psi)$ is modelled using some additive probit or logit regression of $m_{i2}$ on $x_i$,$y_{i1}$ and $y_{i2}$. However, the coefficient of $y_{i2}$ in this regression is not directly estimable from the data and hence the model cannot be fully estimated without extra assumptions.
+
+### Normal Models for MNAR data
+
+Assume we have a complete sample $(y_i,x_i)$ on a continuous variable $Y$ and a set of fully observed covariates $X$, for $i=1,\ldots,n$. Suppose that $i=1,\ldots,n_{cc}$ units are observed while the remaining $i=n_{cc}+1,\ldots,n$ units are missing, with $m_i$ being the corresponding missingness indicator. Heckman (@heckman1976common) proposed the following selection model to handle missingness:
+
+$$
+y_i \mid x_i, \theta, \psi \sim N(\beta_0 + \beta_1x_i, \sigma^2) \;\;\; \text{and} \;\;\; m_i \mid x_i,y_i,\theta,\psi \sim Bern\left(\Phi(\psi_0 + \psi_1x_i + \psi_2y_i) \right),
+$$
+
+where $\theta=(\beta_0,\beta_1,\sigma^2)$ and $\Phi$ denotes the probit (cumulative normal) distribution function. Note that if $\psi_2=0$, the missing data are MAR, while if $\psi_2 \neq 0$ the missing data are MNAR since missingness in $Y$ depends on the unobserved value of $Y$. This model can be estimated using either a two-step least squares method, ML in combination with an EM algorithm, or a Bayesian approach. The main issue is the lack of information about $\psi_2$, which can be partly identified through the specific assumptions about the distribution of the observed data of $Y$. This, however, makes the implicit assumption that the assumed distribution can well described the distribution of the complete (observed and missing) data which can never be tested or checked. An alternative approach is to use a PMM factorisation and model:
+
+$$
+y_i \mid m_i=m,x_i,\xi,\omega \sim N(\beta_0^m + \beta_1^mx_i, \sigma^{2m})\;\;\; \text{and} \;\;\; m_i \mid x_i,\xi,\omega \sim Bern\left(\Phi(\omega_0 + \omega_1x_i) \right),
+$$
+
+where $\xi=(\beta_0^m,\beta_1^m,\sigma^{2m},\;\;\; m=0,1)$. This model implies that the distribution of $y_i$ given $x_i$ in the population is a mixture of two normal distributions with mean
+
+$$
+\left[1 - \Phi(\omega_0 + \omega_1x_i) \right] \left[\beta_0^0 + \beta_1^0 x_i \right] + \left[\Phi(\omega_0 + \omega_1x_i) \right] \left[\beta_0^1 + \beta_1^1 x_i \right].
+$$
+
+The parameters $(\beta_0^0,\beta_1^0,\sigma^{20},\omega)$ can be estimated from the data but the parameters $(\beta_0^1,\beta_1^1,\sigma^{21})$ are not estimable because $y_i$ is missing when $m_i=1$. Under MAR, the distribution of $Y$ given $X$ is the same for units with $Y$ observed and missing, such that $\beta_0^0=\beta_0^1=\beta_0$ (as well as for $\beta_1$ and $\sigma^2$). Under MNAR, other assumptions are needed to esitmate the parameters indexed by $m=1$.
+
+
+Some final considerations:
+
+* Both SM and PMM model the joint distribution of $Y$ and $M$.
+
+* The SM formulation is more natural when the substantive interest concerns the relationship between $Y$ and $X$ in the population. However, these parameters can also be derived in PMM by averaging the patterns specific parameters over the missingness patterns.
+
+* The PMM factorisation is more transparent in terms of the underlying assumptions about the unidentified parameters of the model, while SM tends to impose some obscure constraints in order to identify these parameters, which are also difficult to interpret.
+
+* Given specific assumptions to identify all the parameters in the model, PMMs are often easier to fit than SMs. In addition, imputations of the missing values are based on the predictive distribution of $Y$ given $X$ and $M=0$.
+
+These considerations seem to favour PMM over SM as MNAR approaches, especially when considering *sensitivity analysis*. Bayesian approaches can also be used to identify these models, by assigning prior distributions which can be used to identify those parameters which cannot be estimated from the data. Justifications for the choice of these priors are therefore necessary to ensure the plausibility of the assumptions assessed and the impact of these assumptions on the posterior inference.
+
+
+
+# References
+

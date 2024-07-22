@@ -1,0 +1,89 @@
+---
+title: "Expectation Maximisation Algorithm"
+description: "An Expectation–Maximization (EM) algorithm is an iterative method to find maximum likelihood or maximum a posteriori estimates of parameters in statistical models, where the model depends on unobserved latent variables"
+date: 2016-04-27
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+mainfont: Montserrat
+bibliography: emalgorithm.bib
+---
+
+Patterns of incomplete data in practice often do not have the forms that allow explicit *Maximum Likelihood*(ML) estimates to be calculated. Suppose we have a model for the complete data $Y$, with density $f(Y\mid \theta)$, indexed by the set of unknown parameters $\theta$. Writing $Y=(Y_0,Y_1)$ in terms of the observed $Y_0$ and missing $Y_1$ components, and assuming that the missingness mechanism is *Missing At Random*(MAR), we want to maximise the likelihood
+
+$$
+L\left(\theta \mid Y_0 \right) = \int f\left(Y_0, Y_1 \mid \theta  \right)dY_1
+$$
+
+with respect to $\theta$. When the likelihood is differentiable and unimodal, ML estimates can be found by solving the likelihood equation
+
+$$
+D_l\left(\theta \mid Y_0 \right) \equiv \frac{\partial ln L\left(\theta \mid Y_0 \right)}{\partial \theta} = 0, 
+$$
+
+while, if a closed-form solution cannot be found, iterative methods can be applied. One of these methods is the popular *Expectation Maximisation*(EM) algorithm (@dempster1977maximum).
+
+The EM algorithm is a general iterative method for ML estimation in incomplete data problems. The basic idea behind it is based on a sequence of steps:
+
+* Replace missing values by estimated values 
+
+* Estimate the parameters
+
+* Re-estimate the missing values assuming the new parameter estimates are correct
+
+* Re-estimate parameters
+
+The procedure is then iterated until apparent convergence. Each iteration of EM consists of an *expectation step* (E step) and a *maximisation step* (M step) which ensure that, under general conditions, each iteration increases the loglikelihood $l(\theta \mid Y_0)$. In addition, if the loglikelihood is bounded, the sequence $\{l(\theta_t \mid Y_0), t=(0,1,\ldots)\}$ converges to a stationary value of $l(\theta \mid Y_0)$.
+
+## The E step and the M step
+
+The M step simply consists of performing ML estimation of $\theta$ as if there were no missing data, that is, after they had been filled in. The E step finds the conditional expectation of the missing values given the observed data and current estimated parameters. In practice, EM does not necessarily substitute the missing values themselves but its key idea is that they are generally not $Y_0$ but the functions of $Y_0$ appearing in the complete data loglikelihood $l(\theta \mid Y)$. Specifically, let $\theta_t$ be the current estimate of $\theta$, then the E step finds the expected complete data loglikelihood if $\theta$ were $\theta_t$:
+
+$$
+Q\left(\theta \mid \theta_t \right) = \int l\left(\theta \mid Y \right)f\left(Y_0  \mid Y_1 , \theta = \theta_t \right)dY_0.
+$$
+
+The M step determines $\theta_{t+1}$ by maximising this expected complete data loglikelihood:
+
+$$
+Q\left(\theta_{t+1} \mid \theta_t \right) \geq Q\left(\theta \mid \theta_t \right),
+$$
+
+for all $\theta$.
+
+### Univariate Normal Data Example
+
+Suppose $y_i$ form a an iid sample from a Normal distribution with population mean $\mu$ and variance $\sigma^2$, for $i=1,\ldots,n_{cc}$ observed units and $i=n_{cc}+1,\ldots,n$ missing units. Under the assumption that the missingness mechanism is ignorable, the expectation of each missing $y_i$ given $Y_{obs}$ and $\theta=(\mu,\sigma^2)$ is $\mu$. Since the loglikelihood based on all $y_i$ is linear in the sufficient statistics $\sum_{i=1}^n y_i$ and $\sum_{i=1}^n y^2_i$, the E step of the algorithm calculates
+
+$$
+E\left(\sum_{i=1}^{n}y_i \mid \theta_t, Y_0 \right) = \sum_{i=1}^{n_{cc}}y_i + (n-n_{cc})\mu_t 
+$$
+
+and
+
+$$
+E\left(\sum_{i=1}^{n}y^2_i \mid \theta_t, Y_0 \right) = \sum_{i=1}^{n_{cc}}y^2_i + (n-n_{cc})\left(\mu^2_t + \sigma^2_t \right) 
+$$
+
+for current estimates $\theta_t=(\mu_t,\sigma_t)$ of the parameters. Note that simply substituting $\mu_t$ for the missing values $y_{n_{cc}+1},\ldots,y_n$ is not correct since the term $(n-n_{cc})(\sigma_t^2)$ is omitted. Without missing data, the ML estimate of $\mu$ and $\sigma^2$ are $\frac{\sum_{i=1}^ny_i}{n}$ and $\frac{\sum_{i=1}^ny^2_i}{n}-\left(\frac{\sum_{i=1}^ny_i}{n}\right)^2$, respectively. The M step uses the same expressions based on the current expectations of the sufficient statistics calculated in the E step. Thus, the M step calculates
+
+$$
+\mu_{t+1} = \frac{E\left(\sum_{i=1}^n y_i \mid \theta_t, Y_0 \right)}{n}
+$$
+
+and 
+
+$$
+\sigma^2_{t+1} = \frac{E\left(\sum_{i=1}^n y^2_i \mid \theta_t, Y_0 \right)}{n} - \mu^2_{t+1}.
+$$
+
+Setting $\mu_t=\mu_{t+1}=\hat{\mu}$ and $\sigma_t=\sigma_{t+1}=\hat{\sigma}$ in these equations shows that a fixed point of these iterations is $\hat{\mu}=\frac{\sum_{i=1}^{n_{cc}}y_i}{n_{cc}}$ and $\hat{\sigma}^2=\frac{\sum_{i=1}^{n_{cc}}y^2_i}{n_{cc}} - \hat{\mu}^2$, which are the ML estimates of the parameters from $Y_0$ assuming MAR and distinctness of the parameters.
+
+
+## Extensions of EM
+
+There are a variety of applications where the M step does not have a simple computational form. In such cases, one way to avoid an iterative M step is to increase the Q function, rather than maximising it at each iteration, which corresponds to a *Generalised Expectation Maximisation*(GEM) algorithm. GEM inceases the likelihood at each iteration but appropriate convergence is not guaranteed without further specification of the process of increasing the Q function. One specific case of GEM is the *Expectation Conditional Maximisation*(ECM) algorithm (@meng1993maximum), which replaces the M step with a sequence of $S$ conditional maximisation (CM) steps, each of which maximises the Q function over $\theta$ but with some vector function of $\theta$, say $g_s(\theta)$, fixed at its previous values for $s=1,\ldots,S$. Very briefly, assume that we have a parameter $\theta$ that can be partitioned into subvectors $\theta=(\theta_1,\ldots,\theta_S)$, then we can take the $s$-th of the CM steps to be maximisation with respect to $\theta_s$ with all other parameters held fixed. Alternatively, it may be useful to take the $s$-th of the CM steps to be simultaneous maximisation over all of the subvectors expect $\theta_s$, which is fixed. Because the ECM increases Q, it belongs to the class of GEM algorithms and therefore monotonically increases the likelihood of $\theta$. When the set of functions $g$ is "space filling" in the sense that it allows unconstrained maximisation over $\theta$ in its parameter space, ECM converges to a stationary point under the same conditions ensuring convergence of EM. 
+
+The *Expectation Conditional Maximisation Either*(ECME) algorithm (@liu1994ecme) is another version of GEM, which replaces some of the CM steps of ECM, maximising the constrained expected complete data loglikelihood function, with steps that maximise the correspondingly constrained actual likelihood function. The algorithm has stable monotone convergence and basic simplicity implementation relative to competing faster converging methods, and can have faster convergence rate than EM or ECM, measured using either the number of iterations or actual computer time. The The *Alternative Expectation Conditional Maximisation*(AECM) algorithm (@meng1997algorithm) builds on the ECME idea by maximising functions other than Q or L in particular CM steps, corresponding to varying definitions of what constitutes missing data. An iteration of AECM consists of cycles, each consisting of an E step with a particular definition of complete and missing data, followed by CM steps, which can result in enhanced computational efficiency.
+
+
+# References
+
