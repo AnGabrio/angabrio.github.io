@@ -1,0 +1,25 @@
+
+model {
+ for (i in 1:n){
+  for (j in 1:p){
+   Y[i , j] ~ dbern ( prob [i , j])
+   logit ( prob [i , j]) <- theta [i] - delta [j]
+  }
+  theta [i] ~ dnorm (0.0 , 1.0)
+ }
+
+ for (j in 1:p){
+  delta [j] ~ dnorm (mu.delta , pr.delta )
+ }
+  pr.delta <- pow(s.delta , -2)
+  mu.delta ~ dnorm(0, 5)
+  s.delta ~ dunif(0, 10)
+  
+  for(i in 1:n){
+   for(j in 1:p){
+    Y.rep[i, j] ~ dbern(prob[i, j])
+    loglik_y[i, j]<-logdensity.bern(Y[i,j], prob[i, j])
+   }
+  }
+}
+
