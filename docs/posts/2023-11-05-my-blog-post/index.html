@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2023-11-05">
+
+<title>angabrio.github.io - A tutorial on using R to conduct trial-based CEA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#step-1-imputation" id="toc-step-1-imputation" class="nav-link active" data-scroll-target="#step-1-imputation">Step 1 Imputation</a></li>
+  <li><a href="#step-2-model-fitting" id="toc-step-2-model-fitting" class="nav-link" data-scroll-target="#step-2-model-fitting">Step 2 Model fitting</a></li>
+  <li><a href="#step-3-cea" id="toc-step-3-cea" class="nav-link" data-scroll-target="#step-3-cea">Step 3 CEA</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">A tutorial on using R to conduct trial-based CEA</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">health economics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 5, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Hello dear readers, here I am with a new post about using statistics in health economic evaluations. Today I want to take a break from the quick examples I gave on using Bayesian methods in CEA and instead focus on the research work of <a href="https://link.springer.com/article/10.1007/s40273-023-01301-7">Ben at al.&nbsp;(2023)</a> entitled <strong>Conducting Trial‑Based Economic Evaluations Using R: A Tutorial</strong>, which has been recently published on PharmacoEconomics. I was very intrigued by this publication as last year I had the pleasure to meet and discuss in person with the main author of the paper, who seemed to be well aware and knowledgeable about the importance of using adequate statistical methods in trial-based CEA. From a first look at the paper I can already tell the the content is super relevant in that it provides some concrete examples and lines of code to implement what is now considered the “standard” approach to perform trial-based CEA, taking into account most of the typical complexities that affect CEA data. However, I thought having a quick review of the paper here would be the perfect chance for me to dive into the details of the methods proposed by the author and discuss their perspective and key points.</p>
+<p>The paper is constructed in the form of a step-by-step tutorial on performing trial-based CEA using a variety of methods to account for possible issues affecting the data. To demonstrate how the methods can be applied in practice, they simulate a fake RCT dataset of 200 people (106 in the control and 94 in the intervention) together with other baseline variables that include age, sex, utility scores and costs. The construct a treatment variable Tr denoting whether individuals were assigned to the control (0) or intervention (1) group, and generate follow-up outcome variables for both utilities and costs for 3, 6, 9 and 12 months. Finally, they introduce missingness in all outcome follow-up variables according to a <strong>missing at random</strong> (MAR) assumption, where the chance of missingness is made dependent on the observed baseline variables age and sex. Key characteristics of the data that they outlined as important to take into account, and which are typical of most CEAs, include: presence of missing outcome data in both effectiveness and cost post-randomisation variables, high degrees of skewness for all outcome variables, presence of a correlation between utilities and costs, and presence of imbalances between the groups in some baseline variables. To tackle these issues within a single analysis, as it often occurs in practice, they suggest the use of well-known approaches in the literature, including the use of multiple imputation to handle MAR missingness, non-parametric bootstrapping to handle non-normality, seemingly unrelated regression methods to capture correlations, and regression adjustment approaches to account for baseline imbalances. Although all these methods are well known in the literature, they are hardly used <strong>jointly</strong> in a real analysis, even in the presence of all these data features, possibly because of the lack of knowledge of expertise needed in order to implement such approaches in standard software. Because of this, I really think this paper provides some useful and very heplful indications and guidelines to readers interested in these analyses and warn them about the pitfalls of relying on the use of simpler but likely inadequate methods (e.g.&nbsp;simply discarding missing cases or ad-hoc imputing missing values instead of accounting for properly missingness uncertainty).</p>
+<p>For the purpose of this post, I will simulate my own dataset and apply the methods the author proposed to the newly generated data, so keep in mind that results will not be the same as those obtained by the authors using their own simulated data. So, let’s start with simulating a multivariate non-normal outcome variables (utilities and costs) for 200 people at multiple time points (time 0, 1, 2, 3, 4). To simulate these types of outcomes, for example, I can rely on Gamma distributions and link these distributions to each other through a regression to the mean approach in order to ensure some degree of correlation between each pair of variables. As for the temporal association, we can assume a first-order autoregressive structure to simplify the simulation of the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>Tr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">106</span>),<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">94</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">50</span>, <span class="dv">17</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sex <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.4</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>beta0_u0 <span class="ot">&lt;-</span> <span class="fl">0.3</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>beta1_u0 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>u0 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (beta0_u0 <span class="sc">+</span> beta1_u0<span class="sc">*</span>Tr <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>beta0_c0 <span class="ot">&lt;-</span> <span class="fl">0.1</span> </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>beta1_c0 <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>beta2_c0 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>c0 <span class="ot">&lt;-</span> beta0_c0 <span class="sc">+</span> beta1_c0<span class="sc">*</span>Tr <span class="sc">+</span> beta2_c0<span class="sc">*</span>(u0 <span class="sc">-</span> <span class="fu">mean</span>(u0)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>beta0_u1 <span class="ot">&lt;-</span> <span class="fl">0.6</span> </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>beta1_u1 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>beta2_u1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.6</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>beta3_u1 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>u1 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (beta0_u1 <span class="sc">+</span> beta1_u1<span class="sc">*</span>Tr <span class="sc">+</span> beta2_u1<span class="sc">*</span>(c0 <span class="sc">-</span> <span class="fu">mean</span>(c0)) <span class="sc">+</span> beta3_u1<span class="sc">*</span>(u0 <span class="sc">-</span> <span class="fu">mean</span>(u0)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.5</span>, <span class="dv">2</span>))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>beta0_c1 <span class="ot">&lt;-</span> <span class="fl">0.2</span> </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>beta1_c1 <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>beta2_c1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>beta3_c1 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>c1 <span class="ot">&lt;-</span> beta0_c1 <span class="sc">+</span> beta1_c1<span class="sc">*</span>Tr <span class="sc">+</span> beta2_c1<span class="sc">*</span>(u1 <span class="sc">-</span> <span class="fu">mean</span>(u1)) <span class="sc">+</span> beta2_c1<span class="sc">*</span>(c0 <span class="sc">-</span> <span class="fu">mean</span>(c0)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>beta0_u2 <span class="ot">&lt;-</span> <span class="fl">0.6</span> </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>beta1_u2 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>beta2_u2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.6</span> </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>beta3_u2 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>u2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (beta0_u2 <span class="sc">+</span> beta1_u2<span class="sc">*</span>Tr <span class="sc">+</span> beta2_u2<span class="sc">*</span>(c1 <span class="sc">-</span> <span class="fu">mean</span>(c1)) <span class="sc">+</span> beta3_u2<span class="sc">*</span>(u1 <span class="sc">-</span> <span class="fu">mean</span>(u1)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.5</span>, <span class="dv">2</span>))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>beta0_c2 <span class="ot">&lt;-</span> <span class="fl">0.2</span> </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>beta1_c2 <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>beta2_c2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>beta3_c2 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> beta0_c2 <span class="sc">+</span> beta1_c2<span class="sc">*</span>Tr <span class="sc">+</span> beta2_c2<span class="sc">*</span>(u2 <span class="sc">-</span> <span class="fu">mean</span>(u2)) <span class="sc">+</span> beta2_c2<span class="sc">*</span>(c1 <span class="sc">-</span> <span class="fu">mean</span>(c1)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>beta0_u3 <span class="ot">&lt;-</span> <span class="fl">0.6</span> </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>beta1_u3 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>beta2_u3 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.6</span> </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>beta3_u3 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>u3 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (beta0_u3 <span class="sc">+</span> beta1_u3<span class="sc">*</span>Tr <span class="sc">+</span> beta2_u3<span class="sc">*</span>(c2 <span class="sc">-</span> <span class="fu">mean</span>(c2)) <span class="sc">+</span> beta3_u3<span class="sc">*</span>(u2 <span class="sc">-</span> <span class="fu">mean</span>(u2)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.5</span>, <span class="dv">2</span>))</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>beta0_c3 <span class="ot">&lt;-</span> <span class="fl">0.3</span> </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>beta1_c3 <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>beta2_c3 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>beta3_c3 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>c3 <span class="ot">&lt;-</span> beta0_c3 <span class="sc">+</span> beta1_c3<span class="sc">*</span>Tr <span class="sc">+</span> beta2_c3<span class="sc">*</span>(u3 <span class="sc">-</span> <span class="fu">mean</span>(u3)) <span class="sc">+</span> beta2_c3<span class="sc">*</span>(c2 <span class="sc">-</span> <span class="fu">mean</span>(c2)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>beta0_u4 <span class="ot">&lt;-</span> <span class="fl">0.8</span> </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>beta1_u4 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>beta2_u4 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.4</span> </span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>beta3_u4 <span class="ot">&lt;-</span> <span class="fl">0.3</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>u4 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (beta0_u4 <span class="sc">+</span> beta1_u4<span class="sc">*</span>Tr <span class="sc">+</span> beta2_u4<span class="sc">*</span>(c3 <span class="sc">-</span> <span class="fu">mean</span>(c3)) <span class="sc">+</span> beta3_u4<span class="sc">*</span>(u3 <span class="sc">-</span> <span class="fu">mean</span>(u3)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.01</span>, <span class="fl">1.5</span>))</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>beta0_c4 <span class="ot">&lt;-</span> <span class="fl">0.3</span> </span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>beta1_c4 <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>beta2_c4 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>beta3_c4 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>c4 <span class="ot">&lt;-</span> beta0_c3 <span class="sc">+</span> beta1_c3<span class="sc">*</span>Tr <span class="sc">+</span> beta2_c3<span class="sc">*</span>(u4 <span class="sc">-</span> <span class="fu">mean</span>(u4)) <span class="sc">+</span> beta2_c3<span class="sc">*</span>(c3 <span class="sc">-</span> <span class="fu">mean</span>(c3)) <span class="sc">+</span> <span class="fu">rgamma</span>(n, <span class="fl">0.1</span>, <span class="fl">2.5</span>)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, age, sex, Tr, u0, c0, u1, c1, u2, c2, u3, c3, u4, c4)</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c0 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c0<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c1 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c1<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c2 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c2<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c3 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c3<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c4 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c4<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now inspect the empirical distributions of the two outcomes by treatment group to have an idea of the level of the associated skewness and examine correlation coefficients to see what type of association we should expect to find. For example, let’s examine the pair of u and c variables at time 4:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>Trf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>Tr)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>Trf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>Trf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>Tr)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>Trf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>u4_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>u4))<span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Trf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>c4_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>c4))<span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Trf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u4_hist, c4_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>With a correlation coefficient between the two variables of -0.1962025. Next, we need to introduce some missing values at all follow-up times, using a MAR mechanism dependent on age and sex. We can accomplish this using a series of logistic regression using as outcome the missingness indicator for the corresponding outcome variable and including into those regressions age and sex as predictors. We then need to play around with the regression coefficients to obtain desired amount of missing values for each variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>gamma0_u1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.3</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>gamma1_u1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>gamma2_u1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>pi_u1 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_u1 <span class="sc">+</span> gamma1_u1<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_u1<span class="sc">*</span>sex)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>m_u1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_u1)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>gamma0_c1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.3</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>gamma1_c1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>gamma2_c1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>pi_c1 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_c1 <span class="sc">+</span> gamma1_c1<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_c1<span class="sc">*</span>sex)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>m_c1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_c1)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>gamma0_u2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>gamma1_u2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>gamma2_u2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>pi_u2 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_u2 <span class="sc">+</span> gamma1_u2<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_u2<span class="sc">*</span>sex)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>m_u2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_u1)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>gamma0_c2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>gamma1_c2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>gamma2_c2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>pi_c2 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_c2 <span class="sc">+</span> gamma1_c2<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_c2<span class="sc">*</span>sex)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>m_c2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_c2)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>gamma0_u3 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>gamma1_u3 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>gamma2_u3 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>pi_u3 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_u3 <span class="sc">+</span> gamma1_u3<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_u3<span class="sc">*</span>sex)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>m_u3 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_u3)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>gamma0_c3 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>gamma1_c3 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>gamma2_c3 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>pi_c3 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_c3 <span class="sc">+</span> gamma1_c3<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_c3<span class="sc">*</span>sex)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>m_c3 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_c3)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>gamma0_u4 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>gamma1_u4 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>gamma2_u4 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>pi_u4 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_u4 <span class="sc">+</span> gamma1_u4<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_u4<span class="sc">*</span>sex)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>m_u4 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_u4)</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>gamma0_c4 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>gamma1_c4 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>gamma2_c4 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>pi_c4 <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(gamma0_c4 <span class="sc">+</span> gamma1_c4<span class="sc">*</span>(age<span class="sc">/</span><span class="dv">100</span>) <span class="sc">+</span> gamma2_c4<span class="sc">*</span>sex)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>m_c4 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, pi_c4)</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>u1 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_u1<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,u1)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>c1 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_c1<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,c1)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>u2 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_u2<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,u2)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_c2<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,c2)</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>u3 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_u3<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,u3)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>c3 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_c3<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,c3)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>u4 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_u4<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,u4)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>c4 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(m_c4<span class="sc">==</span><span class="dv">1</span>,<span class="cn">NA</span>,c4)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, Tr, age, sex, u0, c0, u1, c1, u2, c2, u3, c3, u4, c4)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c0 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c0<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c1 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c1<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c2 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c2<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c3 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c3<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c4 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c4<span class="sc">*</span><span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can inspect the data through the command “summary” in order to have an idea about the number and proportions of missing values for each variable in our dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data_sim_ec_obs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       id               Tr            age               sex       
+ Min.   :  1.00   Min.   :0.00   Min.   :  5.697   Min.   :0.000  
+ 1st Qu.: 50.75   1st Qu.:0.00   1st Qu.: 40.261   1st Qu.:0.000  
+ Median :100.50   Median :0.00   Median : 50.613   Median :0.000  
+ Mean   :100.50   Mean   :0.47   Mean   : 50.345   Mean   :0.405  
+ 3rd Qu.:150.25   3rd Qu.:1.00   3rd Qu.: 60.196   3rd Qu.:1.000  
+ Max.   :200.00   Max.   :1.00   Max.   :102.607   Max.   :1.000  
+                                                                  
+       u0                c0                u1                 c1         
+ Min.   :-0.4017   Min.   :  83.03   Min.   :-1.45341   Min.   : -94.59  
+ 1st Qu.: 0.5993   1st Qu.:  85.08   1st Qu.:-0.02676   1st Qu.: 211.69  
+ Median : 0.6000   Median : 323.86   Median : 0.24521   Median : 363.23  
+ Mean   : 0.6152   Mean   : 248.09   Mean   : 0.11125   Mean   : 351.79  
+ 3rd Qu.: 0.6997   3rd Qu.: 356.89   3rd Qu.: 0.32320   3rd Qu.: 438.14  
+ Max.   : 0.7000   Max.   :1131.00   Max.   : 0.69507   Max.   :1059.01  
+                                     NA's   :68         NA's   :47       
+       u2                 c2               u3                 c3        
+ Min.   :-1.69971   Min.   :-346.4   Min.   :-1.82613   Min.   : 110.7  
+ 1st Qu.:-0.11202   1st Qu.: 208.7   1st Qu.:-0.12191   1st Qu.: 327.5  
+ Median : 0.17524   Median : 331.9   Median : 0.15356   Median : 447.7  
+ Mean   : 0.04501   Mean   : 348.4   Mean   : 0.03382   Mean   : 454.9  
+ 3rd Qu.: 0.27519   3rd Qu.: 441.6   3rd Qu.: 0.27746   3rd Qu.: 529.4  
+ Max.   : 1.20925   Max.   :1173.7   Max.   : 0.92052   Max.   :1528.8  
+ NA's   :72         NA's   :81       NA's   :96         NA's   :99      
+       u4                 c4        
+ Min.   :-0.26983   Min.   : 121.7  
+ 1st Qu.: 0.05507   1st Qu.: 340.5  
+ Median : 0.13413   Median : 422.7  
+ Mean   : 0.14381   Mean   : 463.7  
+ 3rd Qu.: 0.20350   3rd Qu.: 572.4  
+ Max.   : 0.84580   Max.   :1153.8  
+ NA's   :124        NA's   :123     </code></pre>
+</div>
+</div>
+<p>We have finally generated our partially-observed CEA dataset and we proceed now to implement the methods described in Ben at el. (2023) to perform the economic evaluation.</p>
+<section id="step-1-imputation" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-imputation">Step 1 Imputation</h2>
+<p>First, the problem of missing values is handled via multiple imputation techniques separately by treatment arm, with particular reference to its <em>multiple imputation by chained equations</em> version. This is typically the type of MI methods used due to the simplicity of implementation (based on univariate regression approaches) and its flexibility in dealing with data-specific features such as high levels of skewness. Indeed, at the imputation step, an imputation model is created using the <em>predictive mean matching</em> approach which allows to preserves the features of the data you are trying to impute (the basic idea is that imputations are generated based on some sampling with replacement approach from the observed data). I this way, M=5 imputed datasets are created and then aggregated quantities in terms of effectiveness (e.g.&nbsp;QALYs) and costs are generated by combining the imputations for each imputed outcome variable across datasets. In my example, since missingness only depends on age and sex, I remove all outcome variables as predictors from the imputation models to simplify the implementation. In general, since MAR cannot be tested, it is always wise to include as many observed variables as possible as predictors in the imputation model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Tr0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(data_sim_ec_obs, Tr<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Tr1 <span class="ot">&lt;-</span> <span class="fu">subset</span>(data_sim_ec_obs, Tr<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pred.Mat <span class="ot">&lt;-</span> <span class="fu">make.predictorMatrix</span>(data_sim_ec_obs)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pred.Mat[,<span class="fu">c</span>(<span class="st">"Tr"</span>,<span class="st">"id"</span>,<span class="st">"u1"</span>,<span class="st">"c1"</span>,<span class="st">"u2"</span>,<span class="st">"c2"</span>,<span class="st">"u3"</span>,<span class="st">"c3"</span>,<span class="st">"u4"</span>,<span class="st">"c4"</span>)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>imp.Tr0 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr0, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ iter imp variable
+  1   1  u1  c1  u2  c2  u3  c3  u4  c4
+  1   2  u1  c1  u2  c2  u3  c3  u4  c4
+  1   3  u1  c1  u2  c2  u3  c3  u4  c4
+  1   4  u1  c1  u2  c2  u3  c3  u4  c4
+  1   5  u1  c1  u2  c2  u3  c3  u4  c4
+  2   1  u1  c1  u2  c2  u3  c3  u4  c4
+  2   2  u1  c1  u2  c2  u3  c3  u4  c4
+  2   3  u1  c1  u2  c2  u3  c3  u4  c4
+  2   4  u1  c1  u2  c2  u3  c3  u4  c4
+  2   5  u1  c1  u2  c2  u3  c3  u4  c4
+  3   1  u1  c1  u2  c2  u3  c3  u4  c4
+  3   2  u1  c1  u2  c2  u3  c3  u4  c4
+  3   3  u1  c1  u2  c2  u3  c3  u4  c4
+  3   4  u1  c1  u2  c2  u3  c3  u4  c4
+  3   5  u1  c1  u2  c2  u3  c3  u4  c4
+  4   1  u1  c1  u2  c2  u3  c3  u4  c4
+  4   2  u1  c1  u2  c2  u3  c3  u4  c4
+  4   3  u1  c1  u2  c2  u3  c3  u4  c4
+  4   4  u1  c1  u2  c2  u3  c3  u4  c4
+  4   5  u1  c1  u2  c2  u3  c3  u4  c4
+  5   1  u1  c1  u2  c2  u3  c3  u4  c4
+  5   2  u1  c1  u2  c2  u3  c3  u4  c4
+  5   3  u1  c1  u2  c2  u3  c3  u4  c4
+  5   4  u1  c1  u2  c2  u3  c3  u4  c4
+  5   5  u1  c1  u2  c2  u3  c3  u4  c4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>imp.Tr1 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr1, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ iter imp variable
+  1   1  u1  c1  u2  c2  u3  c3  u4  c4
+  1   2  u1  c1  u2  c2  u3  c3  u4  c4
+  1   3  u1  c1  u2  c2  u3  c3  u4  c4
+  1   4  u1  c1  u2  c2  u3  c3  u4  c4
+  1   5  u1  c1  u2  c2  u3  c3  u4  c4
+  2   1  u1  c1  u2  c2  u3  c3  u4  c4
+  2   2  u1  c1  u2  c2  u3  c3  u4  c4
+  2   3  u1  c1  u2  c2  u3  c3  u4  c4
+  2   4  u1  c1  u2  c2  u3  c3  u4  c4
+  2   5  u1  c1  u2  c2  u3  c3  u4  c4
+  3   1  u1  c1  u2  c2  u3  c3  u4  c4
+  3   2  u1  c1  u2  c2  u3  c3  u4  c4
+  3   3  u1  c1  u2  c2  u3  c3  u4  c4
+  3   4  u1  c1  u2  c2  u3  c3  u4  c4
+  3   5  u1  c1  u2  c2  u3  c3  u4  c4
+  4   1  u1  c1  u2  c2  u3  c3  u4  c4
+  4   2  u1  c1  u2  c2  u3  c3  u4  c4
+  4   3  u1  c1  u2  c2  u3  c3  u4  c4
+  4   4  u1  c1  u2  c2  u3  c3  u4  c4
+  4   5  u1  c1  u2  c2  u3  c3  u4  c4
+  5   1  u1  c1  u2  c2  u3  c3  u4  c4
+  5   2  u1  c1  u2  c2  u3  c3  u4  c4
+  5   3  u1  c1  u2  c2  u3  c3  u4  c4
+  5   4  u1  c1  u2  c2  u3  c3  u4  c4
+  5   5  u1  c1  u2  c2  u3  c3  u4  c4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">rbind</span>(imp.Tr0,imp.Tr1)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>impdat <span class="ot">&lt;-</span> <span class="fu">complete</span>(imp, <span class="at">action =</span> <span class="st">"long"</span>, <span class="at">include =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> imp[[<span class="st">"m"</span>]]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>impdat<span class="sc">$</span>Tcosts <span class="ot">&lt;-</span> (impdat<span class="sc">$</span>c1 <span class="sc">+</span> impdat<span class="sc">$</span>c2 <span class="sc">+</span> impdat<span class="sc">$</span>c3 <span class="sc">+</span> impdat<span class="sc">$</span>c4)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>impdat<span class="sc">$</span>QALY <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span><span class="sc">*</span>(((impdat<span class="sc">$</span>u0 <span class="sc">+</span> impdat<span class="sc">$</span>u1)<span class="sc">*</span><span class="fl">0.25</span>) <span class="sc">+</span> (impdat<span class="sc">$</span>u1 <span class="sc">+</span> impdat<span class="sc">$</span>u2)<span class="sc">*</span><span class="fl">0.25</span> <span class="sc">+</span> (impdat<span class="sc">$</span>u2 <span class="sc">+</span> impdat<span class="sc">$</span>u3)<span class="sc">*</span><span class="fl">0.25</span> <span class="sc">+</span> ((impdat<span class="sc">$</span>u3 <span class="sc">+</span> impdat<span class="sc">$</span>u4)<span class="sc">*</span><span class="fl">0.25</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>impdata <span class="ot">&lt;-</span> <span class="fu">split</span>(impdat, <span class="at">f =</span> impdat<span class="sc">$</span>.imp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>One thing that the authors do not mention at this point, which however I think can be quite important, is the need to check convergence of the algorithm behind mice since this is essentially based on the same iterative approach of Markov Chain Monte Carlo methods used for Bayesian inference. The main point being that, in case of potential issues in convergence, then results may change depending on how many iterations you decide to run the model before “sampling” from it the imputations. See <a href="https://stefvanbuuren.name/fimd/sec-diagnostics.html">here</a> for a detailed explanation from the creator of mice, prof. Stef van Buuren, of why this is important to do and the different tools that can be used to do these checks. Some examples of diagnostic tools available in mice to check possible issues in the convergence of the algorithm: the <em>plot</em> function, by default showing the mean and variance of the imputations as a hint of the behaviour of the algorithm; the <em>stripplot</em> and <em>densityplot</em> function, respectively dedicated to compare the distributions and the kernel density estimates of imputed vs observed data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stripplot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">densityplot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Typically, when using imputation methods such as pmm and not too many predictors in the imputation model, these checks are more a formality since the algorithm should not have big problems in the convergence or in generating weird imputations. However, I would say it is always a good idea to checks these before looking at the results based on the imputed data.</p>
+</section>
+<section id="step-2-model-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-model-fitting">Step 2 Model fitting</h2>
+<p>Next, we proceed to use a non-parametric bootstrap procedure in combination with a SUR approach fitted at the level of the imputed QALY and TCost variables. These methods, implemented through the <em>boot</em> and <em>systemfit</em> package, account for the skewness of the imputed/observed data as well as the correlation between the outcome variables. These are very typical features of trial-based CEA data which need to be taken into account. In addition, the modelling framework granted by SUR allows the inclusion of predictors into the analysis by means of a regression adjustment approach, therefore allowing us to include important variables as predictors into the model to control for possible baseline imbalances between treatment groups.</p>
+<p>We start by creating a function to fit SUR models to the imputed QALY and TCost data and to extract the model estimates of interest, and then proceed to apply the boot function (here I choose to set the number of bootstrap replications to 1000) to each imputed dataset to retrieve the estimates of interest from each analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>fsur <span class="ot">&lt;-</span> <span class="cf">function</span>(x,i){</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a> dataset <span class="ot">&lt;-</span> x[i,]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a> r1 <span class="ot">&lt;-</span> Tcosts <span class="sc">~</span> Tr <span class="sc">+</span> c0 <span class="sc">+</span> age <span class="sc">+</span> sex</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a> r2 <span class="ot">&lt;-</span> QALY <span class="sc">~</span> Tr <span class="sc">+</span> u0 <span class="sc">+</span> age <span class="sc">+</span> sex</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a> fitsur <span class="ot">&lt;-</span> <span class="fu">systemfit</span>(<span class="fu">list</span>(<span class="at">costreg =</span> r1, <span class="at">effectreg =</span> r2), <span class="st">"SUR"</span>, <span class="at">data =</span> dataset)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a> betas <span class="ot">&lt;-</span> fitsur<span class="sc">$</span>coefficients</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a> <span class="fu">return</span>(<span class="fu">c</span>(betas[[<span class="st">"costreg_Tr"</span>]], betas[[<span class="st">"effectreg_Tr"</span>]]))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#ff &lt;- boot(data = impdata[[1]], statistic = fsur, R=1000)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>bootce <span class="ot">&lt;-</span> <span class="fu">lapply</span>(impdata, <span class="cf">function</span>(x) <span class="fu">boot</span>(<span class="at">data =</span> x, <span class="at">statistic =</span> fsur, <span class="at">R=</span><span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The main idea is to fir SUR models to each imputed dataset and, within each of these, run the analysis a sufficiently large amount of times (here 1000), each time sampling with replacement so to obtain a “distribution” of the estimates of interest for each analysis fitted to each of the imputed datasets. You can imagine that this procedure can become quite computationally expensive as soon as either the number of imputations or the number of bootstrap replications are increased. Unfortunately, this is neede in order to retrieve replications of the estimates of interest that capture both sampling uncertainty (by means of boostrapping) and missing data uncertainty (by means of multiple imputations). A quick note I would like to make here is that, despite this being the most easy way to implement this approach, it is not the only one. Indeed, it is also possible to: first generate bootstrap replications of the <strong>observed</strong> data alone leaving missing values as missing, and only then apply the multiple imputation procedure within each of the replicated bootstrapped observed dataset. See for reference the paper from <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.7956">Brand at al.&nbsp;(2018)</a>). In general, the latter is the one that makes ore sense to me since you are not generating bootstrap replications of imputed data which may or may not be an accurate representations of the actual underlying missing values, but only generate imputations after the observed data have been already bootstrapped. However, this procedure has the drawback of being much more challenging to implement due to the fact that, within each of the R boostrapped datasets you need to run M imputations. In addition, no strong evidence was found in the literature about the overperformance of one approach in comparison to the other in terms of estimates validity and efficiency, provided the model and missingness mechanism are correctly specified. In truth, there is no clear theoretical reasoning behind the performance of these approaches and conclusions on their appropriateness are mostly based on simulation results which seem to indicate no substantial difference between the two methods. Personally, I am always a bit hesitant to say that one method is better than the other given that no clear evidence as been found in the literature but I can understand that analysts always prefer the first approach due to its implementation simplicity.</p>
+<p>Moving on, we now proceed to extract the statistics of interest from each imputed dataset as well as from the overall bootstrapped list object. I believe it is important to note that you need to load the packages <em>dplyr</em> and <em>purrr</em> in order to obtain the output described by the author.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">lapply</span>(bootce, <span class="cf">function</span>(x)((x[[<span class="st">"t0"</span>]])))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">lapply</span>(imputed, setNames, <span class="fu">c</span>(<span class="st">"cost_diff"</span>,<span class="st">"effect_diff"</span>))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">reduce</span>(imputed, bind_rows))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>postboot <span class="ot">&lt;-</span> <span class="fu">lapply</span>(bootce, <span class="cf">function</span>(x) <span class="fu">as.data.frame</span>((x[[<span class="st">"t"</span>]])))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>postboot <span class="ot">&lt;-</span> <span class="fu">lapply</span>(postboot, setNames, <span class="fu">c</span>(<span class="st">"bootcost_diff"</span>,<span class="st">"booteffect_diff"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we pooled statistics of interest across imputed datasets via Rubin’rules and get additional information about imutations such as the fraction of missing information and loss of efficiency for both effectiveness and cost differential estimates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pooled <span class="ot">&lt;-</span> <span class="fu">apply</span>(imputed, <span class="dv">2</span>, mean)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cost_diff_pooled <span class="ot">&lt;-</span> pooled[[<span class="st">"cost_diff"</span>]]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>effect_diff_pooled <span class="ot">&lt;-</span> pooled[[<span class="st">"effect_diff"</span>]]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> cost_diff_pooled<span class="sc">/</span>effect_diff_pooled</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>cov <span class="ot">&lt;-</span> <span class="fu">lapply</span>(postboot, <span class="cf">function</span>(x) <span class="fu">cov</span>(x))</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>M<span class="sc">*</span>(cov[[<span class="st">"1"</span>]]<span class="sc">+</span>cov[[<span class="st">"2"</span>]]<span class="sc">+</span>cov[[<span class="st">"3"</span>]]<span class="sc">+</span>cov[[<span class="st">"4"</span>]]<span class="sc">+</span>cov[[<span class="st">"5"</span>]])</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>M){</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  B <span class="ot">&lt;-</span> B <span class="sc">+</span> (<span class="fu">matrix</span>(imputed[i,],<span class="at">nrow =</span> <span class="dv">2</span>) <span class="sc">-</span> pooled) <span class="sc">%*%</span> (<span class="fu">matrix</span>(imputed[i,],<span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">-</span> pooled)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(M<span class="dv">-1</span>)<span class="sc">*</span>B</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>cov_pooled <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">+</span><span class="dv">1</span><span class="sc">/</span>M)<span class="sc">*</span>B <span class="sc">+</span> W</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>Za <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>LL_cost_pooled <span class="ot">&lt;-</span> cost_diff_pooled <span class="sc">-</span> (Za<span class="sc">*</span><span class="fu">sqrt</span>(cov_pooled[<span class="dv">1</span>,<span class="dv">1</span>]))</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>UL_cost_pooled <span class="ot">&lt;-</span> cost_diff_pooled <span class="sc">+</span> (Za<span class="sc">*</span><span class="fu">sqrt</span>(cov_pooled[<span class="dv">1</span>,<span class="dv">1</span>]))</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>LL_effect_pooled <span class="ot">&lt;-</span> effect_diff_pooled <span class="sc">-</span> (Za<span class="sc">*</span><span class="fu">sqrt</span>(cov_pooled[<span class="dv">2</span>,<span class="dv">2</span>]))</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>UL_effect_pooled <span class="ot">&lt;-</span> effect_diff_pooled <span class="sc">+</span> (Za<span class="sc">*</span><span class="fu">sqrt</span>(cov_pooled[<span class="dv">2</span>,<span class="dv">2</span>]))</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>FMI <span class="ot">&lt;-</span> B<span class="sc">/</span>(B<span class="sc">+</span>W)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>LE <span class="ot">&lt;-</span> FMI<span class="sc">/</span>M</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-3-cea" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-cea">Step 3 CEA</h2>
+<p>Finally, we conclude the analysis by creating standard summaries of CE results, using the CE plane, net monetary benefit (NMB), and CEA curve. The authors write down their own code for getting this plot and I agree this is a nice idea to show how these are generated. However, for the purpose of analysts I think they can also rely on default package functions, such as bcea in the package <em>BCEA</em>, in order to automatically generate these plots. In case customisation of these is desired, then of course writing down your own code for the plotting is very useful.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpointdensity)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>point <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(imputed)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>boot <span class="ot">&lt;-</span> <span class="fu">reduce</span>(postboot, bind_rows)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> boot, <span class="fu">aes</span>(<span class="at">x=</span>booteffect_diff, <span class="at">y=</span>bootcost_diff)) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_pointdensity</span>(<span class="fu">aes</span>(booteffect_diff,bootcost_diff), <span class="at">size=</span><span class="dv">2</span>, <span class="at">alpha=</span><span class="fl">0.75</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>, <span class="at">adjust =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">x=</span><span class="fu">mean</span>(point<span class="sc">$</span>effect_diff), <span class="at">y =</span> <span class="fu">mean</span>(point<span class="sc">$</span>cost_diff)), <span class="fu">aes</span>(x,y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size=</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Diff in QALY"</span>) <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y=</span><span class="st">"Diff in TCost"</span>) <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.02</span>)) <span class="sc">+</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">4500</span>,<span class="at">by=</span><span class="dv">1000</span>)) <span class="sc">+</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>wtp <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">80000</span>,<span class="dv">1000</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>CEAC <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(wtp)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> (wtp<span class="sc">*</span>effect_diff_pooled) <span class="sc">-</span> cost_diff_pooled</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>varNB <span class="ot">&lt;-</span> wtp<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>cov_pooled[<span class="dv">2</span>,<span class="dv">2</span>] <span class="sc">+</span> cov_pooled[<span class="dv">1</span>,<span class="dv">1</span>] <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span>wtp<span class="sc">*</span>cov_pooled[<span class="dv">1</span>,<span class="dv">2</span>]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>CEAC<span class="sc">$</span>prob <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(NB<span class="sc">/</span><span class="fu">sqrt</span>(varNB))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> CEAC, <span class="fu">aes</span>(<span class="at">x=</span>wtp, <span class="at">y=</span>prob)) <span class="sc">+</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">colour=</span><span class="st">"black"</span>,<span class="at">linewidth=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"WTP"</span>) <span class="sc">+</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y=</span><span class="st">"CEAC"</span>) <span class="sc">+</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>The authors go in detail on the potential limitations/alternatives to the approaches used, namely the choice of the order between bootstrapping and imputing, the reliance on a norm-based approach to estimate confidence intervals, use of linear mixed models rather than cross-section SUR models, implementation of a Bayesian framework, etc. I think it is wise to mention the limitations of the approaches used to ensure transparency and in some cases these certainly apply and the anlaysts may need to think on how to solve these problems. However, I believe there is merit in showing the way they did so that others may be able, if desired, to use their methods in their own analysis, rather than just keeping using simple but likely incorrect methods which often ignore key features of CEA data.</p>
+<p>It was certainly a pleasant reading for me and I hope we see more of these types of tutorials popping up in the CEA literature as they provide a strong support to practitioners in order to implement the methods advocated in the literature while also relying on some help on how to implement them in standard software. A final note which, as a Bayesian, I would like to make is that, often people complain about using a Bayesian approach in light of the complexity of building up and fitting a model with respect to a frequentist approach. Well, looking at all the steps needed in order to fit an adequate CEA model, it seems to me that the Bayesian counterpart is more more intuitive and easy to implement !!! no issues about how to combine bootstrapping with imputations, no issues to check congeniality between imputation and analysis model, no issues in the choice of the methods to derive CI bounds and parameters’ “distributions”.</p>
+<p>In addition, while plots like the CEAC are commonly interpreted as showing the probability of cost-effectiveness, <strong>this makes sense only under a Bayesian approach since otherwise NB or any other parameter should not be attached any probabilistic statements</strong>! There is also a nice paper from <a href="https://onlinelibrary.wiley.com/doi/10.1002/hec.903">Fenwick et. al(2004)</a> pointing this out which is something we should keep in mind when interpreting these outputs.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

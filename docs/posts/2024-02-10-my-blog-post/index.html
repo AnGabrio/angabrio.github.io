@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2024-02-10">
+
+<title>angabrio.github.io - Confounders, Colliders, Mediator. What to adjust for</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#causal-relationships-between-variables" id="toc-causal-relationships-between-variables" class="nav-link active" data-scroll-target="#causal-relationships-between-variables">Causal relationships between variables</a></li>
+  <li><a href="#confounders" id="toc-confounders" class="nav-link" data-scroll-target="#confounders">Confounders</a></li>
+  <li><a href="#colliders" id="toc-colliders" class="nav-link" data-scroll-target="#colliders">Colliders</a></li>
+  <li><a href="#mediators" id="toc-mediators" class="nav-link" data-scroll-target="#mediators">Mediators</a></li>
+  <li><a href="#moderator" id="toc-moderator" class="nav-link" data-scroll-target="#moderator">Moderator</a></li>
+  <li><a href="#how-do-i-controladjust-for-variables" id="toc-how-do-i-controladjust-for-variables" class="nav-link" data-scroll-target="#how-do-i-controladjust-for-variables">How do I “control”/”adjust” for variables?</a>
+  <ul class="collapse">
+  <li><a href="#partition-data-into-sub-groups" id="toc-partition-data-into-sub-groups" class="nav-link" data-scroll-target="#partition-data-into-sub-groups">Partition data into sub-groups</a></li>
+  <li><a href="#multivariable-regression" id="toc-multivariable-regression" class="nav-link" data-scroll-target="#multivariable-regression">Multivariable regression</a></li>
+  <li><a href="#propensity-score-matching" id="toc-propensity-score-matching" class="nav-link" data-scroll-target="#propensity-score-matching">Propensity-score matching</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Confounders, Colliders, Mediator. What to adjust for</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 10, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Hello everybody. here we are with my usual monthly update. Today, similarly to last time, I would like to talk about a bit about classical statistical analysis problems, such as those which I find myself routinely explaining to my students. To all health economists who were looking for some more HTA-related content I, once again, apologise and ask them to tune in next time in case what I will talk about today is not of their interest. The main reason why I wanted to go back to this topic is that I am currently teaching a classical stats course for 3rd year medical students who seem to be a bit confused about some basic stats terminology with reference to regression analysis. As usual, I take the opportunity to write here in order to also help myself in making these concepts as clear as possible so to be able to effectively communicate them to my students. I hope some of you may find this topic interesting as much as I do.</p>
+<p>So, the topic today will be the distinction between different types of independent variables which are often use as covariates within a regression framework. More specifically, there is quite a big literature work on the distinction between three general categories of covariates: <strong>confounders</strong>, <strong>colliders</strong>, and <strong>moderators</strong>. Based on this classification, there has also been quite a discussion on whether an adjustment for the effects of such variables on the influence of the main determinant on the outcome is needed, depending on the type of analysis/research question formulated.</p>
+<p>Let’s see if I am able to make these concepts clear and provide some general suggestions on whether and if an adjustment for these variables is needed in a standard statistical analysis. As usual, let me start with an example, mostly inspired from another publicly available simulation example that can be found <a href="https://www.r-bloggers.com/2022/01/simple-examples-to-understand-what-confounders-colliders-mediators-and-moderators-are-and-how-to-control-for-variables-in-r-with-regression-and-propensity-score-matching/">here</a>.</p>
+<section id="causal-relationships-between-variables" class="level1">
+<h1>Causal relationships between variables</h1>
+<p>Consider a <em>directed acyclic graph</em> (DAG) representation of how a researcher would think the variables in their model to be connected to each other, where the presence of an arrow between two variables implies a <strong>causal effect</strong> from the first to the second variable. For example, let’s consider the task of performing an analysis using observational data where <span class="math inline">\(X\)</span> is the variable of interest or <em>main determinant</em> (e.g.&nbsp;has the individual been vaccinated - yes/no), and <span class="math inline">\(Y\)</span> is the outcome (e.g.&nbsp;death- yes/no). In addition, consider the presence of the following variables in the researcher’s dataset:</p>
+<ol type="1">
+<li><p>A confounder variable “Con” (Confounder),</p></li>
+<li><p>A collider variable “Col” (Collider),</p></li>
+<li><p>A mediator variable “M” (Mediator)</p></li>
+</ol>
+<p>Depending on which effect the researcher wants to focus on, a decision has to be made on which other variables should be left out from the analysis graph (A1-A3), given that they are not related to both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. Indeed it is important to not just casually throw variables into the models, e.g.&nbsp;control for all kinds of socio-demographic or economic variables per default, when in fact many of these cannot even plausibly affect <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
+<p>Here the <code>R</code> code I used to generate the graph:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dagitty)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggdag)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">dagify</span>(Y <span class="sc">~</span> X,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            X <span class="sc">~</span> A1,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            A2 <span class="sc">~</span> X,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            Y <span class="sc">~</span> M,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            M <span class="sc">~</span> X,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            Col <span class="sc">~</span> X,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            Col <span class="sc">~</span> Y,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            Y <span class="sc">~</span> A3,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            Y <span class="sc">~</span> Con,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            X <span class="sc">~</span> Con,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">exposure =</span> <span class="st">"X"</span>,<span class="at">outcome =</span> <span class="st">"Y"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">coords =</span> <span class="fu">data.frame</span>(<span class="at">x=</span><span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">3</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                                <span class="at">y=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">1.5</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">name=</span><span class="fu">c</span>(<span class="st">"Y"</span>,<span class="st">"X"</span>,<span class="st">"A1"</span>,<span class="st">"A2"</span>,<span class="st">"M"</span>,<span class="st">"Col"</span>,<span class="st">"A3"</span>,<span class="st">"Con"</span>)))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>g <span class="sc">%&gt;%</span> </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_point</span>(<span class="at">col=</span><span class="st">"grey90"</span>) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_edges</span>() <span class="sc">+</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_text</span>(<span class="at">label=</span><span class="fu">c</span>(<span class="st">"A1"</span>,<span class="st">"A3"</span>,<span class="st">"Con"</span>,<span class="st">"M"</span>,<span class="st">"X"</span>,<span class="st">"Y"</span>,<span class="st">"A2"</span>,<span class="st">"Col"</span>),<span class="at">col =</span> <span class="st">"black"</span>) <span class="sc">+</span> </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dag</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now, let’s see how we can identify each type of variable and decide on whether we should adjust for it or not in our analysis.</p>
+</section>
+<section id="confounders" class="level1">
+<h1>Confounders</h1>
+<p>In the vaccination example above, age is a so-called <strong>confounding variable</strong> as it affects both <span class="math inline">\(X\)</span> as well as <span class="math inline">\(Y\)</span>. Here is another example with some data to illustrate the confounding concept. Green parties have been on the rise in many European countries lately, and you might wonder whether Green voters actually behave more environment-consciously as opposed to voters of Conservative parties. Here are (fake) survey results about mobility and party preference:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">"Party_preference"</span> <span class="ot">=</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"Conservatives"</span>, <span class="dv">4</span>), <span class="fu">rep</span>(<span class="st">"Greens"</span>, <span class="dv">4</span>)),<span class="dv">2</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Place_of_residence"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"City"</span>,<span class="dv">8</span>), <span class="fu">rep</span>(<span class="st">"Countryside"</span>,<span class="dv">8</span>)),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Car_usage"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">22</span>,<span class="dv">33</span>,<span class="dv">26</span>,<span class="dv">19</span>,<span class="dv">18</span>,<span class="dv">31</span>,<span class="dv">28</span>,<span class="dv">23</span>,<span class="dv">58</span>,<span class="dv">23</span>,<span class="dv">12</span>,<span class="dv">7</span>,<span class="dv">52</span>,<span class="dv">34</span>,<span class="dv">6</span>,<span class="dv">8</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Frequency"</span> <span class="ot">=</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Daily"</span>, <span class="st">"Weekly"</span>, <span class="st">"Less often"</span>, <span class="st">"Never"</span>),<span class="dv">4</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Weight"</span> <span class="ot">=</span> <span class="fu">c</span>(.<span class="dv">30</span>,.<span class="dv">30</span>,.<span class="dv">30</span>,.<span class="dv">30</span>,.<span class="dv">75</span>,.<span class="dv">75</span>,.<span class="dv">75</span>,.<span class="dv">75</span>,.<span class="dv">70</span>,.<span class="dv">70</span>,.<span class="dv">70</span>,.<span class="dv">70</span>,.<span class="dv">25</span>,.<span class="dv">25</span>,.<span class="dv">25</span>,.<span class="dv">25</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>Frequency <span class="ot">&lt;-</span> <span class="fu">factor</span>(d<span class="sc">$</span>Frequency, <span class="at">levels =</span> <span class="fu">unique</span>(d<span class="sc">$</span>Frequency))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>Car_usage_weighted <span class="ot">&lt;-</span> d<span class="sc">$</span>Car_usage<span class="sc">*</span>d<span class="sc">$</span>Weight</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d, <span class="fu">aes</span>(<span class="at">x=</span>Frequency,<span class="at">y=</span>Car_usage_weighted,<span class="at">fill=</span>Party_preference)) <span class="sc">+</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"darkgrey"</span>,<span class="st">"darkgreen"</span>)) <span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Frequency of car usage"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Share in %"</span>) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Frequency of car usage by party preference"</span>,<span class="at">subtitle =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Party_preference)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d, <span class="fu">aes</span>(<span class="at">x=</span>Frequency,<span class="at">y=</span>Car_usage,<span class="at">fill=</span>Party_preference)) <span class="sc">+</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"darkgrey"</span>,<span class="st">"darkgreen"</span>)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Frequency of car usage"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Share in %"</span>) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Frequency of car usage by party preference and place of residence"</span>,<span class="at">subtitle =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Party_preference<span class="sc">+</span>Place_of_residence)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this example, it is clear that Conservative voters more often use their car “daily” whereas Green voters are more likely to rarely or “never” use a car. This is supported by the existence of a correlation in the observational data. However, is it also reflecting a <strong>causal relationship</strong>? For all that we know, voters of Green parties may be mostly urban, well-educated people whereas Conservative voters may mostly live in rural areas. For various reasons, thus, we can assume that <em>place of residence</em> (urban/rural) affects voting preferences. On the other hand, living in an urban agglomeration is also associated with better access to public transport, meaning it is more likely that you can get to work by bus or tram or even by bike, as opposed to living in a rural area where there are larger commuting distances and fewer connections by bus or train between places. So we could argue that place of residence is a <strong>confounding factor that needs to be controlled for</strong>.</p>
+<p>We can see from the second plot that the survey results are much less clear about a causal effect from party preference on car usage when controlling for place of residence. By “controlling for”, we here simply divide our total survey respondents into groups of rural vs.&nbsp;urban dwellers and carry out the analysis separately within these groups. As the results show, Green voters who live in the countryside are similar to rural Conservative voters in terms of their car usage in this fictional example. Conversely, urban Conservatives also less frequently use their car compared with rural Conservatives. So here we have a spurious correlation that is actually due to a <strong>compositional effect</strong>: because the city population hosts proportionally more Greens than Conservatives, the Greens are overall less likely to use their cars on a daily basis. Controlling for place of residence, this effect almost completely disappears. <em>Does that mean we can be absolutely sure that there is no direct causal effect here?</em> In general, I would always refrain from using causal language in observational studies. You need to convince your audience that you have considered all important confounding variables, and that they are in fact confounding variables, apart from addressing the usual statistical issues (is your sample size large enough, etc.), and then you could come to the “tentative” conclusion that there does not “appear to be” a direct effect here.</p>
+<p>To conclude, it is important to think about whether there might be factors that affect both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> of interest, and include them into the analysis in observational studies.</p>
+</section>
+<section id="colliders" class="level1">
+<h1>Colliders</h1>
+<p>Let’s get back to our example of smoking and covid infections in hospital patients. The researcher wants to know whether smoking affects the probability of catching Covid. However, the data are from hospital patients, so they also would like to control for the factor hospitalisation - yes/no. Now, we know that Covid can get you into the hospital, but we also know that heavy smoking causes diseases that need stationary treatment independent of Covid. Therefore, in a DAG representation of the analysis problem, you could imagine arrows pointing from both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> to the collider variable. This means that smokers have a generally higher risk of being in a hospital as opposed to non-smokers per se, and this risk is largely due to factors other than Covid which affects only a small share of patients in this hospital.</p>
+<p>This means that, in a representative sample of the total population, symptomatic Covid infections might actually be more prevalent among smokers (or there might be no difference), but here in the hospital smokers are over-represented for other reasons, such as lung cancer, deflating the share of Covid patients with respect to the non-smokers who less often suffer from cancer and thus their share of Covid patients is relatively larger. We can easily reproduce this with some simulated data. In the following code example, we assign smokers and non-smokers in the general population the exact same risk of being hospitalized due to Covid. Then we assign a higher risk of getting hospitalized for other reasons to the smokers. We assigned a <span class="math inline">\(0.5\%\)</span> chance of being hospitalized due to Covid to all persons in the population, but we assigned a slightly larger chance (<span class="math inline">\(7\%\)</span>) of being hospitalized for other reasons to smokers as opposed to non-smokers (<span class="math inline">\(5\%\)</span>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">smoking =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"smoker"</span>, <span class="dv">20000</span>), <span class="fu">rep</span>(<span class="st">"non_smoker"</span>, <span class="dv">80000</span>)),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">covid_hospitalisation =</span> <span class="fu">rbinom</span>(<span class="dv">100000</span>,<span class="dv">1</span>,.<span class="dv">005</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>population<span class="sc">$</span>other_hospitalisation[population<span class="sc">$</span>smoking<span class="sc">==</span><span class="st">"smoker"</span>] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">20000</span>,<span class="dv">1</span>,.<span class="dv">07</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>population<span class="sc">$</span>other_hospitalisation[population<span class="sc">$</span>smoking<span class="sc">==</span><span class="st">"non_smoker"</span>] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">80000</span>,<span class="dv">1</span>,.<span class="dv">05</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>population<span class="sc">$</span>in_hospital <span class="ot">&lt;-</span> population<span class="sc">$</span>covid_hospitalisation <span class="sc">|</span> population<span class="sc">$</span>other_hospitalisation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s check that in the general population, both groups have an equal proportion of Covid’s hospitalisation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>test_covid_pop <span class="ot">&lt;-</span> <span class="fu">t.test</span>(covid_hospitalisation<span class="sc">~</span>smoking, population)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>test_covid_pop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  covid_hospitalisation by smoking
+t = 1.2437, df = 32434, p-value = 0.2136
+alternative hypothesis: true difference in means between group non_smoker and group smoker is not equal to 0
+95 percent confidence interval:
+ -0.0003887495  0.0017387495
+sample estimates:
+mean in group non_smoker     mean in group smoker 
+                0.005275                 0.004600 </code></pre>
+</div>
+</div>
+<p>We see that among both smokers and non-smokers, roughly <span class="math inline">\(0.5\%\)</span> of the population are in a hospital due to Covid at this point in time, and the small difference is due to random chance and not statistically significant given the confidence interval of -3.8874945^{-4};0.0017387. Now let’s limit the data to all hospital patients and compare Covid rates among smokers and non-smokers:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>hospital <span class="ot">&lt;-</span> population[<span class="fu">which</span>(population<span class="sc">$</span>in_hospital),]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>test_covid_hosp <span class="ot">&lt;-</span> <span class="fu">t.test</span>(covid_hospitalisation<span class="sc">~</span>smoking, hospital)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>test_covid_hosp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  covid_hospitalisation by smoking
+t = 4.2995, df = 3073.5, p-value = 1.765e-05
+alternative hypothesis: true difference in means between group non_smoker and group smoker is not equal to 0
+95 percent confidence interval:
+ 0.01780052 0.04764717
+sample estimates:
+mean in group non_smoker     mean in group smoker 
+              0.09438604               0.06166220 </code></pre>
+</div>
+</div>
+<p>Here we see that the non-smokers have a higher proportion of Covid patients (<span class="math inline">\(9\%\)</span>) as opposed to the smokers (<span class="math inline">\(6\%\)</span>), and this difference is statistically significant (CI: 0.0178005;0.0476472). This example shows exactly our point here: limiting the data to hospital patients results in a biased comparison of smokers and non-smokers, which is not reflective of the true causal effect (which is zero in our example). In a real-world scenario, researchers often only have data from hospital patients and do not know the true effect in the general population. This is why they need to consider potential <strong>collider effects</strong> in order to avoid to come to conclusions that are wrong.</p>
+<p>Whenever the researcher has a variable that is affected by both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, you need to leave it out of the equation. If this is not possible do that (because, as in the example, the data were collected in a hospital and you don’t have any non-hospitalized participants), the researcher needs to interpret the data with caution and maybe refrain from making this kind of comparison at all.</p>
+</section>
+<section id="mediators" class="level1">
+<h1>Mediators</h1>
+<p>Let’s assume that households with children have on average a lower household income as opposed to childless couples. One of the obvious reasons for this correlation is given by the fact that mothers or fathers often reduce their working hours to work part-time (or take maternal/paternal leaves) while their children are still young. Working less of course translates into a lower household income. Let’s look at the consequences in another (made-up) example dataset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">1000</span>),<span class="fu">rep</span>(<span class="dv">1</span>,<span class="dv">500</span>),<span class="fu">rep</span>(<span class="dv">2</span>,<span class="dv">600</span>),<span class="fu">rep</span>(<span class="dv">3</span>,<span class="dv">300</span>),<span class="fu">rep</span>(<span class="dv">4</span>,<span class="dv">100</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">=</span> <span class="fu">rexp</span>(<span class="dv">2500</span>,.<span class="dv">2</span>) <span class="sc">*</span>(<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="dv">40</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>f <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">rexp</span>(<span class="dv">1000</span>,.<span class="dv">2</span>) <span class="sc">*</span>(<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="dv">40</span>,<span class="fu">rnorm</span>(<span class="dv">500</span>,<span class="dv">31</span>,<span class="dv">9</span>),<span class="fu">rnorm</span>(<span class="dv">600</span>,<span class="dv">30</span>,<span class="dv">10</span>),<span class="fu">rnorm</span>(<span class="dv">300</span>,<span class="dv">28</span>,<span class="dv">7</span>),<span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="dv">25</span>,<span class="dv">5</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>e <span class="ot">=</span> f<span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">2500</span>,<span class="dv">100</span>,<span class="dv">25</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">data.frame</span>(x,m,f,e)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d, <span class="fu">aes</span>(<span class="at">x=</span><span class="fu">factor</span>(x),<span class="at">y=</span>e)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">8000</span>) <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Number of children &lt;6 year old"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Household income in Euro"</span>) <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Monthly income by number of children"</span>) <span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>,<span class="fu">aes</span>(<span class="at">group=</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this dataset, there is a clear negative correlation between the number of children in a household and the monthly income. Let’s assume other factors such as the number of adults living in the household are held constant. Now, let’s factor in the working time, broadly distinguishing between full-time and part-time workers:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d[d<span class="sc">$</span>f<span class="sc">&gt;=</span><span class="dv">35</span>,], <span class="fu">aes</span>(<span class="at">x=</span><span class="fu">factor</span>(x),<span class="at">y=</span>e)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">8000</span>) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Number of children &lt;6 year old"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Household income in Euro"</span>) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Monthly income by number of children"</span>,<span class="at">subtitle =</span> <span class="st">"only full-time (35+ hours/week)"</span>) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>,<span class="fu">aes</span>(<span class="at">group=</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(d[d<span class="sc">$</span>f<span class="sc">&lt;=</span><span class="dv">20</span>,], <span class="fu">aes</span>(<span class="at">x=</span><span class="fu">factor</span>(x),<span class="at">y=</span>e)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">4000</span>) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Number of children &lt;6 year old"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Household income in Euro"</span>) <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Monthly income by number of children"</span>,<span class="at">subtitle =</span> <span class="st">"only part-time (&lt;= 50%)"</span>) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>,<span class="fu">aes</span>(<span class="at">group=</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Two things are to be noted about these two graphs. First, if you look at the scales of the y axis, it is obvious that part-time workers earn less as opposed to full-time workers. Second, the association between the number of children and the income is not negative in neither of the two groups; if anything, it is positive, such that persons with more children earn on average just as much (or even a bit more) as opposed to childless persons – if they work the same amount of hours, that is. Now what did we find here? Controlling for the number of working hours, having small children in the household does apparently not lead to less earnings (in this made-up example). Rather, our variable “working hours” fully explains why households with small children earn less compared with childless couples. Importantly, this is a different case conceptually as opposed to the confounder example above about car usage among Green party voters. We did not reveal a correlation to be actually spurious here; rather, <strong>we found the reason</strong> why <span class="math inline">\(X\)</span> affects <span class="math inline">\(Y\)</span>. But we have little doubt that <span class="math inline">\(X\)</span> does in fact cause <span class="math inline">\(Y\)</span>. Because the reduced working hours can plausibly be traced back to the small children in the household.</p>
+<p>Having children in the household affects your working hours, which in turn affects your household income. So “working hours” is one of (or maybe the only) <em>causal pathway connecting <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span></em>. That is why it is called a <strong>mediator</strong>, i.e.&nbsp;it explains why <span class="math inline">\(X\)</span> affects <span class="math inline">\(Y\)</span>. Saying that children in the household do not actually affect your household income, because the effect disappears when you control for working hours, would be wrong - <span class="math inline">\(X\)</span> does affect <span class="math inline">\(Y\)</span> via the mediator variable. There is for sure a total causal effect, there just does not appear to be a direct causal effect anymore when you consider working hours as a mechanism (see our boxplots above), which is why in the DAG we could remove the direct arrow from children on income.</p>
+<p>By contrast, in the vaccination example, if we control for the confounders (age, etc.) and find no direct effect anymore, then we would say that there is in fact apparently no causal effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>. Mediators can be controlled for (e.g.&nbsp;added to a regression model) if you want to assess what part of the effect can be attributed to the mechanism. But it makes sense to also provide a model without the mediators to see how large the total effect (direct + indirect effects) is.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>lm_mediators <span class="ot">&lt;-</span> <span class="fu">lm</span>(e<span class="sc">~</span>x,d)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_mediators)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = e ~ x, data = d)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3201.7  -738.8   -46.2   704.9  5578.1 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  3497.93      30.82  113.51   &lt;2e-16 ***
+x            -245.42      18.16  -13.52   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1090 on 2498 degrees of freedom
+Multiple R-squared:  0.06814,   Adjusted R-squared:  0.06777 
+F-statistic: 182.7 on 1 and 2498 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>We see that an additional child lowers your income on average by -245.4187037 Euros, and this effect is statistically significant. If you add working hours to the equation</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lm_mediators2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(e<span class="sc">~</span>x <span class="sc">+</span> f,d)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_mediators2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = e ~ x + f, data = d)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3212.1  -489.0   -10.3   499.8  2935.6 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   39.495     77.932   0.507    0.612    
+x             -3.571     14.299  -0.250    0.803    
+f             99.995      2.156  46.369   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 798.8 on 2497 degrees of freedom
+Multiple R-squared:  0.4993,    Adjusted R-squared:  0.4989 
+F-statistic:  1245 on 2 and 2497 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>the effect will disappear. Showing both models with and without the mediator variable lets you (and your audience) quickly recognize that, first, having children is in general associated with lower income, and, second, the effect is caused by parents working fewer hours.</p>
+</section>
+<section id="moderator" class="level1">
+<h1>Moderator</h1>
+<p>A moderator is a variable that, if present, alters the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>. Here is an example to illustrate what that means. Having young children in the household leads to reduced working hours, as we saw above. <strong>But</strong>: up too closer examination, we might find that females are much more likely to work part-time if small children are present whereas males most often continue to work full-time. This would mean that gender is a moderator to the effect of children (<span class="math inline">\(X\)</span>) on working time (<span class="math inline">\(Y\)</span>): If female, the effect is large, but if male, the effect is small. In other words, a moderator is responsible for a heterogenous treatment effect: the main determinant <span class="math inline">\(X\)</span> does not cause the change in the outcome <span class="math inline">\(Y\)</span> across the entire <span class="math inline">\(X\)</span> groups; rather, there are sub-groups where the increase is significant, and others where it does not happen.</p>
+<p>Here the key differences between a <strong>moderator</strong> variable and a <strong>mediator</strong> or <strong>confounder</strong>. <em>A moderator variable has no causal connection to <span class="math inline">\(X\)</span> whatsoever. By contrast, a mediator is affected by <span class="math inline">\(X\)</span> and a confounder affects <span class="math inline">\(X\)</span></em>. Having young children affects people’s working hours, and female gender moderates this effect: one’s gender does not change after having children, so it cannot be a mediator. Neither can gender have an effect on whether or not you have children, so it is not a confounder. But gender does play a role in determining the effect size.</p>
+<p>So by these rules, moderator variables are not a necessity to include when assessing the correlation of two variables. Leaving it out does not bias the results, as would happen if you fail to adjust for a confounding variable. You simply gain more insight into the mechanism generating the data if you consider the moderator. You realise that your data are heterogeneous and that for some sub-groups in your data, the treatment works differently compared with other sub-groups. This is important, e.g.&nbsp;when assessing the efficacy of a drug in treating an illness, where the effect may vary by factors such as pre-existing conditions, other medication, or genetic factors.</p>
+<p>If you theoretically suspect that there might be heterogeneous treatment effects and you want to assess whether there is a moderator present, you can do so, again, either by simply filtering the data to e.g.&nbsp;males or females only and then see if you get different statistics in these sub-groups. If you have multiple variables and a more complex model, you can include an interaction effect into a regression to see if there is a moderator effect (e.g.&nbsp;gender <span class="math inline">\(\times\)</span> working hours). I will not go into the details about interaction effects here, but here a quick list on how you can generally “control for” variables, with a special focus on regression and matching.</p>
+</section>
+<section id="how-do-i-controladjust-for-variables" class="level1">
+<h1>How do I “control”/”adjust” for variables?</h1>
+<p>Quick summary of what I have discussed so far:</p>
+<ol type="1">
+<li><p>If you have data from a randomised experiment, you likely do not need to worry about confounders, colliders, etc.</p></li>
+<li><p>If you have observational data, by contrast, start your analysis by drawing a diagram of the hypothesised influences between your variables of interest (<span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>) as well as other potentially relevant variables.</p></li>
+<li><p>Variables that point to both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are confounders that must be controlled for in the analysis. Failing to do so will result in biased statistical results.</p></li>
+</ol>
+<p>Mechanisms (<span class="math inline">\(X\)</span> affects <span class="math inline">\(M\)</span> affects <span class="math inline">\(Y\)</span>) can be included if you want to shed light on what part of the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is mediated by <span class="math inline">\(M\)</span>, but the total effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is given by an analysis without <span class="math inline">\(M\)</span>. Other types of variables are at best unnecessary, at worst inducing new bias (through collider variables).</p>
+<p>So how do you “control for” or (synonyms) “adjust for” or “hold constant” confounding variables? Here are three widely employed strategies (only very briefly mentioned - this post is becoming too long!).</p>
+<section id="partition-data-into-sub-groups" class="level2">
+<h2 class="anchored" data-anchor-id="partition-data-into-sub-groups">Partition data into sub-groups</h2>
+<p>This is the most easy way to go and almost self-explanatory. See the graphs and code for the example of car usage among Green party voters above. If you want to make sure that a confounding variable isn’t biasing your results, you simply filter your data such that the confounding variable is constant in the sub-set. This option is viable if you have a small number of confounders (i.e.&nbsp;only one or two) and these variables have only a few distinct values.</p>
+</section>
+<section id="multivariable-regression" class="level2">
+<h2 class="anchored" data-anchor-id="multivariable-regression">Multivariable regression</h2>
+<p>There are of course many variants and advancements over the standard linear model which can help you identify causal effects (or tentatively claim that you might have identified them) when you have special data structures. For instance, if you have longitudinal data of multiple individuals (or countries, etc.), also known as time-series cross-sectional or panel data, there are special regression models that can make use of both the temporal and the inter-individual variation. If you are less concerned with identifying the causal effect of <span class="math inline">\(X\)</span>, but more interested in predicting the outcome <span class="math inline">\(Y\)</span> (e.g.&nbsp;which individuals will develop severe Covid illness based on a multitude of clinical characteristics), models other than regression are often better-suited since they can overcome a number of limitations to regression (e.g.&nbsp;multi-collinearity). Examples include machine-learning algorithms such as random forests.</p>
+</section>
+<section id="propensity-score-matching" class="level2">
+<h2 class="anchored" data-anchor-id="propensity-score-matching">Propensity-score matching</h2>
+<p>Matching means that you don’t use all your data, but you try to find, for your selected group of “treatment” units, counterparts that are most similar in all other regards except for the treatment. Note that matching is no perfect cure for multi-collinearity, you still need some degree of “overlap” of the distributions (i.e.&nbsp;not all poor countries should have high fertility and vice versa), otherwise you don’t find any matching partners except for, again, the unusual outliers.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>I hope this post was helpful to you and, most importantly, to myself in order to have a clearer idea of what the differences between the different types of <span class="math inline">\(X\)</span> variables in a standard classical statistical analysis, typically for observational data. Hopefully, with these examples, I will be able to convince students of these concepts and on what to do to address the problem at hand they might face in the future. Well, that is all, till next time!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

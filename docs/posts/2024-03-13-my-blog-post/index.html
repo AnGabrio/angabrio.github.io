@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2024-03-13">
+
+<title>angabrio.github.io - Rasch Model</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Rasch Model</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">IRT</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 13, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Hello everyone, and welcome back to my blog. Today I would like to resume a topic that I promised myself I will study more but which I kind of left alone for quite some time now. I initially introduced the topic a few months ago in another post, using a primary reference the book of <a href="https://www.jean-paulfox.com/">Jean-Paul Fox</a> called <a href="https://link.springer.com/book/10.1007/978-1-4419-0742-4#:~:text=The%20Bayesian%20approach%20has%20two,additional%20information%20can%20be%20used."><strong>Bayesian Item Response Modelling</strong></a>. With this post I would like to take over from where I left and continue talking a bit about <em>Item Response Theory</em> (IRT).</p>
+<p>Last time I focussed on IRT models, I introduced the simplest type of model for binary IRT response data, called the <strong>Rasch Model</strong> or one-parameter logistic response model, in which the probability of a correct response is given by:</p>
+<p><span class="math display">\[
+P(Y_{ik}=1 | \theta_i,b_k) = \frac{\text{exp}(\theta_i - b_k)}{1+\text{exp}(\theta_i-b_k)},
+\]</span></p>
+<p>for individual <span class="math inline">\(i\)</span> with ability level <span class="math inline">\(\theta_i\)</span> and item <span class="math inline">\(k\)</span> with item-difficulty parameter <span class="math inline">\(b_k\)</span>. Now, let’s try to simulate some data according to the Rasch model.</p>
+<p>Let’s start by considering a simple questionnaire example formed by <span class="math inline">\(K=2\)</span> dichotomous items, and for each of these the <span class="math inline">\(i\)</span>-th respondent in the dataset may provide either a negative (e.g.&nbsp;wrong/failure) or positive (e.g.&nbsp;correct/success) response <span class="math inline">\(Y_{ik}=0\)</span> or <span class="math inline">\(Y_{ik}=1\)</span> according to some probability which in turn depends on some person-specific ability level <span class="math inline">\(\theta_i\)</span> and item-specific difficulty level <span class="math inline">\(b_k\)</span>. We proceed as follows:</p>
+<ol type="1">
+<li><p>Simulate item difficulties <span class="math inline">\(b_k\)</span> using a uniform distribution, i.e.&nbsp;<span class="math inline">\(b_k\sim \text{Uniform}(a_b,b_b)\)</span> for <span class="math inline">\(k=1,K=2\)</span>.</p></li>
+<li><p>Simulate the person abilities <span class="math inline">\(\theta_i\)</span> using a normal distribution, i.e.&nbsp;<span class="math inline">\(\theta_i \sim \text{Normal}(\mu_{\theta},\sigma_{\theta})\)</span> for <span class="math inline">\(i=1,\ldots,N=100\)</span>.</p></li>
+<li><p>Use the generated values of <span class="math inline">\(\theta_i\)</span> and <span class="math inline">\(b_k\)</span> to obtain <span class="math inline">\(P(Y_{ik}=1 | \theta_i,b_k)\)</span>, i.e.&nbsp;the probability of giving the correct response for the <span class="math inline">\(i\)</span>-th person on the <span class="math inline">\(k\)</span>-th item using the <strong>Item Characteristic Curve</strong> (ICC) equation of the Rasch model.</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7689</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">runif</span>(K,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>) </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N,<span class="dv">0</span>,<span class="dv">2</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">rep</span>( theta, <span class="fu">length</span>( b ) ) , <span class="at">ncol =</span> <span class="fu">length</span>( b ) )</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>p_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> N, <span class="at">ncol =</span> K)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N){</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K){</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  p_resp[i,k] <span class="ot">&lt;-</span> (<span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k])) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k]))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a> }</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>obs_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">sapply</span>( <span class="fu">c</span>(p_resp), rbinom, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>), <span class="at">ncol =</span> <span class="fu">length</span>(b) )</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#put everything into a function</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>sim_rasch <span class="ot">&lt;-</span> <span class="cf">function</span>(N,K,<span class="at">a_b=</span><span class="sc">-</span><span class="dv">1</span>,<span class="at">b_b=</span><span class="dv">1</span>,<span class="at">mu_theta=</span><span class="dv">0</span>,<span class="at">sigma_theta=</span><span class="dv">2</span>){</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">runif</span>(K,a_b,b_b) </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N,mu_theta,sigma_theta)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">rep</span>( theta, <span class="fu">length</span>( b ) ) , <span class="at">ncol =</span> <span class="fu">length</span>( b ) )</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>p_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> N, <span class="at">ncol =</span> K)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N){</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K){</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  p_resp[i,k] <span class="ot">&lt;-</span> (<span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k])) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k]))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a> }</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a> obs_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">sapply</span>( <span class="fu">c</span>(p_resp), rbinom, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>), <span class="at">ncol =</span> <span class="fu">length</span>(b) )</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a> output <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"y"</span><span class="ot">=</span>obs_resp, <span class="st">"p"</span><span class="ot">=</span>p_resp, <span class="st">"theta"</span><span class="ot">=</span>theta, <span class="st">"b"</span><span class="ot">=</span>b)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a> <span class="fu">return</span>(output)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>obs_resp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2]
+ [1,]    0    0
+ [2,]    0    0
+ [3,]    0    0
+ [4,]    1    1
+ [5,]    1    0
+ [6,]    1    1
+ [7,]    0    1
+ [8,]    0    0
+ [9,]    0    0
+[10,]    0    1</code></pre>
+</div>
+</div>
+<p>Now, let’s put everything we have done into a function so that we can customise the output as much as we like, for example considering a sample of <span class="math inline">\(N=25\)</span> people who answer a set of <span class="math inline">\(K=5\)</span> dichotomous items:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7689</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#put everything into a function</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sim_rasch <span class="ot">&lt;-</span> <span class="cf">function</span>(N,K,<span class="at">a_b=</span><span class="sc">-</span><span class="dv">1</span>,<span class="at">b_b=</span><span class="dv">1</span>,<span class="at">mu_theta=</span><span class="dv">0</span>,<span class="at">sigma_theta=</span><span class="dv">2</span>){</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">runif</span>(K,a_b,b_b) </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N,mu_theta,sigma_theta)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">rep</span>( theta, <span class="fu">length</span>( b ) ) , <span class="at">ncol =</span> <span class="fu">length</span>( b ) )</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>p_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> N, <span class="at">ncol =</span> K)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N){</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K){</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  p_resp[i,k] <span class="ot">&lt;-</span> (<span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k])) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(theta[i] <span class="sc">-</span> b[k]))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a> }</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a> obs_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>( <span class="fu">sapply</span>( <span class="fu">c</span>(p_resp), rbinom, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>), <span class="at">ncol =</span> <span class="fu">length</span>(b) )</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a> output <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"y"</span><span class="ot">=</span>obs_resp, <span class="st">"p"</span><span class="ot">=</span>p_resp, <span class="st">"theta"</span><span class="ot">=</span>theta, <span class="st">"b"</span><span class="ot">=</span>b)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a> <span class="fu">return</span>(output)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>data_sim <span class="ot">&lt;-</span> <span class="fu">sim_rasch</span>(<span class="at">N=</span><span class="dv">50</span>,<span class="at">K=</span><span class="dv">5</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#extract observed data</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>data_sim<span class="sc">$</span>y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2] [,3] [,4] [,5]
+ [1,]    0    0    0    1    1
+ [2,]    0    0    1    0    1
+ [3,]    0    0    0    0    0
+ [4,]    1    1    1    1    1
+ [5,]    1    1    0    1    1
+ [6,]    1    1    1    1    1
+ [7,]    0    0    1    0    0
+ [8,]    1    1    1    1    1
+ [9,]    1    1    1    1    1
+[10,]    1    0    1    0    1
+[11,]    0    0    0    0    0
+[12,]    1    0    0    0    0
+[13,]    0    0    0    1    0
+[14,]    1    1    1    1    1
+[15,]    1    1    1    1    1
+[16,]    0    1    0    0    1
+[17,]    0    0    0    0    0
+[18,]    0    1    0    0    1
+[19,]    1    1    1    1    1
+[20,]    0    0    0    0    1
+[21,]    1    1    0    1    0
+[22,]    0    0    0    0    0
+[23,]    0    0    1    0    0
+[24,]    0    0    0    1    0
+[25,]    0    0    1    1    1
+[26,]    0    0    0    0    0
+[27,]    0    0    1    1    1
+[28,]    0    0    1    0    0
+[29,]    1    1    1    1    1
+[30,]    0    1    0    0    0
+[31,]    1    1    1    1    1
+[32,]    0    0    1    0    1
+[33,]    0    0    0    0    1
+[34,]    0    0    0    1    1
+[35,]    1    0    1    0    1
+[36,]    1    0    1    1    1
+[37,]    1    0    1    0    1
+[38,]    1    1    1    1    1
+[39,]    0    0    0    1    1
+[40,]    1    1    1    1    1
+[41,]    0    0    0    0    0
+[42,]    0    0    0    0    1
+[43,]    0    0    1    0    0
+[44,]    1    1    0    0    1
+[45,]    0    0    0    1    0
+[46,]    1    1    1    1    1
+[47,]    1    0    1    0    1
+[48,]    1    1    1    1    1
+[49,]    0    1    0    1    0
+[50,]    0    0    1    1    0</code></pre>
+</div>
+</div>
+<p>Ok cool, now that we simulated the data, let’s try to use one of the many <code>R</code> packages to fit a Rasch model to the data and see whether the model fits them as it should be. For this purpose, I will use the <code>eRm</code> package, specifically dedicated to the fitting and checking of Rasch models to the data. I refer to <a href="http://publicifsv.sund.ku.dk/~kach/scaleval_IRT/Rasch-models-in-R.html">this webpage</a> for a more in depth explanation of the package and its function, from which most of the stuff I will show is taken from.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(eRm)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#fit model to simulated item responses</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>items <span class="ot">&lt;-</span> data_sim<span class="sc">$</span>y</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(items) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">"item%01d"</span>, <span class="fu">seq</span>(<span class="dv">1</span>,K)))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#fit the model</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>raschfit <span class="ot">&lt;-</span> <span class="fu">RM</span>(items)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After fitting the model and saving the output in the object <code>raschfit</code>, we can inspect the coefficient estimates of the model both in terms of person and item-specific parameters:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print estimates</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>i.param <span class="ot">&lt;-</span> <span class="fu">coef</span>(raschfit)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#item parameters/difficulties</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>i.param</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>beta item1 beta item2 beta item3 beta item4 beta item5 
+-0.4359822 -0.7641137  0.2419883  0.1154749  0.8426327 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p.param <span class="ot">&lt;-</span> <span class="fu">person.parameter</span>(raschfit)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#person parameters/abilities</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>p.param</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Person Parameters:
+
+ Raw Score   Estimate Std.Error
+         0 -2.5773973        NA
+         1 -1.4777665 1.1455225
+         2 -0.4349030 0.9460435
+         3  0.4371723 0.9454384
+         4  1.4776048 1.1439625
+         5  2.5743185        NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot item and persons together</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotPImap</span>(raschfit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can also obtain the ICC function for each item. For example, let’s say we want to show the ICC for item <span class="math inline">\(2\)</span> and <span class="math inline">\(4\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#item 2</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotICC</span>(raschfit, <span class="at">item.subset =</span> <span class="fu">c</span>(<span class="dv">2</span>), <span class="at">ask=</span>F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#item 4</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotICC</span>(raschfit, <span class="at">item.subset =</span> <span class="fu">c</span>(<span class="dv">4</span>), <span class="at">ask=</span>F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Next, it may be useful to test some of the key assumptions of the Rasch model to see whether the model seems to be reasonable for the data at hand. Among the most popular test procedures that are available in in the package, we can consider the following:</p>
+<ol type="1">
+<li>Andersen’s conditional Likelihood Ratio Test.</li>
+</ol>
+<p>It is a surprising result that we can take our items and then get the correct estimates of all the item parameters <span class="math inline">\(\boldsymbol b=(b_1,\ldots,b_K)\)</span> in the any of these sub samples. This only work because we use conditional inference. It works if we divide the sample into two or more groups using any splitting criterion. We can do it in <code>eRm</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gr <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowSums</span>(items),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">5</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">LRtest</span>(raschfit, <span class="at">splitcr=</span>gr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Andersen LR-test: 
+LR-value: 8.896 
+Chi-square df: 4 
+p-value:  0.064 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#graphically</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>lr <span class="ot">&lt;-</span> <span class="fu">LRtest</span>(raschfit, <span class="at">splitcr =</span> gr, <span class="at">se =</span> T)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plotGOF</span>(lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotGOF</span>(lr, <span class="at">conf=</span><span class="fu">list</span>(), <span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>,<span class="dv">4</span>), <span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>,<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Wald test</li>
+</ol>
+<p>The test allows for testing each item <span class="math inline">\(k\)</span>. The idea is the same: divide sample into two subgroups. Item parameters should be invariant</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Waldtest</span>(raschfit, <span class="at">splitcr =</span> gr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Wald test on item level (z-values):
+
+           z-statistic p-value
+beta item1      -2.081   0.037
+beta item2       1.385   0.166
+beta item3       0.494   0.622
+beta item4       1.729   0.084
+beta item5      -0.391   0.696</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Infit and Outfit test statistics</li>
+</ol>
+<p>Expected response matrix obtained from <span class="math inline">\(\pi_{ij}=\frac{\text{exp}(\hat{b}_k+\hat{\theta}_i)}{1+\text{exp}(\hat{b}_k+\hat{\theta}_i)}\)</span>, while residuals are defined as <span class="math inline">\(e_{ik}=y_{ik}-\pi_{ik}\)</span>. From these quantities, we can retrieve the two statistics: <span class="math inline">\(\text{INFIT}_k=w_k=\frac{1}{N}\frac{\sum_i e^2_{ik}}{\sum_i \nu_{ik}}\)</span> and <span class="math inline">\(\text{OUTFIT}_k=u_k=\frac{1}{N}\sum_i \frac{e^2_{ik}}{\nu_{ik}}\)</span>, where <span class="math inline">\(\nu_{ik}=\pi_{ik}\times (1-\pi_{ik})\)</span>. The INFIT and OUTFIT item fit test statistics have expected value <span class="math inline">\(1\)</span>. Informal evaluation: <span class="math inline">\(0.7\)</span> to <span class="math inline">\(1.3\)</span> is fine (<span class="math inline">\(0.5\)</span> to <span class="math inline">\(1.5\)</span> is OK). The interpretation of the OUTFIT statistic is sensitive against outlying observations e.g.&nbsp;when a very able person gets an easy item wrong. To calculate in <code>eRm</code> we have to use the <code>p.param</code> object:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">itemfit</span>(p.param)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Itemfit Statistics: 
+       Chisq df p-value Outfit MSQ Infit MSQ Outfit t Infit t Discrim
+item1 20.869 30   0.892      0.673     0.689   -1.297  -1.771   2.353
+item2 31.971 30   0.369      1.031     1.053    0.204   0.308  -0.228
+item3 37.423 30   0.165      1.207     1.137    1.118   0.897  -0.921
+item4 34.630 30   0.256      1.117     1.136    0.650   0.875  -1.691
+item5 23.833 30   0.780      0.769     0.806   -1.198  -1.364   0.715</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#use iarm package to shows p-values less than 0.05</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(iarm)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">out_infit</span>(raschfit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+      Outfit se    pvalue padj sig  Infit se    pvalue padj  sig 
+item1 0.705  0.299 0.324  1         0.716 0.205 0.165  0.772     
+item2 1.137  0.38  0.718  1         1.124 0.244 0.611  1         
+item3 1.253  0.195 0.195  1         1.165 0.162 0.309  0.772     
+item4 1.155  0.206 0.452  1         1.174 0.167 0.298  0.772     
+item5 0.779  0.223 0.321  1         0.819 0.15  0.227  0.772     
+
+P value adjustment: BH</code></pre>
+</div>
+</div>
+<p>Item-total correlations and item-score correlations are routinely reported in classical test theory. We can use the simple structure in the Rasch model to compute the expected values of the item-score correlation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">item_restscore</span>(raschfit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      observed expected se     pvalue padj.BH sig
+item1 0.8768   0.7233   0.0851 0.0714 0.3568     
+item2 0.7057   0.7603   0.1295 0.6732 0.6732     
+item3 0.5632   0.6538   0.1507 0.5476 0.6732     
+item4 0.5770   0.6661   0.1446 0.5378 0.6732     
+item5 0.7328   0.5992   0.1174 0.2550 0.6374     </code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>ICC plots compared to empirical ICC</li>
+</ol>
+<p>Data with no missing values - score distribution:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(items)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>s
+ 0  1  2  3  4  5 
+ 6 12  9  8  2 13 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">&lt;-</span><span class="fu">RM</span>(items)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>ppar <span class="ot">&lt;-</span> <span class="fu">person.parameter</span>(raschfit)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">#one to one correspondence between y and theta</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ppar)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we look at the item 2</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotICC</span>(fit,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="at">item.subset =</span> <span class="fu">c</span>(<span class="dv">2</span>),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">empICC =</span> <span class="fu">list</span>(<span class="st">"raw"</span>),</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="at">empCI =</span> <span class="fu">list</span>(<span class="at">gamma=</span><span class="fl">0.95</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This plot shows the ICC for the selected item. The x-axis shows the ability continuum, the y-axis the response probability. The continuous line describes the probability to respond correctly to the problem given a level of ability. The difficulty of the item is where the probability of a correct response equals <span class="math inline">\(0.5\)</span>. The option <code>empICC</code> equal to “raw” also plots the relative frequencies of positive responses for each rawscore group at the position of the corresponding ability level. The blue dotted lines represent the <span class="math inline">\(95\%\)</span> confidence level for the relative frequencies and are shown if options are provided if the optional argument <code>empCI</code> is specified.</p>
+<ol start="5" type="1">
+<li>tests for local dependence</li>
+</ol>
+<p>Testing for local dependence can be done by removing an item, fitting the Rasch model to the remaining items, splitting with respect to the removed item. The general method for testing local dependence is to compute Yens <span class="math inline">\(Q_3\)</span> statistic, which proceeds as follows. Estimate <span class="math inline">\(\boldsymbol b\)</span> and <span class="math inline">\(\boldsymbol \theta\)</span>; compute the expected data matrix <span class="math inline">\(\boldsymbol E=E_{ik}=E(Y_{ik}\mid \theta_i=\hat{\theta}_i)=P(Y_{ik}=1\mid \theta_i=\hat{\theta}_i)\)</span>; compute the matrix of residuals <span class="math inline">\(\boldsymbol R=R_{ik}=\frac{Y_{ik} - E_{ik}}{\text{Var}(Y_{ik})}\)</span>; evaluate correlation between residuals. We use the <code>sirt</code> package for this</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> sirt<span class="sc">::</span><span class="fu">rasch.mml2</span>(items)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>------------------------------------------------------------
+Semiparametric Marginal Maximum Likelihood Estimation 
+Raschtype Model with generalized logistic link function: alpha1= 0 , alpha2= 0  
+------------------------------------------------------------
+...........................................................
+Iteration 1     2024-07-22 15:35:17.027667 
+   Deviance=302.8245
+    Maximum b parameter change=0.149448 
+...........................................................
+Iteration 2     2024-07-22 15:35:17.029991 
+   Deviance=299.1961 | Deviance change=3.628433
+    Maximum b parameter change=0.036572 
+...........................................................
+Iteration 3     2024-07-22 15:35:17.030829 
+   Deviance=296.505 | Deviance change=2.691082
+    Maximum b parameter change=0.036111 
+...........................................................
+Iteration 4     2024-07-22 15:35:17.031601 
+   Deviance=294.5184 | Deviance change=1.986675
+    Maximum b parameter change=0.034245 
+...........................................................
+Iteration 5     2024-07-22 15:35:17.032313 
+   Deviance=293.147 | Deviance change=1.371326
+    Maximum b parameter change=0.031046 
+...........................................................
+Iteration 6     2024-07-22 15:35:17.03324 
+   Deviance=292.2506 | Deviance change=0.896385
+    Maximum b parameter change=0.027082 
+...........................................................
+Iteration 7     2024-07-22 15:35:17.034008 
+   Deviance=291.6894 | Deviance change=0.561218
+    Maximum b parameter change=0.022895 
+...........................................................
+Iteration 8     2024-07-22 15:35:17.034674 
+   Deviance=291.3492 | Deviance change=0.340225
+    Maximum b parameter change=0.018872 
+...........................................................
+Iteration 9     2024-07-22 15:35:17.035317 
+   Deviance=291.1472 | Deviance change=0.202026
+    Maximum b parameter change=0.01525 
+...........................................................
+Iteration 10     2024-07-22 15:35:17.035976 
+   Deviance=291.0282 | Deviance change=0.11894
+    Maximum b parameter change=0.012139 
+...........................................................
+Iteration 11     2024-07-22 15:35:17.036595 
+   Deviance=290.958 | Deviance change=0.070237
+    Maximum b parameter change=0.009558 
+...........................................................
+Iteration 12     2024-07-22 15:35:17.037218 
+   Deviance=290.916 | Deviance change=0.042003
+    Maximum b parameter change=0.00747 
+...........................................................
+Iteration 13     2024-07-22 15:35:17.037848 
+   Deviance=290.8904 | Deviance change=0.025604
+    Maximum b parameter change=0.005808 
+...........................................................
+Iteration 14     2024-07-22 15:35:17.038479 
+   Deviance=290.8744 | Deviance change=0.015958
+    Maximum b parameter change=0.004501 
+...........................................................
+Iteration 15     2024-07-22 15:35:17.039254 
+   Deviance=290.8643 | Deviance change=0.010172
+    Maximum b parameter change=0.003481 
+...........................................................
+Iteration 16     2024-07-22 15:35:17.039984 
+   Deviance=290.8576 | Deviance change=0.00662
+    Maximum b parameter change=0.002688 
+...........................................................
+Iteration 17     2024-07-22 15:35:17.040703 
+   Deviance=290.8533 | Deviance change=0.004387
+    Maximum b parameter change=0.002073 
+...........................................................
+Iteration 18     2024-07-22 15:35:17.041456 
+   Deviance=290.8503 | Deviance change=0.002952
+    Maximum b parameter change=0.001598 
+...........................................................
+Iteration 19     2024-07-22 15:35:17.042538 
+   Deviance=290.8483 | Deviance change=0.002011
+    Maximum b parameter change=0.001231 
+...........................................................
+Iteration 20     2024-07-22 15:35:17.043476 
+   Deviance=290.8469 | Deviance change=0.001384
+    Maximum b parameter change=0.000948 
+...........................................................
+Iteration 21     2024-07-22 15:35:17.044301 
+   Deviance=290.8459 | Deviance change=0.000961
+    Maximum b parameter change=0.000729 
+...........................................................
+Iteration 22     2024-07-22 15:35:17.045088 
+   Deviance=290.8453 | Deviance change=0.000673
+    Maximum b parameter change=0.000561 
+...........................................................
+Iteration 23     2024-07-22 15:35:17.04583 
+   Deviance=290.8448 | Deviance change=0.000474
+    Maximum b parameter change=0.000431 
+...........................................................
+Iteration 24     2024-07-22 15:35:17.046605 
+   Deviance=290.8445 | Deviance change=0.000336
+    Maximum b parameter change=0.000331 
+...........................................................
+Iteration 25     2024-07-22 15:35:17.047385 
+   Deviance=290.8442 | Deviance change=0.000239
+    Maximum b parameter change=0.000255 
+...........................................................
+Iteration 26     2024-07-22 15:35:17.048099 
+   Deviance=290.8441 | Deviance change=0.000171
+    Maximum b parameter change=0.000196 
+...........................................................
+Iteration 27     2024-07-22 15:35:17.048813 
+   Deviance=290.8439 | Deviance change=0.000123
+    Maximum b parameter change=0.00015 
+...........................................................
+Iteration 28     2024-07-22 15:35:17.049523 
+   Deviance=290.8438 | Deviance change=8.9e-05
+    Maximum b parameter change=0.000115 
+...........................................................
+Iteration 29     2024-07-22 15:35:17.050303 
+   Deviance=290.8438 | Deviance change=6.5e-05
+    Maximum b parameter change=8.8e-05 
+------------------------------------------------------------
+Start: 2024-07-22 15:35:17.025159 
+End: 2024-07-22 15:35:17.05309 
+Time difference of 0.02793121 secs
+Difference: 0.02793121 
+------------------------------------------------------------</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> mod<span class="sc">$</span>item<span class="sc">$</span>b</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>mod.wle <span class="ot">&lt;-</span> sirt<span class="sc">::</span><span class="fu">wle.rasch</span>(<span class="at">dat=</span> items , <span class="at">b =</span> beta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+WLE Reliability= 0.54 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> mod.wle<span class="sc">$</span>theta</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co">#and now we can calculate Yen’s Q3 statistic</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>q3 <span class="ot">&lt;-</span> sirt<span class="sc">::</span><span class="fu">Q3</span>(<span class="at">dat =</span> items, <span class="at">theta =</span> eta , <span class="at">b =</span> beta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Yen's Q3 Statistic based on an estimated theta score 
+*** 5 Items | 10 item pairs
+*** Q3 Descriptives
+     M     SD    Min    10%    25%    50%    75%    90%    Max 
+-0.210  0.179 -0.540 -0.397 -0.336 -0.169 -0.073 -0.026  0.002 </code></pre>
+</div>
+</div>
+<p>The conventional interpretation is that correlations should be close to zero. A large value is evidence of a problem with the scale, but since we do not know the asymptotic distribution we have to rely on a rule of thumb to decide when to reject model fit. Based on simulation studies, a value of <span class="math inline">\(0.2\)</span> is considered above the average and works well in many situations.</p>
+<p>So, what do you think? pretty fun, isn’t it? Next time I will delve into this a bit more and check the model fit. Another excuse to keep studying this super cool topic!</p>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
