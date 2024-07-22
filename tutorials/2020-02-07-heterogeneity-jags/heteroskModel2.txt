@@ -1,0 +1,19 @@
+
+  model {
+  #Likelihood
+  for (i in 1:n) {
+  y[i]~dnorm(mu[i],tau[x[i]])
+  mu[i] <- inprod(beta[],X[i,])
+  }
+  
+  #Priors and derivatives
+  for (i in 1:ngroups) {
+  beta[i] ~ dnorm(0,1.0E-6)
+  
+  sigma[i] <- z[i]/sqrt(chSq[i])
+  z[i] ~ dnorm(0, 0.04)I(0,)
+  chSq[i] ~ dgamma(0.5, 0.5)
+  tau[i] <- pow(sigma[i], -2)
+  }
+  }
+  
