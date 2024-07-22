@@ -1,0 +1,27 @@
+
+  model {
+  #Likelihood
+  for (i in 1:n) {
+  y[i]~dnorm(mu[i],tau)
+  mu[i] <- beta0+beta1*x[i]
+  y.err[i] <- y[i] - mu[i]
+  }
+  
+  #Priors
+  beta0 ~ dnorm(0.01,1.0E-6)
+  beta1 ~ dnorm(0,1.0E-6)
+  tau <- 1 / (sigma * sigma)
+  sigma~dunif(0,100)
+  
+  #Other Derived parameters 
+  p.decline <- 1-step(beta1)
+  ymin<-beta0+beta1*min(x)                  
+  xrange <- max(x) - min(x)       
+  decline <- 100*((xrange*beta1)+ymin)/ymin 
+  p.decline25 <- step(decline-25)
+  
+  #finite-population variance components
+  sd.x <- abs(beta1)*sd(x[])
+  sd.resid <- sd(y.err)
+  }
+  

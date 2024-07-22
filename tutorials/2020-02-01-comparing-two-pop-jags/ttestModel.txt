@@ -1,0 +1,20 @@
+  
+ model {
+  #Likelihood
+  for (i in 1:n) {
+    y[i]~dnorm(mu[i],tau)
+    mu[i] <- beta0+beta[x[i]]
+  }
+ 
+  #Priors
+  beta0 ~ dnorm(0,1.0E-06)
+  beta[1] <- 0
+  beta[2] ~ dnorm(0,1.0E-06)
+  tau ~ dgamma(0.1,0.1)
+  sigma<-1/sqrt(tau)
+
+  #Other Derived parameters 
+  # Group means (note, beta is a vector)
+  Group.means <-beta0+beta  
+ }
+ 

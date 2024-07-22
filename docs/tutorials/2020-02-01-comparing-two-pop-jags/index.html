@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-02-01">
+<meta name="keywords" content="Software, Statistics, Stan">
+
+<title>angabrio.github.io - Comparing Two Populations (JAGS)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-generation" id="toc-data-generation" class="nav-link active" data-scroll-target="#data-generation">Data generation</a></li>
+  <li><a href="#the-one-sample-t-test" id="toc-the-one-sample-t-test" class="nav-link" data-scroll-target="#the-one-sample-t-test">The One Sample t-test</a>
+  <ul class="collapse">
+  <li><a href="#fitting-the-model-in-jags" id="toc-fitting-the-model-in-jags" class="nav-link" data-scroll-target="#fitting-the-model-in-jags">Fitting the model in JAGS</a></li>
+  </ul></li>
+  <li><a href="#mcmc-diagnostics" id="toc-mcmc-diagnostics" class="nav-link" data-scroll-target="#mcmc-diagnostics">MCMC diagnostics</a></li>
+  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation">Model validation</a></li>
+  <li><a href="#parameter-estimates" id="toc-parameter-estimates" class="nav-link" data-scroll-target="#parameter-estimates">Parameter estimates</a></li>
+  <li><a href="#graphical-summaries" id="toc-graphical-summaries" class="nav-link" data-scroll-target="#graphical-summaries">Graphical summaries</a></li>
+  <li><a href="#effect-sizes" id="toc-effect-sizes" class="nav-link" data-scroll-target="#effect-sizes">Effect sizes</a></li>
+  <li><a href="#probability-statements" id="toc-probability-statements" class="nav-link" data-scroll-target="#probability-statements">Probability statements</a></li>
+  <li><a href="#finite-population-standard-deviations" id="toc-finite-population-standard-deviations" class="nav-link" data-scroll-target="#finite-population-standard-deviations">Finite population standard deviations</a></li>
+  <li><a href="#unequally-varied-populations" id="toc-unequally-varied-populations" class="nav-link" data-scroll-target="#unequally-varied-populations">Unequally varied populations</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Comparing Two Populations (JAGS)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Software</div>
+    <div class="quarto-category">Statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="mailto:a.gabrio@maastrichtuniversity.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 1, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><span style="font-size: 85%">The focus of this simple tutorial is to provide a brief introduction and overview about how to fit Bayesian models using <code>JAGS</code> via <code>R</code> …</span></p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Software, Statistics, Stan</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>This tutorial will focus on the use of Bayesian estimation to explore differences between two populations. <code>BUGS</code> (Bayesian inference Using <em>Gibbs Sampling</em>) is an algorithm and supporting language (resembling <code>R</code>) dedicated to performing the Gibbs sampling implementation of <em>Markov Chain Monte Carlo</em> (MCMC) method. Dialects of the <code>BUGS</code> language are implemented within three main projects:</p>
+<ol type="1">
+<li><p><strong>OpenBUGS</strong> - written in component pascal.</p></li>
+<li><p><strong>JAGS</strong> - (Just Another Gibbs Sampler) - written in <code>C++</code>.</p></li>
+<li><p><strong>STAN</strong> - a dedicated Bayesian modelling framework written in <code>C++</code> and implementing <em>Hamiltonian</em> MCMC samplers.</p></li>
+</ol>
+<p>Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of R, and thus, they are best accessed from within <code>R</code> itself. As such there are multiple packages devoted to interfacing with the various software implementations:</p>
+<ul>
+<li><p><em>R2OpenBUGS</em> - interfaces with <code>OpenBUGS</code></p></li>
+<li><p><em>R2jags</em> - interfaces with <code>JAGS</code></p></li>
+<li><p><em>rstan</em> - interfaces with <code>STAN</code></p></li>
+</ul>
+<p>The <code>BUGS/JAGS/STAN</code> languages and algorithms are very powerful and flexible. However, the cost of this power and flexibility is complexity and the need for a firm understanding of the model you wish to fit as well as the priors to be used. The algorithms requires the following inputs.</p>
+<ul>
+<li><p>Within the model:</p>
+<ol type="1">
+<li><p>The likelihood function relating the response to the predictors.</p></li>
+<li><p>The definition of the priors.</p></li>
+</ol></li>
+<li><p>Chain properties:</p>
+<ol type="1">
+<li><p>The number of chains.</p></li>
+<li><p>The length of chains (number of iterations).</p></li>
+<li><p>The burn-in length (number of initial iterations to ignore).</p></li>
+<li><p>The thinning rate (number of iterations to count on before storing a sample).</p></li>
+</ol></li>
+<li><p>The initial estimates to start an MCMC chain. If there are multiple chains, these starting values can differ between chains.</p></li>
+<li><p>The list of model parameters and derivatives to monitor (and return the posterior distributions of)</p></li>
+</ul>
+<p>This tutorial will demonstrate how to fit models in <code>JAGS</code> (<span class="citation" data-cites="plummer2004jags">Plummer (<a href="#ref-plummer2004jags" role="doc-biblioref">2004</a>)</span>) using the package <code>R2jags</code> (<span class="citation" data-cites="su2015package">Su et al. (<a href="#ref-su2015package" role="doc-biblioref">2015</a>)</span>) as interface, which also requires to load some other packages.</p>
+<section id="data-generation" class="level1">
+<h1>Data generation</h1>
+<p>We will start by generating a random data set. Note, I am creating two versions of the predictor variable (a numeric version and a factorial version).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>nA <span class="ot">&lt;-</span> <span class="dv">60</span>  <span class="co">#sample size from Population A</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nB <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co">#sample size from Population B</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>muA <span class="ot">&lt;-</span> <span class="dv">105</span>  <span class="co">#population mean of Population A</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>muB <span class="ot">&lt;-</span> <span class="fl">77.5</span>  <span class="co">#population mean of Population B</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">3</span>  <span class="co">#standard deviation of both populations (equally varied)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>yA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nA, muA, sigma)  <span class="co">#Population A sample</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>yB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nB, muB, sigma)  <span class="co">#Population B sample</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(yA, yB)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>), <span class="fu">c</span>(nA, nB)))  <span class="co">#categorical listing of the populations</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>xn <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(x)  <span class="co">#numerical version of the population category for means parameterization. # Should not start at 0.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, x, xn)  <span class="co"># dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let inspect the first few rows of the dataset using the command <code>head</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y x xn
+NA 1 103.3186 A  1
+NA 2 104.3095 A  1
+NA 3 109.6761 A  1
+NA 4 105.2115 A  1
+NA 5 105.3879 A  1
+NA 6 110.1452 A  1</code></pre>
+</div>
+</div>
+<p>We can also perform some exploratory data analysis - in this case, a boxplot of the response for each level of the predictor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y <span class="sc">~</span> x, data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-one-sample-t-test" class="level1">
+<h1>The One Sample t-test</h1>
+<p>A <em>t-test</em> is essentially just a simple regression model in which the categorical predictor is represented by a binary variable in which one level is coded as <span class="math inline">\(0\)</span> and the other <span class="math inline">\(1\)</span>. For the model itself, the observed response <span class="math inline">\(y_i\)</span> are assumed to be drawn from a normal distribution with a given mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma\)</span>. The expected values are themselves determined by the linear predictor <span class="math inline">\(\mu_i=\beta_0+\beta_1x_i\)</span>, where <span class="math inline">\(\beta_0\)</span> represents the mean of the first treatment group and <span class="math inline">\(\beta_1\)</span> represents the difference between the mean of the first group and the mean of the second group (the effect of interest).</p>
+<p>MCMC sampling requires priors on all parameters. We will employ weakly informative priors. Specifying “uninformative” priors is always a bit of a balancing act. If the priors are too vague (wide) the MCMC sampler can wander off into nonscence areas of likelihood rather than concentrate around areas of highest likelihood (desired when wanting the outcomes to be largely driven by the data). On the other hand, if the priors are too strong, they may have an influence on the parameters. In such a simple model, this balance is very forgiving - it is for more complex models that prior choice becomes more important. For this simple model, we will go with zero-centered Gaussian (normal) priors with relatively large standard deviations (<span class="math inline">\(1000\)</span>) for both the intercept and the treatment effect and a wide half-cauchy (scale=<span class="math inline">\(25\)</span>) for the standard deviation (<span class="citation" data-cites="gelman2006prior">Gelman et al. (<a href="#ref-gelman2006prior" role="doc-biblioref">2006</a>)</span>).</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}(\mu_i, \sigma),  
+\]</span></p>
+<p>where <span class="math inline">\(\mu_i=\beta_0+\beta_1x_i\)</span>.</p>
+<p>Priors are defined as:</p>
+<p><span class="math display">\[
+\beta_j \sim \text{Normal}(0,1000),  \;\;\; \text{and} \;\;\; \sigma \sim \text{Cauchy}(0,25),  
+\]</span></p>
+<p>for <span class="math inline">\(j=0,1\)</span>.</p>
+<section id="fitting-the-model-in-jags" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-the-model-in-jags">Fitting the model in JAGS</h2>
+<p>Broadly, there are two ways of parameterising (expressing the unknown (to be estimated) components of a model) a model. Either we can estimate the means of each group (<em>Means parameterisation</em>) or we can estimate the mean of one group and the difference between this group and the other group(s) (<em>Effects parameterisation</em>). The latter is commonly used for frequentist null hypothesis testing as its parameters are more consistent with the null hypothesis of interest (that the difference between the two groups equals zero).</p>
+<ol type="1">
+<li><strong>Effects parameterisation</strong></li>
+</ol>
+<p><span class="math display">\[
+y_i = \beta_0 + \beta_{j}x_i + \epsilon_i, \;\;\; \text{with} \;\;\; \epsilon_i \sim \text{Normal}(0,\sigma).  
+\]</span></p>
+<p>Each <span class="math inline">\(y_i\)</span> is modelled by an intercept <span class="math inline">\(\beta_0\)</span> (mean of group A) plus a difference parameter <span class="math inline">\(\beta_j\)</span> (difference between mean of group A and group B) multiplied by an indicator of which group the observation came from (<span class="math inline">\(x_i\)</span>), plus a residual drawn from a normal distribution with mean <span class="math inline">\(0\)</span> and standard deviation <span class="math inline">\(\sigma\)</span>. Actually, there are as many <span class="math inline">\(\beta_j\)</span> parameters as there are groups but one of them (typically the first) is set to be equal to zero (to avoid over-parameterization). Expected values of <span class="math inline">\(y\)</span> are modelled assuming they are drawn from a normal distribution whose mean is determined by a linear combination of effect parameters and whose variance is defined by the degree of variability in this mean. The parameters are: <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<ol start="2" type="1">
+<li><strong>Means parameterisation</strong></li>
+</ol>
+<p><span class="math display">\[
+y_i = \beta_{j} + \epsilon_i, \;\;\; \text{with} \;\;\; \epsilon_i \sim \text{Normal}(0,\sigma).  
+\]</span></p>
+<p>Each <span class="math inline">\(y_i\)</span> is modelled as the mean <span class="math inline">\(\beta_j\)</span> of each group (<span class="math inline">\(j=1,2\)</span>) plus a residual drawn from a normal distribution with a mean of zero and a standard deviation of <span class="math inline">\(\sigma\)</span>. Actually, <span class="math inline">\(\boldsymbol \beta\)</span> is a set of <span class="math inline">\(j\)</span> coefficients corresponding to the <span class="math inline">\(j\)</span> dummy coded factor levels. Expected values of <span class="math inline">\(y\)</span> are modelled assuming they are drawn from a normal distribution whose mean is determined by a linear combination of means parameters and whose variance is defined by the degree of variability in this mean. The parameters are: <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<p>In <code>JAGS</code>, distributions are defined by their precision <span class="math inline">\(\tau\)</span> rather than their standard deviation <span class="math inline">\(\sigma\)</span>. Precision is just the inverse of variance (<span class="math inline">\(\tau=\frac{1}{\sigma^2}\)</span>) and are chosen as they permit the gamma distribution to be used as the conjugate prior of the variance of a normal distribution. Bayesian analyses require that priors are specified for all the parameters. We will define vague (non-informative) priors for each of the parameters such that the posterior distributions are almost entirely influenced by the likelihood (and thus the data). Hence, appropriate (conjugate) priors for the effects parameterisation could be:</p>
+<ul>
+<li><p><span class="math inline">\(\boldsymbol \beta \sim \text{Normal}(0,1.0\text{E-}6)\)</span> - a very flat normal distribution centered around zero. Note, <span class="math inline">\(1.0\text{E-}6\)</span> is scientific notation for <span class="math inline">\(0.000001\)</span>.</p></li>
+<li><p><span class="math inline">\(\tau \sim \text{Gamma}(0.1,0.1)\)</span> a vague gamma distribution with a shape parameter close to zero (must be greater than <span class="math inline">\(0\)</span>).</p></li>
+</ul>
+<p>The <code>JAGS</code> language very closely matches the above model and prior definitions - hence the importance on understanding the model you wish to fit. The <code>JAGS</code> language resembles <code>R</code> in many respects. It basically consists of:</p>
+<ul>
+<li><p>stochastic nodes - those that appear on the left hand side of <span class="math inline">\(\sim\)</span></p></li>
+<li><p>deterministic nodes - those that appear on the left hand side of <code>&lt;-</code></p></li>
+<li><p><span class="math inline">\(R\)</span>-like for loops and functions to transform and summarise the data</p></li>
+</ul>
+<p>That said, <code>JAGS</code> is based on a declarative language, which means: the order with which statements appear in the model definition are not important; nodes should not be defined more than once (you cannot change a value).We are now in a good position to define the model (Likelihood function and prior distributions).</p>
+<p><strong>Effects Parameterisation</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>modelString <span class="ot">=</span> <span class="st">"  </span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="st"> model {</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">  #Likelihood</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">    y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">    mu[i] &lt;- beta0+beta[x[i]]</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">  #Priors</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">  beta[1] &lt;- 0</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">  beta[2] ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">  tau ~ dgamma(0.1,0.1)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">  sigma&lt;-1/sqrt(tau)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">  #Other Derived parameters </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">  # Group means (note, beta is a vector)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">  Group.means &lt;-beta0+beta  </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="st"> "</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"ttestModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Means Parameterisation</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>modelString.means <span class="ot">=</span> <span class="st">"  </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">  model {</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood </span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">     y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">     mu[i] &lt;- beta[x[i]]</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st">   for (j in min(x):max(x)) {</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">     beta[j] ~ dnorm(0,0.001)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="st">   tau~dgamma(0.1,0.1)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma&lt;-1/sqrt(tau)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="st">   #Other Derived parameters </span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="st">   effect &lt;-beta[2]-beta[1]</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st"> "</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString.means, <span class="at">con =</span> <span class="st">"ttestModelMeans.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>JAGS</code>). Note, all variables must be numeric, therefore we use the numeric version of <span class="math inline">\(x\)</span>. Furthermore, the first level must be <span class="math inline">\(1\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data, <span class="fu">list</span>(<span class="at">y =</span> y, <span class="at">x =</span> xn, <span class="at">n =</span> <span class="fu">nrow</span>(data)))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data.list.means <span class="ot">&lt;-</span> <span class="fu">with</span>(data, <span class="fu">list</span>(<span class="at">y =</span> y, <span class="at">x =</span> xn, <span class="at">n =</span> <span class="fu">nrow</span>(data)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the initial values for the chain. Reasonable starting points can be gleaned from the data themselves.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>inits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">beta0 =</span> <span class="fu">mean</span>(data<span class="sc">$</span>y), <span class="at">beta =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">tapply</span>(data<span class="sc">$</span>y,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    data<span class="sc">$</span>x, mean))), <span class="at">sigma =</span> <span class="fu">sd</span>(data<span class="sc">$</span>y<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>inits.means <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">beta =</span> <span class="fu">tapply</span>(data<span class="sc">$</span>y, data<span class="sc">$</span>x, mean), <span class="at">sigma =</span> <span class="fu">sd</span>(data<span class="sc">$</span>y<span class="sc">/</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"Group.means"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>params.means <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"effect"</span>, <span class="st">"sigma"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>adaptSteps <span class="ot">=</span> <span class="dv">1000</span>  <span class="co"># the number of steps over which to establish a good stepping distance</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">2000</span>  <span class="co"># the number of initial samples to discard</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span>  <span class="co"># the number of independed sampling chains to perform </span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">50000</span>  <span class="co"># the total number of samples to store</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span>  <span class="co"># the thinning rate</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>R2jags</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When using the <code>jags</code> function (<code>R2jags</code> package), it is not necessary to provide initial values. However, if they are to be supplied, the inital values must be provided as a list of the same length as the number of chains.</p>
+<p><strong>Effects Parameterisation</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data.list,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits,inits) # since there are two chains</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>params,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModel.txt"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 3
+NA    Total graph size: 214
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModel.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA                mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat
+NA Group.means[1] 105.200   0.357 104.497 104.959 105.201 105.441 105.900 1.001
+NA Group.means[2]  77.882   0.438  77.018  77.589  77.882  78.174  78.746 1.001
+NA beta[1]          0.000   0.000   0.000   0.000   0.000   0.000   0.000 1.000
+NA beta[2]        -27.318   0.563 -28.426 -27.696 -27.315 -26.943 -26.212 1.001
+NA beta0          105.200   0.357 104.497 104.959 105.201 105.441 105.900 1.001
+NA sigma            2.771   0.202   2.408   2.630   2.759   2.900   3.198 1.001
+NA deviance       487.192   2.485 484.376 485.370 486.547 488.331 493.506 1.001
+NA                n.eff
+NA Group.means[1] 46000
+NA Group.means[2] 15000
+NA beta[1]            1
+NA beta[2]        35000
+NA beta0          46000
+NA sigma          46000
+NA deviance       46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.1 and DIC = 490.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p><strong>Means Parameterisation</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data.r2jags.means <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data.list.means,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits.means,inits.means) # since there are two chains</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>params.means,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModelMeans.txt"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 3
+NA    Total graph size: 211
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags.means)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModelMeans.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA beta[1]  105.184   0.357 104.481 104.947 105.184 105.423 105.884 1.001 46000
+NA beta[2]   77.867   0.439  77.001  77.575  77.866  78.160  78.736 1.001 39000
+NA effect   -27.317   0.566 -28.433 -27.696 -27.317 -26.940 -26.197 1.001 46000
+NA sigma      2.768   0.201   2.408   2.626   2.755   2.897   3.192 1.001 34000
+NA deviance 487.195   2.498 484.360 485.377 486.540 488.323 493.721 1.001 46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.1 and DIC = 490.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p><strong>Notes</strong></p>
+<ul>
+<li><p>If <code>inits=NULL</code> the <code>jags</code> function will generate vaguely sensible initial values for each chain based on the data.</p></li>
+<li><p>In addition to the mean and quantiles of each of the sample nodes, the <code>jags</code> function will calculate.</p>
+<ol type="1">
+<li><p>The <em>effective sample size</em> for each sample - if <code>n.eff</code> for a node is substantially less than the number of iterations, then it suggests poor mixing.</p></li>
+<li><p>The <em>Potential scale reduction factor</em> or <code>Rhat</code> values for each sample - these are a convergence diagnostic (values of <span class="math inline">\(1\)</span> indicate full convergence, values greater than <span class="math inline">\(1.01\)</span> are indicative of non-convergence.</p></li>
+<li><p>An <em>information criteria</em> (DIC) for model selection.</p></li>
+</ol></li>
+</ul>
+<p>The total number samples collected is <span class="math inline">\(46000\)</span>. That is, there are <span class="math inline">\(46000\)</span> samples collected from the multidimensional posterior distribution and thus, <span class="math inline">\(46000\)</span> samples collected from the posterior distributions of each parameter. The effective number of samples column indicates the number of independent samples represented in the total. It is clear that for all parameters the chains were well mixed.</p>
+</section>
+</section>
+<section id="mcmc-diagnostics" class="level1">
+<h1>MCMC diagnostics</h1>
+<p>In addition to the regular model diagnostic checks (such as residual plots), for Bayesian analyses, it is necessary to explore the characteristics of the MCMC chains and the sampler in general. Recall that the purpose of MCMC sampling is to replicate the posterior distribution of the model likelihood and priors by drawing a known number of samples from this posterior (thereby formulating a probability distribution). This is only reliable if the MCMC samples accurately reflect the posterior. Unfortunately, since we only know the posterior in the most trivial of circumstances, it is necessary to rely on indirect measures of how accurately the MCMC samples are likely to reflect the likelihood. I will briefly outline the most important diagnostics.</p>
+<ul>
+<li><p><em>Traceplots</em> for each parameter illustrate the MCMC sample values after each successive iteration along the chain. Bad chain mixing (characterised by any sort of pattern) suggests that the MCMC sampling chains may not have completely traversed all features of the posterior distribution and that more iterations are required to ensure the distribution has been accurately represented.</p></li>
+<li><p><em>Autocorrelation</em> plot for each parameter illustrate the degree of correlation between MCMC samples separated by different lags. For example, a lag of <span class="math inline">\(0\)</span> represents the degree of correlation between each MCMC sample and itself (obviously this will be a correlation of <span class="math inline">\(1\)</span>). A lag of <span class="math inline">\(1\)</span> represents the degree of correlation between each MCMC sample and the next sample along the chain and so on. In order to be able to generate unbiased estimates of parameters, the MCMC samples should be independent (uncorrelated).</p></li>
+<li><p><em>Potential scale reduction factor</em> (Rhat) statistic for each parameter provides a measure of sampling efficiency/effectiveness. Ideally, all values should be less than <span class="math inline">\(1.05\)</span>. If there are values of <span class="math inline">\(1.05\)</span> or greater it suggests that the sampler was not very efficient or effective. Not only does this mean that the sampler was potentially slower than it could have been but, more importantly, it could indicate that the sampler spent time sampling in a region of the likelihood that is less informative. Such a situation can arise from either a misspecified model or overly vague priors that permit sampling in otherwise nonscence parameter space.</p></li>
+</ul>
+<p>Prior to examining the summaries, we should have explored the convergence diagnostics. We use the package <code>mcmcplots</code> to obtain density and trace plots for the effects model as an example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta[2]"</span>,<span class="st">"sigma"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta[2]"</span>,<span class="st">"sigma"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These plots show no evidence that the chains have not reasonably traversed the entire multidimensional parameter space.</p>
+</section>
+<section id="model-validation" class="level1">
+<h1>Model validation</h1>
+<p>Model validation involves exploring the model diagnostics and fit to ensure that the model is broadly appropriate for the data. As such, exploration of the residuals should be routine. Ideally, a good model should also be able to predict the data used to fit the model.</p>
+<p>Residuals are not computed directly within <code>R2jags</code>. However, we can calculate them manually form the posteriors and plot them using the package <code>ggplot2</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta[2]"</span>)]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> data<span class="sc">$</span>x)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc, <span class="dv">2</span>, median)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> fit))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>There is no evidence that the mcmc chain did not converge on a stable posterior distribution. We are now in a position to examine the summaries of the parameters.</p>
+</section>
+<section id="parameter-estimates" class="level1">
+<h1>Parameter estimates</h1>
+<p>Although all parameters in a Bayesian analysis are considered random and are considered a distribution, rarely would it be useful to present tables of all the samples from each distribution. On the other hand, plots of the posterior distributions have some use. Nevertheless, most workers prefer to present simple statistical summaries of the posteriors. Popular choices include the median (or mean) and <span class="math inline">\(95\)</span>% credibility intervals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom.mixed)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(data.r2jags), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 6 × 5
+NA   term           estimate std.error conf.low conf.high
+NA   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 Group.means[1]   105.       0.357   105.      106.  
+NA 2 Group.means[2]    77.9      0.438    77.0      78.7 
+NA 3 beta[1]            0        0         0         0   
+NA 4 beta[2]          -27.3      0.563   -28.4     -26.2 
+NA 5 beta0            105.       0.357   105.      106.  
+NA 6 sigma              2.77     0.202     2.39      3.17</code></pre>
+</div>
+</div>
+<p>The Group A is typically <span class="math inline">\(27.3\)</span> units greater than Group B. The <span class="math inline">\(95\)</span>% confidence interval for the difference between Group A and B does not overlap with <span class="math inline">\(0\)</span> implying a significant difference between the two groups.</p>
+</section>
+<section id="graphical-summaries" class="level1">
+<h1>Graphical summaries</h1>
+<p>A nice graphic is often a great accompaniment to a statistical analysis. Although there are no fixed assumptions associated with graphing (in contrast to statistical analyses), we often want the graphical summaries to reflect the associated statistical analyses. After all, the sample is just one perspective on the population(s). What we are more interested in is being able to estimate and depict likely population parameters/trends. Thus, whilst we could easily provide a plot displaying the raw data along with simple measures of location and spread, arguably, we should use estimates that reflect the fitted model. In this case, it would be appropriate to plot the credibility interval associated with each group. We do this by loading functions in the package <code>dplyr</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculate the fitted values</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">levels</span>(data<span class="sc">$</span>x))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta[2]"</span>)]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> newdata <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(<span class="fu">tidyMCMC</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_pointrange</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> conf.high)) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span> <span class="fu">scale_x_discrete</span>(<span class="st">"X"</span>) <span class="sc">+</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If you wanted to represent sample data on the figure in such a simple example (single predictor) we could simply over- (or under-) lay the raw data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> data, <span class="fu">aes</span>(<span class="at">y =</span> y,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> x), <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span> <span class="fu">geom_pointrange</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low, <span class="at">ymax =</span> conf.high)) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span> <span class="fu">scale_x_discrete</span>(<span class="st">"X"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A more general solution would be to add the partial residuals to the figure. Partial residuals are the fitted values plus the residuals. In this simple case, that equates to exactly the same as the raw observations since <span class="math inline">\(\text{resid}=\text{obs}−\text{fitted}\)</span> and the fitted values depend only on the single predictor we are interested in.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculate partial residuals fitted values</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>fdata <span class="ot">=</span> rdata <span class="ot">=</span> data</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>fMat <span class="ot">=</span> rMat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, fdata)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(<span class="fu">apply</span>(coefs, <span class="dv">2</span>, median) <span class="sc">%*%</span> <span class="fu">t</span>(fMat))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> <span class="fu">as.vector</span>(data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">apply</span>(coefs, <span class="dv">2</span>, median) <span class="sc">%*%</span> <span class="fu">t</span>(rMat))</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>rdata <span class="ot">=</span> rdata <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">partial.resid =</span> resid <span class="sc">+</span> fit)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> rdata, <span class="fu">aes</span>(<span class="at">y =</span> partial.resid),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span> <span class="fu">geom_pointrange</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low, <span class="at">ymax =</span> conf.high)) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span> <span class="fu">scale_x_discrete</span>(<span class="st">"X"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="effect-sizes" class="level1">
+<h1>Effect sizes</h1>
+<p>In addition to deriving the distribution means for the second group, we could make use of the Bayesian framework to derive the distribution of the effect size. There are multiple ways of calculating an effect size, but the most common are:</p>
+<ul>
+<li><p><em>Raw effect size</em> - the difference between two groups (as already calculated)</p></li>
+<li><p><em>Cohen’s D</em> - the effect size standardised by division with the pooled standard deviation</p></li>
+<li><p><em>Percent</em> - the effect size expressed as a percent of the reference group mean</p></li>
+</ul>
+<p>Calculating the percent effect size involves division by an estimate of <span class="math inline">\(\beta_0\)</span>. The very first sample collected of each parameter (including <span class="math inline">\(\beta_0\)</span>) is based on the initial values supplied. If <code>inits=NULL</code> the <code>jags</code> function appears to generate initial values from the priors. Recall that in the previous model definition, <span class="math inline">\(\beta_0\)</span> was deemed to be distributed as a normal distribution with a mean of <span class="math inline">\(0\)</span>. Hence, <span class="math inline">\(\beta_0\)</span> would initially be assigned a value of <span class="math inline">\(0\)</span>. Division by zero is of course illegal and thus an error would be thrown. There are two ways to overcome this:</p>
+<ul>
+<li><p>Modify the prior such that it has a mean close to zero (and thus the first <span class="math inline">\(\beta_0\)</span> sample is not zero), yet not actually zero (such as <span class="math inline">\(0.0001\)</span>). This is the method used here.</p></li>
+<li><p>Define initial values that are based on the observed data (and not zero).</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>paramsv2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"Group.means"</span>, <span class="st">"cohenD"</span>, <span class="st">"ES"</span>, <span class="st">"p10"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>data.r2jagsv2 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data.list,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits,inits) # since there are two chains</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>paramsv2,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModelv2.txt"</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 3
+NA    Total graph size: 224
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jagsv2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModelv2.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA                mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat
+NA ES             -25.965   0.488 -26.918 -26.294 -25.967 -25.637 -24.992 1.001
+NA Group.means[1] 105.197   0.358 104.495 104.957 105.199 105.437 105.900 1.001
+NA Group.means[2]  77.881   0.439  77.020  77.586  77.882  78.174  78.748 1.001
+NA beta[1]          0.000   0.000   0.000   0.000   0.000   0.000   0.000 1.000
+NA beta[2]        -27.316   0.567 -28.428 -27.696 -27.317 -26.934 -26.191 1.001
+NA beta0          105.197   0.358 104.495 104.957 105.199 105.437 105.900 1.001
+NA cohenD          -9.914   0.736 -11.390 -10.402  -9.905  -9.413  -8.503 1.001
+NA p10              1.000   0.000   1.000   1.000   1.000   1.000   1.000 1.000
+NA sigma            2.770   0.199   2.413   2.631   2.758   2.897   3.190 1.001
+NA deviance       487.184   2.473 484.372 485.370 486.546 488.317 493.572 1.001
+NA                n.eff
+NA ES             46000
+NA Group.means[1] 46000
+NA Group.means[2] 46000
+NA beta[1]            1
+NA beta[2]        46000
+NA beta0          46000
+NA cohenD         46000
+NA p10                1
+NA sigma          46000
+NA deviance       46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.1 and DIC = 490.2
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p>The Cohen’s D value is <span class="math inline">\(-9.91\)</span>. This value is far greater than the nominal “large effect” guidelines outlined by Cohen and thus we might proclaim the treatment as having a large negative effect. The effect size expressed as a percentage of the Group A mean is <span class="math inline">\(-27.3\)</span>. Hence the treatment was associated with a <span class="math inline">\(27.3\)</span>% reduction.</p>
+</section>
+<section id="probability-statements" class="level1">
+<h1>Probability statements</h1>
+<p>Bayesian statistics provide a natural means to generate probability statements. For example, we could calculate the probability that there is an effect of the treatment. Moreover, we could calculate the probability that the treatment effect exceeds some threshold (which might be based on a measure of clinically important difference or other compliance guidelines for example).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jagsv2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Percentage change (relative to Group A)</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>ES <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> mcmc[, <span class="st">"beta[2]"</span>]<span class="sc">/</span>mcmc[, <span class="st">"beta0"</span>]</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(ES)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probability that the effect is greater than 10% (a decline of &gt;10%)</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> ES <span class="sc">&gt;</span> <span class="dv">10</span>)<span class="sc">/</span><span class="fu">length</span>(ES)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probability that the effect is greater than 25% (a decline of &gt;25%)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> ES <span class="sc">&gt;</span> <span class="dv">25</span>)<span class="sc">/</span><span class="fu">length</span>(ES)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0.9741304</code></pre>
+</div>
+</div>
+<p>We have defined two additional probability derivatives, both of which utilize the step function (which generates a binary vector based on whether values evaluate less than zero or not).</p>
+<ul>
+<li>P0 - the probability (mean of 1-step()) that the raw effect is greater than zero.</li>
+<li>P25 - the probability (mean of 1-step()) that the percent effect size is greater than <span class="math inline">\(25\)</span>%.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>paramsv3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"Group.means"</span>, <span class="st">"cohenD"</span>, <span class="st">"ES"</span>, <span class="st">"P0"</span>, <span class="st">"P25"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>data.r2jagsv3 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data.list,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits,inits) # since there are two chains</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>paramsv3,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModelv3.txt"</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 3
+NA    Total graph size: 225
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jagsv3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModelv3.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA                mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat
+NA ES             -25.964   0.489 -26.920 -26.293 -25.965 -25.637 -24.999 1.001
+NA Group.means[1] 105.197   0.359 104.485 104.959 105.196 105.435 105.897 1.001
+NA Group.means[2]  77.882   0.441  77.022  77.585  77.881  78.178  78.748 1.001
+NA P0               1.000   0.000   1.000   1.000   1.000   1.000   1.000 1.000
+NA P25              0.975   0.156   0.000   1.000   1.000   1.000   1.000 1.001
+NA beta[1]          0.000   0.000   0.000   0.000   0.000   0.000   0.000 1.000
+NA beta[2]        -27.315   0.568 -28.427 -27.696 -27.314 -26.935 -26.195 1.001
+NA beta0          105.197   0.359 104.485 104.959 105.196 105.435 105.897 1.001
+NA cohenD          -9.912   0.740 -11.385 -10.405  -9.903  -9.412  -8.477 1.001
+NA sigma            2.770   0.200   2.411   2.631   2.758   2.896   3.198 1.001
+NA deviance       487.202   2.492 484.364 485.378 486.557 488.334 493.696 1.001
+NA                n.eff
+NA ES             46000
+NA Group.means[1] 46000
+NA Group.means[2] 46000
+NA P0                 1
+NA P25            46000
+NA beta[1]            1
+NA beta[2]        46000
+NA beta0          46000
+NA cohenD         37000
+NA sigma          27000
+NA deviance       46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.1 and DIC = 490.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="finite-population-standard-deviations" class="level1">
+<h1>Finite population standard deviations</h1>
+<p>It is often useful to be able to estimate the relative amount of variability associated with each predictor (or term) in a model. This can provide a sort of relative importance measure for each predictor.</p>
+<p>In frequentist statistics, such measures are only available for so called random factors (factors whose observational levels are randomly selected to represent all possible levels rather than to represent specific treatment levels). For such random factors, the collective variances (or standard deviation) of each factor are known as the variance components. Each component can also be expressed as a percentage of the total so as to provide a percentage breakdown of the relative contributions of each scale of sampling. Frequentist approaches model random factors according to the variance they add to the model, whereas fixed factors are modelled according to their effects (deviations from reference means). The model does not seek to generalise beyond the observed levels of a given fixed factor (such as control vs treatment) and thus it apparently does not make sense to estimate the population variability between levels (which is what variance components estimate).</p>
+<p>The notion of “fixed” and “random” factors is somewhat arbitrary and does not really have any meaning within a Bayesian context (as all parameters and thus factors are considered random). Instead, the spirit of what many consider is that the difference between fixed and random factors can be captured by conceptualising whether the levels of a factor are drawn from a <em>finite population</em> (from which the observed factor levels are the only ones possible) or a <em>superpopulation</em> (from which the observed factor levels are just a random selection of the infinite possible levels possible). Hence, variance components could be defined in terms of either finite population or superpopulation standard deviations. Superpopulation standard deviations have traditionally been used to describe the relative scale of sampling variation (e.g.&nbsp;where is the greatest source of variability; plots, subplots within plots, individual quadrats within subplots, …. or years, months within years, weeks within months, days within weeks, …) and are most logically applicable to factors that have a relatively large number of levels (such as spatial or temporal sampling units). On the other hand, finite population standard deviations can be used to explore the relative impact or effect of a set of (fixed) treatments.</p>
+<p>Calculate the amount of unexplained (residual) variance absorbed by the factor. This is generated by fitting a model with (full model) and without (reduced model) the term and subtracting the standard deviations of the residuals one another.</p>
+<p><span class="math display">\[
+\sigma_A = \sigma_{reduced} - \sigma_{full}
+\]</span></p>
+<p>This approach works fine for models that only include fixed factors (indeed it is somewhat analogous to the partitioning of variance employed by an ANOVA table), but cannot be used when the model includes random factors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>data.lmFull <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, data)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>data.lmRed <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> <span class="dv">1</span>, data)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>sd.a <span class="ot">&lt;-</span> <span class="fu">sd</span>(data.lmRed<span class="sc">$</span>resid) <span class="sc">-</span> <span class="fu">sd</span>(data.lmFull<span class="sc">$</span>resid)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>sd.resid <span class="ot">&lt;-</span> <span class="fu">sd</span>(data.lmFull<span class="sc">$</span>resid)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>sds <span class="ot">&lt;-</span> <span class="fu">c</span>(sd.a, sd.resid)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span> <span class="sc">*</span> sds<span class="sc">/</span><span class="fu">sum</span>(sds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 80.05772 19.94228</code></pre>
+</div>
+</div>
+<p>However, options are somewhat limiting if we want to estimate the relative impacts of a mixture of “fixed” and “random” terms. For example, we may wish to explore the relative importance of a treatment compared to the spatial and/or temporal sampling heterogeneity. The Bayesian framework provides a relatively simple way to generate both finite population and superpopulation standard deviation estimates for all factors.</p>
+<ul>
+<li><p><strong>Finite populations</strong>. The standard deviations of the MCMC samples across each of the parameters associated with a factor (eg, <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> in the effects parameterisation model) provide natural estimates of the variability between group levels (and thus the finite population standard deviation).</p></li>
+<li><p><strong>Superpopulation</strong>. The mechanism of defining priors also provides a mechanism for calculating infinite population standard deviations. Recall that in the means model, the prior for <span class="math inline">\(\beta_0\)</span> specifies that each of the <span class="math inline">\(\beta_0\)</span> values are drawn from a normal distribution with a particular mean and a certain level of precision (reciprocal of variability). We could further parameterise this prior into an estimatable mean and precision via hyperpriors <span class="math inline">\(\beta_0 \sim \text{Normal}(\mu,\tau)\)</span>, with <span class="math inline">\(\mu \sim \text{Normal}(0,1.0\text{E}-6)\)</span> and <span class="math inline">\(\tau \sim \text{Gamma}(0.1,0.1)\)</span>. Since the normal distribution in line one above represents the distribution from which the (infinite) population means are drawn, <span class="math inline">\(\tau\)</span> provides a direct measure of the variability of the population from which the means are drawn.</p></li>
+</ul>
+<p>When the number of levels of a factor are large, the finite population and superpopulation standard deviation point estimates will be very similar. However, when the number of factor levels is small (such as two levels), the finite population estimate will be very precise whereas the superpopulation standard deviation estimate will be very imprecise (highly varied). For this reason, if the purpose of estimating standard deviations is to compare relative contributions of various predictors (some of which have small numbers of levels and others large), then it is best to use finite population standard deviation estimates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>paramsv4 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"sd.a"</span>, <span class="st">"sd.resid"</span>, <span class="st">"sigma.a"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>data.r2jagsv4 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data.list,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits,inits) # since there are two chains</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>paramsv4,</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModelv4.txt"</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 4
+NA    Total graph size: 319
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jagsv4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModelv4.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA                mu.vect      sd.vect    2.5%     25%     50%     75%
+NA beta[1]   0.000000e+00 0.000000e+00   0.000   0.000   0.000   0.000
+NA beta[2]  -2.731400e+01 5.670000e-01 -28.417 -27.694 -27.314 -26.937
+NA beta0     1.051970e+02 3.590000e-01 104.490 104.955 105.198 105.440
+NA sd.a      1.931400e+01 4.010000e-01  18.521  19.047  19.314  19.583
+NA sd.resid  2.751000e+00 2.000000e-02   2.737   2.738   2.743   2.755
+NA sigma     2.769000e+00 1.990000e-01   2.411   2.629   2.757   2.895
+NA sigma.a   1.095446e+22 1.956638e+24   0.323   1.712  13.394 440.403
+NA deviance  4.871890e+02 2.480000e+00 484.365 485.386 486.550 488.303
+NA                 97.5%  Rhat n.eff
+NA beta[1]         0.000 1.000     1
+NA beta[2]       -26.193 1.001 46000
+NA beta0         105.899 1.001 46000
+NA sd.a           20.094 1.001 46000
+NA sd.resid        2.808 1.001 46000
+NA sigma           3.187 1.001 46000
+NA sigma.a  43469187.743 1.001 46000
+NA deviance      493.637 1.001 46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.1 and DIC = 490.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p>The between group (finite population) standard deviation is <span class="math inline">\(20.1\)</span> whereas the within group standard deviation is <span class="math inline">\(2.81\)</span>. These equate to respectively. Compared to the finite population standard deviation, the superpopulation between group standard deviation estimate (<span class="math inline">\(\sigma_a\)</span>) is both very large and highly variable. This is to be expected, whilst the finite population standard deviation represents the degree of variation between the observed levels, the superpopulation standard deviation seeks to estimate the variability of the population from which the group means of the observed levels <strong>AND</strong> all other possible levels are drawn. There are only two levels from which to estimate this standard deviation and therefore, its value and variability are going to be higher than those pertaining only to the scope of the current data.</p>
+<p>Examination of the quantiles for <span class="math inline">\(\sigma_a\)</span> suggest that its samples are not distributed normally. Consequently, the mean is not an appropriate measure of its location. We will instead characterise the superpopulation between group and within group standard deviations via their respective medians and as percent medians. The contrast between finite population and superpopulation standard deviations is also emphasised by the respective estimates for the residuals. The residuals are of course a “random” factor with a large number of observed levels. It is therefore not surprising that the point estimates for the residuals variance components are very similar. However, also notice that the precision of the finite population standard deviation estimate is substantially higher (lower standard deviation of the standard deviation estimate) than that of the superpopulation estimate.</p>
+</section>
+<section id="unequally-varied-populations" class="level1">
+<h1>Unequally varied populations</h1>
+<p>We can also generate data assuming two populations with different variances, e.g.&nbsp;between male and female subgroups.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="dv">60</span>  <span class="co">#sample size from population 1</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>n2 <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co">#sample size from population 2</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>mu1 <span class="ot">&lt;-</span> <span class="dv">105</span>  <span class="co">#population mean of population 1</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>mu2 <span class="ot">&lt;-</span> <span class="fl">77.5</span>  <span class="co">#population mean of population 2</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>sigma1 <span class="ot">&lt;-</span> <span class="dv">3</span>  <span class="co">#standard deviation of population 1</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="ot">&lt;-</span> <span class="dv">2</span>  <span class="co">#standard deviation of population 2</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2  <span class="co">#total sample size</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>y1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n1, mu1, sigma1)  <span class="co">#population 1 sample</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n2, mu2, sigma2)  <span class="co">#population 2 sample</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(y1, y2)</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>), <span class="fu">c</span>(n1, n2)))  <span class="co">#categorical listing of the populations</span></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>xn <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(n1, n2))  <span class="co">#numerical version of the population category</span></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>data2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, x, xn)  <span class="co"># dataset</span></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data2)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y x xn
+NA 1 103.3186 A  0
+NA 2 104.3095 A  0
+NA 3 109.6761 A  0
+NA 4 105.2115 A  0
+NA 5 105.3879 A  0
+NA 6 110.1452 A  0</code></pre>
+</div>
+</div>
+<p>Start by defining the model</p>
+<p><span class="math display">\[
+y_i = \beta_0 + \beta_1x_i + \epsilon,
+\]</span></p>
+<p>where <span class="math inline">\(\epsilon_1 \sim \text{Normal}(0,\sigma_1)\)</span> for <span class="math inline">\(x_1=0\)</span> (females), and <span class="math inline">\(\epsilon_2 \sim \text{Normal}(0,\sigma_2)\)</span> for <span class="math inline">\(x_2=1\)</span> (males). In <code>JAGS</code> code, the model becomes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>modelStringv5<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="st"> model {</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="st"> #Likelihood</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:n1) {</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="st"> y1[i]~dnorm(mu1,tau1)</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:n2) {</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="st"> y2[i]~dnorm(mu2,tau2)</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="st"> #Priors</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a><span class="st"> mu1 ~ dnorm (0,0.001)</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a><span class="st"> mu2 ~ dnorm(0,0.001)</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a><span class="st"> tau1 &lt;- 1 / (sigma1 * sigma1)</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a><span class="st"> sigma1~dunif(0,100)</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a><span class="st"> tau2 &lt;- 1 / (sigma2 * sigma2)</span></span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a><span class="st"> sigma2~dunif(0,100)</span></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a><span class="st"> #Other Derived parameters </span></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a><span class="st"> delta &lt;- mu2 - mu1</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a><span class="st"> "</span></span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file </span></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelStringv5,<span class="at">con=</span><span class="st">"ttestModelv5.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We specify priors directly on <span class="math inline">\(\sigma_1\)</span> and <span class="math inline">\(\sigma_2\)</span> using Uniform distributions between <span class="math inline">\(0\)</span> and <span class="math inline">\(100\)</span>, and then express <span class="math inline">\(\tau\)</span> as a deterministic function of <span class="math inline">\(\sigma\)</span>. Next, arrange the data as a list (as required by <code>JAGS</code>) and define the MCMC parameters. Note, all variables must be numeric, therefore we use the numeric version of <span class="math inline">\(x\)</span>. Define the initial values for two chains so that the initial values list must include two elements (if provided).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>data2.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data2,<span class="fu">list</span>(<span class="at">y1=</span>y[xn<span class="sc">==</span><span class="dv">0</span>], <span class="at">y2=</span>y[xn<span class="sc">==</span><span class="dv">1</span>], </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n1=</span><span class="fu">length</span>(y[xn<span class="sc">==</span><span class="dv">0</span>]), <span class="at">n2=</span><span class="fu">length</span>(y[xn<span class="sc">==</span><span class="dv">1</span>])))</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>inits <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">list</span>(<span class="at">mu1=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="at">mu2=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="at">sigma1=</span><span class="fu">rlnorm</span>(<span class="dv">1</span>), <span class="at">sigma2=</span><span class="fu">rlnorm</span>(<span class="dv">1</span>)),</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(<span class="at">mu1=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="at">mu2=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="at">sigma1=</span><span class="fu">rlnorm</span>(<span class="dv">1</span>), <span class="at">sigma2=</span><span class="fu">rlnorm</span>(<span class="dv">1</span>)))</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>paramsv5 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mu1"</span>,<span class="st">"mu2"</span>,<span class="st">"delta"</span>,<span class="st">"sigma1"</span>,<span class="st">"sigma2"</span>)</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>adaptSteps <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">2000</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">50000</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, fit the model in <code>JAGS</code> and print the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>data2.r2jagsv5 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>data2.list,</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="at">inits=</span><span class="cn">NULL</span>, <span class="co">#or inits=list(inits,inits) # since there are two chains</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="at">parameters.to.save=</span>paramsv5,</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="at">model.file=</span><span class="st">"ttestModelv5.txt"</span>,</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="at">n.chains=</span>nChains,</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="at">n.iter=</span>nIter,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="at">n.burnin=</span>burnInSteps,</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="at">n.thin=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 100
+NA    Unobserved stochastic nodes: 4
+NA    Total graph size: 115
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data2.r2jagsv5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModelv5.txt", fit using jags,
+NA  2 chains, each with 25000 iterations (first 2000 discarded)
+NA  n.sims = 46000 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA delta    -27.435   0.473 -28.367 -27.755 -27.433 -27.116 -26.508 1.001 27000
+NA mu1      105.181   0.360 104.478 104.937 105.181 105.422 105.891 1.001 44000
+NA mu2       77.746   0.306  77.142  77.543  77.748  77.948  78.347 1.001 46000
+NA sigma1     2.787   0.265   2.328   2.602   2.767   2.951   3.361 1.001 16000
+NA sigma2     1.913   0.225   1.534   1.753   1.893   2.049   2.414 1.001 21000
+NA deviance 455.879   2.945 452.217 453.714 455.215 457.354 463.257 1.001 46000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 4.3 and DIC = 460.2
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-gelman2006prior" class="csl-entry" role="listitem">
+Gelman, Andrew et al. 2006. <span>“Prior Distributions for Variance Parameters in Hierarchical Models (Comment on Article by Browne and Draper).”</span> <em>Bayesian Analysis</em> 1 (3): 515–34.
+</div>
+<div id="ref-plummer2004jags" class="csl-entry" role="listitem">
+Plummer, Martyn. 2004. <span>“JAGS: Just Another Gibbs Sampler.”</span>
+</div>
+<div id="ref-su2015package" class="csl-entry" role="listitem">
+Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements. 2015. <span>“Package <span>‘R2jags’</span>.”</span> <em>R Package Version 0.03-08, URL Http://CRAN. R-Project. Org/Package= R2jags</em>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

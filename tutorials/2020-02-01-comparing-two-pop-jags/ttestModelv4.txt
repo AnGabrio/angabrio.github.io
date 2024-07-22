@@ -1,0 +1,25 @@
+  
+ model {
+  #Likelihood
+  for (i in 1:n) {
+    y[i]~dnorm(mu[i],tau)
+    mu[i] <- beta0+beta[x[i]]
+    resid[i] <- y[i]-mu[i]
+  }
+ 
+  #Priors
+  beta0 ~ dnorm(0,1.0E-06)
+  beta[1] <- 0
+  beta[2] ~ dnorm(0,1.0E-06)
+  tau ~ dgamma(0.1,0.1)
+  sigma<-1/sqrt(tau)
+
+  tau.a ~ dgamma(0.1,0.1)
+  sigma.a<-1/sqrt(tau.a)
+
+  #Finite-population standard deviations
+  sd.a <- sd(beta)
+  sd.resid <- sd(resid)
+
+ }
+ 

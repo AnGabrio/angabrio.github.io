@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-02-02">
+<meta name="keywords" content="Software, Statistics, Stan">
+
+<title>angabrio.github.io - Simple Linear Regression (JAGS)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear regression</a></li>
+  </ul></li>
+  <li><a href="#data-generation" id="toc-data-generation" class="nav-link" data-scroll-target="#data-generation">Data generation</a>
+  <ul class="collapse">
+  <li><a href="#centering-the-data" id="toc-centering-the-data" class="nav-link" data-scroll-target="#centering-the-data">Centering the data</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory data analysis</a>
+  <ul class="collapse">
+  <li><a href="#normality" id="toc-normality" class="nav-link" data-scroll-target="#normality">Normality</a></li>
+  <li><a href="#homogeneity-of-variance" id="toc-homogeneity-of-variance" class="nav-link" data-scroll-target="#homogeneity-of-variance">Homogeneity of variance</a></li>
+  <li><a href="#linearity" id="toc-linearity" class="nav-link" data-scroll-target="#linearity">Linearity</a></li>
+  <li><a href="#model-assumptions" id="toc-model-assumptions" class="nav-link" data-scroll-target="#model-assumptions">Model assumptions</a></li>
+  </ul></li>
+  <li><a href="#model-fitting" id="toc-model-fitting" class="nav-link" data-scroll-target="#model-fitting">Model fitting</a></li>
+  <li><a href="#mcmc-diagnostics" id="toc-mcmc-diagnostics" class="nav-link" data-scroll-target="#mcmc-diagnostics">MCMC diagnostics</a></li>
+  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation">Model validation</a></li>
+  <li><a href="#parameter-estimates" id="toc-parameter-estimates" class="nav-link" data-scroll-target="#parameter-estimates">Parameter estimates</a></li>
+  <li><a href="#graphical-summaries" id="toc-graphical-summaries" class="nav-link" data-scroll-target="#graphical-summaries">Graphical summaries</a></li>
+  <li><a href="#effect-sizes" id="toc-effect-sizes" class="nav-link" data-scroll-target="#effect-sizes">Effect sizes</a></li>
+  <li><a href="#finite-population-standard-deviations" id="toc-finite-population-standard-deviations" class="nav-link" data-scroll-target="#finite-population-standard-deviations">Finite population standard deviations</a></li>
+  <li><a href="#r-squared" id="toc-r-squared" class="nav-link" data-scroll-target="#r-squared">R squared</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Simple Linear Regression (JAGS)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Software</div>
+    <div class="quarto-category">Statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="mailto:a.gabrio@maastrichtuniversity.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 2, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><span style="font-size: 85%">This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models …</span></p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Software, Statistics, Stan</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. <code>BUGS</code> (Bayesian inference Using <em>Gibbs Sampling</em>) is an algorithm and supporting language (resembling <code>R</code>) dedicated to performing the Gibbs sampling implementation of <em>Markov Chain Monte Carlo</em> (MCMC) method. Dialects of the <code>BUGS</code> language are implemented within three main projects:</p>
+<ol type="1">
+<li><p><strong>OpenBUGS</strong> - written in component pascal.</p></li>
+<li><p><strong>JAGS</strong> - (Just Another Gibbs Sampler) - written in <code>C++</code>.</p></li>
+<li><p><strong>STAN</strong> - a dedicated Bayesian modelling framework written in <code>C++</code> and implementing <em>Hamiltonian</em> MCMC samplers.</p></li>
+</ol>
+<p>Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of <code>R</code>, and thus, they are best accessed from within <code>R</code> itself. As such there are multiple packages devoted to interfacing with the various software implementations:</p>
+<ul>
+<li><p><em>R2OpenBUGS</em> - interfaces with <code>OpenBUGS</code></p></li>
+<li><p><em>R2jags</em> - interfaces with <code>JAGS</code></p></li>
+<li><p><em>rstan</em> - interfaces with <code>STAN</code></p></li>
+</ul>
+<p>This tutorial will demonstrate how to fit models in <code>JAGS</code> (<span class="citation" data-cites="plummer2004jags">Plummer (<a href="#ref-plummer2004jags" role="doc-biblioref">2004</a>)</span>) using the package <code>R2jags</code> (<span class="citation" data-cites="su2015package">Su et al. (<a href="#ref-su2015package" role="doc-biblioref">2015</a>)</span>) as interface, which also requires to load some other packages.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Many clinicians get a little twitchy and nervous around mathematical and statistical formulae and nomenclature. Whilst it is possible to perform basic statistics without too much regard for the actual equation (model) being employed, as the complexity of the analysis increases, the need to understand the underlying model becomes increasingly important. Moreover, model specification in <code>BUGS/JAGS/STAN</code> (the language used to program Bayesian modelling) aligns very closely to the underlying formulae. Hence a good understanding of the underlying model is vital to be able to create a sensible Bayesian model. Consequently, I will always present the linear model formulae along with the analysis.</p>
+<p>To introduce the philosophical and mathematical differences between classical (frequentist) and Bayesian statistics, based on previous works, we present a provocative yet compelling trend analysis of two hypothetical populations (A vs B). The temporal trend of population A shows very little variability from a very subtle linear decline (<span class="math inline">\(n=10\)</span>, <span class="math inline">\(\text{slope}=-0.10\)</span>, <span class="math inline">\(\text{p-value}=0.048\)</span>). By contrast, the B population appears to decline more dramatically, yet has substantially more variability (<span class="math inline">\(n=10\)</span>, <span class="math inline">\(\text{slope}=-10.23\)</span>, <span class="math inline">\(\text{p-value}=0.058\)</span>). From a traditional frequentist perspective, we would conclude that there is a “significant” relationship in Population A (<span class="math inline">\(p&lt;0.05\)</span>), yet not in Population B (<span class="math inline">\(p&gt;0.05\)</span>). However, if we consider a third population C which is exactly the same as populstion B but with a higher number of observations, then we may end up with a completely different conclusion compared with that based on population B (<span class="math inline">\(n=100\)</span>, <span class="math inline">\(\text{slope}=-10.47\)</span>, <span class="math inline">\(\text{p-value}&lt;0.001\)</span>).</p>
+<p>The above illustrates a couple of things:</p>
+<ul>
+<li><p>statistical significance does not necessarily translate into clinical importance. Indeed, population B is declining at nearly <span class="math inline">\(10\)</span> times the rate of population A. That sounds rather important, yet on the basis of the hypothesis test, we would dismiss the decline in population B.</p></li>
+<li><p>that a p-value is just the probability of detecting an effect or relationship - what is the probability that the sample size is large enough to pick up a difference.</p></li>
+</ul>
+<p>Let us now look at it from a Bayesian perspective, with a focus on population A and B. We would conclude that:</p>
+<ul>
+<li><p>the mean (plus or minus CI) slopes for Population A and B are <span class="math inline">\(-0.1 (-0.21,0)\)</span> and <span class="math inline">\(-10.08 (-20.32,0.57)\)</span> respectively</p></li>
+<li><p>the Bayesian approach allows us to query the posterior distribution is many other ways in order to ask sensible clinical questions. For example, we might consider that a rate of change of <span class="math inline">\(5\)</span>% or greater represents an important biological impact. For population A and B, the probability that the rate is <span class="math inline">\(5\)</span>% or greater is <span class="math inline">\(0\)</span> and <span class="math inline">\(0.85\)</span> respectively.</p></li>
+</ul>
+</section>
+<section id="linear-regression" class="level2">
+<h2 class="anchored" data-anchor-id="linear-regression">Linear regression</h2>
+<p>Simple linear regression is a linear modelling process that models a continuous response against a single continuous predictor. The linear model is expressed as:</p>
+<p><span class="math display">\[
+y_i = \beta_0 + \beta_1x_i + \epsilon_i, \;\;\; \epsilon_i \sim \text{Normal}(0,\sigma),
+\]</span></p>
+<p>where <span class="math inline">\(y_i\)</span> is the response variable for each of the <span class="math inline">\(i=1\ldots,n\)</span> observations, <span class="math inline">\(\beta_0\)</span> is the intercept (value when <span class="math inline">\(x=0\)</span>), <span class="math inline">\(\beta_1\)</span> is the slope (rate of change in <span class="math inline">\(y\)</span> per unit change in <span class="math inline">\(x\)</span>), <span class="math inline">\(x_i\)</span> is the predictor variable, <span class="math inline">\(\epsilon_i\)</span> is the residual value (difference between the observed value and the value expected by the model). The parameters of the trendline <span class="math inline">\(\boldsymbol \beta=(\beta_0,\beta_1)\)</span> are determined by <em>Ordinary Least Squares</em> (OLS) in which the sum of the squared residuals is minimized. A non-zero population slope is indicative of a relationship.</p>
+</section>
+</section>
+<section id="data-generation" class="level1">
+<h1>Data generation</h1>
+<p>Lets say we had set up an experiment in which we applied a continuous treatment (<span class="math inline">\(x\)</span>) ranging in magnitude from <span class="math inline">\(0\)</span> to <span class="math inline">\(16\)</span> to a total of <span class="math inline">\(16\)</span> sampling units (<span class="math inline">\(n=16\)</span>) and then measured a response (<span class="math inline">\(y\)</span>) from each unit. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">16</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co">#intercept</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.5</span>  <span class="co">#slope</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="ot">&lt;-</span> <span class="dv">25</span>  <span class="co">#residual variance (sd=5)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n  <span class="co">#values of the year covariate</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(sigma2))  <span class="co">#residuals</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> a <span class="sc">+</span> b <span class="sc">*</span> x <span class="sc">+</span> eps  <span class="co">#response variable</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> (<span class="fu">model.matrix</span>(<span class="sc">~</span>x) <span class="sc">%*%</span> <span class="fu">c</span>(a, b)) <span class="sc">+</span> eps</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, x)  <span class="co">#dataset</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y x
+NA 1 35.69762 1
+NA 2 35.84911 2
+NA 3 43.29354 3
+NA 4 34.35254 4
+NA 5 33.14644 5
+NA 6 39.57532 6</code></pre>
+</div>
+</div>
+<p>With these sort of data, we are primarily interested in investigating whether there is a relationship between the continuous response variable and the linear predictor (single continuous predictor).</p>
+<section id="centering-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="centering-the-data">Centering the data</h2>
+<p>When a linear model contains a covariate (continuous predictor variable) in addition to another predictor (continuous or categorical), it is nearly always advisable that the continuous predictor variables are centered prior to the analysis. Centering is a process by which the mean of a variable is subtracted from each of the values such that the scale of the variable is shifted so as to be centered around <span class="math inline">\(0\)</span>. Hence the mean of the new centered variable will be <span class="math inline">\(0\)</span>, yet it will retain the same variance.</p>
+<p>There are multiple reasons for this:</p>
+<ol type="1">
+<li><p>It provides some clinical meaning to the <span class="math inline">\(y\)</span>-intercept. Recall that the <span class="math inline">\(y\)</span>-intercept is the value of <span class="math inline">\(Y\)</span> when <span class="math inline">\(X\)</span> is equal to zero. If <span class="math inline">\(X\)</span> is centered, then the <span class="math inline">\(y\)</span>-intercept represents the value of <span class="math inline">\(Y\)</span> at the mid-point of the <span class="math inline">\(X\)</span> range. The <span class="math inline">\(y\)</span>-intercept of an uncentered <span class="math inline">\(X\)</span> typically represents a unreal value of <span class="math inline">\(Y\)</span> (as an <span class="math inline">\(X\)</span> of <span class="math inline">\(0\)</span> is often beyond the reasonable range of values).</p></li>
+<li><p>In multiplicative models (in which predictors and their interactions are included), main effects and interaction terms built from centered predictors will not be correlated to one another.</p></li>
+<li><p>For more complex models, centering the covariates can increase the likelihood that the modelling engine converges (arrives at a numerically stable and reliable outcome).</p></li>
+</ol>
+<p>Note, centering will not effect the slope estimates. In <code>R</code>, centering is easily achieved with the <code>scale</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">within</span>(data, {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    cx <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(x, <span class="at">scale =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y x   cx
+NA 1 35.69762 1 -7.5
+NA 2 35.84911 2 -6.5
+NA 3 43.29354 3 -5.5
+NA 4 34.35254 4 -4.5
+NA 5 33.14644 5 -3.5
+NA 6 39.57532 6 -2.5</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>Exploratory data analysis</h1>
+<section id="normality" class="level2">
+<h2 class="anchored" data-anchor-id="normality">Normality</h2>
+<p>Estimation and inference testing in linear regression assumes that the response is normally distributed in each of the populations. In this case, the populations are all possible measurements that could be collected at each level of <span class="math inline">\(x\)</span> - hence there are <span class="math inline">\(16\)</span> populations. Typically however, we only collect a single observation from each population (as is also the case here). How then can be evaluate whether each of these populations are likely to have been normal? For a given response, the population distributions should follow much the same distribution shapes. Therefore provided the single samples from each population are unbiased representations of those populations, a boxplot of all observations should reflect the population distributions.</p>
+</section>
+<section id="homogeneity-of-variance" class="level2">
+<h2 class="anchored" data-anchor-id="homogeneity-of-variance">Homogeneity of variance</h2>
+<p>Simple linear regression also assumes that each of the populations are equally varied. Actually, it is prospect of a relationship between the mean and variance of <span class="math inline">\(y\)</span>-values across x-values that is of the greatest concern. Strictly the assumption is that the distribution of <span class="math inline">\(y\)</span> values at each <span class="math inline">\(x\)</span> value are equally varied and that there is no relationship between mean and variance. However, as we only have a single <span class="math inline">\(y\)</span>-value for each <span class="math inline">\(x\)</span>-value, it is difficult to directly determine whether the assumption of <em>homogeneity of variance</em> is likely to have been violated (mean of one value is meaningless and variability can’t be assessed from a single value). If we then plot the residuals (difference between observed values and those predicted by the trendline) against the predict values and observe a definite presence of a pattern, then it is indicative of issues with the assumption of homogeneity of variance.</p>
+<p>Hence looking at the spread of values around a trendline on a scatterplot of <span class="math inline">\(y\)</span> against <span class="math inline">\(x\)</span> is a useful way of identifying gross violations of homogeneity of variance. Residual plots provide an even better diagnostic. The presence of a <em>wedge shape</em> is indicative that the population mean and variance are related.</p>
+</section>
+<section id="linearity" class="level2">
+<h2 class="anchored" data-anchor-id="linearity">Linearity</h2>
+<p>Linear regression fits a straight (linear) line through the data. Therefore, prior to fitting such a model, it is necessary to establish whether this really is the most sensible way of describing the relationship. That is, does the relationship appear to be linearly related or could some other non-linear function describe the relationship better. Scatterplots and residual plots are useful diagnostics.</p>
+</section>
+<section id="model-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="model-assumptions">Model assumptions</h2>
+<p>The typical assumptions which need to be checked when fitting a standard linear regression model are:</p>
+<ul>
+<li><p>All of the observations are independent - this must be addressed at the design and collection stages</p></li>
+<li><p>The response variable (and thus the residuals) should be normally distributed</p></li>
+<li><p>The response variable should be equally varied (variance should not be related to mean as these are supposed to be estimated separately)</p></li>
+<li><p>The relationship between the linear predictor (right hand side of the regression formula) and the link function should be linear. A scatterplot with smoother can be useful for identifying possible non-linearity.</p></li>
+</ul>
+<p>So lets explore normality, homogeneity of variances and linearity by constructing a scatterplot of the relationship between the response (<span class="math inline">\(y\)</span>) and the predictor (<span class="math inline">\(x\)</span>). We will also include a range of smoothers (linear and lowess) and marginal boxplots on the scatterplot to assist in exploring linearity and normality respectively.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scatterplot</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scatterplot</span>(y <span class="sc">~</span> x, data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<p>There is no evidence that the response variable is non-normal. The spread of values around the trendline seems fairly even (hence it there is no evidence of non-homogeneity). The data seems well represented by the linear trendline. Furthermore, the lowess smoother does not appear to have a consistent shift trajectory. Obvious violations could be addressed either by:</p>
+<ul>
+<li><p>Consider a non-linear linear predictor (such as a polynomial, spline or other non-linear function)</p></li>
+<li><p>Transform the scale of the response variables (e.g.&nbsp;to address normality)</p></li>
+</ul>
+</section>
+</section>
+<section id="model-fitting" class="level1">
+<h1>Model fitting</h1>
+<p>The purpose of fitting a model in this case is to explore the relationship between <span class="math inline">\(y\)</span> and <span class="math inline">\(x\)</span>. Since both <span class="math inline">\(y\)</span> and <span class="math inline">\(x\)</span> are continuous, a simple regression line is a good start. The observed response (<span class="math inline">\(y_i\)</span>) are assumed to be drawn from a normal distribution with a given mean (<span class="math inline">\(\mu\)</span>) and standard deviation (<span class="math inline">\(\sigma\)</span>). The expected values (<span class="math inline">\(\mu\)</span>) are themselves determined by the linear predictor (<span class="math inline">\(\beta_0+\beta_1\)</span>). In this case, <span class="math inline">\(\beta_0\)</span> represents the <span class="math inline">\(y\)</span>-intercept (value of <span class="math inline">\(y\)</span> when <span class="math inline">\(x\)</span> is equal to zero) and <span class="math inline">\(\beta_1\)</span> represents the rate of change in <span class="math inline">\(y\)</span> for every unit change in <span class="math inline">\(x\)</span> (the effect).</p>
+<p>Note that in this form, the <span class="math inline">\(y\)</span>-intercept is of little interest. Indeed for many applications, a value of x would be outside the domain of the collected data, outside the logical bounds of the actual variable or else outside the domain of interest. If however, we center the predictor variable (by subtracting the mean of <span class="math inline">\(x\)</span> from each <span class="math inline">\(x\)</span>, then the <span class="math inline">\(y\)</span>-intercept represents the value of <span class="math inline">\(y\)</span> at the average value of <span class="math inline">\(x\)</span>. This certainly has more meaning. Note that centering the predictor does not effect the estimate of slope. MCMC sampling requires priors on all parameters. We will employ weakly informative priors. Specifying “uninformative” priors is always a bit of a balancing act. If the priors are too vague (wide) the MCMC sampler can wander off into nonscence areas of likelihood rather than concentrate around areas of highest likelihood (desired when wanting the outcomes to be largely driven by the data). On the other hand, if the priors are too strong, they may have an influence on the parameters. In such a simple model, this balance is very forgiving - it is for more complex models that prior choice becomes more important.</p>
+<p>For this simple model, we will go with zero-centered Gaussian (normal) priors with relatively large standard deviations (1000) for both the intercept and the treatment effect and a wide half-cauchy (<span class="math inline">\(\text{scale}=25\)</span>) for the standard deviation.</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}(\mu_i, \sigma),
+\]</span></p>
+<p>where <span class="math inline">\(\mu_i=\beta_0+\beta_1x_i\)</span>. Priors are specified as: <span class="math inline">\(\boldsymbol \beta \sim \text{Normal}(0,1000)\)</span> and <span class="math inline">\(\sigma \sim \text{Cauchy}(0,25)\)</span>. We will explore Bayesian modelling of simple linear regression using <code>JAGS</code>. Remember that in this software normal distributions are specified in terms of precision <span class="math inline">\(\tau\)</span> rather than standard deviation <span class="math inline">\(\sigma\)</span>, where <span class="math inline">\(\tau=\frac{1}{\sigma^2}\)</span>. In addition, we will derive the following quantities.</p>
+<ul>
+<li><p>The percentage decline <span class="math inline">\(\left(100 \times \frac{(\text{max}(x) - \text{min}(x))\beta_1 + \text{min}(y)}{\text{min}(y)} \right)\)</span></p></li>
+<li><p>The probability that <span class="math inline">\(y\)</span> decline by more than <span class="math inline">\(25\)</span>%</p></li>
+<li><p>The finite-population variance components</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>modelString <span class="ot">=</span> <span class="st">"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">  model {</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">  #Likelihood</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">  y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">  mu[i] &lt;- beta0+beta1*x[i]</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">  y.err[i] &lt;- y[i] - mu[i]</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st">  #Priors</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0.01,1.0E-6)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-6)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="st">  tau &lt;- 1 / (sigma * sigma)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="st">  sigma~dunif(0,100)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="st">  #Other Derived parameters </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="st">  p.decline &lt;- 1-step(beta1)</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="st">  ymin&lt;-beta0+beta1*min(x)                  </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st">  xrange &lt;- max(x) - min(x)       </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st">  decline &lt;- 100*((xrange*beta1)+ymin)/ymin </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="st">  p.decline25 &lt;- step(decline-25)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="st">  #finite-population variance components</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="st">  sd.x &lt;- abs(beta1)*sd(x[])</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="st">  sd.resid &lt;- sd(y.err)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"ttestModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>JAGS</code>). As input, <code>JAGS</code> will need to be supplied with: the response variable, the predictor variable, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data, <span class="fu">list</span>(<span class="at">y =</span> y, <span class="at">x =</span> x, <span class="at">n =</span> <span class="fu">nrow</span>(data)))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data.list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA $y
+NA  [1] 35.69762 35.84911 43.29354 34.35254 33.14644 39.57532 31.80458 21.67469
+NA  [9] 23.06574 22.77169 29.62041 23.79907 22.50386 19.55341 14.72079 24.93457
+NA 
+NA $x
+NA  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+NA 
+NA $n
+NA [1] 16</code></pre>
+</div>
+</div>
+<p>Define the initial values for the chain. Reasonable starting points can be gleaned from the data themselves.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>inits <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">list</span>(<span class="fu">list</span>(<span class="at">beta0 =</span> <span class="fu">mean</span>(data<span class="sc">$</span>y), <span class="at">beta1 =</span> <span class="fu">diff</span>(<span class="fu">tapply</span>(data<span class="sc">$</span>y,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    data<span class="sc">$</span>x, mean)), <span class="at">sigma =</span> <span class="fu">sd</span>(data<span class="sc">$</span>y))), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>, <span class="st">"sigma"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">15000</span>  <span class="co">#across all chains</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 10500</code></pre>
+</div>
+</div>
+<p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>R2jags</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When using the <code>jags</code> function (<code>R2jags</code> package), it is not necessary to provide initial values. However, if they are to be supplied, the initial values must be provided as a list of the same length as the number of chains. Then print the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params, <span class="at">model.file =</span> <span class="st">"ttestModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter, <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 16
+NA    Unobserved stochastic nodes: 3
+NA    Total graph size: 109
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModel.txt", fit using jags,
+NA  2 chains, each with 10500 iterations (first 3000 discarded)
+NA  n.sims = 15000 iterations saved
+NA          mu.vect sd.vect   2.5%    25%    50%    75%   97.5%  Rhat n.eff
+NA beta0     40.332   2.779 34.814 38.547 40.341 42.142  45.768 1.001 15000
+NA beta1     -1.390   0.283 -1.957 -1.571 -1.390 -1.209  -0.822 1.001 15000
+NA sigma      5.187   1.125  3.549  4.399  5.009  5.772   7.848 1.001 14000
+NA deviance  96.319   2.919 93.005 94.208 95.578 97.595 103.875 1.001 15000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 4.3 and DIC = 100.6
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="mcmc-diagnostics" class="level1">
+<h1>MCMC diagnostics</h1>
+<p>In addition to the regular model diagnostic checks (such as residual plots), for Bayesian analyses, it is necessary to explore the characteristics of the MCMC chains and the sampler in general. Recall that the purpose of MCMC sampling is to replicate the posterior distribution of the model likelihood and priors by drawing a known number of samples from this posterior (thereby formulating a probability distribution). This is only reliable if the MCMC samples accurately reflect the posterior. Unfortunately, since we only know the posterior in the most trivial of circumstances, it is necessary to rely on indirect measures of how accurately the MCMC samples are likely to reflect the likelihood. I will briefly outline the most important diagnostics.</p>
+<ul>
+<li><p><em>Traceplots</em> for each parameter illustrate the MCMC sample values after each successive iteration along the chain. Bad chain mixing (characterised by any sort of pattern) suggests that the MCMC sampling chains may not have completely traversed all features of the posterior distribution and that more iterations are required to ensure the distribution has been accurately represented.</p></li>
+<li><p><em>Autocorrelation</em> plot for each parameter illustrate the degree of correlation between MCMC samples separated by different lags. For example, a lag of <span class="math inline">\(0\)</span> represents the degree of correlation between each MCMC sample and itself (obviously this will be a correlation of <span class="math inline">\(1\)</span>). A lag of <span class="math inline">\(1\)</span> represents the degree of correlation between each MCMC sample and the next sample along the chain and so on. In order to be able to generate unbiased estimates of parameters, the MCMC samples should be independent (uncorrelated).</p></li>
+<li><p><em>Potential scale reduction factor</em> (Rhat) statistic for each parameter provides a measure of sampling efficiency/effectiveness. Ideally, all values should be less than <span class="math inline">\(1.05\)</span>. If there are values of <span class="math inline">\(1.05\)</span> or greater it suggests that the sampler was not very efficient or effective. Not only does this mean that the sampler was potentially slower than it could have been but, more importantly, it could indicate that the sampler spent time sampling in a region of the likelihood that is less informative. Such a situation can arise from either a misspecified model or overly vague priors that permit sampling in otherwise nonscence parameter space.</p></li>
+</ul>
+<p>Prior to examining the summaries, we should have explored the convergence diagnostics. We use the package <code>mcmcplots</code> to obtain density and trace plots for the effects model as an example. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters, e.g.&nbsp;<span class="math inline">\(\boldsymbol \beta\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These plots show no evidence that the chains have not reasonably traversed the entire multidimensional parameter space.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data.mcmc <span class="ot">=</span> <span class="fu">as.mcmc</span>(data.r2jags)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Raftery diagnostic</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(data.mcmc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [[1]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                 
+NA           Burn-in  Total Lower bound  Dependence
+NA           (M)      (N)   (Nmin)       factor (I)
+NA  beta0    3        4115  3746         1.10      
+NA  beta1    2        3855  3746         1.03      
+NA  deviance 3        4026  3746         1.07      
+NA  sigma    4        4907  3746         1.31      
+NA 
+NA 
+NA [[2]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                 
+NA           Burn-in  Total Lower bound  Dependence
+NA           (M)      (N)   (Nmin)       factor (I)
+NA  beta0    2        3938  3746         1.05      
+NA  beta1    2        3770  3746         1.01      
+NA  deviance 2        3811  3746         1.02      
+NA  sigma    4        4853  3746         1.30</code></pre>
+</div>
+</div>
+<p>The Raftery diagnostics for each chain estimate that we would require no more than <span class="math inline">\(5000\)</span> samples to reach the specified level of confidence in convergence. As we have <span class="math inline">\(10500\)</span> samples, we can be confidence that convergence has occurred.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Autocorrelation diagnostic</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(data.mcmc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA               beta0         beta1     deviance       sigma
+NA Lag 0   1.000000000  1.0000000000  1.000000000  1.00000000
+NA Lag 1  -0.007010696  0.0009369893  0.397147648  0.46491253
+NA Lag 5   0.002086800  0.0011849092  0.049133264  0.05413994
+NA Lag 10  0.005430778  0.0054667236  0.008226042  0.01218053
+NA Lag 50 -0.011848951 -0.0054465800 -0.014357351 -0.01271746</code></pre>
+</div>
+</div>
+<p>A lag of 10 appears to be sufficient to avoid autocorrelation (poor mixing).</p>
+</section>
+<section id="model-validation" class="level1">
+<h1>Model validation</h1>
+<p>Model validation involves exploring the model diagnostics and fit to ensure that the model is broadly appropriate for the data. As such, exploration of the residuals should be routine. Ideally, a good model should also be able to predict the data used to fit the model.</p>
+<p>Although residuals can be computed directly within <code>R2jags</code>, we can calculate them manually from the posteriors to be consistent across other approaches.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> data<span class="sc">$</span>x)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc, <span class="dv">2</span>, median)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> fit))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Residuals against predictors</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> data<span class="sc">$</span>x)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc, <span class="dv">2</span>, median)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> data<span class="sc">$</span>x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>And now for studentized residuals</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> data<span class="sc">$</span>x)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc, <span class="dv">2</span>, median)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>sresid <span class="ot">=</span> resid<span class="sc">/</span><span class="fu">sd</span>(resid)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> sresid, <span class="at">x =</span> fit))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For this simple model, the studentized residuals yield the same pattern as the raw residuals (or the Pearson residuals for that matter). Lets see how well data simulated from the model reflects the raw data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, data)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="do">## draw samples from this model</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>yRep <span class="ot">=</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(mcmc), <span class="cf">function</span>(i) <span class="fu">rnorm</span>(<span class="fu">nrow</span>(data), fit[i,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    ], mcmc[i, <span class="st">"sigma"</span>]))</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.vector</span>(yRep),</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Model"</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">data =</span> data,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">fill =</span> <span class="st">"Obs"</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="parameter-estimates" class="level1">
+<h1>Parameter estimates</h1>
+<p>Although all parameters in a Bayesian analysis are considered random and are considered a distribution, rarely would it be useful to present tables of all the samples from each distribution. On the other hand, plots of the posterior distributions have some use. Nevertheless, most workers prefer to present simple statistical summaries of the posteriors. Popular choices include the median (or mean) and <span class="math inline">\(95\)</span>% credibility intervals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "ttestModel.txt", fit using jags,
+NA  2 chains, each with 10500 iterations (first 3000 discarded)
+NA  n.sims = 15000 iterations saved
+NA          mu.vect sd.vect   2.5%    25%    50%    75%   97.5%  Rhat n.eff
+NA beta0     40.332   2.779 34.814 38.547 40.341 42.142  45.768 1.001 15000
+NA beta1     -1.390   0.283 -1.957 -1.571 -1.390 -1.209  -0.822 1.001 15000
+NA sigma      5.187   1.125  3.549  4.399  5.009  5.772   7.848 1.001 14000
+NA deviance  96.319   2.919 93.005 94.208 95.578 97.595 103.875 1.001 15000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 4.3 and DIC = 100.6
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom.mixed)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(data.r2jags), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 3 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 beta0    40.3      2.78     34.9     45.8  
+NA 2 beta1    -1.39     0.283    -1.94    -0.812
+NA 3 sigma     5.19     1.13      3.31     7.38</code></pre>
+</div>
+</div>
+<p>A one unit increase in <span class="math inline">\(x\)</span> is associated with a <span class="math inline">\(-1.39\)</span> change in <span class="math inline">\(y\)</span>. That is, <span class="math inline">\(y\)</span> declines at a rate of <span class="math inline">\(-1.39\)</span> per unit increase in <span class="math inline">\(x\)</span>. The <span class="math inline">\(95\)</span>% confidence interval for the slope does not overlap with <span class="math inline">\(0\)</span> implying a significant effect of <span class="math inline">\(x\)</span> on <span class="math inline">\(y\)</span>. While workers attempt to become comfortable with a new statistical framework, it is only natural that they like to evaluate and comprehend new structures and output alongside more familiar concepts. One way to facilitate this is via Bayesian p-values that are somewhat analogous to the frequentist p-values for investigating the hypothesis that a parameter is equal to zero.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>mcmcpvalue <span class="ot">&lt;-</span> <span class="cf">function</span>(samp) {</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="do">## elementary version that creates an empirical p-value for the</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="do">## hypothesis that the columns of samp have mean zero versus a general</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="do">## multivariate distribution with elliptical contours.</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="do">## differences from the mean standardized by the observed</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="do">## variance-covariance factor</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Note, I put in the bit for single terms</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">dim</span>(samp)) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        std <span class="ot">&lt;-</span> <span class="fu">backsolve</span>(<span class="fu">chol</span>(<span class="fu">var</span>(samp)), <span class="fu">cbind</span>(<span class="dv">0</span>, <span class="fu">t</span>(samp)) <span class="sc">-</span> <span class="fu">mean</span>(samp),</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">transpose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        sqdist <span class="ot">&lt;-</span> <span class="fu">colSums</span>(std <span class="sc">*</span> std)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sum</span>(sqdist[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">&gt;</span> sqdist[<span class="dv">1</span>])<span class="sc">/</span><span class="fu">length</span>(samp)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        std <span class="ot">&lt;-</span> <span class="fu">backsolve</span>(<span class="fu">chol</span>(<span class="fu">var</span>(samp)), <span class="fu">cbind</span>(<span class="dv">0</span>, <span class="fu">t</span>(samp)) <span class="sc">-</span> <span class="fu">colMeans</span>(samp),</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">transpose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        sqdist <span class="ot">&lt;-</span> <span class="fu">colSums</span>(std <span class="sc">*</span> std)</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sum</span>(sqdist[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">&gt;</span> sqdist[<span class="dv">1</span>])<span class="sc">/</span><span class="fu">nrow</span>(samp)</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a><span class="do">## since values are less than zero</span></span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta1"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0</code></pre>
+</div>
+</div>
+<p>With a p-value of essentially <span class="math inline">\(0\)</span>, we would conclude that there is almost no evidence that the slope was likely to be equal to zero, suggesting there is a relationship.</p>
+</section>
+<section id="graphical-summaries" class="level1">
+<h1>Graphical summaries</h1>
+<p>A nice graphic is often a great accompaniment to a statistical analysis. Although there are no fixed assumptions associated with graphing (in contrast to statistical analyses), we often want the graphical summaries to reflect the associated statistical analyses. After all, the sample is just one perspective on the population(s). What we are more interested in is being able to estimate and depict likely population parameters/trends. Thus, whilst we could easily provide a plot displaying the raw data along with simple measures of location and spread, arguably, we should use estimates that reflect the fitted model. In this case, it would be appropriate to plot the credibility interval associated with each group. We do this by loading functions in the package <code>dplyr</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculate the fitted values</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="fu">min</span>(data<span class="sc">$</span>x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="fu">max</span>(data<span class="sc">$</span>x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">len =</span> <span class="dv">1000</span>))</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> newdata <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(<span class="fu">tidyMCMC</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> conf.high), <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="st">"X"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If you wanted to represent sample data on the figure in such a simple example (single predictor) we could simply over- (or under-) lay the raw data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> data, <span class="fu">aes</span>(<span class="at">y =</span> y,</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> x), <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> conf.high), <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="st">"X"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A more general solution would be to add the partial residuals to the figure. Partial residuals are the fitted values plus the residuals. In this simple case, that equates to exactly the same as the raw observations since <span class="math inline">\(\text{resid}=\text{obs}−\text{fitted}\)</span> and the fitted values depend only on the single predictor we are interested in.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculate partial residuals fitted values</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>fdata <span class="ot">=</span> rdata <span class="ot">=</span> data</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>fMat <span class="ot">=</span> rMat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, fdata)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(<span class="fu">apply</span>(coefs, <span class="dv">2</span>, median) <span class="sc">%*%</span> <span class="fu">t</span>(fMat))</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> <span class="fu">as.vector</span>(data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">apply</span>(coefs, <span class="dv">2</span>, median) <span class="sc">%*%</span> <span class="fu">t</span>(rMat))</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>rdata <span class="ot">=</span> rdata <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">partial.resid =</span> resid <span class="sc">+</span> fit)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y =</span> estimate, <span class="at">x =</span> x)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> rdata, <span class="fu">aes</span>(<span class="at">y =</span> partial.resid),</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> conf.low, <span class="at">ymax =</span> conf.high),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="st">"Y"</span>) <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="st">"X"</span>) <span class="sc">+</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="effect-sizes" class="level1">
+<h1>Effect sizes</h1>
+<p>Lets explore a range of effect sizes:</p>
+<ul>
+<li><p><em>Raw effect size</em> between the largest and smallest <span class="math inline">\(x\)</span></p></li>
+<li><p><em>Cohen’s D</em></p></li>
+<li><p><em>Percentage change</em> between the largest and smallest <span class="math inline">\(x\)</span></p></li>
+<li><p><em>Fractional change</em> between the largest and smallest <span class="math inline">\(x\)</span></p></li>
+<li><p><em>Probability</em> that a change in <span class="math inline">\(x\)</span> is associated with greater than a <span class="math inline">\(25\)</span>% decline in <span class="math inline">\(y\)</span>.</p></li>
+</ul>
+<p>Clearly, in order to explore this inference, we must first express the change in <span class="math inline">\(y\)</span> as a percentage. This in turn requires us to calculate start and end points from which to calculate the magnitude of the effect (amount of decline in <span class="math inline">\(y\)</span>) as well as the percentage decline. Hence, we start by predicting the distribution of <span class="math inline">\(y\)</span> at the lowest and highest values of <span class="math inline">\(x\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fu">min</span>(data<span class="sc">$</span>x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="fu">max</span>(data<span class="sc">$</span>x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, newdata)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Raw effect size</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>(<span class="at">RES =</span> <span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(fit[, <span class="dv">2</span>] <span class="sc">-</span> fit[, <span class="dv">1</span>]), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 1 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 var1     -20.9      4.24    -29.2     -12.2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Cohen's D</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>cohenD <span class="ot">=</span> (fit[, <span class="dv">2</span>] <span class="sc">-</span> fit[, <span class="dv">1</span>])<span class="sc">/</span>mcmc[, <span class="st">"sigma"</span>]</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>(<span class="at">cohenDES =</span> <span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(cohenD), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 1 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 var1     -4.19      1.14    -6.40     -1.94</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Percentage change (relative to Group A)</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>ESp <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> (fit[, <span class="dv">2</span>] <span class="sc">-</span> fit[, <span class="dv">1</span>])<span class="sc">/</span>fit[, <span class="dv">1</span>]</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>(<span class="at">PES =</span> <span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(ESp), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 1 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 var1     -53.2      8.25    -69.4     -36.5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probability that the effect is greater than 25% (a decline of &gt;25%)</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> ESp <span class="sc">&gt;</span> <span class="dv">25</span>)<span class="sc">/</span><span class="fu">length</span>(ESp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0.9964667</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="do">## fractional change</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> fit[fit[, <span class="dv">2</span>] <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>(<span class="at">FES =</span> <span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(fit[, <span class="dv">2</span>]<span class="sc">/</span>fit[, <span class="dv">1</span>]), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 1 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 var1     0.468    0.0825    0.306     0.635</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong></p>
+<ul>
+<li><p>On average, <span class="math inline">\(Y\)</span> declines by <span class="math inline">\(-20.9\)</span> over the observed range of <span class="math inline">\(x\)</span>. We are <span class="math inline">\(95\)</span>% confident that the decline is between <span class="math inline">\(-29.2\)</span> and <span class="math inline">\(-12.2\)</span>.</p></li>
+<li><p>The Cohen’s D associated with a change over the observed range of <span class="math inline">\(x\)</span> is <span class="math inline">\(-4.19\)</span>.</p></li>
+<li><p>On average, <span class="math inline">\(Y\)</span> declines by <span class="math inline">\(-53.2\)</span>% over the observed range of <span class="math inline">\(x\)</span>. We are <span class="math inline">\(95\)</span>% confident that the decline is between <span class="math inline">\(-69.4\)</span>% and <span class="math inline">\(-36.5\)</span>%.</p></li>
+<li><p>The probability that <span class="math inline">\(Y\)</span> declines by more than <span class="math inline">\(25\)</span>% over the observed range of <span class="math inline">\(x\)</span> is <span class="math inline">\(0.996\)</span>.</p></li>
+<li><p>On average, <span class="math inline">\(Y\)</span> declines by a factor of <span class="math inline">\(0.468\)</span>% over the observed range of <span class="math inline">\(x\)</span>. We are <span class="math inline">\(95\)</span>% confident that the decline is between a factor of <span class="math inline">\(0.306\)</span>% and <span class="math inline">\(0.635\)</span>%.</p></li>
+</ul>
+</section>
+<section id="finite-population-standard-deviations" class="level1">
+<h1>Finite population standard deviations</h1>
+<p>Variance components, the amount of added variance attributed to each influence, are traditionally estimated for so called random effects. These are the effects for which the levels employed in the design are randomly selected to represent a broader range of possible levels. For such effects, effect sizes (differences between each level and a reference level) are of little value. Instead, the “importance” of the variables are measured in units of variance components. On the other hand, regular variance components for fixed factors (those whose measured levels represent the only levels of interest) are not logical - since variance components estimate variance as if the levels are randomly selected from a larger population. Nevertheless, in order to compare and contrast the scale of variability of both fixed and random factors, it is necessary to measure both on the same scale (sample or population based variance).</p>
+<p>Finite-population variance components assume that the levels of all factors (fixed and random) in the design are all the possible levels available (<span class="citation" data-cites="gelman2005analysis">Gelman et al. (<a href="#ref-gelman2005analysis" role="doc-biblioref">2005</a>)</span>). In other words, they are assumed to represent finite populations of levels. Sample (rather than population) statistics are then used to calculate these finite-population variances (or standard deviations). Since standard deviation (and variance) are bound at zero, standard deviation posteriors are typically non-normal. Consequently, medians and HPD intervals are more robust estimates.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 2 × 5
+NA   term     estimate std.error conf.low conf.high
+NA   &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 sd.x         6.62     1.35      3.87      9.26
+NA 2 sd.resid     4.72     0.279     4.54      5.28</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 2 × 5
+NA   term     estimate std.error conf.low conf.high
+NA   &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 sd.x         57.8      5.71     46.6      63.9
+NA 2 sd.resid     42.2      5.71     36.1      53.4</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Approximately <span class="math inline">\(59.3\)</span>% of the total finite population standard deviation is due to <span class="math inline">\(x\)</span>.</p>
+</section>
+<section id="r-squared" class="level1">
+<h1>R squared</h1>
+<p>In a frequentist context, the <span class="math inline">\(R^2\)</span> value is seen as a useful indicator of goodness of fit. Whilst it has long been acknowledged that this measure is not appropriate for comparing models (for such purposes information criterion such as AIC are more appropriate), it is nevertheless useful for estimating the amount (percent) of variance explained by the model. In a frequentist context, <span class="math inline">\(R^2\)</span> is calculated as the variance in predicted values divided by the variance in the observed (response) values. Unfortunately, this classical formulation does not translate simply into a Bayesian context since the equivalently calculated numerator can be larger than the an equivalently calculated denominator - thereby resulting in an <span class="math inline">\(R^2\)</span> greater than <span class="math inline">\(100\)</span>%. <span class="citation" data-cites="gelman2019r">Gelman et al. (<a href="#ref-gelman2019r" role="doc-biblioref">2019</a>)</span> proposed an alternative formulation in which the denominator comprises the sum of the explained variance and the variance of the residuals.</p>
+<p>So in the standard regression model notation of:</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}(\boldsymbol X \boldsymbol \beta, \sigma),
+\]</span></p>
+<p>the <span class="math inline">\(R^2\)</span> could be formulated as</p>
+<p><span class="math display">\[
+R^2 = \frac{\sigma^2_f}{\sigma^2_f + \sigma^2_e},
+\]</span></p>
+<p>where <span class="math inline">\(\sigma^2_f=\text{var}(\boldsymbol X \boldsymbol \beta)\)</span>, and for normal models <span class="math inline">\(\sigma^2_e=\text{var}(y-\boldsymbol X \boldsymbol \beta)\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, data)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, <span class="fu">c</span>(<span class="st">"beta0"</span>, <span class="st">"beta1"</span>)]</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> <span class="fu">sweep</span>(fit, <span class="dv">2</span>, data<span class="sc">$</span>y, <span class="st">"-"</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>var_f <span class="ot">=</span> <span class="fu">apply</span>(fit, <span class="dv">1</span>, var)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>var_e <span class="ot">=</span> <span class="fu">apply</span>(resid, <span class="dv">1</span>, var)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> var_f<span class="sc">/</span>(var_f <span class="sc">+</span> var_e)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(R2), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA # A tibble: 1 × 5
+NA   term  estimate std.error conf.low conf.high
+NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+NA 1 var1     0.649     0.106    0.433     0.758</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for comparison with frequentist</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x, data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA Call:
+NA lm(formula = y ~ x, data = data)
+NA 
+NA Residuals:
+NA     Min      1Q  Median      3Q     Max 
+NA -7.5427 -3.3510 -0.3309  2.0411  7.5791 
+NA 
+NA Coefficients:
+NA             Estimate Std. Error t value Pr(&gt;|t|)    
+NA (Intercept)  40.3328     2.4619  16.382 1.58e-10 ***
+NA x            -1.3894     0.2546  -5.457 8.45e-05 ***
+NA ---
+NA Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+NA 
+NA Residual standard error: 4.695 on 14 degrees of freedom
+NA Multiple R-squared:  0.6802, Adjusted R-squared:  0.6574 
+NA F-statistic: 29.78 on 1 and 14 DF,  p-value: 8.448e-05</code></pre>
+</div>
+</div>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-gelman2005analysis" class="csl-entry" role="listitem">
+Gelman, Andrew et al. 2005. <span>“Analysis of Variance—Why It Is More Important Than Ever.”</span> <em>The Annals of Statistics</em> 33 (1): 1–53.
+</div>
+<div id="ref-gelman2019r" class="csl-entry" role="listitem">
+Gelman, Andrew, Ben Goodrich, Jonah Gabry, and Aki Vehtari. 2019. <span>“R-Squared for Bayesian Regression Models.”</span> <em>The American Statistician</em> 73 (3): 307–9.
+</div>
+<div id="ref-plummer2004jags" class="csl-entry" role="listitem">
+Plummer, Martyn. 2004. <span>“JAGS: Just Another Gibbs Sampler.”</span>
+</div>
+<div id="ref-su2015package" class="csl-entry" role="listitem">
+Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements. 2015. <span>“Package <span>‘R2jags’</span>.”</span> <em>R Package Version 0.03-08, URL Http://CRAN. R-Project. Org/Package= R2jags</em>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
