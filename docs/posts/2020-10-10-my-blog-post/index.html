@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-10-10">
 
-<title>angabrio.github.io - missingHE</title>
+<title>angabrio.github.io - Why health economists do not care about statistical significance?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +22,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -40,8 +62,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,6 +90,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -130,21 +179,54 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#so-how-do-you-make-the-decision-if-there-no-hypothesis-test" id="toc-so-how-do-you-make-the-decision-if-there-no-hypothesis-test" class="nav-link active" data-scroll-target="#so-how-do-you-make-the-decision-if-there-no-hypothesis-test">So how do you make the decision if there no hypothesis test ?</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">missingHE</h1>
-</div>
+<h1 class="title">Why health economists do not care about statistical significance?</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Health Economics</div>
+  </div>
+  </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 10, 2020</p>
+    </div>
+  </div>
   
     
   </div>
@@ -154,25 +236,44 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><code>missingHE</code> is a <code>R</code> package, available on CRAN which is aimed at providing some useful tools to analysts in order to handle missing outcome data under a full Bayesian framework in economic evaluations. The package relies on the <code>R</code> package <code>R2jags</code> to implement Bayesian methods via the statistical software <code>JAGS</code> to obtain inferences using <strong>Markov Chain Monte Carlo</strong> (MCMC) methods. Different types of missing data models are implemented in the package, including selection models, pattern mixture models and hurdle models. A range of parametric distributions can be specified when modelling the typical outcomes in an trial-based economic evaluations, namely the effectiveness and cost variables, while simultaneously incorporating different assumptions about the missingness mechanism, which allows to easily perform sensitivity analysis to a range of alternative missing data assumptions according to the modelling choices selected by the user.</p>
-<p><code>missingHE</code> also provides functions, taken and adapted from other <code>R</code> packages, to assess the results of each type of model, including summaries of the posterior distributions of each model parameter, range and imputations of the missing values, different types of model diagnostics to assess convergence of the algorithm, posterior predictive checks, model assessment measures based on the fit to the observed data, and a general summary of the economic evaluations, including the results from probabilistic sensitivity analyses which are automatically performed within a Bayesian modelling framework.</p>
-<p>For example, the function plot can produce graphs, such as those shown in <a href="#fig-plotmis" class="quarto-xref">Figure&nbsp;1</a>, which compare the observed and imputed values for both cost and benefit measures in each treatment group to detect possible concerns about the plausibility of the imputations.</p>
-<div id="fig-plotmis" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center" width="60%">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-plotmis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="imputed.jpg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plotmis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Plot of observed (black dots) and imputed (red dots and lines) effectiveness and cost data by treatment group.
-</figcaption>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
-<p>More information, including new updates, about <code>missingHE</code> can be found on my dedicated <a href="https://github.com/AnGabrio/missingHE">GitHub repository</a> or via the most up to date version of the package on <a href="https://cran.r-project.org/web/packages/missingHE/">CRAN</a>.</p>
-<p><span style="text-align: center; font-size: 2rem"><a href="https://github.com/AnGabrio/short-course/blob/master/slides/workshop-knitr.pdf"><i class="fa-solid fa-file-powerpoint" aria-label="file-powerpoint"></i></a> &nbsp; <a href="https://github.com/AnGabrio/missingHE"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
+<p>Hello dear readers!</p>
+<p>I have finally come back from my lethargy with a new exciting posts about why the job of health economists, although inevitably involving some statistics, can be very different from what standard statisticians typically do. To make this point, I will abuse and give my own opinion of the notorious (and now quite old) paper published by Dr.&nbsp;Claxton (<span class="citation" data-cites="claxton1999irrelevance">Claxton (<a href="#ref-claxton1999irrelevance" role="doc-biblioref">1999</a>)</span>).</p>
+<p>Before starting my discussion I would like to point out a very nice <a href="https://aheblog.com/2017/03/22/the-irrelevance-of-inference-almost-20-years-on/#:~:text=The%20Irrelevance%20of%20Inference%20was,the%20evaluation%20of%20health%20technologies.&amp;text=From%20a%20Bayesian%20perspective%20estimation%20and%20inference%20is%20a%20decision%20problem.">post</a> made by <a href="https://aheblog.com/author/samuelwatson/">Sam Watson</a> on the <a href="https://aheblog.com/">Academic Health Economists’ Blog</a>, who nicely provided his own opinion on the matter and discussed the pros and cons of the paper. I really recommend people interested in knowing more about health economics to check out this blog which is one of the most popular in the field and which has contributions from many many health economists on different topics.</p>
+<p>In this post, in contrast to what Sam did in his own, I will not focus on the technical details about the health economics decision-making problem of minimising the expected loss / maximising the utility function in terms of societal preferences (i.e.&nbsp;social welfare in terms of effectiveness and costs). Instead, here I would like to address the much simpler and basic question <strong>why health economists do not use statistical significance in their analyses?</strong>. In my own experience, especially in trial-based analyses, I had to work closely with both health economists and statisticians who often are unaware of what the other “people” are doing. Since cost-effectiveness analyses have become more and more important over the last decade, I believe it is imperative that even statisticians should learn at least the basics of what their colleagues are doing and most importantly why. Of course, the same applies for health economists who should know a bit of statistics in order to do their job. However, in general, I have the feeling statisticians are reluctant to care about health economics, perhaps due to different statistical methodology required for these analyses compared with standard methods used for the analysis of clinical outcomes.</p>
+<p>Apologies for the very long premise. So, let’s start with the most basic question of all. what is the objective of health economics ? To inform decision-makers about the cost-effectiveness of a given treatment with respect to alternatives. Unlike the standard clinical analysis which focuses merely on detecting whether there is a “clinically relevant” difference between treatments in terms of some pre-defined outcome measure, the health economic analysis does not qualify as a mere yes/no problem due to the existence of <strong>opportunity costs</strong>. These are the losses, either in terms of forgone benefits or extra costs, that the society/health care provider would incur by funding a treatment which is not cost-effective compared to others. Precisely, the decision-making nature of the problem comes from the fact that only a limited amount of resources are available to decision-makers, who need to define some sort of rule to prioritise the distribution of the funds across a pool of possible treatments. Thus, if the objective is to maximise the health benefits for a given budget, then treatments should be selected based on a target quantity, which summarises effectiveness, costs and the preferences of decision-makers, while also taking into account the uncertainty about our conclusions. This quantity takes the name of incremental net benefit and is given by</p>
+<p><span class="math display">\[
+\text{INB} = K \Delta_e - \Delta_c,
+\]</span></p>
+<p>where <span class="math inline">\(\Delta_e\)</span> and <span class="math inline">\(\Delta_c\)</span> are the mean differences between two competing interventions in terms of some effectiveness and cost measures, while <span class="math inline">\(K\)</span> is the acceptance threshold representing the budget the decision-maker is willing to spend to obtain an increment of one unit of effectiveness (cost per unit of effectiveness gained). If we were to evaluate an hypothesis test about cost-effectiveness of treatment 2 vs treatment 1, we would then test: <span class="math inline">\(\text{INB} \leq 0\)</span> (<span class="math inline">\(H_0\)</span>) vs <span class="math inline">\(\text{INB} &gt; 0\)</span> (<span class="math inline">\(H_1\)</span>).</p>
+<p>A natural test statistic for this hypothesis is:</p>
+<p><span class="math display">\[
+t = \frac{\sqrt{n}Kd_e-d_c}{\sqrt{K^2 s^2_e -2Ks_{ce}+s^2_c}},
+\]</span></p>
+<p>where <span class="math inline">\(d_e\)</span> and <span class="math inline">\(d_c\)</span> are the in-sample estimates of the corresponding population values, while <span class="math inline">\(s\)</span> are the sample standard deviations. Under the null, this test statistic has a t-student distribution with <span class="math inline">\(n-1\)</span> degrees of freedom. However, we can see how not rejecting the null hypothesis when a new treatment has a positive but statistically insignificant mean incremental net benefit imposes unnecessary costs which can be valued in either monetary or effectiveness terms. Decisions should be based only on the mean irrespective of whether any differences in this quantity are regarded as statistically significant. This is because one of the mutually exclusive alternatives must be chosen and this decision cannot be deferred. The opportunity costs of failing to make the correct decision based on a single test statistic are symmetrical while the definition of which of the alternatives is regarded as current practice is completely irrelevant.</p>
+<section id="so-how-do-you-make-the-decision-if-there-no-hypothesis-test" class="level2">
+<h2 class="anchored" data-anchor-id="so-how-do-you-make-the-decision-if-there-no-hypothesis-test">So how do you make the decision if there no hypothesis test ?</h2>
+<p>Although the ordinary rules of statistical analyses do not apply, we still need to summarise the uncertainty associated with our results based on the mean INB given that decision-making problems must take into account and quantify the impact that sampling uncertainty has on our conclusions. This is typically achieved through the use of re-sampling methods, such as bootstrapping, (frequentist approach) or Bayesian methods. The two approaches are very different from a theoretical perspective but I will not address this point to save me of few weeks of time. Here, I am most interested in what type of results we will obtain once applied these methods. Well, typically we will look at something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="cepboot-1.png" class="img-fluid figure-img"></p>
+<figcaption>Cost-Effectiveness Plane</figcaption>
+</figure>
+</div>
 
 
 
-</main> <!-- /main -->
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-claxton1999irrelevance" class="csl-entry" role="listitem">
+Claxton, Karl. 1999. <span>“The Irrelevance of Inference: A Decision-Making Approach to the Stochastic Evaluation of Health Care Technologies.”</span> <em>Journal of Health Economics</em> 18 (3): 341–64.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

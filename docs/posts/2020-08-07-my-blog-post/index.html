@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2020-03-01">
+<meta name="dcterms.date" content="2020-08-07">
 
-<title>angabrio.github.io - Lockdown</title>
+<title>angabrio.github.io - What is Bayesian inference?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -70,6 +70,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -130,19 +159,29 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#subjective-probability" id="toc-subjective-probability" class="nav-link active" data-scroll-target="#subjective-probability">Subjective probability</a></li>
+  <li><a href="#bayes-theorem" id="toc-bayes-theorem" class="nav-link" data-scroll-target="#bayes-theorem">Bayes theorem</a></li>
+  <li><a href="#bayesian-updating-of-information" id="toc-bayesian-updating-of-information" class="nav-link" data-scroll-target="#bayesian-updating-of-information">Bayesian updating of information</a></li>
+  <li><a href="#parameters-as-random-variables" id="toc-parameters-as-random-variables" class="nav-link" data-scroll-target="#parameters-as-random-variables">Parameters as random variables</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lockdown</h1>
+<h1 class="title">What is Bayesian inference?</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Quarto</div>
     <div class="quarto-category">R</div>
     <div class="quarto-category">Academia</div>
-    <div class="quarto-category">conference</div>
+    <div class="quarto-category">statistics</div>
   </div>
   </div>
 
@@ -169,7 +208,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">March 1, 2020</p>
+      <p class="date">August 7, 2020</p>
     </div>
   </div>
   
@@ -181,18 +220,91 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center"> I have to admit, although I expected some fear to spread because of the virus which is currently and quickly infecting the world, I was surprised by the frenzy surrounding us, especially in my homecountry (Italy) and particularly in my parents’ region which is at the moment under lockdown. I will also probably cancel my planned trip home for Eastern and perhaps also after that since the situations is still unclear and I may be unable to come back to the UK in the short time. This is pretty scary to all the people living in those territories, who are now forbidden to have any sort of public meeting and are strongly recommended to stay at home. I am afraid this will not be enough to stop the virus from spreading but of course it is useful as it is the only way we have if we want to contain it. The hope is that by summer time the heath will reduce the ability of the virus to spread and give us some time to come up with a possible vaccine in the next months.</p>
-<p>There have already been attempts to estimate the fatality ratio of the virus using statistical methods. Here I post the tweet from Andrew Gelman</p>
-<p></p><div id="tweet-70842"></div><script>tweet={"url":"https:\/\/twitter.com\/StatModeling\/status\/1236845267275702273","author_name":"Andrew Gelman et al.","author_url":"https:\/\/twitter.com\/StatModeling","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EPost Edited: Coronavirus age-specific fatality ratio, estimated using Stan, and (attempting) to account for underreporting of cases and the time delay to death.  Now with data and code.  And now a link to another paper (also with data and code). \u003Ca href=\"https:\/\/t.co\/CSHnXRMtyp\"\u003Ehttps:\/\/t.co\/CSHnXRMtyp\u003C\/a\u003E\u003C\/p\u003E&mdash; Andrew Gelman et al. (@StatModeling) \u003Ca href=\"https:\/\/twitter.com\/StatModeling\/status\/1236845267275702273?ref_src=twsrc%5Etfw\"\u003EMarch 9, 2020\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-70842").innerHTML = tweet["html"];</script><p></p>
-<p>which refers to epidemiologists who tried to use <a href="https://www.medrxiv.org/content/10.1101/2020.03.04.20031104v1.full.pdf">Stan</a> for achieving this objective, although an additional reference to another work based on the use of <a href="https://www.medrxiv.org/content/10.1101/2020.02.14.20023127v1">differential equation analysis</a> is also made. However, results are still preliminary and subject to limitations for the type of data and assumptions used. From a statistical perspective I am sure this new epidemic will be interesting to study and I guess lots of funding will be devoted to analyse the upcoming data to get a better idea of the actual threat it represents for the people. I am not an epidemiologist, so I do not have a big statistical interest in this, although I am pretty much worried as any other person. Hopefully, this will become clearer as time passes and let us just hope the number of deaths will not be very high.</p>
-<p>Sorry about talking about this here, but from time to time I would also like to highlight was is currently happening around me. As for my research, nothing has changed much for me at the moment and life as usual continues with another busy upcoming period with lots of boring meetings, reports and standard analyses to do, but hopefully I can also save some time to do some methodological work. I am also waiting for the decision about my abstract which I submitted to the <a href="https://cfp.euhea.eu/conf/euhea2020">EuHEA conference 2020</a> and which is supposed to be held in Oslo this July. I really hope I have a chance to presenting my work there as I have never been to this specific health economic conference. Fingers crossed! Of course, nobody knows what will happen from here till July and much is to be discussed also with respect to how the spreading of the virus may affect everyone’s schedule in the next months.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://media.giphy.com/media/3ohhwxaw5OlElXzv8s/giphy.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>What is probability? The answer to this question is generally acknowledged to be the one that respects the so called Kolmogorov axioms which can be brutally simplified to:</p>
+<ol type="1">
+<li><p>Probabilities are non-negative</p></li>
+<li><p>Probabilities sum to one</p></li>
+<li><p>The joint probability of disjoint events is the sum of the probabilities of the events</p></li>
+</ol>
+<p>One of the ways in which Bayesian statistics differs from classical statistics is in the <strong>interpretation</strong> of probability. Differences in interpretation continue to be controversial, are critical to the distinction between Bayesian and non-Bayesian statistics.</p>
+<p>In classical statistics probability is often understood as a <em>property of the phenomenon being studied</em>: for instance, the probability that a tossed coin will come up heads is a characteristic of the coin. Thus, by tossing the coin many times under more or less identical conditions, and noting the result of each toss, we can estimate the probability of a head, with the precision of the estimate monotonically increasing with the number of tosses. In this view, probability is the limit of a long-run, relative frequency; i.e.&nbsp;if <span class="math inline">\(A\)</span> is an event of interest (e.g.&nbsp;the coin lands heads up) then</p>
+<p><span class="math display">\[
+\text{Pr}(A) = \lim_{n\rightarrow\infty}\frac{m}{n}
+\]</span></p>
+<p>is the probability of <span class="math inline">\(A\)</span>, where <span class="math inline">\(m\)</span> is the number of times we observe the event <span class="math inline">\(A\)</span> and <span class="math inline">\(n\)</span> is the number of repetitions. Given this definition of probability, we can understand why classicial statistics is sometimes referred to as <em>frequentist</em> and <em>objectivist</em>. However, historians of science stress that at least two notions of probability were under development from the late <span class="math inline">\(1600\)</span>s onwards: the objectivist view described above, and a subjectivist view. With regard to the latter, we can consider different ‘degrees’ of belief to interpret probability, ‘from the very neighbourhourhood of certainty and demonstration, quite down to improbability and unlikeliness, even to the confines of impossibility’. For Locke, ‘Probability is likeliness to be true’, a definition in which (repeated) games of chance play no part. For Bernoulli, ‘Probability is degree of certainty and differs from absolute certainty as the part differs from the whole’, it being unequivocal that the ‘certainty’ referred to is a state of mind, but, critically, (1) varied from person to person (depending on one’s knowledge and experience) and (2) was quantifiable. Ramsey and de Finetti, working independently, showed that subjective probability is not just any set of subjective beliefs, but beliefs that conform to the axioms of probability. The Ramsey-de Finetti Theorem states that if <span class="math inline">\(p_1, p_2, \ldots\)</span> are a set of betting quotients on hypotheses <span class="math inline">\(h_1, h_2,\ldots\)</span> , then if the <span class="math inline">\(p_j\)</span> do not satisfy the probability axioms, there exists a betting strategy and a set of stakes such that whoever follows this betting strategy will lose a finite sum whatever the truth values of the hypotheses turn out to be. In de Finetti’s terminology, subjective probabilities that fail to conform to the axioms of probability are incoherent or inconsistent. Thus, subjective probabilities are whatever a particular person believes, provided they satisfy the axioms of probability. Thus, if I do not update my subjective beliefs in light of new information (data) in a manner consistent with the probability axioms, and you can convince me to gamble with you, you have the opportunity to take advantage of my irrationality, and are guaranteed to profit at my expense. That is, while probability may be subjective, Bayes Rule governs how rational people should update subjective beliefs.</p>
+<section id="subjective-probability" class="level2">
+<h2 class="anchored" data-anchor-id="subjective-probability">Subjective probability</h2>
+<p>Bayesian probability statements are thus about states of mind over states of the world, and not about states of the world per se. Indeed, whatever one believes about determinism or chance in social processes, the meaningful uncertainty is that which resides in our brains, upon which we will base decisions and actions. This is why, in one of the more memorable and strongest statements of the subjectivist position, de Finetti writes <strong>probability does not exist</strong>: “The abandonment of superstitious beliefs about <span class="math inline">\(\ldots\)</span> Fairies and Witches was an essential step along the road to scientific thinking. Probability, too, if regarded as something endowed with some kind of objective existence, is not less a misleading misconception, an illusory attempt to exteriorize or materialize our true probabilistic beliefs. In investigating the reasonableness of our own modes of thought and behaviour under uncertainty, all we require, and all that we are reasonably entitled to, is consistency among these beliefs, and their reasonable relation to any kind of relevant objective data”.</p>
+<p>The use of subjective probability also means that Bayesians can report probabilities without a “practically unlimited” sequence of observations. What is the frequentist probability of the truth of the proposition “Jackson was the eighth president”? Since there is only one relevant experiment for this problem, the frequentist probability is either zero (if Jackson was not the eighth president) or one (if Jackson was the eighth president). Non-trivial frequentist probabilities, it seems, are reserved for phenomena that are standardized and repeatable. Bayes Theorem itself is uncontroversial: it is merely an accounting identity that follows from the axioms of probability discussed above, plus the following additional definition.</p>
+<ol type="1">
+<li><strong>Conditional probability</strong>. Let <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> be events with <span class="math inline">\(P(B)&gt;0\)</span>. Then the conditional probability of <span class="math inline">\(A\)</span> given <span class="math inline">\(B\)</span> is</li>
+</ol>
+<p><span class="math display">\[
+P(A\mid B) = \frac{P(A \cap B)}{P(B)}
+\]</span></p>
+<p>The following two useful results are also implied by the probability axioms, plus the definition of conditional probability</p>
+<ol start="2" type="1">
+<li><strong>Multiplication rule</strong></li>
+</ol>
+<p><span class="math display">\[
+P(A \cap B) = P(A\mid B)P(B) = P(B\mid A)P(A)
+\]</span></p>
+<ol start="3" type="1">
+<li><strong>Law of total probability</strong></li>
+</ol>
+<p><span class="math display">\[  
+P(B) = P(A\cap B)+ P\overline{(A\cap B)} = P(B\mid A)P(A) + P(B \mid \overline{A})P(\overline{A})
+\]</span></p>
+</section>
+<section id="bayes-theorem" class="level2">
+<h2 class="anchored" data-anchor-id="bayes-theorem">Bayes theorem</h2>
+<p><em>Bayes Theorem</em> can now be stated, following immediately from the definition of conditional probability. If <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> are events with <span class="math inline">\(P(B)&gt;0\)</span>, then</p>
+<p><span class="math display">\[
+P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)}
+\]</span></p>
+<p>If we consider the event <span class="math inline">\(A=H\)</span> to be an hypothesis and the event <span class="math inline">\(B=E\)</span> to be observing some evidence, then <span class="math inline">\(Pr(H\mid E)\)</span> is the probability of <span class="math inline">\(H\)</span> after obtaining <span class="math inline">\(E\)</span>, and <span class="math inline">\(\text{Pr}(H)\)</span> is the prior probability of <span class="math inline">\(H\)</span> before considering <span class="math inline">\(E\)</span>. The conditional probability on the left-hand side of the theorem, <span class="math inline">\(\text{Pr}(H\mid E)\)</span>, is usually referred to as the posterior probability of <span class="math inline">\(H\)</span>. Bayes Theorem thus supplies a solution to the general problem of inference or induction, providing a mechanism for learning about the plausibility of a hypothesis <span class="math inline">\(H\)</span> from data <span class="math inline">\(E\)</span>.</p>
+<p>In most analyses in the social sciences, we want to learn about a continuous parameter, rather than the discrete parameters considered in the discussion thus far. Examples include the mean of a continuous variable, a proportion (a continuous parameter on the unit interval), a correlation, or a regression coefficient. In general, let the unknown parameter be <span class="math inline">\(\theta\)</span> and denote the data available for analysis as <span class="math inline">\(\boldsymbol y = (y_1, \ldots , y_n)\)</span>. In the case of continuous parameters, beliefs about the parameter are represented as probability density functions or pdfs; we denote the prior pdf as <span class="math inline">\(p(\theta)\)</span> and the posterior pdf as <span class="math inline">\(p(\theta \mid \boldsymbol y)\)</span>. Then, Bayes Theorem for a continuous parameter is as follows:</p>
+<p><span class="math display">\[
+p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{\int p(y \mid \theta) p(\theta) d\theta},
+\]</span></p>
+<p>which is often approximated by</p>
+<p><span class="math display">\[
+p(\theta \mid y) \propto p(y \mid \theta) p(\theta),
+\]</span></p>
+<p>where the proportionality constant is <span class="math inline">\(\left[ \int p(y \mid \theta) p(\theta) d\theta \right]^{-1}\)</span> which ensures that the posterior density integrates to one, as a proper probability density. The first term on the right hand side of the Equation is the <em>likelihood function</em>, the probability density of the data <span class="math inline">\(y\)</span>, considered as a function of <span class="math inline">\(\theta\)</span>. This formulation of Bayes Rule highlights a particularly elegant feature of the Bayesian approach, showing how the likelihood function <span class="math inline">\(p(\boldsymbol y|\theta)\)</span> can be “inverted” to generate a probability statement about <span class="math inline">\(\theta\)</span>, given data <span class="math inline">\(y\)</span>. Thus, from a Bayesian perspective, likelihood based analyses of data assume prior ignorance, although seldom is this assumption made explicit, even if it were plausible. In other cases, when working with the so-called conjugate priors in the exponential family, the mean of the posterior distribution is a precision-weighted average of the prior and the likelihood. Suppose a prior density <span class="math inline">\(p(\theta)\)</span> belongs to a class of parametric of densities, <span class="math inline">\(F\)</span>. More specifically, the prior density is said to be conjugate with respect to a likelihood <span class="math inline">\(p(y \mid \theta)\)</span> if the posterior density <span class="math inline">\(p(\theta \mid y )\)</span> is also in <span class="math inline">\(F\)</span>.</p>
+<p>Bayesian statistical inference is equivalent to combining information, marrying the information in the prior with the information in the data, with the relative contributions of prior and data to the posterior being proportional to their respective precision. That is, Bayesian analysis with conjugate priors over a parameter <span class="math inline">\(\theta\)</span> is equivalent to taking a precision-weighted average of prior information about <span class="math inline">\(\theta\)</span> and the information in the data about <span class="math inline">\(\theta\)</span>. Thus:</p>
+<ol type="1">
+<li><p>Thus, when prior beliefs about <span class="math inline">\(\theta\)</span> are ‘vague’, ‘diffuse’, or, in the limit, uninformative, the posterior density will be dominated by the likelihood (i.e.&nbsp;the data contains much more information than the prior about the parameters);</p></li>
+<li><p>When prior information is available, the posterior incorporates it, and rationally, in the sense of being consistent with the laws of probability via Bayes Theorem. In fact, when prior beliefs are quite precise relative to the data, it is possible that the likelihood is largely ignored, and the posterior distribution will look almost exactly like the prior</p></li>
+</ol>
+<p>Note also that via Bayes Rule, if a particular region of the parameter space has zero prior probability, then it also has zero posterior probability. This feature of Bayesian updating has been dubbed <em>Cromwell’s Rule</em> by Lindley. The point here is that posterior distributions can sometimes look quite unusual, depending on the form of the prior and the likelihood for a particular problem. The fact that a posterior distribution may have a peculiar shape is of no great concern in a Bayesian analysis: provided one is updating prior beliefs via Bayes Rule, all is well. Unusual looking posterior distributions might suggest that one’s prior distribution was poorly specified, but, as a general rule, one should be extremely wary of engaging this kind of procedure. Bayes Rule is a procedure for generating posterior distributions over parameters in light of data. Although one can always re-run a Bayesian analysis with different priors (and indeed, this is usually a good idea), Bayesian procedures should not be used to hunt for priors that generate the most pleasing looking posterior distribution given a particular data set and likelihood. Indeed, such a practice would amount to an inversion of the Bayesian approach: i.e.&nbsp;if the researcher has strong ideas as to what values of <span class="math inline">\(\theta\)</span> are more likely than others, aside from the information in the data, then that auxiliary information should be considered a prior, with Bayes Rule providing a procedure for rationally combining that auxiliary information with the information in the data.</p>
+</section>
+<section id="bayesian-updating-of-information" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-updating-of-information">Bayesian updating of information</h2>
+<p>Bayesian procedures are often equivalent to combining the information in one set of data with another set of data. In fact, if prior beliefs represent the result of a previous data analysis (or perhaps many previous data analyses), then Bayesian analysis is equivalent to <em>pooling information</em>. This is a particularly compelling feature of Bayesian analysis, and one that takes on special significance when working with cojugate priors. In these cases, Bayesian procedures accumulate information in the sense that the posterior distribution is more precise than either the prior distribution or the likelihood alone. Further, as the amount of data increases, say through repeated applications of the data generation process, the posterior precision will continue to increase, eventually overwhelming any non-degenerate prior; the upshot is that analysts with different (non-degenerate) prior beliefs over a parameter will eventually find their beliefs coinciding, provided they (1) see enough data and (2) update their beliefs using Bayes Theorem. In this way Bayesian analysis has been proclaimed as a model for scientific practice acknowledging that while reasonable people may differ (at least prior to seeing data), our views will tend to converge as scientific knowledge accumulates, provided we update our views rationally, consistent with the laws of probability.</p>
+</section>
+<section id="parameters-as-random-variables" class="level2">
+<h2 class="anchored" data-anchor-id="parameters-as-random-variables">Parameters as random variables</h2>
+<p>One of the critical ways in which Bayesian statistical inference differs from frequentist inference is that the result of a Bayesian analysis, the posterior density <span class="math inline">\(p(\theta \mid y)\)</span> is just that, a probability density. Given a subjectivist interpretation of probabilty that most Bayesians adopt, the ‘randomness’ summarized by the posterior density is a reflection of the researcher’s uncertainty over <span class="math inline">\(\theta\)</span>, conditional on having observed data. Contrast the frequentist approach, in which <span class="math inline">\(\theta\)</span> is not random, but a fixed (but unknown) property of a population from which we randomly sample data <span class="math inline">\(\boldsymbol y\)</span>. Repeated applications of the sampling process, if undertaken, would yield different y, and different sample based estimates of θ, denoted <span class="math inline">\(\hat{\theta} = \hat{\theta}(y)\)</span>, this notation reminding us that estimates of parameters are functions of data. In the frequentist scheme, the <span class="math inline">\(\hat{\theta}(y)\)</span> vary randomly across data sets (or would, if repeated sampling was undertaken), while the parameter <span class="math inline">\(\theta\)</span> is a constant feature of the population from which data sets are drawn. The distribution of values of <span class="math inline">\(\hat{\theta}(y)\)</span> that would result from repeated application of the sampling process is called the sampling distribution, and is the basis of inference in the frequentist approach; the standard deviation of the sampling distribution of <span class="math inline">\(\hat{\theta}\)</span> is the standard error of <span class="math inline">\(\hat{\theta}\)</span>, which plays a key role in frequentist inference. The Bayesian approach does not rely on how <span class="math inline">\(\hat{\theta}\)</span> might vary over repeated applications of random sampling. Instead, Bayesian procedures center on a simple question: “what should I believe about <span class="math inline">\(\theta\)</span> in light of the data available for analysis, <span class="math inline">\(y\)</span> ?”</p>
+<p>The critical point to grasp is that in the Bayesian approach, the roles of <span class="math inline">\(\theta\)</span> and <span class="math inline">\(\hat{\theta}\)</span> are reversed relative to their roles in classical, frequentist inference: <span class="math inline">\(\theta\)</span> is random, in the sense that the researcher is uncertain about its value, while <span class="math inline">\(\hat{\theta}\)</span> is fixed, a feature of the data at hand.</p>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>So, we have seen a couple of interesting things about Bayesian statistics which people may not be aware of. First, Bayesian statistics is a scientific approach in that it provides a rational way to update subjective beliefs based on the available evidence through Bayes theorem which conforms the rules of probability. This ensures the scientific credibility of the posterior results while also providing a way to solve the inductive problem of learning from the data and update our belief about a parameter/hypothesis. Second, in contrast to the classical approach, Bayesian statistics do not rely on asymptotic results of a series of repeatable events in order to hold and therefore can be used to answer questions which do not have any meaning in the context of repeated events. Finally, Bayesian statistics sees any unknown quantity (e.g.&nbsp;parameters) as random variables and attach to them a probability distribution expressing the uncertainty around the estimates. Since the entire posterior distribution is derived based on Bayes theorem, this ensures correct propagation of uncertainty from the data and prior and does not require the additional step of classical statistics of deriving uncertainty measures in an “artificial way” or relying on asymptotic results.</p>
+<p>I hope this was a bit interesting for those who would like to get more familiar with the Bayesian philosophy and its underlying implications in terms of statistical assumptions and methods. Of course, being a Bayesian, this is the best way to go for me when doing an analysis and I would love to see more people embracing the Bayesian way as a new way of thinking statistics.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://media.giphy.com/media/qav3a2OPBdZoQ/giphy.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -622,5 +734,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
