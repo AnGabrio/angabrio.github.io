@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-03-01">
 
-<title>angabrio.github.io - Linear mixed models to handle missing at random data in trial based economic evaluations</title>
+<title>angabrio.github.io - Lockdown</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -40,8 +42,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,35 +70,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -159,29 +130,48 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
-  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Linear mixed models to handle missing at random data in trial based economic evaluations</h1>
-</div>
+<h1 class="title">Lockdown</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">conference</div>
+  </div>
+  </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.ucl.ac.uk/statistics/department-statistical-science">
+            University College London
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 1, 2020</p>
+    </div>
+  </div>
   
     
   </div>
@@ -191,43 +181,18 @@ window.Quarto = {
 </header>
 
 
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<p>Cost‐effectiveness analyses (CEAs) conducted alongside randomised controlled trials are an important source of information for decision-makers in the process of technology appraisal (Ramsey et al., 2015). The analysis is based on healthcare outcome data and health service use, typically collected at multiple time points and then combined into overall measures of effectiveness and cost. A popular approach to handle missingness is to discard the participants with incomplete observations (complete case analysis or CCA), allowing for derivation of the overall measures based on the completers alone. We note that slightly different definitions of CCA are possible, depending on the form of the model of interest, the type of missingness and the inclusion of observed covariates. This approach, although appealing by its simplicity, has well-recognised limitations including loss of efficiency and an increased risk of bias. We propose the use of linear mixed effects models (LMMs) as an alternative approach under MAR. LMMs are commonly used for the modelling of dependent data (e.g.&nbsp;repeated-measures) and belong to the general class of likelihood-based methods. LMMs appear surprisingly uncommon for the analysis of repeated measures in trial-based CEA, perhaps because of a lack of awareness or familiarity with fitting LMMs.</p>
-</section>
-<section id="methods" class="level1">
-<h1>Methods</h1>
-<p>Linear mixed model extends the usual linear model framework by the addition of “random effect” terms, which can take into account the dependence between observations.</p>
-<p><span id="eq-lmm"><span class="math display">\[
-Y_{ij}=\beta_1+\beta_2 X_{i1}+\ldots+\beta_(P+1) X_{iP}+\omega_i+\epsilon_{ij},
-\tag{1}\]</span></span></p>
-<p>where <span class="math inline">\(Y_{ij}\)</span> denotes the outcome repeatedly collected for each individual <span class="math inline">\(i=1,\ldots,N\)</span> at multiple times <span class="math inline">\(j=1,\ldots,J\)</span>. The model parameters commonly referred to as fixed effects include an intercept <span class="math inline">\(\beta_1\)</span> and the coefficients <span class="math inline">\((\beta_2,\ldots,\beta_{(P+1)})\)</span> associated with the predictors <span class="math inline">\(X_{i1},\ldots,X_{iP}\)</span>, while <span class="math inline">\(\omega_i\)</span> and <span class="math inline">\(\epsilon_{ij}\)</span> are two random terms: <span class="math inline">\(\epsilon_{ij}\)</span> is the usual error term and <span class="math inline">\(\omega_i\)</span> is a random intercept which captures variation in outcomes between individuals. The models can be extended to deal with more complex structures, for example by allowing the effect of the covariates to vary across individuals (random slope) or a different covariance structure of the errors. LMMs can be fitted even if some outcome data are missing and provide correct inferences under MAR.</p>
-<p>A particular type of LMMs commonly used in the analysis of repeated measures in clinical trials is referred to as Mixed Model for Repeated Measurement (MMRM). The model includes a categorical effect for time, an interaction between time and treatment arm, and allows errors to have different variance and correlation over time (i.e.&nbsp;unstructured covariance structure). <a href="#fig-covstruct" class="quarto-xref">Figure&nbsp;1</a> shows some examples of possible covariance structures that may be explored for LMMs.</p>
-<div id="fig-covstruct" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center" width="60%">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-covstruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="cov_struct_lmm.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-covstruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Some examples of covariance structures in LMM
-</figcaption>
+<p><img src="featured.png" class="img-fluid quarto-figure quarto-figure-center"> I have to admit, although I expected some fear to spread because of the virus which is currently and quickly infecting the world, I was surprised by the frenzy surrounding us, especially in my homecountry (Italy) and particularly in my parents’ region which is at the moment under lockdown. I will also probably cancel my planned trip home for Eastern and perhaps also after that since the situations is still unclear and I may be unable to come back to the UK in the short time. This is pretty scary to all the people living in those territories, who are now forbidden to have any sort of public meeting and are strongly recommended to stay at home. I am afraid this will not be enough to stop the virus from spreading but of course it is useful as it is the only way we have if we want to contain it. The hope is that by summer time the heath will reduce the ability of the virus to spread and give us some time to come up with a possible vaccine in the next months.</p>
+<p>There have already been attempts to estimate the fatality ratio of the virus using statistical methods. Here I post the tweet from Andrew Gelman</p>
+<p></p><div id="tweet-62078"></div><script>tweet={"url":"https:\/\/twitter.com\/StatModeling\/status\/1236845267275702273","author_name":"Andrew Gelman et al.","author_url":"https:\/\/twitter.com\/StatModeling","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EPost Edited: Coronavirus age-specific fatality ratio, estimated using Stan, and (attempting) to account for underreporting of cases and the time delay to death.  Now with data and code.  And now a link to another paper (also with data and code). \u003Ca href=\"https:\/\/t.co\/CSHnXRMtyp\"\u003Ehttps:\/\/t.co\/CSHnXRMtyp\u003C\/a\u003E\u003C\/p\u003E&mdash; Andrew Gelman et al. (@StatModeling) \u003Ca href=\"https:\/\/twitter.com\/StatModeling\/status\/1236845267275702273?ref_src=twsrc%5Etfw\"\u003EMarch 9, 2020\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-62078").innerHTML = tweet["html"];</script><p></p>
+<p>which refers to epidemiologists who tried to use <a href="https://www.medrxiv.org/content/10.1101/2020.03.04.20031104v1.full.pdf">Stan</a> for achieving this objective, although an additional reference to another work based on the use of <a href="https://www.medrxiv.org/content/10.1101/2020.02.14.20023127v1">differential equation analysis</a> is also made. However, results are still preliminary and subject to limitations for the type of data and assumptions used. From a statistical perspective I am sure this new epidemic will be interesting to study and I guess lots of funding will be devoted to analyse the upcoming data to get a better idea of the actual threat it represents for the people. I am not an epidemiologist, so I do not have a big statistical interest in this, although I am pretty much worried as any other person. Hopefully, this will become clearer as time passes and let us just hope the number of deaths will not be very high.</p>
+<p>Sorry about talking about this here, but from time to time I would also like to highlight was is currently happening around me. As for my research, nothing has changed much for me at the moment and life as usual continues with another busy upcoming period with lots of boring meetings, reports and standard analyses to do, but hopefully I can also save some time to do some methodological work. I am also waiting for the decision about my abstract which I submitted to the <a href="https://cfp.euhea.eu/conf/euhea2020">EuHEA conference 2020</a> and which is supposed to be held in Oslo this July. I really hope I have a chance to presenting my work there as I have never been to this specific health economic conference. Fingers crossed! Of course, nobody knows what will happen from here till July and much is to be discussed also with respect to how the spreading of the virus may affect everyone’s schedule in the next months.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://media.giphy.com/media/3ohhwxaw5OlElXzv8s/giphy.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
-<p>Incremental (between-group) or marginal (within-group) estimates for aggregated outcomes over the trial period, such as quality-adjusted life years (QALYs) or total costs can be retrieved as linear combinations of the parameter estimates from <a href="#eq-lmm" class="quarto-xref">Equation&nbsp;1</a>. For example, the mean difference in total cost is obtained by summing up the estimated differences at each follow-up point, while differences on a QALY scale can be obtained as weighted linear combinations of the coefficient estimates of the utility model.</p>
-</section>
-<section id="conclusions" class="level1">
-<h1>Conclusions</h1>
-<p>We believe LMMs represent an alternative approach which can overcome some of these limitations.</p>
-<ul>
-<li><p>First, practitioners may be more comfortable with the standard regression framework.</p></li>
-<li><p>Second, LMMs can be tailored to address other data features (e.g.&nbsp;cluster-randomised trials or non-normal distribution) while also easily combined with bootstrapping.</p></li>
-<li><p>Third, LMMs do not rely on imputation, and results are therefore deterministic and easily reproducible, whereas the Monte Carlo error associated with multiple imputation may cause results to vary from one imputation to another, unless the number of imputations is sufficiently large.</p></li>
-</ul>
-<p>Although the methodology illustrated is already known, particularly in the area of statistical analyses, to our knowledge LMMs have rarely been applied to health economic data collected alongside randomised trials. We believe the proposed methods is preferable to a complete-case analysis when CEA data are incomplete, and that it can offer an interesting alternative to imputation methods.</p>
-<p><span style="text-align: center; font-size: 2rem"><a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510"><i class="fa-solid fa-file-pdf" aria-label="file-pdf"></i></a> &nbsp; <a href="https://github.com/AnGabrio/Code/tree/master/lmm_in_CEA"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -657,4 +622,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
+<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
