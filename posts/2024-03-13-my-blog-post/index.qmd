@@ -1,0 +1,293 @@
+---
+title: "Rasch Model"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2024-03-13
+categories: [Quarto, R, Academia, IRT] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.png){fig-align="center"}
+
+
+Hello everyone, and welcome back to my blog. Today I would like to resume a topic that I promised myself I will study more but which I kind of left alone for quite some time now. I initially introduced the topic a few months ago in another post, using a primary reference the book of [Jean-Paul Fox](https://www.jean-paulfox.com/) called [**Bayesian Item Response Modelling**](https://link.springer.com/book/10.1007/978-1-4419-0742-4#:~:text=The%20Bayesian%20approach%20has%20two,additional%20information%20can%20be%20used.). With this post I would like to take over from where I left and continue talking a bit about *Item Response Theory* (IRT).
+
+Last time I focussed on IRT models, I introduced the simplest type of model for binary IRT response data, called the **Rasch Model** or one-parameter logistic response model, in which the probability of a correct response is given by:
+
+$$
+P(Y_{ik}=1 | \theta_i,b_k) = \frac{\text{exp}(\theta_i - b_k)}{1+\text{exp}(\theta_i-b_k)},
+$$
+
+for individual $i$ with ability level $\theta_i$ and item $k$ with item-difficulty parameter $b_k$. Now, let's try to simulate some data according to the Rasch model. 
+
+Let's start by considering a simple questionnaire example formed by $K=2$ dichotomous items, and for each of these the $i$-th respondent in the dataset may provide either a negative (e.g. wrong/failure) or positive (e.g. correct/success) response $Y_{ik}=0$ or $Y_{ik}=1$ according to some probability which in turn depends on some person-specific ability level $\theta_i$ and item-specific difficulty level $b_k$. We proceed as follows:
+
+  1. Simulate item difficulties $b_k$ using a uniform distribution, i.e. $b_k\sim \text{Uniform}(a_b,b_b)$ for $k=1,K=2$.
+  
+  2. Simulate the person abilities $\theta_i$ using a normal distribution, i.e. $\theta_i \sim \text{Normal}(\mu_{\theta},\sigma_{\theta})$ for $i=1,\ldots,N=100$.
+  
+  3. Use the generated values of $\theta_i$ and $b_k$ to obtain $P(Y_{ik}=1 | \theta_i,b_k)$, i.e. the probability of giving the correct response for the $i$-th person on the $k$-th item using the **Item Characteristic Curve** (ICC) equation of the Rasch model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+set.seed(7689)
+
+K <- 2
+b <- runif(K,-1,1) 
+N <- 10
+theta <- rnorm(N,0,2)
+temp <- matrix( rep( theta, length( b ) ) , ncol = length( b ) )
+p_resp <- matrix(NA, nrow = N, ncol = K)
+for(i in 1:N){
+ for(k in 1:K){
+  p_resp[i,k] <- (exp(theta[i] - b[k])) / (1 + exp(theta[i] - b[k]))
+ }
+}
+obs_resp <- matrix( sapply( c(p_resp), rbinom, n = 1, size = 1), ncol = length(b) )
+
+#put everything into a function
+sim_rasch <- function(N,K,a_b=-1,b_b=1,mu_theta=0,sigma_theta=2){
+b <- runif(K,a_b,b_b) 
+theta <- rnorm(N,mu_theta,sigma_theta)
+temp <- matrix( rep( theta, length( b ) ) , ncol = length( b ) )
+p_resp <- matrix(NA, nrow = N, ncol = K)
+for(i in 1:N){
+ for(k in 1:K){
+  p_resp[i,k] <- (exp(theta[i] - b[k])) / (1 + exp(theta[i] - b[k]))
+ }
+}
+ obs_resp <- matrix( sapply( c(p_resp), rbinom, n = 1, size = 1), ncol = length(b) )
+ output <- list("y"=obs_resp, "p"=p_resp, "theta"=theta, "b"=b)
+ return(output)
+}
+
+obs_resp
+```
+
+Now, let's put everything we have done into a function so that we can customise the output as much as we like, for example considering a sample of $N=25$ people who answer a set of $K=5$ dichotomous items:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+set.seed(7689)
+
+#put everything into a function
+sim_rasch <- function(N,K,a_b=-1,b_b=1,mu_theta=0,sigma_theta=2){
+b <- runif(K,a_b,b_b) 
+theta <- rnorm(N,mu_theta,sigma_theta)
+temp <- matrix( rep( theta, length( b ) ) , ncol = length( b ) )
+p_resp <- matrix(NA, nrow = N, ncol = K)
+for(i in 1:N){
+ for(k in 1:K){
+  p_resp[i,k] <- (exp(theta[i] - b[k])) / (1 + exp(theta[i] - b[k]))
+ }
+}
+ obs_resp <- matrix( sapply( c(p_resp), rbinom, n = 1, size = 1), ncol = length(b) )
+ output <- list("y"=obs_resp, "p"=p_resp, "theta"=theta, "b"=b)
+ return(output)
+}
+
+data_sim <- sim_rasch(N=50,K=5)
+
+#extract observed data
+data_sim$y
+```
+
+Ok cool, now that we simulated the data, let's try to use one of the many `R` packages to fit a Rasch model to the data and see whether the model fits them as it should be. For this purpose, I will use the `eRm` package, specifically dedicated to the fitting and checking of Rasch models to the data. I refer to [this webpage](http://publicifsv.sund.ku.dk/~kach/scaleval_IRT/Rasch-models-in-R.html) for a more in depth explanation of the package and its function, from which most of the stuff I will show is taken from. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#load package
+library(eRm)
+
+#fit model to simulated item responses
+items <- data_sim$y
+K <- ncol(items)
+N <- nrow(items)
+colnames(items) <- c(sprintf("item%01d", seq(1,K)))
+#fit the model
+raschfit <- RM(items)
+```
+
+After fitting the model and saving the output in the object `raschfit`, we can inspect the coefficient estimates of the model both in terms of person and item-specific parameters:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#print estimates
+
+i.param <- coef(raschfit)
+#item parameters/difficulties
+i.param
+
+p.param <- person.parameter(raschfit)
+#person parameters/abilities
+p.param
+
+#plot item and persons together
+plotPImap(raschfit)
+```
+
+We can also obtain the ICC function for each item. For example, let's say we want to show the ICC for item $2$ and $4$:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#item 2
+plotICC(raschfit, item.subset = c(2), ask=F)
+
+#item 4
+plotICC(raschfit, item.subset = c(4), ask=F)
+```
+
+Next, it may be useful to test some of the key assumptions of the Rasch model to see whether the model seems to be reasonable for the data at hand. Among the most popular test procedures that are available in in the package, we can consider the following:
+
+  1) Andersen’s conditional Likelihood Ratio Test.
+
+It is a surprising result that we can take our items and then get the correct estimates of all the item parameters $\boldsymbol b=(b_1,\ldots,b_K)$ in the any of these sub samples. This only work because we use conditional inference. It works if we divide the sample into two or more groups using any splitting criterion. We can do it in `eRm`:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+gr <- cut(
+  rowSums(items),
+  breaks=c(0,2,5),
+  include.lowest = TRUE)
+LRtest(raschfit, splitcr=gr)
+
+#graphically
+lr <- LRtest(raschfit, splitcr = gr, se = T)
+plotGOF(lr)
+
+plotGOF(lr, conf=list(), xlim=c(-4,4), ylim=c(-5,5))
+```
+
+  2) Wald test
+
+The test allows for testing each item $k$. The idea is the same: divide sample into two subgroups. Item parameters should be invariant
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+Waldtest(raschfit, splitcr = gr)
+```
+
+  3) Infit and Outfit test statistics
+
+Expected response matrix obtained from $\pi_{ij}=\frac{\text{exp}(\hat{b}_k+\hat{\theta}_i)}{1+\text{exp}(\hat{b}_k+\hat{\theta}_i)}$, while residuals are defined as $e_{ik}=y_{ik}-\pi_{ik}$. From these quantities, we can retrieve the two statistics: $\text{INFIT}_k=w_k=\frac{1}{N}\frac{\sum_i e^2_{ik}}{\sum_i \nu_{ik}}$ and $\text{OUTFIT}_k=u_k=\frac{1}{N}\sum_i \frac{e^2_{ik}}{\nu_{ik}}$, where $\nu_{ik}=\pi_{ik}\times (1-\pi_{ik})$. The INFIT and OUTFIT item fit test statistics have expected value $1$. Informal evaluation: $0.7$ to $1.3$ is fine ($0.5$ to $1.5$ is OK). The interpretation of the OUTFIT statistic is sensitive against outlying observations e.g. when a very able person gets an easy item wrong. To calculate in `eRm` we have to use the `p.param` object:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+itemfit(p.param)
+
+#use iarm package to shows p-values less than 0.05
+library(iarm)
+out_infit(raschfit)
+```
+
+Item-total correlations and item-score correlations are routinely reported in classical test theory. We can use the simple structure in the Rasch model to compute the expected values of the item-score correlation:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+item_restscore(raschfit)
+```
+
+  4) ICC plots compared to empirical ICC
+
+Data with no missing values - score distribution:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+s <- rowSums(items)
+table(s)
+
+hist(s)
+
+fit<-RM(items)
+ppar <- person.parameter(raschfit)
+
+#one to one correspondence between y and theta
+plot(ppar)
+
+#we look at the item 2
+plotICC(fit,
+item.subset = c(2),
+empICC = list("raw"),
+empCI = list(gamma=0.95, col="blue")
+)
+```
+
+This plot shows the ICC for the selected item. The x-axis shows the ability continuum, the y-axis the response probability. The continuous line describes the probability to respond correctly to the problem given a level of ability. The difficulty of the item is where the probability of a correct response equals $0.5$. The option `empICC` equal to "raw" also plots the relative frequencies of positive responses for each rawscore group at the position of the corresponding ability level. The blue dotted lines represent the $95\%$ confidence level for the relative frequencies and are shown if options are provided if the optional argument `empCI` is specified.
+
+  5) tests for local dependence
+
+Testing for local dependence can be done by removing an item, fitting the Rasch model to the remaining items, splitting with respect to the removed item. The general method for testing local dependence is to compute Yens $Q_3$ statistic, which proceeds as follows. Estimate $\boldsymbol b$ and $\boldsymbol \theta$; compute the expected data matrix $\boldsymbol E=E_{ik}=E(Y_{ik}\mid \theta_i=\hat{\theta}_i)=P(Y_{ik}=1\mid \theta_i=\hat{\theta}_i)$; compute the matrix of residuals $\boldsymbol R=R_{ik}=\frac{Y_{ik} - E_{ik}}{\text{Var}(Y_{ik})}$; evaluate correlation between residuals. We use the `sirt` package for this
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+mod <- sirt::rasch.mml2(items)
+beta <- mod$item$b
+mod.wle <- sirt::wle.rasch(dat= items , b = beta)
+eta <- mod.wle$theta
+
+#and now we can calculate Yen’s Q3 statistic
+q3 <- sirt::Q3(dat = items, theta = eta , b = beta)
+```
+
+The conventional interpretation is that correlations should be close to zero. A large value is evidence of a problem with the scale, but since we do not know the asymptotic distribution we have to rely on a rule of thumb to decide when to reject model fit. Based on simulation studies, a value of $0.2$ is considered above the average and works well in many situations.
+
+So, what do you think? pretty fun, isn't it? Next time I will delve into this a bit more and check the model fit. Another excuse to keep studying this super cool topic!
+
+
+
+
+
+
+

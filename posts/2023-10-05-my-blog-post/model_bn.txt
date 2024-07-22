@@ -1,0 +1,28 @@
+
+model {
+
+#model specification
+for(i in 1:n){
+QALYs[i] ~ dnorm(nu_e[i],tau_e)
+nu_e[i] <- beta0 + beta1*trt[i]
+
+Costs[i] ~ dnorm(nu_c[i],tau_c)
+nu_c[i] <- gamma0 + gamma1*trt[i] + gamma2*QALYs[i]
+}
+
+#prior specification
+tau_e <- 1/ss_e
+ss_e <- s_e*s_e
+tau_c <- 1/ss_c
+ss_c <- s_c*s_c
+
+s_c ~ dunif(0,1000)
+s_e ~ dunif(0,1000)
+beta0 ~ dnorm(0,0.000001)
+beta1 ~ dnorm(0,0.000001)
+gamma0 ~ dnorm(0,0.000001)
+gamma1 ~ dnorm(0,0.000001)
+gamma2 ~ dnorm(0,0.000001)
+
+}
+

@@ -1,0 +1,28 @@
+
+model {
+
+#model specification
+for(i in 1:n){
+      QALYs[i]~dbeta(shape1[i],shape2[i])
+      shape1[i]<-nu_e[i]*(nu_e[i]*(1-nu_e[i])/pow(s_e,2) - 1)
+      shape2[i]<-(1-nu_e[i])*(nu_e[i]*(1-nu_e[i])/pow(s_e,2) - 1)
+      logit(nu_e[i])<-beta0 + beta1*trt[i]
+
+      Costs[i]~dgamma(shape[i],rate[i])
+      shape[i]<-pow(nu_c[i],2)/pow(s_c,2)
+      rate[i]<-nu_c[i]/pow(s_c,2)
+      log(nu_c[i])<-gamma0 + gamma1*trt[i] + gamma2*QALYs[i]
+}
+
+#prior specification
+s_c ~ dunif(0,1000)
+s_e_limit<- sqrt(0.5885263*(1-0.5885263))
+s_e ~ dunif(0,s_e_limit)
+beta0 ~ dnorm(0,0.001)
+beta1 ~ dnorm(0,0.001)
+gamma0 ~ dnorm(0,0.001)
+gamma1 ~ dnorm(0,0.001)
+gamma2 ~ dnorm(0,0.001)
+
+}
+
