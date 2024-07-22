@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-02-10">
+<meta name="keywords" content="Software, Statistics, Stan">
+
+<title>angabrio.github.io - Randomised Complete Block Anova (Stan)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#linear-models" id="toc-linear-models" class="nav-link" data-scroll-target="#linear-models">Linear models</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  </ul></li>
+  <li><a href="#simple-rcb" id="toc-simple-rcb" class="nav-link" data-scroll-target="#simple-rcb">Simple RCB</a>
+  <ul class="collapse">
+  <li><a href="#data-generation" id="toc-data-generation" class="nav-link" data-scroll-target="#data-generation">Data generation</a></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory data analysis</a></li>
+  <li><a href="#model-fitting" id="toc-model-fitting" class="nav-link" data-scroll-target="#model-fitting">Model fitting</a></li>
+  <li><a href="#full-means-parameterisation" id="toc-full-means-parameterisation" class="nav-link" data-scroll-target="#full-means-parameterisation">Full means parameterisation</a></li>
+  <li><a href="#full-effect-parameterisation" id="toc-full-effect-parameterisation" class="nav-link" data-scroll-target="#full-effect-parameterisation">Full effect parameterisation</a></li>
+  <li><a href="#matrix-parameterisation" id="toc-matrix-parameterisation" class="nav-link" data-scroll-target="#matrix-parameterisation">Matrix parameterisation</a></li>
+  </ul></li>
+  <li><a href="#rcb-repeated-measures---continuous-within" id="toc-rcb-repeated-measures---continuous-within" class="nav-link" data-scroll-target="#rcb-repeated-measures---continuous-within">RCB (repeated measures) - continuous within</a>
+  <ul class="collapse">
+  <li><a href="#data-generation-1" id="toc-data-generation-1" class="nav-link" data-scroll-target="#data-generation-1">Data generation</a></li>
+  <li><a href="#exploratory-data-analysis-1" id="toc-exploratory-data-analysis-1" class="nav-link" data-scroll-target="#exploratory-data-analysis-1">Exploratory data analysis</a></li>
+  <li><a href="#model-fitting-1" id="toc-model-fitting-1" class="nav-link" data-scroll-target="#model-fitting-1">Model fitting</a></li>
+  <li><a href="#matrix-parameterisation-1" id="toc-matrix-parameterisation-1" class="nav-link" data-scroll-target="#matrix-parameterisation-1">Matrix parameterisation</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Randomised Complete Block Anova (Stan)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Software</div>
+    <div class="quarto-category">Statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="mailto:a.gabrio@maastrichtuniversity.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 10, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><span style="font-size: 85%">This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models …</span></p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Software, Statistics, Stan</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. <code>BUGS</code> (Bayesian inference Using <em>Gibbs Sampling</em>) is an algorithm and supporting language (resembling <code>R</code>) dedicated to performing the Gibbs sampling implementation of <em>Markov Chain Monte Carlo</em> (MCMC) method. Dialects of the <code>BUGS</code> language are implemented within three main projects:</p>
+<ol type="1">
+<li><p><strong>OpenBUGS</strong> - written in component pascal.</p></li>
+<li><p><strong>JAGS</strong> - (Just Another Gibbs Sampler) - written in <code>C++</code>.</p></li>
+<li><p><strong>Stan</strong> - a dedicated Bayesian modelling framework written in <code>C++</code> and implementing <em>Hamiltonian</em> MCMC samplers.</p></li>
+</ol>
+<p>Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of <code>R</code>, and thus, they are best accessed from within <code>R</code> itself. As such there are multiple packages devoted to interfacing with the various software implementations:</p>
+<ul>
+<li><p><em>R2OpenBUGS</em> - interfaces with <code>OpenBUGS</code></p></li>
+<li><p><em>R2jags</em> - interfaces with <code>JAGS</code></p></li>
+<li><p><em>rstan</em> - interfaces with <code>Stan</code></p></li>
+</ul>
+<p>This tutorial will demonstrate how to fit models in <code>Stan</code> (<span class="citation" data-cites="gelman2015stan">Gelman, Lee, and Guo (<a href="#ref-gelman2015stan" role="doc-biblioref">2015</a>)</span>) using the package <code>rstan</code> (<span class="citation" data-cites="rstanpackage">Stan Development Team (<a href="#ref-rstanpackage" role="doc-biblioref">2018</a>)</span>) as interface, which also requires to load some other packages.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In the previous tutorial (nested ANOVA), we introduced the concept of employing sub-replicates that are nested within the main treatment levels as a means of absorbing some of the unexplained variability that would otherwise arise from designs in which sampling units are selected from amongst highly heterogeneous conditions. Such (nested) designs are useful in circumstances where the levels of the main treatment (such as burnt and un-burnt sites) occur at a much larger temporal or spatial scale than the experimental/sampling units (e.g.&nbsp;vegetation monitoring quadrats). For circumstances in which the main treatments can be applied (or naturally occur) at the same scale as the sampling units (such as whether a stream rock is enclosed by a fish proof fence or not), an alternative design is available. In this design (<strong>randomised complete block design</strong>), each of the levels of the main treatment factor are grouped (blocked) together (in space and/or time) and therefore, whilst the conditions between the groups (referred to as “blocks”) might vary substantially, the conditions under which each of the levels of the treatment are tested within any given block are far more homogeneous.</p>
+<p>If any differences between blocks (due to the heterogeneity) can account for some of the total variability between the sampling units (thereby reducing the amount of variability that the main treatment(s) failed to explain), then the main test of treatment effects will be more powerful/sensitive. As an simple example of a randomised complete block (RCB) design, consider an investigation into the roles of different organism scales (microbial, macro invertebrate and vertebrate) on the breakdown of leaf debris packs within streams. An experiment could consist of four treatment levels - leaf packs protected by fish-proof mesh, leaf packs protected by fine macro invertebrate exclusion mesh, leaf packs protected by dissolving antibacterial tablets, and leaf packs relatively unprotected as controls. As an acknowledgement that there are many other unmeasured factors that could influence leaf pack breakdown (such as flow velocity, light levels, etc) and that these are likely to vary substantially throughout a stream, the treatments are to be arranged into groups or “blocks” (each containing a single control, microbial, macro invertebrate and fish protected leaf pack). Blocks of treatment sets are then secured in locations haphazardly selected throughout a particular reach of stream. Importantly, the arrangement of treatments in each block must be randomized to prevent the introduction of some systematic bias - such as light angle, current direction etc.</p>
+<p>Blocking does however come at a cost. The blocks absorb both unexplained variability as well as degrees of freedom from the residuals. Consequently, if the amount of the total unexplained variation that is absorbed by the blocks is not sufficiently large enough to offset the reduction in degrees of freedom (which may result from either less than expected heterogeneity, or due to the scale at which the blocks are established being inappropriate to explain much of the variation), for a given number of sampling units (leaf packs), the tests of main treatment effects will suffer power reductions. Treatments can also be applied sequentially or repeatedly at the scale of the entire block, such that at any single time, only a single treatment level is being applied (see the lower two sub-figures above). Such designs are called repeated measures. A repeated measures ANOVA is to an single factor ANOVA as a paired t-test is to a independent samples t-test. One example of a repeated measures analysis might be an investigation into the effects of a five different diet drugs (four doses and a placebo) on the food intake of lab rats. Each of the rats (“subjects”) is subject to each of the four drugs (within subject effects) which are administered in a random order. In another example, temporal recovery responses of sharks to bi-catch entanglement stresses might be simulated by analyzing blood samples collected from captive sharks (subjects) every half hour for three hours following a stress inducing restraint. This repeated measures design allows the anticipated variability in stress tolerances between individual sharks to be accounted for in the analysis (so as to permit more powerful test of the main treatments). Furthermore, by performing repeated measures on the same subjects, repeated measures designs reduce the number of subjects required for the investigation. Essentially, this is a randomised complete block design except that the within subject (block) effect (e.g.&nbsp;time since stress exposure) cannot be randomised.</p>
+<p>To suppress contamination effects resulting from the proximity of treatment sampling units within a block, units should be adequately spaced in time and space. For example, the leaf packs should not be so close to one another that the control packs are effected by the antibacterial tablets and there should be sufficient recovery time between subsequent drug administrations. In addition, the order or arrangement of treatments within the blocks must be randomized so as to prevent both confounding as well as computational complications. Whilst this is relatively straight forward for the classic randomized complete block design (such as the leaf packs in streams), it is logically not possible for repeated measures designs. Blocking factors are typically random factors that represent all the possible blocks that could be selected. As such, no individual block can truly be replicated. Randomised complete block and repeated measures designs can therefore also be thought of as un-replicated factorial designs in which there are two or more factors but that the interactions between the blocks and all the within block factors are not replicated.</p>
+</section>
+<section id="linear-models" class="level2">
+<h2 class="anchored" data-anchor-id="linear-models">Linear models</h2>
+<p>The linear models for two and three factor nested design are:</p>
+<p><span class="math display">\[
+y_{ij} = \mu + \beta_i + \alpha_j + \epsilon_{ij},
+\]</span></p>
+<p><span class="math display">\[
+y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\beta\alpha)_{ij} + (\beta\gamma)_{ik} + (\alpha\gamma)_{jk} + (\alpha\beta\gamma)_{ijk} + \epsilon_{ijk}, \;\;\; \text{(Model 1)}
+\]</span></p>
+<p><span class="math display">\[
+y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\alpha\gamma)_{jk} + \epsilon_{ijk}, \;\;\; \text{(Model 2)},
+\]</span></p>
+<p>where <span class="math inline">\(\mu\)</span> is the overall mean, <span class="math inline">\(\beta\)</span> is the effect of the Blocking Factor B (<span class="math inline">\(\sum \beta=0\)</span>), <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\gamma\)</span> are the effects of withing block Factor A and Factor C, respectively, and <span class="math inline">\(\epsilon \sim N(0,\sigma^2)\)</span> is the random unexplained or residual component.</p>
+<p>Tests for the effects of blocks as well as effects within blocks assume that there are no interactions between blocks and the within block effects. That is, it is assumed that any effects are of similar nature within each of the blocks. Whilst this assumption may well hold for experiments that are able to consciously set the scale over which the blocking units are arranged, when designs utilize arbitrary or naturally occurring blocking units, the magnitude and even polarity of the main effects are likely to vary substantially between the blocks. The preferred (non-additive or “Model 1”) approach to un-replicated factorial analysis of some bio-statisticians is to include the block by within subject effect interactions (e.g.&nbsp;<span class="math inline">\(\beta\alpha\)</span>). Whilst these interaction effects cannot be formally tested, they can be used as the denominators in F-ratio calculations of their respective main effects tests. Proponents argue that since these blocking interactions cannot be formally tested, there is no sound inferential basis for using these error terms separately. Alternatively, models can be fitted additively (“Model 2”) whereby all the block by within subject effect interactions are pooled into a single residual term (<span class="math inline">\(\epsilon\)</span>). Although the latter approach is simpler, each of the within subject effects tests do assume that there are no interactions involving the blocks and that perhaps even more restrictively, that sphericity holds across the entire design.</p>
+</section>
+<section id="assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
+<p>As with other ANOVA designs, the reliability of hypothesis tests is dependent on the residuals being:</p>
+<ul>
+<li><p>normally distributed. Boxplots using the appropriate scale of replication (reflecting the appropriate residuals/F-ratio denominator should be used to explore normality. Scale transformations are often useful.</p></li>
+<li><p>equally varied. Boxplots and plots of means against variance (using the appropriate scale of replication) should be used to explore the spread of values. Residual plots should reveal no patterns. Scale transformations are often useful.</p></li>
+<li><p>independent of one another. Although the observations within a block may not strictly be independent, provided the treatments are applied or ordered randomly within each block or subject, within block proximity effects on the residuals should be random across all blocks and thus the residuals should still be independent of one another. Nevertheless, it is important that experimental units within blocks are adequately spaced in space and time so as to suppress contamination or carryover effects.</p></li>
+</ul>
+</section>
+</section>
+<section id="simple-rcb" class="level1">
+<h1>Simple RCB</h1>
+<section id="data-generation" class="level2">
+<h2 class="anchored" data-anchor-id="data-generation">Data generation</h2>
+<p>Imagine we has designed an experiment in which we intend to measure a response (y) to one of treatments (three levels; “a1”, “a2” and “a3”). Unfortunately, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability you decide to apply a design (RCB) in which each of the treatments within each of 35 blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nTreat <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>nBlock <span class="ot">&lt;-</span> <span class="dv">35</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sigma.block <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> nBlock<span class="sc">*</span>nTreat</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Block <span class="ot">&lt;-</span> <span class="fu">gl</span>(nBlock, <span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">gl</span>(nTreat,<span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">A=</span>A,<span class="at">Block=</span>Block)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Xmat &lt;- model.matrix(~Block + A + Block:A, data=dt)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Block <span class="sc">+</span> A, <span class="at">data=</span>dt)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>block.effects <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> nBlock, <span class="at">mean =</span> <span class="dv">40</span>, <span class="at">sd =</span> sigma.block)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>A.effects <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">30</span>,<span class="dv">40</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>all.effects <span class="ot">&lt;-</span> <span class="fu">c</span>(block.effects,A.effects)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>lin.pred <span class="ot">&lt;-</span> Xmat <span class="sc">%*%</span> all.effects</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Block,<span class="at">data=</span>dt),<span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>A,<span class="at">data=</span>dt))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Sum to zero block effects</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>block.effects <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> nBlock, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma.block)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>A.effects <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">40</span>,<span class="dv">70</span>,<span class="dv">80</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>all.effects <span class="ot">&lt;-</span> <span class="fu">c</span>(block.effects,A.effects)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>lin.pred <span class="ot">&lt;-</span> Xmat <span class="sc">%*%</span> all.effects</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="do">## the quadrat observations (within sites) are drawn from</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="do">## normal distributions with means according to the site means</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="do">## and standard deviations of 5</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,lin.pred,sigma)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>data.rcb <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y, <span class="fu">expand.grid</span>(<span class="at">A=</span>A, <span class="at">Block=</span>Block))</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y A Block
+NA 1 45.80853 1     1
+NA 2 66.71784 2     1
+NA 3 93.29238 3     1
+NA 4 43.10101 1     2
+NA 5 73.20697 2     2
+NA 6 91.77487 3     2</code></pre>
+</div>
+</div>
+</section>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
+<p><strong>Normality and Homogeneity of variance</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>A, data.rcb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li><p>there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.</p></li>
+<li><p>there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. . More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the <span class="math inline">\(y\)</span>-axis. Hence it there is no evidence of non-homogeneity</p></li>
+</ul>
+<p>Obvious violations could be addressed either by:</p>
+<ul>
+<li>transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).</li>
+</ul>
+<p><strong>Block by within-Block interaction</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rcb, <span class="fu">interaction.plot</span>(A,Block,y))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#OR with ggplot</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rcb, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>A, <span class="at">group=</span>Block,<span class="at">color=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-3-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA            Test stat Pr(&gt;|Test stat|)
+NA Block                                
+NA A                                    
+NA Tukey test   -1.4163           0.1567</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># within the car package</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA       Test     Pvalue 
+NA -1.4163343  0.1566776</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># asbio package</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(asbio)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rcb,<span class="fu">tukey.add.test</span>(y,A,Block))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA Tukey's one df test for additivity 
+NA F = 2.0060029   Denom df = 67    p-value = 0.1613102</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li>there is no visual or inferential evidence of any major interactions between Block and the within-Block effect (A). Any trends appear to be reasonably consistent between Blocks.</li>
+</ul>
+</section>
+<section id="model-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="model-fitting">Model fitting</h2>
+<p><strong>Full parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\beta_0 + \beta_i + \gamma_{j(i)},
+\]</span></p>
+<p>where <span class="math inline">\(\gamma_{ij)} \sim N(0, \sigma^2_B)\)</span>, <span class="math inline">\(\beta_0, \beta_i \sim N(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>. The <em>full parameterisation</em>, shows the effects parameterisation in which there is an intercept (<span class="math inline">\(\beta_0\)</span>) and two treatment effects (<span class="math inline">\(\beta_i\)</span>, where <span class="math inline">\(i\)</span> is <span class="math inline">\(1,2\)</span>).</p>
+<p><strong>Matrix parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\boldsymbol \beta \boldsymbol X + \gamma_{j(i)},
+\]</span></p>
+<p>where <span class="math inline">\(\gamma_{ij} \sim N(0, \sigma^2_B)\)</span>, <span class="math inline">\(\boldsymbol \beta \sim MVN(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>. The full parameterisation, shows the effects parameterisation in which there is an intercept (<span class="math inline">\(\alpha_0\)</span>) and two treatment effects (<span class="math inline">\(\beta_i\)</span>, where <span class="math inline">\(i\)</span> is <span class="math inline">\(1,2\)</span>). The <em>matrix parameterisation</em> is a compressed notation, In this parameterisation, there are three alpha parameters (one representing the mean of treatment a1, and the other two representing the treatment effects (differences between a2 and a1 and a3 and a1). In generating priors for each of these three alpha parameters, we could loop through each and define a non-informative normal prior to each (as in the Full parameterisation version). However, it turns out that it is more efficient (in terms of mixing and thus the number of necessary iterations) to define the priors from a multivariate normal distribution. This has as many means as there are parameters to estimate (<span class="math inline">\(3\)</span>) and a <span class="math inline">\(3\times3\)</span> matrix of zeros and <span class="math inline">\(100\)</span> in the diagonals.</p>
+<p><span class="math display">\[
+\boldsymbol \mu =
+  \begin{bmatrix} 0  \\ 0  \\ 0 \end{bmatrix}, \;\;\; \sigma^2 \sim   
+  \begin{bmatrix}
+   1000000 &amp; 0 &amp; 0 \\
+   0 &amp; 1000000 &amp; 0 \\
+   0 &amp; 0 &amp; 1000000
+   \end{bmatrix}.
+\]</span></p>
+<p><strong>Hierarchical parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}= \beta_0 + \beta_i + \gamma_{j(i)},
+\]</span></p>
+<p>where <span class="math inline">\(\gamma_{ij} \sim N(0, \sigma^2_B)\)</span>, <span class="math inline">\(\beta_0, \beta_i \sim N(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>.</p>
+<p>Rather than assume a specific variance-covariance structure, just like <code>lme</code> we can incorporate an appropriate structure to account for different dependency/correlation structures in our data. In RCB designs, it is prudent to capture the residuals to allow checks that there are no outstanding dependency issues following model fitting.</p>
+</section>
+<section id="full-means-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="full-means-parameterisation">Full means parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rstanString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nA;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] y;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">   int A[n];</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="st">   int B[n];</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">parameters{</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="st">  real alpha[nA];</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nB] beta;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_B;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="st">    real mu[n];</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="st">    // Priors</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="st">    alpha ~ normal( 0 , 100 );</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="st">    beta ~ normal( 0 , sigma_B );</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma_B ~ cauchy( 0 , 25 );</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma ~ cauchy( 0 , 25 );</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="st">    for ( i in 1:n ) {</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="st">        mu[i] = alpha[A[i]] + beta[B[i]];</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="st">    y ~ normal( mu , sigma );</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString, <span class="at">con =</span> <span class="st">"fullModel.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">A=</span><span class="fu">as.numeric</span>(A), <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block)),<span class="at">nA=</span><span class="fu">length</span>(<span class="fu">levels</span>(A))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Start the <code>Stan</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>rstan</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"fullModel.stan"</span>, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+NA Chain 1: 
+NA Chain 1: Gradient evaluation took 3.7e-05 seconds
+NA Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.37 seconds.
+NA Chain 1: Adjust your expectations accordingly!
+NA Chain 1: 
+NA Chain 1: 
+NA Chain 1: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 1: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 1: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 1: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 1: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 1: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 1: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 1: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 1: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 1: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 1: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 1: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 1: 
+NA Chain 1:  Elapsed Time: 0.243 seconds (Warm-up)
+NA Chain 1:                0.111 seconds (Sampling)
+NA Chain 1:                0.354 seconds (Total)
+NA Chain 1: 
+NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+NA Chain 2: 
+NA Chain 2: Gradient evaluation took 7e-06 seconds
+NA Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.07 seconds.
+NA Chain 2: Adjust your expectations accordingly!
+NA Chain 2: 
+NA Chain 2: 
+NA Chain 2: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 2: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 2: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 2: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 2: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 2: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 2: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 2: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 2: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 2: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 2: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 2: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 2: 
+NA Chain 2:  Elapsed Time: 0.237 seconds (Warm-up)
+NA Chain 2:                0.105 seconds (Sampling)
+NA Chain 2:                0.342 seconds (Total)
+NA Chain 2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.c, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Stan model: anon_model.
+NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
+NA post-warmup draws per chain=1500, total post-warmup draws=3000.
+NA 
+NA           mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+NA alpha[1] 41.55    0.10 2.13 37.40 40.15 41.54 42.94 45.68   441 1.01
+NA alpha[2] 69.50    0.11 2.16 65.31 68.08 69.50 70.86 73.85   419 1.01
+NA alpha[3] 81.85    0.10 2.12 77.71 80.45 81.80 83.21 85.95   425 1.01
+NA sigma     5.07    0.01 0.44  4.29  4.75  5.05  5.35  6.00  2176 1.00
+NA sigma_B  11.71    0.03 1.60  9.10 10.58 11.55 12.63 15.35  3757 1.00
+NA 
+NA Samples were drawn using NUTS(diag_e) at Mon Jul 22 12:08:01 2024.
+NA For each parameter, n_eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor on split chains (at 
+NA convergence, Rhat=1).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.c))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.c.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA    alpha.1  alpha.2  alpha.3    sigma  sigma_B      lp__
+NA 1 40.92583 67.75321 79.80043 4.655019 10.81956 -319.5226
+NA 2 41.66058 72.22219 83.44578 4.325701 15.14545 -323.5076
+NA 3 41.23380 69.83747 82.08849 5.818799 10.75345 -329.9066
+NA 4 40.46224 68.34375 80.72886 4.690904 11.07078 -317.4154
+NA 5 38.51851 66.61851 79.33672 4.498886 11.73147 -318.8312
+NA 6 41.81091 69.41454 82.56791 6.062546  9.78244 -322.8856</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.c<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.c)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>MCMCsum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(x, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="fu">t</span>(<span class="fu">quantile</span>(x,<span class="at">na.rm=</span><span class="cn">TRUE</span>)),</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)),<span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x),<span class="at">p=</span><span class="fl">0.5</span>))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.c.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
+NA 1 alpha.1   41.535980   32.655709   40.149101   41.535980   42.944616
+NA 2 alpha.2   69.496977   61.677410   68.079227   69.496977   70.861836
+NA 3 alpha.3   81.799857   73.717659   80.452339   81.799857   83.205086
+NA 4   sigma    5.048656    3.677651    4.748179    5.048656    5.349604
+NA 5 sigma_B   11.554897    7.586198   10.576991   11.554897   12.629219
+NA 6    lp__ -321.666229 -342.185020 -325.626894 -321.666229 -318.292350
+NA         X100.       lower       upper     lower.1    upper.1
+NA 1   50.527411   37.476978   45.726479   40.282467   43.04881
+NA 2   78.798149   65.297631   73.829659   68.437537   71.17360
+NA 3   90.863749   77.678551   85.948313   80.381917   83.10695
+NA 4    6.931274    4.212814    5.902948    4.673778    5.25575
+NA 5   19.103937    8.800251   14.887844   10.404933   12.39880
+NA 6 -307.824839 -333.210469 -312.359491 -325.688234 -318.38516</code></pre>
+</div>
+</div>
+</section>
+<section id="full-effect-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="full-effect-parameterisation">Full effect parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rstan2String<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] y;</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="st">   int A2[n];</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="st">   int A3[n];</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="st">   int B[n];</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="st">parameters{</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="st">  real alpha0;</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="st">  real alpha2;</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="st">  real alpha3;</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nB] beta;</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_B;</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="st">    real mu[n];</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="st">    // Priors</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="st">    alpha0 ~ normal( 0 , 1000 );</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="st">    alpha2 ~ normal( 0 , 1000 );</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="st">    alpha3 ~ normal( 0 , 1000 );</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="st">    beta ~ normal( 0 , sigma_B );</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma_B ~ cauchy( 0 , 25 );</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma ~ cauchy( 0 , 25 );</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a><span class="st">    for ( i in 1:n ) {</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a><span class="st">        mu[i] = alpha0 + alpha2*A2[i] + </span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="st">               alpha3*A3[i] + beta[B[i]];</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a><span class="st">    y ~ normal( mu , sigma );</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstan2String, <span class="at">con =</span> <span class="st">"full2Model.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data.rcb<span class="sc">$</span>A<span class="sc">==</span><span class="st">'2'</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>A3 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data.rcb<span class="sc">$</span>A<span class="sc">==</span><span class="st">'3'</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">A2=</span>A2, <span class="at">A3=</span>A3, <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>,<span class="st">"alpha2"</span>,<span class="st">"alpha3"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"full2Model.stan"</span>, </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+NA Chain 1: 
+NA Chain 1: Gradient evaluation took 3.2e-05 seconds
+NA Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.32 seconds.
+NA Chain 1: Adjust your expectations accordingly!
+NA Chain 1: 
+NA Chain 1: 
+NA Chain 1: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 1: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 1: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 1: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 1: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 1: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 1: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 1: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 1: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 1: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 1: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 1: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 1: 
+NA Chain 1:  Elapsed Time: 0.421 seconds (Warm-up)
+NA Chain 1:                0.165 seconds (Sampling)
+NA Chain 1:                0.586 seconds (Total)
+NA Chain 1: 
+NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+NA Chain 2: 
+NA Chain 2: Gradient evaluation took 8e-06 seconds
+NA Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.08 seconds.
+NA Chain 2: Adjust your expectations accordingly!
+NA Chain 2: 
+NA Chain 2: 
+NA Chain 2: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 2: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 2: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 2: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 2: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 2: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 2: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 2: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 2: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 2: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 2: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 2: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 2: 
+NA Chain 2:  Elapsed Time: 0.445 seconds (Warm-up)
+NA Chain 2:                0.175 seconds (Sampling)
+NA Chain 2:                0.62 seconds (Total)
+NA Chain 2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.f, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>, <span class="st">"alpha2"</span>, <span class="st">"alpha3"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Stan model: anon_model.
+NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
+NA post-warmup draws per chain=1500, total post-warmup draws=3000.
+NA 
+NA          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+NA alpha0  41.73    0.14 2.17 37.48 40.25 41.70 43.24 46.17   253    1
+NA alpha2  27.91    0.03 1.23 25.49 27.10 27.93 28.70 30.30  1991    1
+NA alpha3  40.24    0.03 1.19 37.85 39.44 40.26 41.04 42.52  2033    1
+NA sigma    5.08    0.01 0.46  4.28  4.76  5.05  5.37  6.07  1685    1
+NA sigma_B 11.73    0.03 1.57  9.15 10.63 11.57 12.63 15.27  2206    1
+NA 
+NA Samples were drawn using NUTS(diag_e) at Mon Jul 22 12:08:33 2024.
+NA For each parameter, n_eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor on split chains (at 
+NA convergence, Rhat=1).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.f))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.f.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA     alpha0   alpha2   alpha3    sigma  sigma_B      lp__
+NA 1 39.95904 28.82693 40.37188 5.244175 11.47116 -318.3557
+NA 2 40.26174 27.82831 41.60322 5.111554 12.84181 -311.5651
+NA 3 39.07137 28.27831 38.76523 4.700475 12.79742 -315.8146
+NA 4 41.14351 30.10751 40.30998 4.690441 13.88115 -325.3576
+NA 5 42.56938 26.98799 39.34253 5.384412 10.29316 -321.9314
+NA 6 40.45307 29.22397 41.05599 5.021199 12.07345 -314.9324</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.f<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.f)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.f.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
+NA 1  alpha0   41.698390   34.473108   40.246925   41.698390   43.235888
+NA 2  alpha2   27.929974   23.249223   27.096648   27.929974   28.701302
+NA 3  alpha3   40.264280   35.080170   39.437859   40.264280   41.043282
+NA 4   sigma    5.052888    3.786100    4.757611    5.052888    5.366813
+NA 5 sigma_B   11.567793    7.661363   10.634201   11.567793   12.631537
+NA 6    lp__ -321.145807 -342.911147 -325.003745 -321.145807 -317.615781
+NA         X100.       lower       upper     lower.1     upper.1
+NA 1   48.769516   37.757085   46.360518   40.444880   43.392733
+NA 2   32.665468   25.650646   30.418299   27.152255   28.743241
+NA 3   44.938585   37.833235   42.486534   39.485525   41.085516
+NA 4    7.054157    4.214457    5.954861    4.688346    5.269776
+NA 5   19.027742    9.063056   15.130256   10.347573   12.291484
+NA 6 -306.630367 -332.364491 -310.979729 -323.592133 -316.356397</code></pre>
+</div>
+</div>
+</section>
+<section id="matrix-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-parameterisation">Matrix parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] y;</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="st">   matrix [n,nX] X;</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="st">   int B[n];</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="st">parameters{</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nX] beta;</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nB] gamma;</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_B;</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[n] mu;    </span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a><span class="st">  mu = X*beta;</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a><span class="st">    mu[i] = mu[i] + gamma[B[i]];</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a><span class="st">} </span></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="st">    // Priors</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a><span class="st">    beta ~ normal( 0 , 100 );</span></span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a><span class="st">    gamma ~ normal( 0 , sigma_B );</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma_B ~ cauchy( 0 , 25 );</span></span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma ~ cauchy( 0 , 25 );</span></span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a><span class="st">    y ~ normal( mu , sigma );</span></span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString2, <span class="at">con =</span> <span class="st">"matrixModel.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, <span class="at">data=</span>data.rcb)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>Xmat, <span class="at">nX=</span><span class="fu">ncol</span>(Xmat),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"matrixModel.stan"</span>, </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+NA Chain 1: 
+NA Chain 1: Gradient evaluation took 3.9e-05 seconds
+NA Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.39 seconds.
+NA Chain 1: Adjust your expectations accordingly!
+NA Chain 1: 
+NA Chain 1: 
+NA Chain 1: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 1: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 1: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 1: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 1: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 1: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 1: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 1: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 1: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 1: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 1: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 1: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 1: 
+NA Chain 1:  Elapsed Time: 0.343 seconds (Warm-up)
+NA Chain 1:                0.128 seconds (Sampling)
+NA Chain 1:                0.471 seconds (Total)
+NA Chain 1: 
+NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+NA Chain 2: 
+NA Chain 2: Gradient evaluation took 8e-06 seconds
+NA Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.08 seconds.
+NA Chain 2: Adjust your expectations accordingly!
+NA Chain 2: 
+NA Chain 2: 
+NA Chain 2: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 2: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 2: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 2: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 2: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 2: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 2: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 2: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 2: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 2: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 2: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 2: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 2: 
+NA Chain 2:  Elapsed Time: 0.338 seconds (Warm-up)
+NA Chain 2:                0.127 seconds (Sampling)
+NA Chain 2:                0.465 seconds (Total)
+NA Chain 2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.d, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Stan model: anon_model.
+NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
+NA post-warmup draws per chain=1500, total post-warmup draws=3000.
+NA 
+NA          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+NA beta[1] 41.70    0.12 2.19 37.16 40.31 41.76 43.18 45.87   311 1.01
+NA beta[2] 27.93    0.02 1.20 25.55 27.14 27.93 28.71 30.22  2830 1.00
+NA beta[3] 40.25    0.02 1.25 37.78 39.41 40.26 41.09 42.71  2510 1.00
+NA sigma    5.06    0.01 0.45  4.28  4.74  5.04  5.33  6.03  1684 1.00
+NA sigma_B 11.71    0.03 1.52  9.13 10.61 11.58 12.64 15.06  2905 1.00
+NA 
+NA Samples were drawn using NUTS(diag_e) at Mon Jul 22 12:09:06 2024.
+NA For each parameter, n_eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor on split chains (at 
+NA convergence, Rhat=1).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.d))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.d.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA     beta.1   beta.2   beta.3    sigma   sigma_B      lp__
+NA 1 43.53750 26.19984 38.88439 4.383973 11.909139 -311.6449
+NA 2 40.00707 29.45451 40.75455 5.187455 12.559968 -318.1385
+NA 3 41.04678 27.38811 40.37273 4.133845 12.234813 -313.0129
+NA 4 40.53589 28.77436 41.33340 4.601260  9.623768 -316.7945
+NA 5 39.19210 28.78798 41.84681 4.408715 12.655509 -313.2638
+NA 6 41.09020 28.31770 40.18192 4.504707 11.065015 -311.0851</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.d<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.d)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.d.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
+NA 1  beta.1   41.758141   33.279797   40.306435   41.758141   43.178469
+NA 2  beta.2   27.931300   23.108350   27.136590   27.931300   28.712865
+NA 3  beta.3   40.260645   34.766550   39.412227   40.260645   41.086043
+NA 4   sigma    5.035827    3.837230    4.738249    5.035827    5.330248
+NA 5 sigma_B   11.582596    7.470131   10.613220   11.582596   12.637936
+NA 6    lp__ -320.912804 -347.661595 -324.937268 -320.912804 -317.463916
+NA        X100.       lower       upper     lower.1     upper.1
+NA 1   51.15476   37.008800   45.713133   40.384918   43.218462
+NA 2   32.92478   25.618576   30.287537   27.029125   28.593104
+NA 3   44.64738   37.866252   42.759044   39.451019   41.116210
+NA 4    7.73581    4.288374    6.031137    4.719787    5.304595
+NA 5   19.08792    8.929760   14.729667   10.377374   12.370289
+NA 6 -306.91630 -332.294151 -311.520232 -324.167208 -316.967283</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="rcb-repeated-measures---continuous-within" class="level1">
+<h1>RCB (repeated measures) - continuous within</h1>
+<section id="data-generation-1" class="level2">
+<h2 class="anchored" data-anchor-id="data-generation-1">Data generation</h2>
+<p>Imagine now that we has designed an experiment to investigate the effects of a continuous predictor (<span class="math inline">\(x\)</span>, for example time) on a response (<span class="math inline">\(y\)</span>). Again, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability, we again decide to apply a design (RCB) in which each of the levels of <span class="math inline">\(X\)</span> (such as time) treatments within each of <span class="math inline">\(35\)</span> blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>slope <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>intercept <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>nBlock <span class="ot">&lt;-</span> <span class="dv">35</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>nTime <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>sigma.block <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> nBlock<span class="sc">*</span>nTime</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>Block <span class="ot">&lt;-</span> <span class="fu">gl</span>(nBlock, <span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>Time <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">Time=</span>Time,<span class="at">Block=</span>Block)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Block <span class="sc">+</span> Time, <span class="at">data=</span>dt)</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>block.effects <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> nBlock, <span class="at">mean =</span> intercept, <span class="at">sd =</span> sigma.block)</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="co">#A.effects &lt;- c(30,40)</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>all.effects <span class="ot">&lt;-</span> <span class="fu">c</span>(block.effects,slope)</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>lin.pred <span class="ot">&lt;-</span> Xmat <span class="sc">%*%</span> all.effects</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Block,<span class="at">data=</span>dt),<span class="fu">model.matrix</span>(<span class="sc">~</span>Time,<span class="at">data=</span>dt))</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="do">## Sum to zero block effects</span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a><span class="do">##block.effects &lt;- rnorm(n = nBlock, mean = 0, sd = sigma.block)</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a><span class="do">###A.effects &lt;- c(40,70,80)</span></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="do">##all.effects &lt;- c(block.effects,intercept,slope)</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a><span class="do">##lin.pred &lt;- Xmat %*% all.effects</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a><span class="do">## the quadrat observations (within sites) are drawn from</span></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a><span class="do">## normal distributions with means according to the site means</span></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a><span class="do">## and standard deviations of 5</span></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>eps[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a>  eps[j] <span class="ot">&lt;-</span> rho<span class="sc">*</span>eps[j<span class="dv">-1</span>] <span class="co">#residuals</span></span>
+<span id="cb46-34"><a href="#cb46-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-35"><a href="#cb46-35" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,lin.pred,sigma)<span class="sc">+</span>eps</span>
+<span id="cb46-36"><a href="#cb46-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-37"><a href="#cb46-37" aria-hidden="true" tabindex="-1"></a><span class="co">#OR</span></span>
+<span id="cb46-38"><a href="#cb46-38" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb46-39"><a href="#cb46-39" aria-hidden="true" tabindex="-1"></a><span class="co"># first value cant be autocorrelated</span></span>
+<span id="cb46-40"><a href="#cb46-40" aria-hidden="true" tabindex="-1"></a>eps[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>,<span class="dv">0</span>,sigma)</span>
+<span id="cb46-41"><a href="#cb46-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb46-42"><a href="#cb46-42" aria-hidden="true" tabindex="-1"></a>  eps[j] <span class="ot">&lt;-</span> rho<span class="sc">*</span>eps[j<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma)  <span class="co">#residuals</span></span>
+<span id="cb46-43"><a href="#cb46-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-44"><a href="#cb46-44" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> lin.pred <span class="sc">+</span> eps</span>
+<span id="cb46-45"><a href="#cb46-45" aria-hidden="true" tabindex="-1"></a>data.rm <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y, dt)</span>
+<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rm)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y Time Block
+NA 1 282.1142    1     1
+NA 2 321.1404    2     1
+NA 3 278.7700    3     1
+NA 4 285.8709    4     1
+NA 5 336.6390    5     1
+NA 6 333.5961    6     1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time)) <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>Block)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="exploratory-data-analysis-1" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-1">Exploratory data analysis</h2>
+<p><strong>Normality and Homogeneity of variance</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Time, data.rm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span><span class="fu">factor</span>(Time))) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li><p>there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.</p></li>
+<li><p>there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the <span class="math inline">\(y\)</span>-axis. Hence it there is no evidence of non-homogeneity</p></li>
+</ul>
+<p>Obvious violations could be addressed either by:</p>
+<ul>
+<li>transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).</li>
+</ul>
+<p><strong>Block by within-Block interaction</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm, <span class="fu">interaction.plot</span>(Time,Block,y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time, <span class="at">color=</span>Block, <span class="at">group=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-19-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-19-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA            Test stat Pr(&gt;|Test stat|)
+NA Block                                
+NA Time         -0.7274           0.4675
+NA Tukey test   -0.9809           0.3267</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="co"># within the car package</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA       Test     Pvalue 
+NA -0.9808606  0.3266615</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co"># asbio package</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm,<span class="fu">tukey.add.test</span>(y,Time,Block))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA Tukey's one df test for additivity 
+NA F = 0.3997341   Denom df = 305    p-value = 0.5277003</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li>there is no visual or inferential evidence of any major interactions between Block and the within-Block effect (Time). Any trends appear to be reasonably consistent between Blocks.</li>
+</ul>
+<p><strong>Sphericity</strong></p>
+<p>Since the levels of Time cannot be randomly assigned, it is likely that sphericity is not met. We can explore whether there is an auto-correlation patterns in the residuals. Note, as there was only ten time periods, it does not make logical sense to explore lags above <span class="math inline">\(10\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>data.rm.lme <span class="ot">&lt;-</span> <span class="fu">lme</span>(y<span class="sc">~</span>Time, <span class="at">random=</span><span class="sc">~</span><span class="dv">1</span><span class="sc">|</span>Block, <span class="at">data=</span>data.rm)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(<span class="fu">resid</span>(data.rm.lme), <span class="at">lag=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<p>The autocorrelation factor (ACF) at a range of lags up to <span class="math inline">\(10\)</span>, indicate that there is a cyclical pattern of residual auto-correlation. We really should explore incorporating some form of correlation structure into our model.</p>
+</section>
+<section id="model-fitting-1" class="level2">
+<h2 class="anchored" data-anchor-id="model-fitting-1">Model fitting</h2>
+</section>
+<section id="matrix-parameterisation-1" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-parameterisation-1">Matrix parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] y;</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="st">   matrix [n,nX] X;</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a><span class="st">   int B[n];</span></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a><span class="st">parameters{</span></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nX] beta;</span></span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nB] gamma;</span></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_B;</span></span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[n] mu;    </span></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a><span class="st">  mu = X*beta;</span></span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a><span class="st">    mu[i] = mu[i] + gamma[B[i]];</span></span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a><span class="st">} </span></span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a><span class="st">    // Priors</span></span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a><span class="st">    beta ~ normal( 0 , 100 );</span></span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a><span class="st">    gamma ~ normal( 0 , sigma_B );</span></span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma_B ~ cauchy( 0 , 25 );</span></span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma ~ cauchy( 0 , 25 );</span></span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a><span class="st">    y ~ normal( mu , sigma );</span></span>
+<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb60-36"><a href="#cb60-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-37"><a href="#cb60-37" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb60-38"><a href="#cb60-38" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString2, <span class="at">con =</span> <span class="st">"matrixModel2.stan"</span>)</span>
+<span id="cb60-39"><a href="#cb60-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-40"><a href="#cb60-40" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>Time, <span class="at">data=</span>data.rm)</span>
+<span id="cb60-41"><a href="#cb60-41" aria-hidden="true" tabindex="-1"></a>data.rm.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rm, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>Xmat, <span class="at">nX=</span><span class="fu">ncol</span>(Xmat),</span>
+<span id="cb60-42"><a href="#cb60-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb60-43"><a href="#cb60-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rm), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span>
+<span id="cb60-44"><a href="#cb60-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-45"><a href="#cb60-45" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>)</span>
+<span id="cb60-46"><a href="#cb60-46" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb60-47"><a href="#cb60-47" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb60-48"><a href="#cb60-48" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb60-49"><a href="#cb60-49" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb60-50"><a href="#cb60-50" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb60-51"><a href="#cb60-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-52"><a href="#cb60-52" aria-hidden="true" tabindex="-1"></a>data.rm.rstan.d  <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rm.list, <span class="at">file =</span> <span class="st">"matrixModel2.stan"</span>, </span>
+<span id="cb60-53"><a href="#cb60-53" aria-hidden="true" tabindex="-1"></a>                            <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
+<span id="cb60-54"><a href="#cb60-54" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+NA Chain 1: 
+NA Chain 1: Gradient evaluation took 3e-05 seconds
+NA Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.3 seconds.
+NA Chain 1: Adjust your expectations accordingly!
+NA Chain 1: 
+NA Chain 1: 
+NA Chain 1: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 1: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 1: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 1: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 1: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 1: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 1: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 1: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 1: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 1: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 1: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 1: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 1: 
+NA Chain 1:  Elapsed Time: 1.194 seconds (Warm-up)
+NA Chain 1:                0.285 seconds (Sampling)
+NA Chain 1:                1.479 seconds (Total)
+NA Chain 1: 
+NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+NA Chain 2: 
+NA Chain 2: Gradient evaluation took 1.6e-05 seconds
+NA Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.16 seconds.
+NA Chain 2: Adjust your expectations accordingly!
+NA Chain 2: 
+NA Chain 2: 
+NA Chain 2: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 2: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 2: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 2: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 2: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 2: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 2: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 2: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 2: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 2: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 2: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 2: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 2: 
+NA Chain 2:  Elapsed Time: 1.21 seconds (Warm-up)
+NA Chain 2:                0.283 seconds (Sampling)
+NA Chain 2:                1.493 seconds (Total)
+NA Chain 2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Stan model: anon_model.
+NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
+NA post-warmup draws per chain=1500, total post-warmup draws=3000.
+NA 
+NA           mean se_mean    sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+NA beta[1] 186.70    0.72 11.96 162.54 178.89 186.74 194.88 209.68   272    1
+NA beta[2]  30.79    0.02  1.02  28.82  30.10  30.77  31.48  32.75  2076    1
+NA sigma    55.90    0.04  2.21  51.64  54.35  55.83  57.39  60.29  2729    1
+NA sigma_B  64.52    0.19  8.76  50.39  58.35  63.49  69.44  83.96  2044    1
+NA 
+NA Samples were drawn using NUTS(diag_e) at Mon Jul 22 12:09:12 2024.
+NA For each parameter, n_eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor on split chains (at 
+NA convergence, Rhat=1).</code></pre>
+</div>
+</div>
+<p>Given that Time cannot be randomized, there is likely to be a temporal dependency structure to the data. The above analyses assume no temporal dependency - actually, they assume that the variance-covariance matrix demonstrates a structure known as sphericity. Lets specifically model in a first order autoregressive correlation structure in an attempt to accommodate the expected temporal autocorrelation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>rstanString3<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] y;</span></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a><span class="st">   matrix [n,nX] X;</span></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a><span class="st">   int B[n];</span></span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a><span class="st">   vector [n] tgroup;</span></span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a><span class="st">parameters{</span></span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nX] beta;</span></span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a><span class="st">  vector [nB] gamma;</span></span>
+<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_B;</span></span>
+<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a><span class="st">  real ar;</span></span>
+<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb64-20"><a href="#cb64-20" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[n] mu;    </span></span>
+<span id="cb64-21"><a href="#cb64-21" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[n] E;</span></span>
+<span id="cb64-22"><a href="#cb64-22" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[n] res;</span></span>
+<span id="cb64-23"><a href="#cb64-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-24"><a href="#cb64-24" aria-hidden="true" tabindex="-1"></a><span class="st">  mu = X*beta;</span></span>
+<span id="cb64-25"><a href="#cb64-25" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb64-26"><a href="#cb64-26" aria-hidden="true" tabindex="-1"></a><span class="st">     E[i] = 0;</span></span>
+<span id="cb64-27"><a href="#cb64-27" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb64-28"><a href="#cb64-28" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
+<span id="cb64-29"><a href="#cb64-29" aria-hidden="true" tabindex="-1"></a><span class="st">    mu[i] = mu[i] + gamma[B[i]];</span></span>
+<span id="cb64-30"><a href="#cb64-30" aria-hidden="true" tabindex="-1"></a><span class="st">    res[i] = y[i] - mu[i];</span></span>
+<span id="cb64-31"><a href="#cb64-31" aria-hidden="true" tabindex="-1"></a><span class="st">    if(i&gt;0 &amp;&amp; i &lt; n &amp;&amp; tgroup[i+1] == tgroup[i]) {</span></span>
+<span id="cb64-32"><a href="#cb64-32" aria-hidden="true" tabindex="-1"></a><span class="st">      E[i+1] = res[i];</span></span>
+<span id="cb64-33"><a href="#cb64-33" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb64-34"><a href="#cb64-34" aria-hidden="true" tabindex="-1"></a><span class="st">    mu[i] = mu[i] + (E[i] * ar);</span></span>
+<span id="cb64-35"><a href="#cb64-35" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb64-36"><a href="#cb64-36" aria-hidden="true" tabindex="-1"></a><span class="st">} </span></span>
+<span id="cb64-37"><a href="#cb64-37" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb64-38"><a href="#cb64-38" aria-hidden="true" tabindex="-1"></a><span class="st">    // Priors</span></span>
+<span id="cb64-39"><a href="#cb64-39" aria-hidden="true" tabindex="-1"></a><span class="st">    beta ~ normal( 0 , 100 );</span></span>
+<span id="cb64-40"><a href="#cb64-40" aria-hidden="true" tabindex="-1"></a><span class="st">    gamma ~ normal( 0 , sigma_B );</span></span>
+<span id="cb64-41"><a href="#cb64-41" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma_B ~ cauchy( 0 , 25 );</span></span>
+<span id="cb64-42"><a href="#cb64-42" aria-hidden="true" tabindex="-1"></a><span class="st">    sigma ~ cauchy( 0 , 25 );</span></span>
+<span id="cb64-43"><a href="#cb64-43" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb64-44"><a href="#cb64-44" aria-hidden="true" tabindex="-1"></a><span class="st">    y ~ normal( mu , sigma );</span></span>
+<span id="cb64-45"><a href="#cb64-45" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb64-46"><a href="#cb64-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-47"><a href="#cb64-47" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb64-48"><a href="#cb64-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-49"><a href="#cb64-49" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb64-50"><a href="#cb64-50" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString3, <span class="at">con =</span> <span class="st">"matrixModel3.stan"</span>)</span>
+<span id="cb64-51"><a href="#cb64-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-52"><a href="#cb64-52" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>Time, <span class="at">data=</span>data.rm)</span>
+<span id="cb64-53"><a href="#cb64-53" aria-hidden="true" tabindex="-1"></a>data.rm.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rm, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>Xmat, <span class="at">nX=</span><span class="fu">ncol</span>(Xmat),</span>
+<span id="cb64-54"><a href="#cb64-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb64-55"><a href="#cb64-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rm), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block)),</span>
+<span id="cb64-56"><a href="#cb64-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">tgroup=</span><span class="fu">as.numeric</span>(Block)))</span>
+<span id="cb64-57"><a href="#cb64-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-58"><a href="#cb64-58" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>,<span class="st">'ar'</span>)</span>
+<span id="cb64-59"><a href="#cb64-59" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb64-60"><a href="#cb64-60" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb64-61"><a href="#cb64-61" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb64-62"><a href="#cb64-62" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb64-63"><a href="#cb64-63" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb64-64"><a href="#cb64-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-65"><a href="#cb64-65" aria-hidden="true" tabindex="-1"></a>data.rm.rstan.d  <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rm.list, <span class="at">file =</span> <span class="st">"matrixModel3.stan"</span>, </span>
+<span id="cb64-66"><a href="#cb64-66" aria-hidden="true" tabindex="-1"></a>                            <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
+<span id="cb64-67"><a href="#cb64-67" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+NA Chain 1: 
+NA Chain 1: Gradient evaluation took 5.7e-05 seconds
+NA Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.57 seconds.
+NA Chain 1: Adjust your expectations accordingly!
+NA Chain 1: 
+NA Chain 1: 
+NA Chain 1: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 1: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 1: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 1: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 1: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 1: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 1: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 1: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 1: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 1: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 1: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 1: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 1: 
+NA Chain 1:  Elapsed Time: 1.438 seconds (Warm-up)
+NA Chain 1:                0.502 seconds (Sampling)
+NA Chain 1:                1.94 seconds (Total)
+NA Chain 1: 
+NA 
+NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+NA Chain 2: 
+NA Chain 2: Gradient evaluation took 2.7e-05 seconds
+NA Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.27 seconds.
+NA Chain 2: Adjust your expectations accordingly!
+NA Chain 2: 
+NA Chain 2: 
+NA Chain 2: Iteration:    1 / 4500 [  0%]  (Warmup)
+NA Chain 2: Iteration:  450 / 4500 [ 10%]  (Warmup)
+NA Chain 2: Iteration:  900 / 4500 [ 20%]  (Warmup)
+NA Chain 2: Iteration: 1350 / 4500 [ 30%]  (Warmup)
+NA Chain 2: Iteration: 1800 / 4500 [ 40%]  (Warmup)
+NA Chain 2: Iteration: 2250 / 4500 [ 50%]  (Warmup)
+NA Chain 2: Iteration: 2700 / 4500 [ 60%]  (Warmup)
+NA Chain 2: Iteration: 3001 / 4500 [ 66%]  (Sampling)
+NA Chain 2: Iteration: 3450 / 4500 [ 76%]  (Sampling)
+NA Chain 2: Iteration: 3900 / 4500 [ 86%]  (Sampling)
+NA Chain 2: Iteration: 4350 / 4500 [ 96%]  (Sampling)
+NA Chain 2: Iteration: 4500 / 4500 [100%]  (Sampling)
+NA Chain 2: 
+NA Chain 2:  Elapsed Time: 2.343 seconds (Warm-up)
+NA Chain 2:                0.483 seconds (Sampling)
+NA Chain 2:                2.826 seconds (Total)
+NA Chain 2:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>,<span class="st">'ar'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Stan model: anon_model.
+NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
+NA post-warmup draws per chain=1500, total post-warmup draws=3000.
+NA 
+NA           mean se_mean    sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+NA beta[1] 179.17    0.24 12.76 153.91 170.91 179.06 187.48 204.24  2816    1
+NA beta[2]  31.29    0.02  1.70  27.91  30.17  31.29  32.43  34.72  5406    1
+NA sigma    48.73    0.03  1.99  45.11  47.33  48.63  50.06  52.72  5115    1
+NA sigma_B  49.78    0.26 10.61  30.48  42.28  49.07  56.56  73.10  1604    1
+NA ar        0.78    0.00  0.05   0.68   0.75   0.78   0.81   0.88  2786    1
+NA 
+NA Samples were drawn using NUTS(diag_e) at Mon Jul 22 12:09:49 2024.
+NA For each parameter, n_eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor on split chains (at 
+NA convergence, Rhat=1).</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-gelman2015stan" class="csl-entry" role="listitem">
+Gelman, Andrew, Daniel Lee, and Jiqiang Guo. 2015. <span>“Stan: A Probabilistic Programming Language for Bayesian Inference and Optimization.”</span> <em>Journal of Educational and Behavioral Statistics</em> 40 (5): 530–43.
+</div>
+<div id="ref-rstanpackage" class="csl-entry" role="listitem">
+Stan Development Team. 2018. <span>“<span>RStan</span>: The <span>R</span> Interface to <span>Stan</span>.”</span> <a href="http://mc-stan.org/">http://mc-stan.org/</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

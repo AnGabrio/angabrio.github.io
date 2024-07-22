@@ -1,0 +1,29 @@
+
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- beta0 + beta[A[i]] + gamma[Block[i]]
+      res[i] <- y[i]-mu[i]
+   }
+   
+   #Priors
+   beta0 ~ dnorm(0, 1.0E-6)
+   beta[1] <- 0
+   for (i in 2:nA) {
+     beta[i] ~ dnorm(0, 1.0E-6) #prior
+   }
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+ }
+

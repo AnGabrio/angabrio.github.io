@@ -1,0 +1,996 @@
+---
+title: "Randomised Complete Block Anova (JAGS)"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    email: a.gabrio@maastrichtuniversity.nl
+    corresponding: true    
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2020-02-01
+categories: [Quarto, R, Academia, Software, Statistics] # self-defined categories
+#image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+abstract: > 
+  [The focus of this simple tutorial is to provide a brief introduction and overview about how to fit Bayesian models using `JAGS` via `R` ...]{style="font-size: 85%"}
+keywords:
+  - Software
+  - Statistics
+  - Stan
+#license: "GPL-2"
+#copyright: 
+#  holder: CRAN
+#  year: 2023
+#citation: 
+#  title: missingHE
+#  author: Andrea Gabrio
+#  note: R package version 4.4.2
+#  url: https://cran.r-project.org/web/packages/missingHE
+#funding: "The author received no specific funding for this work."
+bibliography: citations_jags11.bib
+#nocite: |
+#  @gabrio2017handling
+---
+
+This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. `BUGS` (Bayesian inference Using *Gibbs Sampling*) is an algorithm and supporting language (resembling `R`) dedicated to performing the Gibbs sampling implementation of *Markov Chain Monte Carlo* (MCMC) method. Dialects of the `BUGS` language are implemented within three main projects:
+
+1. **OpenBUGS** - written in component pascal.
+ 
+2. **JAGS** - (Just Another Gibbs Sampler) - written in `C++`. 
+
+3. **STAN** - a dedicated Bayesian modelling framework written in `C++` and implementing *Hamiltonian* MCMC samplers.
+
+Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of `R`, and thus, they are best accessed from within `R` itself. As such there are multiple packages devoted to interfacing with the various software implementations:
+
+* *R2OpenBUGS* - interfaces with `OpenBUGS`
+
+* *R2jags* - interfaces with `JAGS`
+
+* *rstan* - interfaces with `STAN`
+
+This tutorial will demonstrate how to fit models in `JAGS` (@plummer2004jags) using the package `R2jags` (@su2015package) as interface, which also requires to load some other packages.
+
+# Overview
+
+## Introduction
+
+In the previous tutorial (nested ANOVA), we introduced the concept of employing sub-replicates that are nested within the main treatment levels as a means of absorbing some of the unexplained variability that would otherwise arise from designs in which sampling units are selected from amongst highly heterogeneous conditions. Such (nested) designs are useful in circumstances where the levels of the main treatment (such as burnt and un-burnt sites) occur at a much larger temporal or spatial scale than the experimental/sampling units (e.g. vegetation monitoring quadrats). For circumstances in which the main treatments can be applied (or naturally occur) at the same scale as the sampling units (such as whether a stream rock is enclosed by a fish proof fence or not), an alternative design is available. In this design (**randomised complete block design**), each of the levels of the main treatment factor are grouped (blocked) together (in space and/or time) and therefore, whilst the conditions between the groups (referred to as "blocks") might vary substantially, the conditions under which each of the levels of the treatment are tested within any given block are far more homogeneous.
+
+If any differences between blocks (due to the heterogeneity) can account for some of the total variability between the sampling units (thereby reducing the amount of variability that the main treatment(s) failed to explain), then the main test of treatment effects will be more powerful/sensitive. As an simple example of a randomised complete block (RCB) design, consider an investigation into the roles of different organism scales (microbial, macro invertebrate and vertebrate) on the breakdown of leaf debris packs within streams. An experiment could consist of four treatment levels - leaf packs protected by fish-proof mesh, leaf packs protected by fine macro invertebrate exclusion mesh, leaf packs protected by dissolving antibacterial tablets, and leaf packs relatively unprotected as controls. As an acknowledgement that there are many other unmeasured factors that could influence leaf pack breakdown (such as flow velocity, light levels, etc) and that these are likely to vary substantially throughout a stream, the treatments are to be arranged into groups or "blocks" (each containing a single control, microbial, macro invertebrate and fish protected leaf pack). Blocks of treatment sets are then secured in locations haphazardly selected throughout a particular reach of stream. Importantly, the arrangement of treatments in each block must be randomized to prevent the introduction of some systematic bias - such as light angle, current direction etc.
+
+Blocking does however come at a cost. The blocks absorb both unexplained variability as well as degrees of freedom from the residuals. Consequently, if the amount of the total unexplained variation that is absorbed by the blocks is not sufficiently large enough to offset the reduction in degrees of freedom (which may result from either less than expected heterogeneity, or due to the scale at which the blocks are established being inappropriate to explain much of the variation), for a given number of sampling units (leaf packs), the tests of main treatment effects will suffer power reductions. Treatments can also be applied sequentially or repeatedly at the scale of the entire block, such that at any single time, only a single treatment level is being applied (see the lower two sub-figures above). Such designs are called repeated measures. A repeated measures ANOVA is to an single factor ANOVA as a paired t-test is to a independent samples t-test. One example of a repeated measures analysis might be an investigation into the effects of a five different diet drugs (four doses and a placebo) on the food intake of lab rats. Each of the rats ("subjects") is subject to each of the four drugs (within subject effects) which are administered in a random order. In another example, temporal recovery responses of sharks to bi-catch entanglement stresses might be simulated by analyzing blood samples collected from captive sharks (subjects) every half hour for three hours following a stress inducing restraint. This repeated measures design allows the anticipated variability in stress tolerances between individual sharks to be accounted for in the analysis (so as to permit more powerful test of the main treatments). Furthermore, by performing repeated measures on the same subjects, repeated measures designs reduce the number of subjects required for the investigation. Essentially, this is a randomised complete block design except that the within subject (block) effect (e.g. time since stress exposure) cannot be randomised.
+
+To suppress contamination effects resulting from the proximity of treatment sampling units within a block, units should be adequately spaced in time and space. For example, the leaf packs should not be so close to one another that the control packs are effected by the antibacterial tablets and there should be sufficient recovery time between subsequent drug administrations. In addition, the order or arrangement of treatments within the blocks must be randomized so as to prevent both confounding as well as computational complications. Whilst this is relatively straight forward for the classic randomized complete block design (such as the leaf packs in streams), it is logically not possible for repeated measures designs. Blocking factors are typically random factors that represent all the possible blocks that could be selected. As such, no individual block can truly be replicated. Randomised complete block and repeated measures designs can therefore also be thought of as un-replicated factorial designs in which there are two or more factors but that the interactions between the blocks and all the within block factors are not replicated.
+
+## Linear models
+
+The linear models for two and three factor nested design are:
+
+$$
+y_{ij} = \mu + \beta_i + \alpha_j + \epsilon_{ij},
+$$
+
+$$
+y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\beta\alpha)_{ij} + (\beta\gamma)_{ik} + (\alpha\gamma)_{jk} + (\alpha\beta\gamma)_{ijk} + \epsilon_{ijk}, \;\;\; \text{(Model 1)}
+$$
+
+$$
+y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\alpha\gamma)_{jk} + \epsilon_{ijk}, \;\;\; \text{(Model 2)},
+$$
+
+where $\mu$ is the overall mean, $\beta$ is the effect of the Blocking Factor B ($\sum \beta=0$), $\alpha$ and $\gamma$ are the effects of withing block Factor A and Factor C, respectively, and $\epsilon \sim N(0,\sigma^2)$ is the random unexplained or residual component.
+
+Tests for the effects of blocks as well as effects within blocks assume that there are no interactions between blocks and the within block effects. That is, it is assumed that any effects are of similar nature within each of the blocks. Whilst this assumption may well hold for experiments that are able to consciously set the scale over which the blocking units are arranged, when designs utilize arbitrary or naturally occurring blocking units, the magnitude and even polarity of the main effects are likely to vary substantially between the blocks. The preferred (non-additive or "Model 1") approach to un-replicated factorial analysis of some bio-statisticians is to include the block by within subject effect interactions (e.g. $\beta\alpha$). Whilst these interaction effects cannot be formally tested, they can be used as the denominators in F-ratio calculations of their respective main effects tests. Proponents argue that since these blocking interactions cannot be formally tested, there is no sound inferential basis for using these error terms separately. Alternatively, models can be fitted additively ("Model 2") whereby all the block by within subject effect interactions are pooled into a single residual term ($\epsilon$). Although the latter approach is simpler, each of the within subject effects tests do assume that there are no interactions involving the blocks and that perhaps even more restrictively, that sphericity holds across the entire design.
+
+## Assumptions
+
+As with other ANOVA designs, the reliability of hypothesis tests is dependent on the residuals being:
+
+* normally distributed. Boxplots using the appropriate scale of replication (reflecting the appropriate residuals/F-ratio denominator should be used to explore normality. Scale transformations are often useful.
+
+* equally varied. Boxplots and plots of means against variance (using the appropriate scale of replication) should be used to explore the spread of values. Residual plots should reveal no patterns. Scale transformations are often useful.
+
+* independent of one another. Although the observations within a block may not strictly be independent, provided the treatments are applied or ordered randomly within each block or subject, within block proximity effects on the residuals should be random across all blocks and thus the residuals should still be independent of one another. Nevertheless, it is important that experimental units within blocks are adequately spaced in space and time so as to suppress contamination or carryover effects.
+
+# Simple RCB
+
+## Data generation
+
+Imagine we has designed an experiment in which we intend to measure a response (y) to one of treatments (three levels; "a1", "a2" and "a3"). Unfortunately, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability you decide to apply a design (RCB) in which each of the treatments within each of 35 blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(plyr)
+set.seed(123)
+nTreat <- 3
+nBlock <- 35
+sigma <- 5
+sigma.block <- 12
+n <- nBlock*nTreat
+Block <- gl(nBlock, k=1)
+A <- gl(nTreat,k=1)
+dt <- expand.grid(A=A,Block=Block)
+#Xmat <- model.matrix(~Block + A + Block:A, data=dt)
+Xmat <- model.matrix(~-1+Block + A, data=dt)
+block.effects <- rnorm(n = nBlock, mean = 40, sd = sigma.block)
+A.effects <- c(30,40)
+all.effects <- c(block.effects,A.effects)
+lin.pred <- Xmat %*% all.effects
+
+# OR
+Xmat <- cbind(model.matrix(~-1+Block,data=dt),model.matrix(~-1+A,data=dt))
+## Sum to zero block effects
+block.effects <- rnorm(n = nBlock, mean = 0, sd = sigma.block)
+A.effects <- c(40,70,80)
+all.effects <- c(block.effects,A.effects)
+lin.pred <- Xmat %*% all.effects
+
+
+
+## the quadrat observations (within sites) are drawn from
+## normal distributions with means according to the site means
+## and standard deviations of 5
+y <- rnorm(n,lin.pred,sigma)
+data.rcb <- data.frame(y=y, expand.grid(A=A, Block=Block))
+head(data.rcb)  #print out the first six rows of the data set
+```
+
+## Exploratory data analysis
+
+**Normality and Homogeneity of variance**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+boxplot(y~A, data.rcb)
+```
+
+**Conclusions**:
+
+* there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.
+
+* there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. . More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the $y$-axis. Hence it there is no evidence of non-homogeneity
+
+Obvious violations could be addressed either by:
+
+* transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).
+
+**Block by within-Block interaction**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(car)
+with(data.rcb, interaction.plot(A,Block,y))
+
+#OR with ggplot
+library(ggplot2)
+ggplot(data.rcb, aes(y=y, x=A, group=Block,color=Block)) + geom_line() +
+  guides(color=guide_legend(ncol=3))
+
+residualPlots(lm(y~Block+A, data.rcb))
+
+# the Tukey's non-additivity test by itself can be obtained via an internal function
+# within the car package
+car:::tukeyNonaddTest(lm(y~Block+A, data.rcb))
+
+# alternatively, there is also a Tukey's non-additivity test within the
+# asbio package
+library(asbio)
+with(data.rcb,tukey.add.test(y,A,Block))
+```
+
+**Conclusions**:
+
+* there is no visual or inferential evidence of any major interactions between Block and the within-Block effect (A). Any trends appear to be reasonably consistent between Blocks.
+
+## Model fitting
+
+**Full parameterisation**
+
+$$
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\beta_0 + \beta_i + \gamma_{j(i)},
+$$
+
+where $\gamma_{ij)} \sim N(0, \sigma^2_B)$, $\beta_0, \beta_i \sim N(0, 1000000)$, and $\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}$. The *full parameterisation*, shows the effects parameterisation in which there is an intercept ($\beta_0$) and two treatment effects ($\beta_i$, where $i$ is $1,2$).
+
+**Matrix parameterisation**
+
+$$
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\boldsymbol \beta \boldsymbol X + \gamma_{j(i)}, 
+$$
+
+where $\gamma_{ij} \sim N(0, \sigma^2_B)$, $\boldsymbol \beta \sim MVN(0, 1000000)$, and $\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}$. The full parameterisation, shows the effects parameterisation in which there is an intercept ($\alpha_0$) and two treatment effects ($\beta_i$, where $i$ is $1,2$). The *matrix parameterisation* is a compressed notation, In this parameterisation, there are three alpha parameters (one representing the mean of treatment a1, and the other two representing the treatment effects (differences between a2 and a1 and a3 and a1). In generating priors for each of these three alpha parameters, we could loop through each and define a non-informative normal prior to each (as in the Full parameterisation version). However, it turns out that it is more efficient (in terms of mixing and thus the number of necessary iterations) to define the priors from a multivariate normal distribution. This has as many means as there are parameters to estimate ($3$) and a $3\times3$ matrix of zeros and $100$ in the diagonals.
+
+$$
+\boldsymbol \mu =
+  \begin{bmatrix} 0  \\ 0  \\ 0 \end{bmatrix}, \;\;\; \sigma^2 \sim   
+  \begin{bmatrix}
+   1000000 & 0 & 0 \\
+   0 & 1000000 & 0 \\
+   0 & 0 & 1000000
+   \end{bmatrix}. 
+$$
+   
+**Hierarchical parameterisation**
+
+$$
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}= \beta_0 + \beta_i + \gamma_{j(i)},
+$$
+
+where $\gamma_{ij} \sim N(0, \sigma^2_B)$, $\beta_0, \beta_i \sim N(0, 1000000)$, and $\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}$. 
+
+Rather than assume a specific variance-covariance structure, just like `lme` we can incorporate an appropriate structure to account for different dependency/correlation structures in our data. In RCB designs, it is prudent to capture the residuals to allow checks that there are no outstanding dependency issues following model fitting.
+
+## Full effect parameterisation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString="
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- beta0 + beta[A[i]] + gamma[Block[i]]
+      res[i] <- y[i]-mu[i]
+   }
+   
+   #Priors
+   beta0 ~ dnorm(0, 1.0E-6)
+   beta[1] <- 0
+   for (i in 2:nA) {
+     beta[i] ~ dnorm(0, 1.0E-6) #prior
+   }
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString, con = "fullModel.txt")
+```
+
+Arrange the data as a list (as required by `JAGS`). As input, `JAGS` will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.rcb.list <- with(data.rcb,
+        list(y=y,
+                 Block=as.numeric(Block),
+         A=as.numeric(A),
+         n=nrow(data.rcb),
+         nBlock=length(levels(Block)),
+                 nA = length(levels(A))
+         )
+)
+```
+
+Define the nodes (parameters and derivatives) to monitor and the chain parameters.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("beta0","beta",'gamma',"sigma","sigma.B","res")
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+```
+
+Start the `JAGS` model (check the model, load data into the model, specify the number of chains and compile the model). Load the `R2jags` package.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(R2jags)
+```
+
+Now run the `JAGS` code via the `R2jags` interface.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.rcb.r2jags.f <- jags(data = data.rcb.list, inits = NULL, parameters.to.save = params,
+    model.file = "fullModel.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.rcb.r2jags.f)
+```
+
+## Matrix parameterisation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString2="
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- inprod(beta[],X[i,]) + gamma[Block[i]]
+	  res[i] <- y[i]-mu[i]
+   } 
+   
+   #Priors
+   beta ~ dmnorm(a0,A0)
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString2, con = "matrixModel.txt")
+```
+
+Arrange the data as a list (as required by `JAGS`). As input, `JAGS` will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+A.Xmat <- model.matrix(~A,data.rcb)
+data.rcb.list <- with(data.rcb,
+        list(y=y,
+                 Block=as.numeric(Block),
+         X=A.Xmat,
+         n=nrow(data.rcb),
+         nBlock=length(levels(Block)),
+         a0=rep(0,3), A0=diag(3)
+         )
+)
+```
+
+Define the nodes (parameters and derivatives) to monitor and the chain parameters.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("beta",'gamma',"sigma","sigma.B","res")
+adaptSteps = 1000
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+```
+
+Now run the `JAGS` code via the `R2jags` interface.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.rcb.r2jags.m <- jags(data = data.rcb.list, inits = NULL, parameters.to.save = params,
+    model.file = "matrixModel.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.rcb.r2jags.m)
+```
+
+For a simple model with only two hierarchical levels, the model is the same as above. If you want to include finite-population standard deviations in the model you can use the following code.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString3="
+model {
+   #Likelihood (esimating site means (gamma.site)
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- gamma[Block[i]] + inprod(beta[], X[i,]) 
+      y.err[i]<- mu[i]-y[i]
+   }
+   for (i in 1:nBlock) {
+      gamma[i] ~ dnorm(0, tau.block)
+   }
+   #Priors
+   for (i in 1:nX) {
+     beta[i] ~ dnorm(0, 1.0E-6) #prior
+   }
+   sigma ~ dunif(0, 100)
+   tau <- 1 / (sigma * sigma)
+   sigma.block ~ dunif(0, 100)
+   tau.block <- 1 / (sigma.block * sigma.block)
+
+   sd.y <- sd(y.err)
+   sd.block <- sd(gamma)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString3, con = "SDModel.txt")
+
+#data list
+A.Xmat <- model.matrix(~A,ddply(data.rcb,~Block,catcolwise(unique)))
+data.rcb.list <- with(data.rcb,
+        list(y=y,
+                 Block=Block,
+         X= A.Xmat,
+         n=nrow(data.rcb),
+         nBlock=length(levels(Block)),
+                 nX = ncol(A.Xmat)
+         )
+)
+
+#parameters and chain details
+params <- c("beta","sigma","sd.y",'sd.block','sigma.block')
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+
+data.rcb.r2jagsSD <- jags(data = data.rcb.list, inits = NULL, parameters.to.save = params,
+    model.file = "SDModel.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.rcb.r2jagsSD)
+```
+
+Calculate $R^2$ from the posterior of the model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.rcb.mcmc.listSD <- as.mcmc(data.rcb.r2jagsSD)
+
+Xmat <- model.matrix(~A, data.rcb)
+coefs <- data.rcb.r2jagsSD$BUGSoutput$sims.list[['beta']]
+fitted <- coefs %*% t(Xmat)
+X.var <- aaply(fitted,1,function(x){var(x)})
+Z.var <- data.rcb.r2jagsSD$BUGSoutput$sims.list[['sd.block']]^2
+R.var <- data.rcb.r2jagsSD$BUGSoutput$sims.list[['sd.y']]^2
+R2.marginal <- (X.var)/(X.var+Z.var+R.var)
+R2.marginal <- data.frame(Mean=mean(R2.marginal), Median=median(R2.marginal), HPDinterval(as.mcmc(R2.marginal)))
+R2.conditional <- (X.var+Z.var)/(X.var+Z.var+R.var)
+R2.conditional <- data.frame(Mean=mean(R2.conditional),
+   Median=median(R2.conditional), HPDinterval(as.mcmc(R2.conditional)))
+R2.block <- (Z.var)/(X.var+Z.var+R.var)
+R2.block <- data.frame(Mean=mean(R2.block), Median=median(R2.block), HPDinterval(as.mcmc(R2.block)))
+R2.res<-(R.var)/(X.var+Z.var+R.var)
+R2.res <- data.frame(Mean=mean(R2.res), Median=median(R2.res), HPDinterval(as.mcmc(R2.res)))
+
+rbind(R2.block=R2.block, R2.marginal=R2.marginal, R2.res=R2.res, R2.conditional=R2.conditional)
+```
+
+## Planned comparisonsand pairwise tests
+
+Since there are no restrictions on the type and number of comparisons derived from the posteriors, Bayesian analyses provide a natural framework for exploring additional contrasts and comparisons. For example, to compare all possible levels:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+coefs <- data.rcb.r2jags.m$BUGSoutput$sims.list[[c('beta')]]
+head(coefs)
+
+newdata <- data.frame(A=levels(data.rcb$A))
+# A Tukeys contrast matrix
+library(multcomp)
+tuk.mat <- contrMat(n=table(newdata$A), type="Tukey")
+Xmat <- model.matrix(~A, data=newdata)
+pairwise.mat <- tuk.mat %*% Xmat
+pairwise.mat
+
+comps <- coefs %*% t(pairwise.mat)
+
+MCMCsum <- function(x) {
+   data.frame(Median=median(x, na.rm=TRUE), t(quantile(x,na.rm=TRUE)),
+              HPDinterval(as.mcmc(x)),HPDinterval(as.mcmc(x),p=0.5))
+}
+
+(comps <-plyr:::adply(comps,2,MCMCsum))
+```
+
+# RCB (repeated measures) - continuous within
+
+## Data generation
+
+Imagine now that we has designed an experiment to investigate the effects of a continuous predictor ($x$, for example time) on a response ($y$). Again, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability, we again decide to apply a design (RCB) in which each of the levels of $X$ (such as time) treatments within each of $35$ blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(123)
+slope <- 30
+intercept <- 200
+nBlock <- 35
+nTime <- 10
+sigma <- 50
+sigma.block <- 30
+n <- nBlock*nTime
+Block <- gl(nBlock, k=1)
+Time <- 1:10
+rho <- 0.8
+dt <- expand.grid(Time=Time,Block=Block)
+Xmat <- model.matrix(~-1+Block + Time, data=dt)
+block.effects <- rnorm(n = nBlock, mean = intercept, sd = sigma.block)
+#A.effects <- c(30,40)
+all.effects <- c(block.effects,slope)
+lin.pred <- Xmat %*% all.effects
+
+# OR
+Xmat <- cbind(model.matrix(~-1+Block,data=dt),model.matrix(~Time,data=dt))
+## Sum to zero block effects
+##block.effects <- rnorm(n = nBlock, mean = 0, sd = sigma.block)
+###A.effects <- c(40,70,80)
+##all.effects <- c(block.effects,intercept,slope)
+##lin.pred <- Xmat %*% all.effects
+
+## the quadrat observations (within sites) are drawn from
+## normal distributions with means according to the site means
+## and standard deviations of 5
+eps <- NULL
+eps[1] <- 0
+for (j in 2:n) {
+  eps[j] <- rho*eps[j-1] #residuals
+}
+y <- rnorm(n,lin.pred,sigma)+eps
+
+#OR
+eps <- NULL
+# first value cant be autocorrelated
+eps[1] <- rnorm(1,0,sigma)
+for (j in 2:n) {
+  eps[j] <- rho*eps[j-1] + rnorm(1, mean = 0, sd = sigma)  #residuals
+}
+y <- lin.pred + eps
+data.rm <- data.frame(y=y, dt)
+head(data.rm)  #print out the first six rows of the data set
+
+ggplot(data.rm, aes(y=y, x=Time)) + geom_smooth(method='lm') + geom_point() + facet_wrap(~Block)
+```
+
+## Exploratory data analysis
+
+**Normality and Homogeneity of variance**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+boxplot(y~Time, data.rm)
+
+ggplot(data.rm, aes(y=y, x=factor(Time))) + geom_boxplot()
+```
+
+**Conclusions**:
+
+* there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.
+
+* there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the $y$-axis. Hence it there is no evidence of non-homogeneity
+
+Obvious violations could be addressed either by:
+
+* transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).
+
+**Block by within-Block interaction**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+with(data.rm, interaction.plot(Time,Block,y))
+
+ggplot(data.rm, aes(y=y, x=Time, color=Block, group=Block)) + geom_line() +
+  guides(color=guide_legend(ncol=3))
+
+residualPlots(lm(y~Block+Time, data.rm))
+
+# the Tukey's non-additivity test by itself can be obtained via an internal function
+# within the car package
+car:::tukeyNonaddTest(lm(y~Block+Time, data.rm))
+
+# alternatively, there is also a Tukey's non-additivity test within the
+# asbio package
+with(data.rm,tukey.add.test(y,Time,Block))
+```
+
+**Conclusions**:
+
+* there is no visual or inferential evidence of any major interactions between Block and the within-Block effect (Time). Any trends appear to be reasonably consistent between Blocks.
+
+**Sphericity**
+
+Since the levels of Time cannot be randomly assigned, it is likely that sphericity is not met. We can explore whether there is an auto-correlation patterns in the residuals. Note, as there was only ten time periods, it does not make logical sense to explore lags above $10$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(nlme)
+data.rm.lme <- lme(y~Time, random=~1|Block, data=data.rm)
+acf(resid(data.rm.lme), lag=10)
+```
+
+**Conclusions**:
+
+The autocorrelation factor (ACF) at a range of lags up to $10$, indicate that there is a cyclical pattern of residual auto-correlation. We really should explore incorporating some form of correlation structure into our model.
+
+## Model fitting
+
+## Full effect parameterisation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString="
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- beta0 + beta*Time[i] + gamma[Block[i]]
+      res[i] <- y[i]-mu[i]
+   }
+   
+   #Priors
+   beta0 ~ dnorm(0, 1.0E-6)
+   beta ~ dnorm(0, 1.0E-6) #prior
+   
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString, con = "fullModel2.txt")
+
+data.rm.list <- with(data.rm,
+        list(y=y,
+                 Block=as.numeric(Block),
+         Time=Time,
+         n=nrow(data.rm),
+         nBlock=length(levels(Block))
+             )
+)
+
+params <- c("beta0","beta",'gamma',"sigma","sigma.B","res")
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+
+data.rm.r2jags.f <- jags(data = data.rm.list, inits = NULL, parameters.to.save = params,
+    model.file = "fullModel2.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.rm.r2jags.f)
+```
+
+## Matrix parameterisation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString2="
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- inprod(beta[],X[i,]) + gamma[Block[i]]
+	  res[i] <- y[i]-mu[i]
+   } 
+   
+   #Priors
+   beta ~ dmnorm(a0,A0)
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString2, con = "matrixModel2.txt")
+
+Xmat <- model.matrix(~Time,data.rm)
+data.rm.list <- with(data.rm,
+        list(y=y,
+                 Block=as.numeric(Block),
+         X=Xmat,
+         n=nrow(data.rm),
+         nBlock=length(levels(Block)),
+         a0=rep(0,ncol(Xmat)), A0=diag(ncol(Xmat))
+         )
+)
+
+params <- c("beta",'gamma',"sigma","sigma.B","res")
+adaptSteps = 1000
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+
+data.rm.r2jags.m <- jags(data = data.rm.list, inits = NULL, parameters.to.save = params,
+    model.file = "matrixModel2.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.rm.r2jags.m)
+```
+
+Given that Time cannot be randomized, there is likely to be a temporal dependency structure to the data. The above analyses assume no temporal dependency - actually, they assume that the variance-covariance matrix demonstrates a structure known as sphericity. Lets specifically model in a first order autoregressive correlation structure in an attempt to accommodate the expected temporal autocorrelation.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString3="
+model {
+   #Likelihood
+   y[1]~dnorm(mu[1],tau)
+   mu[1] <- eta1[1]
+   eta1[1] ~ dnorm(eta[1], taueps)
+   eta[1] <- inprod(beta[],X[1,]) + gamma[Block[1]]
+   res[1] <- y[1]-mu[1]
+   for (i in 2:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- eta1[i]
+      eta1[i] ~ dnorm(temp[i], taueps)
+      temp[i] <- eta[i] + -rho*(mu[i-1]-y[i-1])
+      eta[i] <- inprod(beta[],X[i,]) + gamma[Block[i]]
+	  res[i] <- y[i]-mu[i]
+   } 
+   beta ~ dmnorm(a0,A0)
+   for (i in 1:nBlock) {
+     gamma[i] ~ dnorm(0, tau.B) #prior
+   }
+   rho ~ dunif(-1,1)
+   tau <- pow(sigma,-2)
+   sigma <- z/sqrt(chSq) 
+   z ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq ~ dgamma(0.5, 0.5)
+   taueps <- pow(sigma.eps,-2)
+   sigma.eps <- z/sqrt(chSq.eps) 
+   z.eps ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.eps ~ dgamma(0.5, 0.5)
+   tau.B <- pow(sigma.B,-2)
+   sigma.B <- z/sqrt(chSq.B) 
+   z.B ~ dnorm(0, 0.0016)I(0,)  #1/25^2 = 0.0016
+   chSq.B ~ dgamma(0.5, 0.5)
+   sd.y <- sd(res)
+   sd.block <- sd(gamma)
+ }
+"
+
+## write the model to a text file
+writeLines(modelString3, con = "matrixModel3.txt")
+
+Xmat <- model.matrix(~Time,data.rm)
+data.rm.list <- with(data.rm,
+        list(y=y,
+                 Block=as.numeric(Block),
+         X=Xmat,
+         n=nrow(data.rm),
+         nBlock=length(levels(Block)),
+         a0=rep(0,ncol(Xmat)), A0=diag(ncol(Xmat))
+         )
+)
+
+params <- c("beta",'gamma',"sigma","sigma.B","res",'sigma.eps','rho','sd.y','sd.block')
+adaptSteps = 1000
+burnInSteps = 3000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = burnInSteps+ceiling((numSavedSteps * thinSteps)/nChains)
+
+data.rm.r2jags.mt <- jags(data = data.rm.list, inits = NULL, parameters.to.save = params,
+    model.file = "matrixModel3.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+data.rm.mt.mcmc <- data.rm.r2jags.mt$BUGSoutput$sims.matrix
+summary(as.mcmc(data.rm.mt.mcmc[,grep('beta|sigma|rho',colnames(data.rm.mt.mcmc))]))
+
+#head(data.rm.r2jags.mt$BUGSoutput$sims.list[[c('beta','rho','sigma')]]) 
+#print(data.rm.r2jags.mt)
+data.rm.mcmc.list.mt <- as.mcmc(data.rm.r2jags.mt)
+Data.Rm.mcmc.list.mt <- data.rm.mcmc.list.mt
+
+# R2 calculations
+Xmat <- model.matrix(~Time, data.rm)
+coefs <- data.rm.r2jags.mt$BUGSoutput$sims.list[['beta']]
+fitted <- coefs %*% t(Xmat)
+X.var <- aaply(fitted,1,function(x){var(x)})
+X.var[1:10]
+
+Z.var <- data.rm.r2jags.mt$BUGSoutput$sims.list[['sd.block']]^2
+R.var <- data.rm.r2jags.mt$BUGSoutput$sims.list[['sd.y']]^2
+R2.marginal <- (X.var)/(X.var+Z.var+R.var)
+R2.marginal <- data.frame(Mean=mean(R2.marginal), Median=median(R2.marginal), HPDinterval(as.mcmc(R2.marginal)))
+R2.conditional <- (X.var+Z.var)/(X.var+Z.var+R.var)
+R2.conditional <- data.frame(Mean=mean(R2.conditional),
+   Median=median(R2.conditional), HPDinterval(as.mcmc(R2.conditional)))
+R2.block <- (Z.var)/(X.var+Z.var+R.var)
+R2.block <- data.frame(Mean=mean(R2.block), Median=median(R2.block), HPDinterval(as.mcmc(R2.block)))
+R2.res<-(R.var)/(X.var+Z.var+R.var)
+R2.res <- data.frame(Mean=mean(R2.res), Median=median(R2.res), HPDinterval(as.mcmc(R2.res)))
+
+(r2 <- rbind(R2.block=R2.block, R2.marginal=R2.marginal, R2.res=R2.res, R2.conditional=R2.conditional))
+```
+
+It would appear that the incorporation of a first order autocorrelation structure is indeed appropriate. The degree of correlation between successive points is $0.733$. Let's have a look at a summary figure.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+coefs <- data.rm.r2jags.mt$BUGSoutput$sims.list[['beta']]
+newdata <- with(data.rm, data.frame(Time=seq(min(Time, na.rm=TRUE), max(Time, na.rm=TRUE), len=100)))
+Xmat <- model.matrix(~Time, newdata)
+pred <- (coefs %*% t(Xmat))
+pred <- adply(pred, 2, function(x) {
+   data.frame(Mean=mean(x), Median=median(x, na.rm=TRUE), t(quantile(x,na.rm=TRUE)),
+              HPDinterval(as.mcmc(x)),HPDinterval(as.mcmc(x),p=0.5))
+})
+newdata <- cbind(newdata, pred)
+#Also calculate the partial observations
+Xmat <- model.matrix(~Time, data.rm)
+pred <- colMeans(as.vector(coefs %*% t(Xmat))+data.rm.r2jags.mt$BUGSoutput$sims.list[['res']])
+part.obs <- cbind(data.rm,Median=pred)
+
+ggplot(newdata, aes(y=Median, x=Time)) +
+  geom_point(data=part.obs, aes(y=Median))+
+  geom_ribbon(aes(ymin=lower, ymax=upper), fill='blue',alpha=0.2) +
+  geom_line()+
+  scale_x_continuous('Time') +
+  scale_y_continuous('Y') +
+  theme_classic() +
+  theme(axis.title.y = element_text(vjust=2, size=rel(1.2)),
+        axis.title.x = element_text(vjust=-2, size=rel(1.2)),
+        plot.margin=unit(c(0.5,0.5,2,2), 'lines'))
+```
+
+# References

@@ -1,0 +1,24 @@
+
+model {
+   #Likelihood (esimating site means (gamma.site)
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- gamma[Block[i]] + inprod(beta[], X[i,]) 
+      y.err[i]<- mu[i]-y[i]
+   }
+   for (i in 1:nBlock) {
+      gamma[i] ~ dnorm(0, tau.block)
+   }
+   #Priors
+   for (i in 1:nX) {
+     beta[i] ~ dnorm(0, 1.0E-6) #prior
+   }
+   sigma ~ dunif(0, 100)
+   tau <- 1 / (sigma * sigma)
+   sigma.block ~ dunif(0, 100)
+   tau.block <- 1 / (sigma.block * sigma.block)
+
+   sd.y <- sd(y.err)
+   sd.block <- sd(gamma)
+ }
+
