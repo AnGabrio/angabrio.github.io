@@ -1,0 +1,364 @@
+---
+title: "Partly Nested Anova (JAGS)"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    email: a.gabrio@maastrichtuniversity.nl
+    corresponding: true    
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2020-02-11
+categories: [Quarto, R, Academia, Software, Statistics] # self-defined categories
+#image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+abstract: > 
+  [This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models ...]{style="font-size: 85%"}
+keywords:
+  - Software
+  - Statistics
+  - Stan
+#license: "GPL-2"
+#copyright: 
+#  holder: CRAN
+#  year: 2023
+#citation: 
+#  title: missingHE
+#  author: Andrea Gabrio
+#  note: R package version 4.4.2
+#  url: https://cran.r-project.org/web/packages/missingHE
+#funding: "The author received no specific funding for this work."
+bibliography: citations_jags12.bib
+#nocite: |
+#  @gabrio2017handling
+---
+
+This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. `BUGS` (Bayesian inference Using *Gibbs Sampling*) is an algorithm and supporting language (resembling `R`) dedicated to performing the Gibbs sampling implementation of *Markov Chain Monte Carlo* (MCMC) method. Dialects of the `BUGS` language are implemented within three main projects:
+
+1. **OpenBUGS** - written in component pascal.
+ 
+2. **JAGS** - (Just Another Gibbs Sampler) - written in `C++`. 
+
+3. **STAN** - a dedicated Bayesian modelling framework written in `C++` and implementing *Hamiltonian* MCMC samplers.
+
+Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of `R`, and thus, they are best accessed from within `R` itself. As such there are multiple packages devoted to interfacing with the various software implementations:
+
+* *R2OpenBUGS* - interfaces with `OpenBUGS`
+
+* *R2jags* - interfaces with `JAGS`
+
+* *rstan* - interfaces with `STAN`
+
+This tutorial will demonstrate how to fit models in `JAGS` (@plummer2004jags) using the package `R2jags` (@su2015package) as interface, which also requires to load some other packages.
+
+# Overview
+
+## Introduction
+
+*Split-plot designs* (plots refer to agricultural field plots for which these designs were originally devised) extend unreplicated factorial (*randomised complete block* and *simple repeated measures*) designs by incorporating an additional factor whose levels are applied to entire blocks. Similarly, complex repeated measures designs are repeated measures designs in which there are different types of subjects. Consider the example of a randomised complete block. Blocks of four treatments (representing leaf packs subject to different aquatic taxa) were secured in numerous locations throughout a potentially heterogeneous stream. If some of those blocks had been placed in riffles, some in runs and some in pool habitats of the stream, the design becomes a split-plot design incorporating a between block factor (stream region: runs, riffles or pools) and a within block factor (leaf pack exposure type: microbial, macro invertebrate or vertebrate). Furthermore, the design would enable us to investigate whether the roles that different organism scales play on the breakdown of leaf material in stream are consistent across each of the major regions of a stream (interaction between region and exposure type). Alternatively (or in addition), shading could be artificially applied to half of the blocks, thereby introducing a between block effect (whether the block is shaded or not). Extending the repeated measures examples from Tutorial 9.3a, there might have been different populations (such as different species or histories) of rats or sharks. Any single subject (such as an individual shark or rat) can only be of one of the populations types and thus this additional factor represents a between subject effect.
+
+## Linear models
+
+The linear models for three and four factor partly nested designs are:
+
+$$
+y_{ijkl} = \mu + \alpha_i + \beta_j + \gamma_k + (\alpha\gamma)_{ij} + (\beta\gamma)_{jk} + \epsilon_{ijkl},
+$$
+
+$$
+y_{ijklm} = \mu + \alpha_i + \gamma_j + (\alpha\gamma)_{ij} + \beta_k + \delta_l + (\alpha\delta)_{il} + (\gamma\delta)_{jl} + (\alpha\gamma\delta)_{ijl} + \epsilon_{ijklm}, \;\;\; \text{(Model 2 additive - 2 between)}
+$$
+
+$$
+y_{ijklm} = \mu + \alpha_i + \beta_j + \gamma_k + \delta_l +  (\gamma\delta)_{kl} + (\alpha\gamma)_{ik} + (\alpha\delta)_{il} + (\alpha\gamma\delta)_{ikl} + \epsilon_{ijk}, \;\;\; \text{(Model 2 additive - 1 between)}
+$$
+
+where $\mu$ is the overall mean, $\beta$ is the effect of the Blocking Factor B and $\epsilon$ is the random unexplained or residual component.
+
+## Assumptions
+
+As partly nested designs share elements in common with each of nested, factorial and unreplicated factorial designs, they also share similar assumptions and implications to these other designs. Specifically, hypothesis tests assume that:
+
+* the appropriate residuals are normally distributed. Boxplots using the appropriate scale of replication (reflecting the appropriate residuals/F-ratio denominator (see Tables above) be used to explore normality. Scale transformations are often useful.
+
+* the appropriate residuals are equally varied. Boxplots and plots of means against variance (using the appropriate scale of replication) should be used to explore the spread of values. Residual plots should reveal no patterns. Scale transformations are often useful.
+
+* the appropriate residuals are independent of one another. Critically, experimental units within blocks/subjects should be adequately spaced temporally and spatially to restrict contamination or carryover effects. Non-independence resulting from the hierarchical design should be accounted for.
+
+* that the variance/covariance matrix displays **sphericity** (strickly, the variance-covariance matrix must display a very specific pattern of sphericity in which both variances and covariances are equal (compound symmetry), however, an F-ratio will still reliably follow an F distribution provided basic sphericity holds). This assumption is likely to be met only if the treatment levels within each block can be randomly ordered. This assumption can be managed by either adjusting the sensitivity of the affected F-ratios or employing linear mixed effects modelling to the design.
+
+* there are no block by within block interactions. Such interactions render non-significant within block effects difficult to interpret unless we assume that there are no block by within block interactions, non-significant within block effects could be due to either an absence of a treatment effect, or as a result of opposing effects within different blocks. As these block by within block interactions are unreplicated, they can neither be formally tested nor is it possible to perform main effects tests to diagnose non-significant within block effects.
+
+# Split-plot design
+
+## Data generation
+
+Imagine we has designed an experiment in which we intend to measure a response ($y$) to one of treatments (three levels; "a1", "a2" and "a3"). Unfortunately, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability you decide to apply a design (RCB) in which each of the treatments within each of $35$ blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(plyr)
+set.seed(123)
+nA <- 3
+nC <- 3
+nBlock <- 36
+sigma <- 5
+sigma.block <- 12
+n <- nBlock*nC
+Block <- gl(nBlock, k=1)
+C <- gl(nC,k=1)
+
+## Specify the cell means
+AC.means<-(rbind(c(40,70,80),c(35,50,70),c(35,40,45)))
+## Convert these to effects
+X <- model.matrix(~A*C,data=expand.grid(A=gl(3,k=1),C=gl(3,k=1)))
+AC <- as.vector(AC.means)
+AC.effects <- solve(X,AC)
+
+A <- gl(nA,nBlock,n)
+dt <- expand.grid(C=C,Block=Block)
+dt <- data.frame(dt,A)
+
+Xmat <- cbind(model.matrix(~-1+Block, data=dt),model.matrix(~A*C, data=dt))
+block.effects <-  rnorm(n = nBlock, mean =0 , sd = sigma.block)
+all.effects <- c(block.effects, AC.effects)
+lin.pred <- Xmat %*% all.effects
+
+## the quadrat observations (within sites) are drawn from
+## normal distributions with means according to the site means
+## and standard deviations of 5
+y <- rnorm(n,lin.pred,sigma)
+data.splt <- data.frame(y=y, A=A,dt)
+head(data.splt)  #print out the first six rows of the data set
+
+tapply(data.splt$y,data.splt$A,mean)
+
+tapply(data.splt$y,data.splt$C,mean)
+
+replications(y~A*C+Error(Block), data.splt)
+
+library(ggplot2)
+ggplot(data.splt, aes(y=y, x=C, linetype=A, group=A)) + geom_line(stat='summary', fun.y=mean)
+
+ggplot(data.splt, aes(y=y, x=C,color=A)) + geom_point() + facet_wrap(~Block)
+```
+
+## Exploratory data analysis
+
+**Normality and Homogeneity of variance**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# check between plot effects
+boxplot(y~A, ddply(data.splt,~A+Block, summarise,y=mean(y)))
+
+#OR
+ggplot(ddply(data.splt,~A+Block, summarise,y=mean(y)), aes(y=y, x=A)) + geom_boxplot()
+
+# check within plot effects
+boxplot(y~A*C, data.splt)
+
+#OR 
+ggplot(data.splt, aes(y=y, x=C, fill=A)) + geom_boxplot()
+```
+
+**Conclusions**:
+
+* there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.
+
+* there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the y-axis. Hence it there is no evidence of non-homogeneity.
+
+Obvious violations could be addressed either by:
+
+* transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).
+
+**Block by within-Block interaction**
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(car)
+with(data.splt, interaction.plot(C,Block,y))
+
+#OR with ggplot
+library(ggplot2)
+ggplot(data.splt, aes(y=y, x=C, group=Block,color=Block)) + geom_line() +
+  guides(color=guide_legend(ncol=3))
+
+residualPlots(lm(y~Block+A*C, data.splt))
+
+# the Tukey's non-additivity test by itself can be obtained via an internal function
+# within the car package
+car:::tukeyNonaddTest(lm(y~Block+A*C, data.splt))
+```
+
+**Conclusions**:
+
+* there is no visual or inferential evidence of any major interactions between Block and the within-Block effect (C). Any trends appear to be reasonably consistent between Blocks.
+
+# Example - split-plot
+
+In an attempt to understand the effects on marine animals of short-term exposure to toxic substances, such as might occur following a spill, or a major increase in storm water flows, a it was decided to examine the toxicant in question, Copper, as part of a field experiment in Honk Kong. The experiment consisted of small sources of Cu (small, hemispherical plaster blocks, impregnated with copper), which released the metal into sea water over $4$ or $5$ days. The organism whose response to Cu was being measured was a small, polychaete worm, Hydroides, that attaches to hard surfaces in the sea, and is one of the first species to colonize any surface that is submerged. The biological questions focused on whether the timing of exposure to Cu affects the overall abundance of these worms. The time period of interest was the first or second week after a surface being available.
+
+The experimental setup consisted of sheets of black perspex (settlement plates), which provided good surfaces for these worms. Each plate had a plaster block bolted to its centre, and the dissolving block would create a gradient of [Cu] across the plate. Over the two weeks of the experiment, a given plate would have pl ain plaster blocks (Control) or a block containing copper in the first week, followed by a plain block, or a plain block in the first week, followed by a dose of copper in the second week. After two weeks in the water, plates were removed and counted back in the laboratory. Without a clear idea of how sensitive these worms are to copper, an effect of the treatments might show up as an overall difference in the density of worms across a plate, or it could show up as a gradient in abundance across the plate, with a different gradient in different treatments. Therefore, on each plate, the density of worms was recorded at each of four distances from the center of the plate. Let's have a look at the dataset
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+copper <- read.table('copper.csv', header=T, sep=',', strip.white=T)
+head(copper)
+```
+
+Variables' description:
+
+**Copper**. Categorical listing of the copper treatment (control = no copper applied, week 2 = copper treatment applied in second week and week 1= copper treatment applied in first week) applied to whole plates. Factor A (between plot factor).
+
+**Plate**. Substrate provided for polychaete worm colonization on which copper treatment applied. These are the plots (Factor B). Numbers in this column represent numerical labels given to each plate.
+
+**Dist**. Categorical listing for the four concentric distances from the center of the plate (source of copper treatment) with 1 being the closest and 4 the furthest. Factor C (within plot factor) 
+
+**Worms**.	Density of worms measured. Response variable.
+
+The Plates are the "random" groups. Within each Plate, all levels of the Distance factor occur (this is a within group factor). Each Plate can only be of one of the three levels of the Copper treatment. This is therefore a within group (nested) factor. Traditionally, this mixture of nested and randomised block design would be called a partly nested or split-plot design. In Bayesian (multilevel modeling) terms, this is a multi-level model with one hierarchical level the Plates means and another representing the Copper treatment means (based on the Plate means). Exploratory data analysis has indicated that the response variable could be normalised via a forth-root transformation.
+
+## Model fitting
+
+We will only explore the matrix parameterisation (random intercepts) of the model, where 
+
+$$
+\text{number of lesions}_i = \beta \text{Site}_{j(i)} + \epsilon_{i},
+$$
+
+where $\epsilon_i∼ N(0,\sigma^2)$ and we treat Distance as a factor.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString="
+model {
+   #Likelihood
+   for (i in 1:n) {
+      y[i]~dnorm(mu[i],tau.res)
+      mu[i] <- inprod(beta[],X[i,]) + inprod(gamma[],Z[i,])
+      y.err[i] <- y[i] - mu[1]
+   }
+
+   #Priors and derivatives
+   for (i in 1:nZ) {
+      gamma[i] ~ dnorm(0,tau.plate)
+   }
+   for (i in 1:nX) {
+      beta[i] ~ dnorm(0,1.0E-06)
+   }
+
+   tau.res <- pow(sigma.res,-2)
+   sigma.res <- z/sqrt(chSq)
+   z ~ dnorm(0, .0016)I(0,)
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.plate <- pow(sigma.plate,-2)
+   sigma.plate <- z.plate/sqrt(chSq.plate)
+   z.plate ~ dnorm(0, .0016)I(0,)
+   chSq.plate ~ dgamma(0.5, 0.5)
+
+ }
+"
+
+## write the model to a text file
+writeLines(modelString, con = "matrixModel.txt")
+
+
+#sort the data set so that the copper treatments are in a more logical order
+library(dplyr)
+copper$DIST <- factor(copper$DIST)
+copper$PLATE <- factor(copper$PLATE)
+copper.sort <- arrange(copper,COPPER,PLATE,DIST)
+
+Xmat <- model.matrix(~COPPER*DIST, data=copper.sort)
+Zmat <- model.matrix(~-1+PLATE, data=copper.sort)
+copper.list <- list(y=copper.sort$WORMS,
+               X=Xmat, nX=ncol(Xmat),
+                           Z=Zmat, nZ=ncol(Zmat),
+                           n=nrow(copper.sort)
+                           )
+
+params <- c("beta","gamma","sigma.res","sigma.plate")
+burnInSteps = 1000
+nChains = 2
+numSavedSteps = 3000
+thinSteps = 1
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+library(R2jags)
+library(coda)
+
+copper.r2jags.b <- jags(data = copper.list, inits = NULL, parameters.to.save = params,
+    model.file = "matrixModel.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(copper.r2jags.b)
+```
+
+## MCMC diagnostics
+
+Before fully exploring the parameters, it is prudent to examine the convergence and mixing diagnostics. Chose either any of the parameterizations (they should yield much the same).
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(mcmcplots)
+denplot(copper.r2jags.b, parms = c("gamma","beta"))
+traplot(copper.r2jags.b, parms = c("gamma","beta"))
+
+raftery.diag(as.mcmc(copper.r2jags.b))
+
+autocorr.diag(as.mcmc(copper.r2jags.b))
+```
+
+## Parameter estimates
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(copper.r2jags.b)
+```
+
+# References
