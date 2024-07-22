@@ -301,20 +301,20 @@ Initializing model</code></pre>
  Parameter estimates under MAR assumption
  
  Comparator intervention 
-                        mean     sd      LB      UB
-mean effects (t = 1)   0.873  0.017   0.846     0.9
-mean costs (t = 1)   238.067 53.197 148.928 324.335
+                        mean     sd      LB     UB
+mean effects (t = 1)   0.874  0.016   0.847  0.901
+mean costs (t = 1)   236.716 49.778 155.903 319.43
 
  Reference intervention 
-                      mean    sd      LB      UB
-mean effects (t = 2) 0.917 0.022    0.88   0.952
-mean costs (t = 2)   186.4 39.86 117.381 249.882
+                        mean     sd      LB      UB
+mean effects (t = 2)   0.917  0.022   0.882   0.952
+mean costs (t = 2)   185.896 40.642 120.007 250.279
 
  Incremental results 
                    mean     sd       LB     UB
-delta effects     0.044  0.028   -0.001   0.09
-delta costs     -51.667 67.548 -165.507 59.613
-ICER          -1182.511                       </code></pre>
+delta effects     0.043  0.028   -0.002  0.089
+delta costs      -50.82 63.696 -155.573 55.615
+ICER          -1191.646                       </code></pre>
 </div>
 </div>
 </section>
@@ -324,7 +324,13 @@ ICER          -1182.511                       </code></pre>
 <li>From 25/09/2019, the updated version (1.2.1) of <code>missingHE</code> has become available on <a href="https://cran.r-project.org/web/packages/missingHE/">CRAN</a>, which allows to perform posterior predictive checks for each type of model as a further way to assess the fit of the model to the observed data.</li>
 </ul>
 <p>The checks can be done by first setting the optional argument <code>ppc = TRUE</code> when fitting the model using one of the main function of the package. For example, when using <code>selection</code> to fit selection models you would have something like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model.sel <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> data, <span class="at">model.eff =</span> e <span class="sc">~</span> age, <span class="at">model.cost =</span> c <span class="sc">~</span> age <span class="sc">+</span> e, <span class="at">model.me =</span> me <span class="sc">~</span> age, <span class="at">model.mc =</span> mc <span class="sc">~</span> age, <span class="at">dist_e =</span> <span class="st">"norm"</span>, <span class="at">dist_c =</span> <span class="st">"gamma"</span>, <span class="at">type =</span> <span class="st">"MAR"</span>, <span class="at">n.iter =</span> <span class="dv">1000</span>, <span class="at">ppc =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Then you can use the function <code>ppc</code> to perform different types of posterior predictive checks that you can choose among a set of pre-specified types using the <code>type</code> argument. For example, if we want to compare histograms of the empirical and predictive distributions of the effectiveness variable in one arm (e.g.&nbsp;control), then we can type</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc</span>(model.sel, <span class="at">type =</span> <span class="st">"histogram"</span>, <span class="at">outcome =</span> <span class="st">"effects_arm1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>and we get something like this</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -336,13 +342,48 @@ ICER          -1182.511                       </code></pre>
 <li>From 07/01/2020, the updated version (1.3.2) of <code>missingHE</code> has become available on <a href="https://cran.r-project.org/web/packages/missingHE/">CRAN</a>, which allows to choose among more distributions for the effectiveness measures, including continuous (Gamma, Weibull, Exponential, Logistic), discrete (Poisson, Negative Binomial) and binary (Bernoulli) health outcomes.</li>
 </ul>
 <p>For example, we can choose to specify a selection model assuming a Bernoulli distribution for the effects (if this is a binary outcome) and a LogNormal distribution for the costs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model.sel <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> data, <span class="at">model.eff =</span> e <span class="sc">~</span> age, <span class="at">model.cost =</span> c <span class="sc">~</span> age <span class="sc">+</span> e, <span class="at">model.me =</span> me <span class="sc">~</span> <span class="dv">1</span>, <span class="at">model.mc =</span> mc <span class="sc">~</span> <span class="dv">1</span>, <span class="at">dist_e =</span> <span class="st">"bern"</span>, <span class="at">dist_c =</span> <span class="st">"lnorm"</span>, <span class="at">type =</span> <span class="st">"MAR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ul>
 <li>From 30/04/2020, the updated version (1.4.0) of <code>missingHE</code> has become available on <a href="https://cran.r-project.org/web/packages/missingHE/">CRAN</a>, which allows to perform fit random effects for each type of model implemented. The random terms can be specified using the following notation</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>model.sel <span class="ot">&lt;-</span> <span class="fu">selection</span>(<span class="at">data =</span> data, <span class="at">model.eff =</span> e <span class="sc">~</span> age <span class="sc">+</span> (age <span class="sc">|</span> site), <span class="at">model.cost =</span> c <span class="sc">~</span> age <span class="sc">+</span> e <span class="sc">+</span> (age <span class="sc">+</span> e <span class="sc">|</span> site), <span class="at">model.me =</span> me <span class="sc">~</span> age <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> site), <span class="at">model.mc =</span> mc <span class="sc">~</span> age <span class="sc">+</span> (<span class="dv">0</span> <span class="sc">+</span> age <span class="sc">|</span> site), <span class="at">dist_e =</span> <span class="st">"norm"</span>, <span class="at">dist_c =</span> <span class="st">"gamma"</span>, <span class="at">type =</span> <span class="st">"MAR"</span>, <span class="at">n.iter =</span> <span class="dv">10000</span>, <span class="at">ppc =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>I borrowed this notation, alongside with a couple of internal functions, from the <code>lme4</code> package. The terms inside the brackets on the left of the bar are the terms for which the random effects are assumed (these must also be included as fixed effects). The term on the right of the bar is the clustering variable over which the random effects are specified.</p>
 <p>For example the formula <code>+ (age | site)</code> specifies random effects for the intercept and <code>age</code> across the values of the <code>site</code> variable. It aslo possible to specify random slope only models (i.e.&nbsp;remove the random intercept) by adding the term <code>0 +</code> inside the brackets on the left of the bar.</p>
 <p>All functions in the package have been updated to take into account the possibility that random effects are specified and to perform diagnostic and posterior predictive checks based on the random effects if these are included. In addition, a new generic function called <code>coef</code> is now available to extract the fixed or random effect terms from the effectiveness and cost models for each type of model in <code>missingHE</code>. For example, we can extract summary statistics for the fixed effects from the fitted selection model by using the command</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(model.sel, <span class="at">random =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>which prints something like this</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>$Comparator
+$Comparator$Effects
+             mean    sd  lower upper
+(Intercept) 0.187 0.138 -0.083 0.457
+u.0         0.779 0.150  0.487 1.074
+
+$Comparator$Costs
+                mean      sd     lower    upper
+(Intercept)  236.716  49.778   142.237  335.056
+e           -963.484 418.694 -1772.698 -149.278
+
+
+$Reference
+$Reference$Effects
+             mean    sd lower upper
+(Intercept) 0.665 0.075 0.520 0.811
+u.0         0.285 0.087 0.115 0.458
+
+$Reference$Costs
+                mean      sd    lower   upper
+(Intercept)  185.896  40.642  103.211 262.101
+e           -187.828 349.812 -871.173 485.674</code></pre>
+</div>
+</div>
 <p>If we set <code>random = TRUE</code>, then summary statistics for the random effects terms are printed.</p>
 <ul>
 <li><p>From 10/06/2020 a new version (1.4.1) of <code>missingHE</code> is available to download from my <a href="https://github.com/AnGabrio/missingHE">GitHub</a> page, which includes three vignettes providing some tutorials on how to use the functions of the package. Each vignette is specifically designed to help different types of users:</p>
@@ -358,9 +399,23 @@ ICER          -1182.511                       </code></pre>
 <section id="installation" class="level2">
 <h2 class="anchored" data-anchor-id="installation">Installation</h2>
 <p>There are two ways of installing <code>missingHE</code>. A <em>stable</em> version (currently 4.2.0) is packaged and available from <a href="https://cran.r-project.org/web/packages/missingHE/">CRAN</a>. You can simply type on your <code>R</code> terminal</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"missingHE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>The second way involves using the <em>development</em> version of <code>missingHE</code>, which is available from <a href="https://github.com/AnGabrio/missingHE">GitHub</a> - this will usually be updated more frequently and may be continuously tested. On Windows machines, you need to install a few dependencies, including Rtools first, e.g.&nbsp;by running</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pkgs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"R2jags"</span>,<span class="st">"ggplot2"</span>,<span class="st">"gridExtra"</span>,<span class="st">"BCEA"</span>,<span class="st">"ggmcmc"</span>,<span class="st">"loo"</span>,<span class="st">"Rtools"</span>,<span class="st">"devtools"</span>, <span class="st">"utils"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>repos <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"https://cran.rstudio.com"</span>) </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(pkgs,<span class="at">repos=</span>repos,<span class="at">dependencies =</span> <span class="st">"Depends"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>before installing the package using <code>devtools</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"AnGabrio/missingHE"</span>, <span class="at">build_vignettes =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>The optional argument <code>build_vignettes = TRUE</code> allows to install the vignettes of the package locally on your computer. These consist in brief tutorials to guid the user on how to use and customise the models in missingHE using different functions of the package. Once the package is installed, they can be accessed by using the command</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">browseVignettes</span>(<span class="at">package =</span> <span class="st">"missingHE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>All models implemented in missingHE are written in the <code>BUGS</code> language using the software <code>JAGS</code>, which needs to be installed from its own repository and instructions for installations under different OS can be found online. Once installed, the software is called in missingHE via the <code>R</code> package <code>R2jags</code>. Note that the missingHE package is currently under active development and therefore it is advisable to reinstall the package directly from <a href="https://github.com/AnGabrio/missingHE">GitHub</a> before each use to ensure that you are using the most updated version.</p>
 <p><span style="text-align: center; font-size: 2rem"><a href="https://github.com/AnGabrio/short-course/blob/master/slides/workshop-knitr.pdf"><i class="fa-solid fa-file-powerpoint" aria-label="file-powerpoint"></i></a> &nbsp; <a href="https://github.com/AnGabrio/missingHE"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
 
