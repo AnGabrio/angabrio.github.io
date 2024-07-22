@@ -1,0 +1,24 @@
+
+  model {
+  #Likelihood
+  for (i in 1:n) {
+  y[i]~dnorm(mean[i],tau.res)
+  mean[i] <- alpha+beta[x[i]]
+  }
+
+  #Priors and derivatives
+  alpha ~ dnorm(0,1.0E-6)
+  beta[1] <- 0
+  for (i in 2:ngroups) {
+  beta[i] ~ dnorm(0, 1.0E-6) #prior
+  }
+  sigma.res ~ dunif(0, 100)
+  tau.res <- 1 / (sigma.res * sigma.res)
+  sigma.group <- sd(beta[])
+
+  #Group mean posteriors (derivatives)
+  for (i in 1:ngroups) {
+  Group.means[i] <- beta[i]+alpha
+  }
+  }
+  
