@@ -1,0 +1,1280 @@
+---
+title: "Ancova (JAGS)"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    email: a.gabrio@maastrichtuniversity.nl
+    corresponding: true    
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2020-02-05
+categories: [Quarto, R, Academia, Software, Statistics] # self-defined categories
+#image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+abstract: > 
+  [This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models ...]{style="font-size: 85%"}
+keywords:
+  - Software
+  - Statistics
+  - Stan
+#license: "GPL-2"
+#copyright: 
+#  holder: CRAN
+#  year: 2023
+#citation: 
+#  title: missingHE
+#  author: Andrea Gabrio
+#  note: R package version 4.4.2
+#  url: https://cran.r-project.org/web/packages/missingHE
+#funding: "The author received no specific funding for this work."
+bibliography: citations_jags6.bib
+#nocite: |
+#  @gabrio2017handling
+---
+
+This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. `BUGS` (Bayesian inference Using *Gibbs Sampling*) is an algorithm and supporting language (resembling `R`) dedicated to performing the Gibbs sampling implementation of *Markov Chain Monte Carlo* (MCMC) method. Dialects of the `BUGS` language are implemented within three main projects:
+
+1. **OpenBUGS** - written in component pascal.
+ 
+2. **JAGS** - (Just Another Gibbs Sampler) - written in `C++`. 
+
+3. **STAN** - a dedicated Bayesian modelling framework written in `C++` and implementing *Hamiltonian* MCMC samplers.
+
+Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of `R`, and thus, they are best accessed from within `R` itself. As such there are multiple packages devoted to interfacing with the various software implementations:
+
+* *R2OpenBUGS* - interfaces with `OpenBUGS`
+
+* *R2jags* - interfaces with `JAGS`
+
+* *rstan* - interfaces with `STAN`
+
+This tutorial will demonstrate how to fit models in `JAGS` (@plummer2004jags) using the package `R2jags` (@su2015package) as interface, which also requires to load some other packages.
+
+# Overview
+
+## Introduction
+
+Previous tutorials have concentrated on designs for either continuous (Regression) or categorical (ANOVA) predictor variables. *Analysis of covariance* (ANCOVA) models are essentially ANOVA models that incorporate one or more continuous and categorical variables (covariates). Although the relationship between a response variable and a covariate may itself be of substantial clinical interest, typically covariate(s) are incorporated to reduce the amount of unexplained variability in the model and thereby increase the power of any treatment effects.
+
+In ANCOVA, a reduction in unexplained variability is achieved by adjusting the response (to each treatment) according to slight differences in the covariate means as well as accounting for any underlying trends between the response and covariate(s). To do so, the extent to which the within treatment group small differences in covariate means between groups and treatment groups are essentially compared via differences in their $y$-intercepts. The total variation is thereafter partitioned into explained (using the deviations between the overall trend and trends approximated for each of the treatment groups) and unexplained components (using the deviations between the observations and the approximated within group trends). In this way, ANCOVA can be visualized as a regular ANOVA in which the group and overall means are replaced by group and overall trendlines. Importantly, it should be apparent that ANCOVA is only appropriate when each of the within group trends have the same slope and are thus parallel to one another and the overall trend. Furthermore, ANCOVA is not appropriate when the resulting adjustments must be extrapolated from a linear relationship outside the measured range of the covariate.
+
+As an example, an experiment might be set up to investigate the energetic impacts of sexual vs parthenogenetic (egg development without fertilization) reproduction on leaf insect food consumption. To do so, researchers could measure the daily food intake of individual adult female leaf insects from female only (parthenogenetic) and mixed (sexual) populations. Unfortunately, the available individual leaf insects varied substantially in body size which was expected to increase the variability of daily food intake of treatment groups. Consequently, the researchers also measured the body mass of the individuals as a covariate, thereby providing a means by which daily food consumption could be standardized for body mass. ANCOVA attempts to reduce unexplained variability by standardising the response to the treatment by the effects of the specific covariate condition. Thus ANCOVA provides a means of exercising some statistical control over the variability when it is either not possible or not desirable to exercise experimental control (such as blocking or using otherwise homogeneous observations). 
+
+## Null hypothesis
+
+**Factor A: the main treatment effect**
+
+* $H_0(A):\mu_1(adj)=\mu_2(adj)=\ldots=\mu_i(adj)=\mu(adj)$
+
+The adjusted population group means are all equal. The mean of population $1$ adjusted for the covariate is equal to that of population $2$ adjusted for the covariate and so on, and thus all population means adjusted for the covariate are equal to an overall adjusted mean. If the effect of the $i$-th group is the difference between the $i$-th group adjusted mean and the overall adjusted mean ($\alpha_i(adj)=\mu_i(adj)−\mu(adj)$) then the $H_0$ can alternatively be written as:
+
+* $H_0(A):\alpha_1(adj)=\alpha_2(adj)=\ldots=\alpha_i(adj)=0$
+
+The effect of each group equals zero. If one or more of the $\alpha_i(adj)$ are different from zero (the response mean for this treatment differs from the overall response mean), the null hypothesis is not true, indicating that the treatment does affect the response variable.
+
+**Factor B: the covariate effect**
+
+* $H_0(B):\beta_1(pooled)=0$
+
+The pooled population slope equals zero. Note, that this null hypothesis is rarely of much interest. It is precisely because of this nuisance relationship that ANCOVA designs are applied.
+
+## Linear models
+
+One or more covariates can be incorporated into single factor, nested, factorial and partly nested designs in order to reduce the unexplained variation. Fundamentally, the covariate(s) are purely used to adjust the response values prior to the regular analysis. The difficulty is in determining the appropriate adjustments. Following is a list of the appropriate linear models and adjusted response calculations for a range of ANCOVA designs. Note that these linear models do not include interactions involving the covariates as these are assumed to be zero. The inclusion of these interaction terms is a useful means of testing the homogeneity of slopes assumption.
+
+* *Single categorical and single covariate*
+
+  * Linear model: $y_{ij}=\mu + \alpha_i + \beta(x_{ij}-\bar{x}) + \epsilon_{ij}$
+  
+  * Adjustments: $y_{ij(adj)}=y_{ij} - b(x_{ij} - \bar{x})$
+
+
+* *Single categorical and two covariates*
+
+  * Linear model: $y_{ij}=\mu + \alpha_i + \beta_{YX}(x_{ij}-\bar{x}) + \beta_{YZ}(z_{ij}-\bar{z}) + \epsilon_{ij}$
+  
+  * Adjustments: $y_{ij(adj)}=y_{ij} - b_{YX}(x_{ij} - \bar{x}) - b_{YZ}(z_{ij} - \bar{z})$
+
+* *Factorial designs*
+
+  * Linear model: $y_{ij}=\mu + \alpha_i + \gamma_j + (\alpha\gamma)_{ij}+ \beta(x_{ijk}-\bar{x}) + \epsilon_{ijk}$
+  
+  * Adjustments: $y_{ijk(adj)}=y_{ijk} - b(x_{ijk} - \bar{x})$
+
+* *Nested designs*
+
+  * Linear model: $y_{ijk}=\mu + \alpha_i + \gamma_{j(i)} + \beta(x_{ijk}-\bar{x}) + \epsilon_{ijk}$
+  
+  * Adjustments: $y_{ijk(adj)}=y_{ijk} - b(x_{ijk} - \bar{x})$
+
+* *Partly nested designs*
+
+  * Linear model: $y_{ijkl}=\mu + \alpha_i + \gamma_{j(i)} + \delta_k + (\alpha\delta)_{ik} + (\gamma\delta)_{j(i)k} + \beta(x_{ijk}-\bar{x}) + \epsilon_{ijkl}$
+  
+  * Adjustments: $y_{ijk(adj)}=y_{ijkl} - b_{between}(x_{i} - \bar{x}) - b_{within}(x_{ijk} - \bar{x}_i)$
+
+
+## Analysis of variance
+
+In ANCOVA, the total variability of the response variable is sequentially partitioned into components explained by each of the model terms, starting with the covariate and is therefore equivalent to performing a regular analysis of variance on the response variables that have been adjusted for the covariate. The appropriate unexplained residuals and therefore the appropriate *F-ratios* for each factor differ according to the different null hypotheses associated with different linear models as well as combinations of fixed and random factors in the model (see the following tables). Note that since the covariate levels measured are typically different for each group, ANCOVA designs are inherently non-orthogonal (unbalanced). Consequently, sequential (Type I sums of squares) should not be used. For very simple Ancova designs that incorporate a single categorical and single covariate, Type I sums of squares can be used provided the covariate appears in the linear model first (and thus is partitioned out last) as we are typically not interested in estimating this effect.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+ancova_table<-matrix(NA,4,4)
+rownames(ancova_table)<-c("Factor A","Factor B","Factor AB","Residual")
+colnames(ancova_table)<-c("df","MS","F-ratio (A&B fixed)","F-ratio (B fixed)")
+ancova_table[1,]<-c("a-1","MS A","(MS A)/(MS res)","(MS A)/(MS res)")
+ancova_table[2,]<-c("1","MS B","(MS B)/(MS res)","(MS B)/(MS res)")
+ancova_table[3,]<-c("a-1","MS AB","(MS AB)/(MS res)","(MS AB)/(MS res)")
+ancova_table[4,]<-c("(n-2)a","MS res","","")
+```
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+ancova_table
+```
+
+The corresponding `R` syntax is given below.
+
+```{r}
+#| eval: false
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+anova(lm(DV ~ B * A, dataset))
+# OR
+anova(aov(DV ~ B * A, dataset))
+# OR (make sure not using treatment contrasts)
+Anova(lm(DV ~ B * A, dataset), type = "III")
+```
+
+## Assumptions
+
+As ANCOVA designs are essentially regular ANOVA designs that are first adjusted (centered) for the covariate(s), ANCOVA designs inherit all of the underlying assumptions of the appropriate ANOVA design. Specifically, hypothesis tests assume that:
+
+* The appropriate residuals are normally distributed. Boxplots using the appropriate scale of replication (reflecting the appropriate residuals/F-ratio denominator, see the above tables) should be used to explore normality. Scale transformations are often useful.
+
+* The appropriate residuals are equally varied. Boxplots and plots of means against variance (using the appropriate scale of replication) should be used to explore the spread of values. Residual plots should reveal no patterns. Scale transformations are often useful.
+
+* The appropriate residuals are independent of one another.
+
+* The relationship between the response variable and the covariate should be linear. Linearity can be explored using scatterplots and residual plots should reveal no patterns.
+
+* For repeated measures and other designs in which treatment levels within blocks can not be be randomly ordered, the variance/covariance matrix is assumed to display sphericity.
+
+* For designs that utilise blocking, it is assumed that there are no block by within block interactions.
+
+
+**Homogeneity of Slopes**
+
+In addition to the above assumptions, ANCOVA designs also assume that slopes of relationships between the response variable and the covariate(s) are the same for each treatment level (group). That is, all the trends are parallel. If the individual slopes deviate substantially from each other (and thus the overall slope), then adjustments made to each of the observations are nonsensical. This situation is analogous to an interaction between two or more factors. In ANCOVA, interactions involving the covariate suggest that the nature of the relationship between the response and the covariate differs between the levels of the categorical treatment. More importantly, they also indicate that whether or not there is an effect of the treatment depends on what range of the covariate you are focussed on. Clearly then, it is not possible to make conclusions about the main effects of treatments in the presence of such interactions. The assumption of homogeneity of slopes can be examined via interaction plots or more formally, by testing hypotheses about the interactions between categorical variables and the covariate(s). There are three broad approaches for dealing with ANCOVA designs with heterogeneous slopes and selection depends on the primary focus of the study.
+
+  1. When the primary objective of the analysis is to investigate the effects of categorical treatments, it is possible to adopt an approach similar to that taken when exploring interactions in multiple regression. The effect of treatments can be examined at specific values of the covariate (such as the mean and $\pm$ one standard deviation). This approach is really only useful at revealing broad shifts in patterns over the range of the covariate and if the selected values of the covariate do not have some inherent clinical meaning (selected arbitrarily), then the outcomes can be of only limited clinical interest.
+  
+  2. Alternatively, the *Johnson-Neyman technique* (or Wilxon modification thereof) procedure indicates the ranges of the covariate over which the individual regression lines of pairs of treatment groups overlap or cross. Although less powerful than the previous approach, the *Wilcox(J-N)* procedure has the advantage of revealing the important range (ranges for which the groups are different and not different) of the covariate rather than being constrained by specific levels selected.
+  
+  3. Use contrast treatments to split up the interaction term into its constituent contrasts for each level of the treatment. Essentially this compares each of the treatment level slopes to the slope from the "control" group and is useful if the primary focus is on the relationships between the response and the covariate.
+
+**Similar covariate ranges**
+
+Adjustments made to the response means in an attempt to statistically account for differences in the covariate involve predicting mean response values along displaced linear relationships between the overall response and covariate variables. The degree of trend displacement for any given group is essentially calculated by multiplying the overall regression slope by the degree of difference between the overall covariate mean and the mean of the covariate for that group. However, when the ranges of the covariate within each of the groups differ substantially from one another, these adjustments are effectively extrapolations and therefore of unknown reliability. If a simple ANOVA of the covariate modelled against the categorical factor indicates that the covariate means differ significantly between groups, it may be necessary to either remove extreme observations or reconsider the analysis.
+
+**Robust ANCOVA**
+
+ANCOVA based on rank transformed data can be useful for accommodating data with numerous problematic outliers. Nevertheless, problems about the difficulties of detecting interactions from rank transformed data, obviously have implications for inferential tests of homogeneity of slopes. Randomisation tests that maintain response0covariate pairs and repeatedly randomise these observations amongst the levels of the treatments can also be useful, particularly when there is doubt over the independence of observations. Both planned and unplanned comparisons follow those of other ANOVA chapters without any real additional complications. Notably, recent implementations of the *Tukey's test* (within `R`) accommodate unbalanced designs and thus negate the need for some of the more complicated and specialised techniques that have been highlighted in past texts.
+
+# Data generation
+
+Consider an experimental design aimed at exploring the effects of a categorical variable with three levels (Group A, Group B and Group C) on a response. From previous studies, we know that the response is influenced by another variable (covariate). Unfortunately, it was not possible to ensure that all sampling units were the same degree of the covariate. Therefore, in an attempt to account for this anticipated extra source of variability, we measured the level of the covariate for each sampling unit. Actually, in allocating treatments to the various treatment groups, we tried to ensure a similar mean and range of the covariate within each group.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(123)
+n <- 10
+p <- 3
+A.eff <- c(40, -15, -20)
+beta <- -0.45
+sigma <- 4
+B <- rnorm(n * p, 0, 15)
+A <- gl(p, n, lab = paste("Group", LETTERS[1:3]))
+mm <- model.matrix(~A + B)
+data <- data.frame(A = A, B = B, Y = as.numeric(c(A.eff, beta) %*% t(mm)) + rnorm(n * p, 0, 4))
+data$B <- data$B + 20
+head(data)
+```
+
+## Exploratory data analysis
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(car)
+scatterplot(Y ~ B | A, data = data)
+
+boxplot(Y ~ A, data)
+
+# OR via ggplot
+library(ggplot2)
+ggplot(data, aes(y = Y, x = B, group = A)) + geom_point() + geom_smooth(method = "lm")
+
+ggplot(data, aes(y = Y, x = A)) + geom_boxplot()
+```
+
+**Conclusions**
+
+There is no evidence of obvious non-normality. The assumption of linearity seems reasonable. The variability of the three groups seems approximately equal. The slopes ($Y$ vs B trends) appear broadly similar for each treatment group.
+
+We can explore inferential evidence of unequal slopes by examining estimated effects of the interaction between the categorical variable and the covariate. Note, pay no attention to the main effects - only the interaction. Even though I intend to illustrate Bayesian analyses here, for such a simple model, it is considerably simpler to use traditional OLS for testing for the presence of an interaction.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+anova(lm(Y ~ B * A, data = data))
+```
+
+There is very little evidence to suggest that the assumption of equal slopes will be inappropriate.
+
+# Model fitting
+
+The observed response ($y_i$) are assumed to be drawn from a normal distribution with a given mean ($\mu$) and standard deviation ($\sigma$). The expected values are themselves determined by the linear predictor ($\boldsymbol X \boldsymbol \beta$). In this case, $\boldsymbol \beta$ represents the vector of $\beta$'s - the intercept associated with the first group, the (effects) differences between this intercept and the intercepts for each other group as well as the slope associated with the continuous covariate. $\boldsymbol X$ is the model matrix. MCMC sampling requires priors on all parameters. We will employ weakly informative priors. Specifying 'uninformative' priors is always a bit of a balancing act. If the priors are too vague (wide) the MCMC sampler can wander off into nonscence areas of likelihood rather than concentrate around areas of highest likelihood (desired when wanting the outcomes to be largely driven by the data). On the other hand, if the priors are too strong, they may have an influence on the parameters. In such a simple model, this balance is very forgiving - it is for more complex models that prior choice becomes more important. For this simple model, we will go with zero-centered Gaussian (normal) priors with relatively large standard deviations ($100$) for both the intercept and the treatment effect and a wide half-cauchy ($\text{scale}=5$) for the standard deviation.
+
+$$
+y_i \sim N(\mu_i,\sigma), 
+$$
+
+where $\mu_i=\beta_0 +\boldsymbol \beta \boldsymbol X$. The assumed priors are: $\beta \sim N(0,100)$ and $\sigma \sim \text{Cauchy}(0,5)$. Note, exploratory data analysis suggests that while the intercept (intercept of Group A) and categorical predictor effects (differences between intercepts of each of the Group and Group A's intercept) could be drawn from a similar distribution (with mean in the $10$'s and variances in the $100$'s), the slope (effect associated with Group A linear relationship) is likely to be an order of magnitude less. We might therefore be tempted to provide different priors for the intercept, categorical effects and slope effect. For a simple model such as this, it is unlikely to be necessary. However, for more complex models, where prior specification becomes more critical, separate priors would probably be necessary.
+
+We proceed to code the model into `JAGS` (remember that in this software normal distribution are parameterised in terms of precisions $\tau$ rather than variances, where $\tau=\frac{1}{\sigma^2}$). Note the following example as group means calculated as derived posteriors.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString = "
+  model {
+  #Likelihood
+  for (i in 1:n) {
+  y[i]~dnorm(mean[i],tau)
+  mean[i] <- inprod(beta[],X[i,])
+  }
+  #Priors
+  for (i in 1:ngroups) {
+  beta[i] ~ dnorm(0, 1.0E-6) 
+  }
+  sigma ~ dunif(0, 100)
+  tau <- 1 / (sigma * sigma)
+  }
+  "
+
+## write the model to a text file
+writeLines(modelString, con = "ancovaModel.txt")
+```
+
+Arrange the data as a list (as required by `JAGS`). As input, `JAGS` will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+X <- model.matrix(~A + B, data)
+data.list <- with(data, list(y = Y, X = X, n = nrow(data), ngroups = ncol(X)))
+```
+
+Define the nodes (parameters and derivatives) to monitor and the chain parameters.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("beta", "sigma")
+nChains = 2
+burnInSteps = 3000
+thinSteps = 1
+numSavedSteps = 15000  #across all chains
+nIter = ceiling(burnInSteps + (numSavedSteps * thinSteps)/nChains)
+nIter
+```
+
+
+Start the `JAGS` model (check the model, load data into the model, specify the number of chains and compile the model). Load the `R2jags` package.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(R2jags)
+```
+
+Now run the `JAGS` code via the `R2jags` interface. Note that the first time jags is run after the `R2jags` package is loaded, it is often necessary to run any kind of randomization function just to initiate the .Random.seed variable.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.r2jags <- jags(data = data.list, inits = NULL, parameters.to.save = params,
+    model.file = "ancovaModel.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data.r2jags)
+```
+
+# MCMC diagnostics
+
+In addition to the regular model diagnostic checks (such as residual plots), for Bayesian analyses, it is necessary to explore the characteristics of the MCMC chains and the sampler in general. Recall that the purpose of MCMC sampling is to replicate the posterior distribution of the model likelihood and priors by drawing a known number of samples from this posterior (thereby formulating a probability distribution). This is only reliable if the MCMC samples accurately reflect the posterior. Unfortunately, since we only know the posterior in the most trivial of circumstances, it is necessary to rely on indirect measures of how accurately the MCMC samples are likely to reflect the likelihood. I will briefly outline the most important diagnostics.
+
+* *Traceplots* for each parameter illustrate the MCMC sample values after each successive iteration along the chain. Bad chain mixing (characterised by any sort of pattern) suggests that the MCMC sampling chains may not have completely traversed all features of the posterior distribution and that more iterations are required to ensure the distribution has been accurately represented.
+
+* *Autocorrelation* plot for each parameter illustrate the degree of correlation between MCMC samples separated by different lags. For example, a lag of $0$ represents the degree of correlation between each MCMC sample and itself (obviously this will be a correlation of $1$). A lag of $1$ represents the degree of correlation between each MCMC sample and the next sample along the chain and so on. In order to be able to generate unbiased estimates of parameters, the MCMC samples should be independent (uncorrelated).
+
+* *Potential scale reduction factor* (Rhat) statistic for each parameter provides a measure of sampling efficiency/effectiveness. Ideally, all values should be less than $1.05$. If there are values of $1.05$ or greater it suggests that the sampler was not very efficient or effective. Not only does this mean that the sampler was potentially slower than it could have been but, more importantly, it could indicate that the sampler spent time sampling in a region of the likelihood that is less informative. Such a situation can arise from either a misspecified model or overly vague priors that permit sampling in otherwise nonscence parameter space.
+
+Prior to examining the summaries, we should have explored the convergence diagnostics. We use the package `mcmcplots` to obtain density and trace plots for the effects model as an example. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters, e.g. $\boldsymbol \beta$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(mcmcplots)
+denplot(data.r2jags, parms = c("beta"))
+traplot(data.r2jags, parms = c("beta"))
+```
+
+Trace plots show no evidence that the chains have not reasonably traversed the entire multidimensional parameter space. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters (such as $\beta$s). 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data.mcmc = as.mcmc(data.r2jags)
+#Raftery diagnostic
+raftery.diag(data.mcmc)
+```
+
+The Raftery diagnostics for each chain estimate that we would require no more than $5000$ samples to reach the specified level of confidence in convergence. As we have $10500$ samples, we can be confidence that convergence has occurred.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#Autocorrelation diagnostic
+autocorr.diag(data.mcmc)
+```
+
+A lag of 10 appears to be sufficient to avoid autocorrelation (poor mixing).
+
+# Model validation
+
+Model validation involves exploring the model diagnostics and fit to ensure that the model is broadly appropriate for the data. As such, exploration of the residuals should be routine. For more complex models (those that contain multiple effects), it is also advisable to plot the residuals against each of the individual predictors. For sampling designs that involve sample collection over space or time, it is also a good idea to explore whether there are any temporal or spatial patterns in the residuals.
+
+There are numerous situations (e.g. when applying specific variance-covariance structures to a model) where raw residuals do not reflect the interior workings of the model. Typically, this is because they do not take into account the variance-covariance matrix or assume a very simple variance-covariance matrix. Since the purpose of exploring residuals is to evaluate the model, for these cases, it is arguably better to draw conclusions based on standardized (or studentised) residuals. Unfortunately the definitions of standardised and studentised residuals appears to vary and the two terms get used interchangeably. I will adopt the following definitions:
+
+  * **Standardised residuals**. The raw residuals divided by the true standard deviation of the residuals (which of course is rarely known).
+
+  * **Studentised residuals**. The raw residuals divided by the standard deviation of the residuals. Note that **externally studentised residuals** are calculated by dividing the raw residuals by a unique standard deviation for each observation that is calculated from regressions having left each successive observation out.
+
+  * **Pearson residuals**. The raw residuals divided by the standard deviation of the response variable.
+
+he mark of a good model is being able to predict well. In an ideal world, we would have sufficiently large sample size as to permit us to hold a fraction (such as $25$%) back thereby allowing us to train the model on $75$% of the data and then see how well the model can predict the withheld $25$%. Unfortunately, such a luxury is still rare. The next best option is to see how well the model can predict the observed data. Models tend to struggle most with the extremes of trends and have particular issues when the extremes approach logical boundaries (such as zero for count data and standard deviations). We can use the fitted model to generate random predicted observations and then explore some properties of these compared to the actual observed data.
+
+Rather than dublicate this for both additive and multiplicative models, we will only explore the multiplicative model. Residuals are not computed directly within `JAGS`. However, we can calculate them manually form the posteriors.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(dplyr)
+mcmc = data.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata = data
+Xmat = model.matrix(~A + B, newdata)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:4], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data$Y - fit
+ggplot() + geom_point(data = NULL, aes(y = resid, x = fit)) + theme_classic()
+```
+
+Residuals against predictors
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(tidyr)
+mcmc = data.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata = newdata
+Xmat = model.matrix(~A + B, newdata)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:4], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data$Y - fit
+newdata = newdata %>% cbind(fit, resid)
+ggplot(newdata) + geom_point(aes(y = resid, x = A)) + theme_classic()
+
+ggplot(newdata) + geom_point(aes(y = resid, x = B)) + theme_classic()
+```
+
+And now for studentised residuals
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata = data
+Xmat = model.matrix(~A + B, newdata)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:4], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data$Y - fit
+sresid = resid/sd(resid)
+ggplot() + geom_point(data = NULL, aes(y = sresid, x = fit)) + theme_classic()
+```
+
+For this simple model, the studentised residuals yield the same pattern as the raw residuals (or the Pearson residuals for that matter). Lets see how well data simulated from the model reflects the raw data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+Xmat = model.matrix(~A + B, data)
+## get median parameter estimates
+coefs = mcmc[, 1:4]
+fit = coefs %*% t(Xmat)
+## draw samples from this model
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(data), fit[i,
+    ], mcmc[i, "sigma"]))
+newdata = data.frame(A = data$A, B = data$B, yRep) %>% gather(key = Sample,
+    value = Value, -A, -B)
+ggplot(newdata) + geom_violin(aes(y = Value, x = A, fill = "Model"),
+    alpha = 0.5) + geom_violin(data = data, aes(y = Y, x = A,
+    fill = "Obs"), alpha = 0.5) + geom_point(data = data, aes(y = Y,
+    x = A), position = position_jitter(width = 0.1, height = 0),
+    color = "black") + theme_classic()
+
+ggplot(newdata) + geom_violin(aes(y = Value, x = B, fill = "Model",
+    group = B, color = A), alpha = 0.5) + geom_point(data = data,
+    aes(y = Y, x = B, group = B, color = A)) + theme_classic()
+```
+
+The predicted trends do encapsulate the actual data, suggesting that the model is a reasonable representation of the underlying processes. Note, these are prediction intervals rather than confidence intervals as we are seeking intervals within which we can predict individual observations rather than means. We can also explore the posteriors of each parameter.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(bayesplot)
+mcmc_intervals(data.r2jags$BUGSoutput$sims.matrix, regex_pars = "beta|sigma")
+mcmc_areas(data.r2jags$BUGSoutput$sims.matrix, regex_pars = "beta|sigma")
+```
+
+# Parameter estimates
+
+Although all parameters in a Bayesian analysis are considered random and are considered a distribution, rarely would it be useful to present tables of all the samples from each distribution. On the other hand, plots of the posterior distributions have some use. Nevertheless, most workers prefer to present simple statistical summaries of the posteriors. Popular choices include the median (or mean) and $95$% credibility intervals.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmcpvalue <- function(samp) {
+    ## elementary version that creates an empirical p-value for the
+    ## hypothesis that the columns of samp have mean zero versus a general
+    ## multivariate distribution with elliptical contours.
+
+    ## differences from the mean standardized by the observed
+    ## variance-covariance factor
+
+    ## Note, I put in the bit for single terms
+    if (length(dim(samp)) == 0) {
+        std <- backsolve(chol(var(samp)), cbind(0, t(samp)) - mean(samp),
+            transpose = TRUE)
+        sqdist <- colSums(std * std)
+        sum(sqdist[-1] > sqdist[1])/length(samp)
+    } else {
+        std <- backsolve(chol(var(samp)), cbind(0, t(samp)) - colMeans(samp),
+            transpose = TRUE)
+        sqdist <- colSums(std * std)
+        sum(sqdist[-1] > sqdist[1])/nrow(samp)
+    }
+
+}
+```
+
+First, we look at the results from the additive model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(data.r2jags)
+
+# OR
+library(broom)
+library(broom.mixed)
+tidyMCMC(as.mcmc(data.r2jags), conf.int = TRUE, conf.method = "HPDinterval")
+```
+
+**Conclusions**
+
+* The intercept of the first group (Group A) is $51$.
+
+* The mean of the second group (Group B) is $-16.3$ units greater than (A).
+
+* The mean of the third group (Group C) is $-20.7$ units greater than (A).
+
+* A one unit increase in B in Group A is associated with a $-0.484$ units increase in $Y$.
+
+The $95$% confidence interval for the effects of Group B, Group C and the partial slope associated with B do not overlapp with 0 implying a significant difference between group A and groups B, C and a significant negative relationship with B. While workers attempt to become comfortable with a new statistical framework, it is only natural that they like to evaluate and comprehend new structures and output alongside more familiar concepts. One way to facilitate this is via Bayesian p-values that are somewhat analogous to the frequentist p-values for investigating the hypothesis that a parameter is equal to zero.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+## since values are less than zero
+mcmcpvalue(data.r2jags$BUGSoutput$sims.matrix[, "beta[2]"])  # effect of (B-A = 0)
+mcmcpvalue(data.r2jags$BUGSoutput$sims.matrix[, "beta[3]"])  # effect of (C-A = 0)
+mcmcpvalue(data.r2jags$BUGSoutput$sims.matrix[, "beta[4]"])  # effect of (slope = 0)
+mcmcpvalue(data.r2jags$BUGSoutput$sims.matrix[, 2:4])  # effect of (model)
+```
+
+There is evidence that the reponse differs between the groups.
+
+# Graphical summaries
+
+A nice graphic is often a great accompaniment to a statistical analysis. Although there are no fixed assumptions associated with graphing (in contrast to statistical analyses), we often want the graphical summaries to reflect the associated statistical analyses. After all, the sample is just one perspective on the population(s). What we are more interested in is being able to estimate and depict likely population parameters/trends. Thus, whilst we could easily provide a plot displaying the raw data along with simple measures of location and spread, arguably, we should use estimates that reflect the fitted model. In this case, it would be appropriate to plot the credibility interval associated with each group.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix
+## Calculate the fitted values
+newdata = expand.grid(A = levels(data$A), B = seq(min(data$B), max(data$B),
+    len = 100))
+Xmat = model.matrix(~A + B, newdata)
+coefs = mcmc[, c("beta[1]", "beta[2]", "beta[3]", "beta[4]")]
+fit = coefs %*% t(Xmat)
+newdata = newdata %>% cbind(tidyMCMC(fit, conf.int = TRUE, conf.method = "HPDinterval"))
+
+ggplot(newdata, aes(y = estimate, x = B, fill = A)) + geom_ribbon(aes(ymin = conf.low,
+    ymax = conf.high), alpha = 0.2) + geom_line() + scale_y_continuous("Y") +
+    scale_x_continuous("B") + theme_classic()
+```
+
+As this is simple single factor ANOVA, we can simple add the raw data to this figure. For more complex designs with additional predictors, it is necessary to plot partial residuals.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+## Calculate partial residuals fitted values
+fdata = rdata = data
+fMat = rMat = model.matrix(~A + B, fdata)
+fit = as.vector(apply(coefs, 2, median) %*% t(fMat))
+resid = as.vector(data$Y - apply(coefs, 2, median) %*% t(rMat))
+rdata = rdata %>% mutate(partial.resid = resid + fit)
+
+ggplot(newdata, aes(y = estimate, x = B, fill = A)) + geom_point(data = rdata,
+    aes(y = partial.resid, x = B, color = A)) + geom_ribbon(aes(ymin = conf.low,
+    ymax = conf.high), alpha = 0.2) + geom_line() + scale_y_continuous("Y") +
+    scale_x_continuous("B") + theme_classic()
+```
+
+# Posteriors
+
+In frequentist statistics, when we have more than two groups, we are typically not only interested in whether there is evidence for an overall "effect" of a factor - we are also interested in how various groups compare to one another. To explore these trends, we either compare each group to each other in a pairwise manner (controlling for family-wise Type I error rates) or we explore an independent subset of the possible comparisons. Although these alternate approaches can adequately address a specific research agenda, often they impose severe limitations and compromises on the scope and breadth of questions that can be asked of your data. The reason for these limitations is that in a frequentist framework, any single hypothesis carries with it a (nominally) $5$% chance of a false rejection (since it is based on long-run frequency). Thus, performing multiple tests are likely to compound this error rate. The point is, that each comparison is compared to its own probability distribution (and each carries a $5$% error rate). By contrast, in Bayesian statistics, all comparisons (contrasts) are drawn from the one (hopefully stable and convergent) posterior distribution and this posterior is invariant to the type and number of comparisons drawn. Hence, the theory clearly indicates that having generated our posterior distribution, we can then query this distribution in any way that we wish thereby allowing us to explore all of our research questions simultaneously.
+
+Bayesian "contrasts" can be performed either:
+
+* within the Bayesian sampling model or
+
+* construct them from the returned MCMC samples (they are drawn from the posteriors)
+
+Only the latter will be demonstrated as it provides a consistent approach across all routines. In order to allow direct comparison to the frequentist equivalents, I will explore the same set of planned and *Tukey*'s test comparisons described here. For the "planned comparison" we defined two contrasts: 1) group B vs group C; and 2) group A vs the average of groups B and C. Of course each of these could be explored at multiple values of B, however, since we fit an additive model (which assumes that the slopes are homogeneous), the contrasts will be constant throughout the domain of B.
+
+Lets start by comparing each group to each other group in a pairwise manner. Arguably the most elegant way to do this is to generate a Tukey's contrast matrix. This is a model matrix specific to comparing each group to each other group. Again, since the lines are parallel, it does not really matter what level of B we estimate these efffects at - so lets use the mean B.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix
+coefs <- as.matrix(mcmc)[, 1:4]
+newdata <- data.frame(A = levels(data$A), B = mean(data$B))
+# A Tukeys contrast matrix
+library(multcomp)
+tuk.mat <- contrMat(n = table(newdata$A), type = "Tukey")
+Xmat <- model.matrix(~A + B, data = newdata)
+pairwise.mat <- tuk.mat %*% Xmat
+pairwise.mat
+
+mcmc_areas(coefs %*% t(pairwise.mat))
+
+(comps = tidyMCMC(coefs %*% t(pairwise.mat), conf.int = TRUE, conf.method = "HPDinterval"))
+
+ggplot(comps, aes(y = estimate, x = term)) + geom_pointrange(aes(ymin = conf.low,
+    ymax = conf.high)) + geom_hline(yintercept = 0, linetype = "dashed") +
+    scale_y_continuous("Effect size") + scale_x_discrete("") + coord_flip() +
+    theme_classic()
+```
+
+With a couple of modifications, we could also express this as percentage changes. A percentage change represents the change (difference between groups) divided by one of the groups (determined by which group you want to express the percentage change to). Hence, we generate an additional mcmc matrix that represents the cell means for the divisor group (group we want to express change relative to). Since the `tuk.mat` defines comparisons as $-1$ and $1$ pairs, if we simply replace all the $-1$ with $0$, the eventual matrix multiplication will result in estimates of the divisor cell means instead of the difference. We can then divide the original mcmc matrix above with this new divisor mcmc matrix to yeild a mcmc matrix of percentage change.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# Modify the tuk.mat to replace -1 with 0.  This will allow us to get a
+# mcmc matrix of ..
+tuk.mat[tuk.mat == -1] = 0
+comp.mat <- tuk.mat %*% Xmat
+comp.mat
+
+comp.mcmc = 100 * (coefs %*% t(pairwise.mat))/coefs %*% t(comp.mat)
+(comps = tidyMCMC(comp.mcmc, conf.int = TRUE, conf.method = "HPDinterval"))
+
+ggplot(comps, aes(y = estimate, x = term)) + geom_pointrange(aes(ymin = conf.low,
+    ymax = conf.high)) + geom_hline(yintercept = 0, linetype = "dashed") +
+    scale_y_continuous("Effect size (%)") + scale_x_discrete("") + coord_flip() +
+    theme_classic()
+```
+
+And now for the specific planned comparisons (Group B vs Group C as well as Group A vs the average of Groups B and C). This is achieved by generating our own contrast matrix (defining the contributions of each group to each contrast).
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+c.mat = rbind(c(0, 1, -1), c(1/2, -1/3, -1/3))
+c.mat
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix
+coefs <- as.matrix(mcmc)[, 1:4]
+newdata <- data.frame(A = levels(data$A), B = mean(data$B))
+Xmat <- model.matrix(~A + B, data = newdata)
+c.mat = c.mat %*% Xmat
+c.mat
+
+(comps = tidyMCMC(as.mcmc(coefs %*% t(c.mat)), conf.int = TRUE, conf.method = "HPDinterval"))
+```
+
+# Finite population standard deviations
+
+Variance components, the amount of added variance attributed to each influence, are traditionally estimated for so called random effects. These are the effects for which the levels employed in the design are randomly selected to represent a broader range of possible levels. For such effects, effect sizes (differences between each level and a reference level) are of little value. Instead, the "importance" of the variables are measured in units of variance components. On the other hand, regular variance components for fixed factors (those whose measured levels represent the only levels of interest) are not logical - since variance components estimate variance as if the levels are randomly selected from a larger population. Nevertheless, in order to compare and contrast the scale of variability of both fixed and random factors, it is necessary to measure both on the same scale (sample or population based variance).
+
+Finite-population variance components assume that the levels of all factors (fixed and random) in the design are all the possible levels available (@gelman2005analysis). In other words, they are assumed to represent finite populations of levels. Sample (rather than population) statistics are then used to calculate these finite-population variances (or standard deviations). Since standard deviation (and variance) are bound at zero, standard deviation posteriors are typically non-normal. Consequently, medians and HPD intervals are more robust estimates.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data.r2jags$BUGSoutput$sims.matrix
+head(mcmc)
+
+# A
+wch = grep("beta.[2-3]", colnames(mcmc))
+# Get the rowwise standard deviations between effects parameters
+sd.A = apply(mcmc[, wch], 1, sd)
+# B
+wch = grep("beta.4", colnames(mcmc))
+sd.B = sd(data$B) * abs(mcmc[, wch])
+# generate a model matrix
+newdata = data
+Xmat = model.matrix(~A + B, newdata)
+## get median parameter estimates
+wch = grep("beta.[1-4]", colnames(mcmc))
+coefs = mcmc[, wch]
+fit = coefs %*% t(Xmat)
+resid = sweep(fit, 2, data$Y, "-")
+sd.resid = apply(resid, 1, sd)
+
+sd.all = cbind(sd.A, sd.B, sd.resid)
+(fpsd = tidyMCMC(sd.all, conf.int = TRUE, conf.method = "HPDinterval"))
+
+# OR expressed as a percentage
+(fpsd.p = tidyMCMC(100 * sd.all/rowSums(sd.all), estimate.method = "median",
+    conf.int = TRUE, conf.method = "HPDinterval"))
+
+## we can even plot this as a Bayesian ANOVA table
+ggplot(fpsd, aes(y = estimate, x = term)) + geom_hline(yintercept = 0,
+    linetype = "dashed") + geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+    geom_text(aes(label = sprintf("%.2f%%", fpsd.p$estimate), vjust = -1)) +
+    scale_y_continuous("Finite population standard deviation") + scale_x_discrete() +
+    coord_flip() + theme_classic()
+```
+
+Approximately $22.9$% of the total finite population standard deviation is due to $x$.
+
+# R squared
+
+In a frequentist context, the $R^2$ value is seen as a useful indicator of goodness of fit. Whilst it has long been acknowledged that this measure is not appropriate for comparing models (for such purposes information criterion such as AIC are more appropriate), it is nevertheless useful for estimating the amount (percent) of variance explained by the model. In a frequentist context, $R^2$ is calculated as the variance in predicted values divided by the variance in the observed (response) values. Unfortunately, this classical formulation does not translate simply into a Bayesian context since the equivalently calculated numerator can be larger than the an equivalently calculated denominator - thereby resulting in an $R^2$ greater than $100$%. @gelman2019r proposed an alternative formulation in which the denominator comprises the sum of the explained variance and the variance of the residuals.
+
+So in the standard regression model notation of:
+
+$$
+y_i \sim \text{Normal}(\boldsymbol X \boldsymbol \beta, \sigma),
+$$
+
+the $R^2$ could be formulated as
+
+$$
+R^2 = \frac{\sigma^2_f}{\sigma^2_f + \sigma^2_e},
+$$
+
+where $\sigma^2_f=\text{var}(\boldsymbol X \boldsymbol \beta)$, and for normal models $\sigma^2_e=\text{var}(y-\boldsymbol X \boldsymbol \beta)$
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat = model.matrix(~A + B, data)
+wch = grep("beta", colnames(mcmc))
+coefs = mcmc[, wch]
+fit = coefs %*% t(Xmat)
+resid = sweep(fit, 2, data$Y, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+# for comparison with frequentist
+summary(lm(Y ~ A + B, data))
+```
+
+# Dealing with heterogeneous slopes
+
+Generate the data with heterogeneous slope effects. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(123)
+n <- 10
+p <- 3
+A.eff <- c(40, -15, -20)
+beta <- c(-0.45, -0.1, 0.5)
+sigma <- 4
+B <- rnorm(n * p, 0, 15)
+A <- gl(p, n, lab = paste("Group", LETTERS[1:3]))
+mm <- model.matrix(~A * B)
+data1 <- data.frame(A = A, B = B, Y = as.numeric(c(A.eff, beta) %*% t(mm)) + rnorm(n * p, 0, 4))
+data1$B <- data1$B + 20
+head(data1)
+```
+
+## Exploratory data analysis
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+scatterplot(Y ~ B | A, data = data1)
+
+boxplot(Y ~ A, data1)
+
+# OR via ggplot
+ggplot(data1, aes(y = Y, x = B, group = A)) + geom_point() + geom_smooth(method = "lm")
+
+ggplot(data1, aes(y = Y, x = A)) + geom_boxplot()
+```
+
+The slopes ($Y$ vs B trends) do appear to differ between treatment groups - in particular, Group C seems to portray a different trend to Groups A and B.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+anova(lm(Y ~ B * A, data = data1))
+```
+
+There is strong evidence to suggest that the assumption of equal slopes is violated.
+
+## Fitting the model
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+modelString2 = "
+  model {
+  #Likelihood
+  for (i in 1:n) {
+  y[i]~dnorm(mean[i],tau)
+  mean[i] <- inprod(beta[],X[i,])
+  }
+  #Priors
+  for (i in 1:ngroups) {
+  beta[i] ~ dnorm(0, 1.0E-6) 
+  }
+  sigma ~ dunif(0, 100)
+  tau <- 1 / (sigma * sigma)
+  }
+  "
+
+## write the model to a text file
+writeLines(modelString2, con = "ancovaModel2.txt")
+```
+
+Arrange the data as a list (as required by `JAGS`). As input, `JAGS` will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+X <- model.matrix(~A * B, data1)
+data1.list <- with(data1, list(y = Y, X = X, n = nrow(data1), ngroups = ncol(X)))
+```
+
+Define the nodes (parameters and derivatives) to monitor and the chain parameters.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("beta", "sigma")
+nChains = 2
+burnInSteps = 3000
+thinSteps = 1
+numSavedSteps = 15000  #across all chains
+nIter = ceiling(burnInSteps + (numSavedSteps * thinSteps)/nChains)
+nIter
+```
+
+Start the `JAGS` model (check the model, load data into the model, specify the number of chains and compile the model). 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data1.r2jags <- jags(data = data1.list, inits = NULL, parameters.to.save = params,
+    model.file = "ancovaModel2.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(data1.r2jags)
+```
+
+## MCMC diagnostics
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+denplot(data1.r2jags, parms = c("beta"))
+traplot(data1.r2jags, parms = c("beta"))
+```
+
+Trace plots show no evidence that the chains have not reasonably traversed the entire multidimensional parameter space. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters (such as $\beta$s). 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data1.mcmc = as.mcmc(data1.r2jags)
+#Raftery diagnostic
+raftery.diag(data1.mcmc)
+```
+
+The Raftery diagnostics for each chain estimate that we would require no more than $5000$ samples to reach the specified level of confidence in convergence. As we have $10500$ samples, we can be confidence that convergence has occurred.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#Autocorrelation diagnostic
+autocorr.diag(data1.mcmc)
+```
+
+## Model validation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data1.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata1 = data1
+Xmat = model.matrix(~A * B, newdata1)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:6], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data1$Y - fit
+ggplot() + geom_point(data = NULL, aes(y = resid, x = fit)) + theme_classic()
+```
+
+Residuals against predictors
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data1.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata1 = newdata1
+Xmat = model.matrix(~A * B, newdata1)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:6], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data1$Y - fit
+newdata1 = newdata1 %>% cbind(fit, resid)
+ggplot(newdata1) + geom_point(aes(y = resid, x = A)) + theme_classic()
+
+ggplot(newdata1) + geom_point(aes(y = resid, x = B)) + theme_classic()
+```
+
+And now for studentised residuals
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data1.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+newdata1 = data1
+Xmat = model.matrix(~A * B, newdata1)
+## get median parameter estimates
+coefs = apply(mcmc[, 1:6], 2, median)
+fit = as.vector(coefs %*% t(Xmat))
+resid = data1$Y - fit
+sresid = resid/sd(resid)
+ggplot() + geom_point(data1 = NULL, aes(y = sresid, x = fit)) + theme_classic()
+```
+
+For this simple model, the studentised residuals yield the same pattern as the raw residuals (or the Pearson residuals for that matter). Lets see how well data simulated from the model reflects the raw data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data1.r2jags$BUGSoutput$sims.matrix %>% as.data.frame %>%
+    dplyr:::select(contains("beta"), sigma) %>% as.matrix
+# generate a model matrix
+Xmat = model.matrix(~A * B, data1)
+## get median parameter estimates
+coefs = mcmc[, 1:6]
+fit = coefs %*% t(Xmat)
+## draw samples from this model
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(data1), fit[i,
+    ], mcmc[i, "sigma"]))
+newdata1 = data.frame(A = data1$A, B = data1$B, yRep) %>% gather(key = Sample,
+    value = Value, -A, -B)
+ggplot(newdata1) + geom_violin(aes(y = Value, x = A, fill = "Model"),
+    alpha = 0.5) + geom_violin(data = data1, aes(y = Y, x = A,
+    fill = "Obs"), alpha = 0.5) + geom_point(data = data1, aes(y = Y,
+    x = A), position = position_jitter(width = 0.1, height = 0),
+    color = "black") + theme_classic()
+
+ggplot(newdata1) + geom_violin(aes(y = Value, x = B, fill = "Model",
+    group = B, color = A), alpha = 0.5) + geom_point(data = data1,
+    aes(y = Y, x = B, group = B, color = A)) + theme_classic()
+```
+
+The predicted trends do encapsulate the actual data, suggesting that the model is a reasonable representation of the underlying processes. Note, these are prediction intervals rather than confidence intervals as we are seeking intervals within which we can predict individual observations rather than means. We can also explore the posteriors of each parameter.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc_intervals(data1.r2jags$BUGSoutput$sims.matrix, regex_pars = "beta|sigma")
+mcmc_areas(data1.r2jags$BUGSoutput$sims.matrix, regex_pars = "beta|sigma")
+```
+
+## Parameter estimates
+
+First, we look at the results from the additive model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(data1.r2jags)
+
+# OR
+tidyMCMC(as.mcmc(data1.r2jags), conf.int = TRUE, conf.method = "HPDinterval")
+```
+
+**Conclusions**
+
+* The intercept of the first group (Group A) is $48.2$.
+
+* The mean of the second group (Group B) is $-10.6$ units greater than (A).
+
+* The mean of the third group (Group C) is $-26.5$ units greater than (A).
+
+* A one unit increase in B in Group A is associated with a $-0.351$ units increase in $Y$.
+
+* difference in slope between Group B and Group A $-0.270$.
+
+* difference in slope between Group C and Group A $0.270$.
+
+
+The $95$% confidence interval for the effects of Group B, Group C and the partial slope associated with B do not overlapp with $0$ implying a significant difference between group A and groups B, C (at the mean level of predictor B) and a significant negative relationship with B (for Group A). The slope associated with Group B was not found to be significantly different from that associated with Group A, however, the slope associated with Group C was found to be significantly less negative than the slope associated with Group A. While workers attempt to become comfortable with a new statistical framework, it is only natural that they like to evaluate and comprehend new structures and output alongside more familiar concepts. One way to facilitate this is via Bayesian p-values that are somewhat analogous to the frequentist p-values for investigating the hypothesis that a parameter is equal to zero.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+## since values are less than zero
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, "beta[2]"])  # effect of (B-A = 0)
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, "beta[3]"])  # effect of (C-A = 0)
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, "beta[4]"])  # effect of (slope = 0)
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, "beta[5]"])  # effect of (slopeB - slopeA = 0)
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, "beta[6]"])  # effect of (slopeC - slopeA = 0)
+mcmcpvalue(data1.r2jags$BUGSoutput$sims.matrix[, 2:6])  # effect of (model)
+```
+
+There is evidence that the reponse differs between the groups.
+
+## Graphical summaries
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mcmc = data1.r2jags$BUGSoutput$sims.matrix
+## Calculate the fitted values
+newdata1 = expand.grid(A = levels(data1$A), B = seq(min(data1$B), max(data1$B),
+    len = 100))
+Xmat = model.matrix(~A * B, newdata1)
+coefs = mcmc[, c("beta[1]", "beta[2]", "beta[3]", "beta[4]", "beta[5]",
+    "beta[6]")]
+fit = coefs %*% t(Xmat)
+newdata1 = newdata1 %>% cbind(tidyMCMC(fit, conf.int = TRUE, conf.method = "HPDinterval"))
+
+ggplot(newdata1, aes(y = estimate, x = B, fill = A)) + geom_ribbon(aes(ymin = conf.low,
+    ymax = conf.high), alpha = 0.2) + geom_line() + scale_y_continuous("Y") +
+    scale_x_continuous("B") + theme_classic()
+```
+
+As this is simple single factor ANOVA, we can simple add the raw data to this figure. For more complex designs with additional predictors, it is necessary to plot partial residuals.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+## Calculate partial residuals fitted values
+fdata1 = rdata1 = data1
+fMat = rMat = model.matrix(~A * B, fdata1)
+fit = as.vector(apply(coefs, 2, median) %*% t(fMat))
+resid = as.vector(data1$Y - apply(coefs, 2, median) %*% t(rMat))
+rdata1 = rdata1 %>% mutate(partial.resid = resid + fit)
+
+ggplot(newdata1, aes(y = estimate, x = B, fill = A)) + geom_point(data = rdata1,
+    aes(y = partial.resid, x = B, color = A)) + geom_ribbon(aes(ymin = conf.low,
+    ymax = conf.high), alpha = 0.2) + geom_line() + scale_y_continuous("Y") +
+    scale_x_continuous("B") + theme_classic()
+```
+
+# References
