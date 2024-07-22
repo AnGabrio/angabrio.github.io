@@ -1,0 +1,32 @@
+
+model {
+   #Likelihood (esimating site means (gamma.site)
+   for (i in 1:n) {
+      y[i]~dnorm(quad.means[i],tau)
+      quad.means[i] <- gamma.site[site[i]]
+      y.err[i]<- quad.means[i]-y[i]
+   }
+   for (i in 1:s) {
+      gamma.site[i] ~ dnorm(site.means[i], tau.site)
+      site.means[i] <- inprod(beta[],A.Xmat[i,])
+      site.err[i] <- site.means[i] - gamma.site[i]
+   }
+   #Priors
+   for (i in 1:a) {
+     beta[i] ~ dnorm(0, 1.0E-6) #prior
+   }
+   tau <- pow(sigma,-2)
+   sigma <-z/sqrt(chSq)
+   z ~ dnorm(0, .0016)I(0,)
+   chSq ~ dgamma(0.5, 0.5)
+
+   tau.site <- pow(sigma.site,-2)
+   sigma.site <-z/sqrt(chSq.site)
+   z.site ~ dnorm(0, .0016)I(0,)
+   chSq.site ~ dgamma(0.5, 0.5)
+   
+   sd.y <- sd(y.err)
+   sd.site <- sd(site.err)
+   sd.A <- sd(beta)
+ }
+

@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-02-09">
+<meta name="keywords" content="Software, Statistics, Stan">
+
+<title>angabrio.github.io - Nested Anova (JAGS)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#linear-models-frequentist" id="toc-linear-models-frequentist" class="nav-link" data-scroll-target="#linear-models-frequentist">Linear models (frequentist)</a></li>
+  <li><a href="#linear-models-bayesian" id="toc-linear-models-bayesian" class="nav-link" data-scroll-target="#linear-models-bayesian">Linear models (Bayesian)</a></li>
+  <li><a href="#null-hypotheses" id="toc-null-hypotheses" class="nav-link" data-scroll-target="#null-hypotheses">Null hypotheses</a></li>
+  <li><a href="#analysis-of-variance" id="toc-analysis-of-variance" class="nav-link" data-scroll-target="#analysis-of-variance">Analysis of variance</a></li>
+  <li><a href="#variance-components" id="toc-variance-components" class="nav-link" data-scroll-target="#variance-components">Variance components</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  <li><a href="#unbalanced-nested-designs" id="toc-unbalanced-nested-designs" class="nav-link" data-scroll-target="#unbalanced-nested-designs">Unbalanced nested designs</a></li>
+  <li><a href="#linear-mixed-effects-models" id="toc-linear-mixed-effects-models" class="nav-link" data-scroll-target="#linear-mixed-effects-models">Linear mixed effects models</a></li>
+  </ul></li>
+  <li><a href="#data-generation" id="toc-data-generation" class="nav-link" data-scroll-target="#data-generation">Data generation</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory data analysis</a></li>
+  </ul></li>
+  <li><a href="#model-fitting" id="toc-model-fitting" class="nav-link" data-scroll-target="#model-fitting">Model fitting</a>
+  <ul class="collapse">
+  <li><a href="#full-effect-parameterisation" id="toc-full-effect-parameterisation" class="nav-link" data-scroll-target="#full-effect-parameterisation">Full effect parameterisation</a></li>
+  <li><a href="#matrix-parameterisation" id="toc-matrix-parameterisation" class="nav-link" data-scroll-target="#matrix-parameterisation">Matrix parameterisation</a></li>
+  <li><a href="#hierarchical-parameterisation" id="toc-hierarchical-parameterisation" class="nav-link" data-scroll-target="#hierarchical-parameterisation">Hierarchical parameterisation</a></li>
+  <li><a href="#graphical-summaries" id="toc-graphical-summaries" class="nav-link" data-scroll-target="#graphical-summaries">Graphical summaries</a></li>
+  </ul></li>
+  <li><a href="#data-generation---second-example" id="toc-data-generation---second-example" class="nav-link" data-scroll-target="#data-generation---second-example">Data generation - second example</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis-1" id="toc-exploratory-data-analysis-1" class="nav-link" data-scroll-target="#exploratory-data-analysis-1">Exploratory data analysis</a></li>
+  </ul></li>
+  <li><a href="#model-fitting-1" id="toc-model-fitting-1" class="nav-link" data-scroll-target="#model-fitting-1">Model fitting</a>
+  <ul class="collapse">
+  <li><a href="#frequentist-for-comparison" id="toc-frequentist-for-comparison" class="nav-link" data-scroll-target="#frequentist-for-comparison">Frequentist for comparison</a></li>
+  <li><a href="#full-effect-parameterisation-1" id="toc-full-effect-parameterisation-1" class="nav-link" data-scroll-target="#full-effect-parameterisation-1">Full effect parameterisation</a></li>
+  <li><a href="#matrix-parameterisation-1" id="toc-matrix-parameterisation-1" class="nav-link" data-scroll-target="#matrix-parameterisation-1">Matrix parameterisation</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Nested Anova (JAGS)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Software</div>
+    <div class="quarto-category">Statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="mailto:a.gabrio@maastrichtuniversity.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 9, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><span style="font-size: 85%">This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models …</span></p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Software, Statistics, Stan</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. <code>BUGS</code> (Bayesian inference Using <em>Gibbs Sampling</em>) is an algorithm and supporting language (resembling <code>R</code>) dedicated to performing the Gibbs sampling implementation of <em>Markov Chain Monte Carlo</em> (MCMC) method. Dialects of the <code>BUGS</code> language are implemented within three main projects:</p>
+<ol type="1">
+<li><p><strong>OpenBUGS</strong> - written in component pascal.</p></li>
+<li><p><strong>JAGS</strong> - (Just Another Gibbs Sampler) - written in <code>C++</code>.</p></li>
+<li><p><strong>STAN</strong> - a dedicated Bayesian modelling framework written in <code>C++</code> and implementing <em>Hamiltonian</em> MCMC samplers.</p></li>
+</ol>
+<p>Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of <code>R</code>, and thus, they are best accessed from within <code>R</code> itself. As such there are multiple packages devoted to interfacing with the various software implementations:</p>
+<ul>
+<li><p><em>R2OpenBUGS</em> - interfaces with <code>OpenBUGS</code></p></li>
+<li><p><em>R2jags</em> - interfaces with <code>JAGS</code></p></li>
+<li><p><em>rstan</em> - interfaces with <code>STAN</code></p></li>
+</ul>
+<p>This tutorial will demonstrate how to fit models in <code>JAGS</code> (<span class="citation" data-cites="plummer2004jags">Plummer (<a href="#ref-plummer2004jags" role="doc-biblioref">2004</a>)</span>) using the package <code>R2jags</code> (<span class="citation" data-cites="su2015package">Su et al. (<a href="#ref-su2015package" role="doc-biblioref">2015</a>)</span>) as interface, which also requires to load some other packages.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>When single sampling units are selected amongst highly heterogeneous conditions, it is unlikely that these single units will adequately represent the populations and repeated sampling is likely to yield very different outcomes. For example, if we were investigating the impacts of fuel reduction burning across a highly heterogeneous landscape, our ability to replicate adequately might be limited by the number of burn sites available.</p>
+<p>Alternatively, sub-replicates within each of the sampling units (e.g.&nbsp;sites) can be collected (and averaged) so as to provided better representatives for each of the units and ultimately reduce the unexplained variability of the test of treatments. In essence, the sub-replicates are the replicates of an additional nested factor whose levels are nested within the main treatment factor. A nested factor refers to a factor whose levels are unique within each level of the factor it is nested within and each level is only represented once. For example, the fuel reduction burn study design could consist of three burnt sites and three un-burnt (control) sites each containing four quadrats (replicates of site and sub-replicates of the burn treatment). Each site represents a unique level of a random factor (any given site cannot be both burnt and un-burnt) that is nested within the fire treatment (burned or not).</p>
+<p>A nested design can be thought of as a hierarchical arrangement of factors (hence the alternative name hierarchical designs) whereby a treatment is progressively sub-replicated. As an additional example, imagine an experiment designed to comparing the leaf toughness of a number of tree species. Working down the hierarchy, five individual trees were randomly selected within (nested within) each species, three branches were randomly selected within each tree, two leaves were randomly selected within each branch and the force required to shear the leaf material in half (transversely) was measured in four random locations along the leaf. Clearly any given leaf can only be from a single branch, tree and species. Each level of sub-replication is introduced to further reduce the amount of unexplained variation and thereby increasing the power of the test for the main treatment effect. Additionally, it is possible to investigate which scale has the greatest (or least, etc) degree of variability - the level of the species, individual tree, branch, leaf, leaf region etc.</p>
+<ul>
+<li><p>Nested factors are typically random factors, of which the levels are randomly selected to represent all possible levels (e.g.&nbsp;sites). When the main treatment effect (often referred to as Factor A) is a fixed factor, such designs are referred to as a <em>mixed model nested ANOVA</em>, whereas when Factor A is random, the design is referred to as a <em>Model II nested ANOVA</em>.</p></li>
+<li><p>Fixed nested factors are also possible. For example, specific dates (corresponding to particular times during a season) could be nested within season. When all factors are fixed, the design is referred to as a <em>Model I mixed model</em>.</p></li>
+<li><p>Fully nested designs (the topic of this chapter) differ from other multi-factor designs in that all factors within (below) the main treatment factor are nested and thus interactions are un-replicated and cannot be tested. Indeed, interaction effects (interaction between Factor A and site) are assumed to be zero.</p></li>
+</ul>
+</section>
+<section id="linear-models-frequentist" class="level2">
+<h2 class="anchored" data-anchor-id="linear-models-frequentist">Linear models (frequentist)</h2>
+<p>The linear models for two and three factor nested design are:</p>
+<p><span class="math display">\[
+y_{ijk} = \mu + \alpha_i + \beta_{j(i)} + \epsilon_{ijk},
+\]</span></p>
+<p><span class="math display">\[
+y_{ijkl} = \mu + \alpha_i + \beta_{j(i)} + gamma_{k(j(i))}  + \epsilon_{ijkl},
+\]</span></p>
+<p>where <span class="math inline">\(\mu\)</span> is the overall mean, <span class="math inline">\(\alpha\)</span> is the effect of Factor A, <span class="math inline">\(\beta\)</span> is the effect of Factor B, <span class="math inline">\(\gamma\)</span> is the effect of Factor C and <span class="math inline">\(\epsilon\)</span> is the random unexplained or residual component.</p>
+</section>
+<section id="linear-models-bayesian" class="level2">
+<h2 class="anchored" data-anchor-id="linear-models-bayesian">Linear models (Bayesian)</h2>
+<p>So called “random effects” are modelled differently from “fixed effects” in that rather than estimate their individual effects, we instead estimate the variability due to these “random effects”. Since technically all variables in a Bayesian framework are random, some prefer to use the terms ‘fixed effects’ and ‘varying effects’. As random factors typically represent “random” selections of levels (such as a set of randomly selected sites), incorporated in order to account for the dependency structure (observations within sites are more likely to be correlated to one another - not strickly independent) to the data, we are not overly interested in the individual differences between levels of the ‘varying’ (random) factor. Instead (in addition to imposing a separate correlation structure within each nest), we want to know how much variability is attributed to this level of the design. The linear models for two and three factor nested design are:</p>
+<p><span class="math display">\[
+y_{ijk} = \mu + \alpha_i + \beta_{j(i)} + \epsilon_{ijk}, \;\;\; \epsilon_{ijk} \sim N(0, \sigma^2), \;\;\; \beta_{j(i)} \sim N(0, \sigma^2_{B})
+\]</span></p>
+<p><span class="math display">\[
+y_{ijkl} = \mu + \alpha_i + \beta_{j(i)} + \gamma_{k(j(i))} + \epsilon_{ijkl}, \;\;\; \epsilon_{ijkl} \sim N(0, \sigma^2), \;\;\; \beta_{j(i)} \sim N(0, \sigma^2_{B}) \;\;\; \gamma_{k(j(i))} \sim N(0, \sigma^2_C)
+\]</span></p>
+<p>where <span class="math inline">\(\mu\)</span> is the overall mean, <span class="math inline">\(\alpha\)</span> is the effect of Factor A, <span class="math inline">\(\beta\)</span> is the variability of Factor B (nested within Factor A), <span class="math inline">\(\gamma\)</span> is the variability of Factor C (nested within Factor B) and <span class="math inline">\(\epsilon\)</span> is the random unexplained or residual component that is assumed to be normally distributed with a mean of zero and a constant amount of standard deviation (<span class="math inline">\(\sigma^2\)</span>). The subscripts are iterators. For example, the <span class="math inline">\(i\)</span> represents the number of effects to be estimated for Factor A. Thus the first formula can be read as the <span class="math inline">\(k\)</span>-th observation of <span class="math inline">\(y\)</span> is drawn from a normal distribution (with a specific level of variability) and mean proposed to be determined by a base mean (<span class="math inline">\(\mu\)</span> - mean of the first treatment across all nests) plus the effect of the <span class="math inline">\(i\)</span>-th treatment effect plus the variabilitythe model proposes that, given a base mean (<span class="math inline">\(\mu\)</span>) and knowing the effect of the <span class="math inline">\(i\)</span>-th treatment (factor A) and which of the <span class="math inline">\(j\)</span>-th nests within the treatment the <span class="math inline">\(k\)</span>-th observation from Block <span class="math inline">\(j\)</span> (factor B) within treatment effect.</p>
+</section>
+<section id="null-hypotheses" class="level2">
+<h2 class="anchored" data-anchor-id="null-hypotheses">Null hypotheses</h2>
+<p>Separate null hypotheses are associated with each of the factors, however, nested factors are typically only added to absorb some of the unexplained variability and thus, specific hypotheses tests associated with nested factors are of lesser biological importance. Hence, rather than estimate the effects of random effects, we instead estimate how much variability they contribute.</p>
+<p><strong>Factor A: the main treatment effect (fixed)</strong></p>
+<ul>
+<li><p><span class="math inline">\(H_0(A): \mu_1=\mu_2=\ldots=\mu_i=\mu\)</span> (the population group means are all equal). That is, that the mean of population <span class="math inline">\(1\)</span> is equal to that of population <span class="math inline">\(2\)</span> and so on, and thus all population means are equal to one another - no effect of the factor on the response. If the effect of the <span class="math inline">\(i\)</span>-th group is the difference between the <span class="math inline">\(i\)</span>-th group mean and the mean of the first group (<span class="math inline">\(\alpha_i=\mu_i-\mu_1\)</span>) then the <span class="math inline">\(H_0\)</span> can alternatively be written as:</p></li>
+<li><p><span class="math inline">\(H_0(A) : \alpha_1=\alpha_2=\ldots=\alpha_i=0\)</span> (the effect of each group equals zero). If one or more of the <span class="math inline">\(\alpha_i\)</span> are different from zero (the response mean for this treatment differs from the overall response mean), there is evidence that the null hypothesis is not true indicating that the factor does affect the response variable.</p></li>
+</ul>
+<p><strong>Factor A: the main treatment effect (random)</strong></p>
+<ul>
+<li><span class="math inline">\(H_0(A) : \sigma^2_{\alpha}=0\)</span> (population variance equals zero). There is no added variance due to all possible levels of A.</li>
+</ul>
+<p><strong>Factor B: the nested effect (random)</strong></p>
+<ul>
+<li><span class="math inline">\(H_0(B) : \sigma^2_{\beta}=0\)</span> (population variance equals zero). There is no added variance due to all possible levels of B within the (set or all possible) levels of A.</li>
+</ul>
+<p><strong>Factor B: the nested effect (fixed)</strong></p>
+<ul>
+<li><p><span class="math inline">\(H_0(B): \mu_{1(1)}=\mu_{2(1)}=\ldots=\mu_{j(i)}=\mu\)</span> (the population group means of B (within A) are all equal).</p></li>
+<li><p><span class="math inline">\(H_0(B): \beta_{1(1)}=\beta_{2(1)}=\ldots=\beta_{j(i)}=0\)</span> (the effect of each chosen B group equals zero).</p></li>
+</ul>
+</section>
+<section id="analysis-of-variance" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-of-variance">Analysis of variance</h2>
+<p>Analysis of variance sequentially partitions the total variability in the response variable into components explained by each of the factors (starting with the factors lowest down in the hierarchy - the most deeply nested) and the components unexplained by each factor. Explained variability is calculated by subtracting the amount unexplained by the factor from the amount unexplained by a reduced model that does not contain the factor. When the null hypothesis for a factor is true (no effect or added variability), the ratio of explained and unexplained components for that factor (F-ratio) should follow a theoretical F-distribution with an expected value less than 1. The appropriate unexplained residuals and therefore the appropriate F-ratios for each factor differ according to the different null hypotheses associated with different combinations of fixed and random factors in a nested linear model (see Table below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fact_anova_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The corresponding <code>R</code> syntax is given below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#A fixed/random, B random (balanced)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">aov</span>(y<span class="sc">~</span>A<span class="sc">+</span><span class="fu">Error</span>(B), data))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">VarCorr</span>(<span class="fu">lme</span>(y<span class="sc">~</span>A,<span class="at">random=</span><span class="dv">1</span><span class="sc">|</span>B, data))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#A fixed/random, B random (unbalanced)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(<span class="fu">lme</span>(y<span class="sc">~</span>A,<span class="at">random=</span><span class="dv">1</span><span class="sc">|</span>B, data), <span class="at">type=</span><span class="st">'marginal'</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#A fixed/random, B fixed(balanced)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">aov</span>(y<span class="sc">~</span>A<span class="sc">+</span>B, data))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#A fixed/random, B fixed (unbalanced)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(data<span class="sc">$</span>B) <span class="ot">&lt;-</span> contr.sum</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">Anova</span>(<span class="fu">aov</span>(y<span class="sc">~</span>A<span class="sc">/</span>B, data), <span class="at">type=</span><span class="st">'III'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="variance-components" class="level2">
+<h2 class="anchored" data-anchor-id="variance-components">Variance components</h2>
+<p>As previously alluded to, it can often be useful to determine the relative contribution (to explaining the unexplained variability) of each of the factors as this provides insights into the variability at each different scales. These contributions are known as <strong>Variance components</strong> and are estimates of the added variances due to each of the factors. For consistency with leading texts on this topic, I have included estimated variance components for various balanced nested ANOVA designs in the above table. However, variance components based on a modified version of the maximum likelihood iterative model fitting procedure (<em>REML</em>) is generally recommended as this accommodates both balanced and unbalanced designs. While there are no numerical differences in the calculations of variance components for fixed and random factors, fixed factors are interpreted very differently and arguably have little clinical meaning (other to infer relative contribution). For fixed factors, variance components estimate the variance between the means of the specific populations that are represented by the selected levels of the factor and therefore represent somewhat arbitrary and artificial populations. For random factors, variance components estimate the variance between means of all possible populations that could have been selected and thus represents the true population variance.</p>
+</section>
+<section id="assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
+<p>An F-distribution represents the relative frequencies of all the possible F-ratio’s when a given null hypothesis is true and certain assumptions about the residuals (denominator in the F-ratio calculation) hold. Consequently, it is also important that diagnostics associated with a particular hypothesis test reflect the denominator for the appropriate F-ratio. For example, when testing the null hypothesis that there is no effect of Factor A (<span class="math inline">\(H_0(A):\alpha_i=0\)</span>) in a mixed nested ANOVA, the means of each level of Factor B are used as the replicates of Factor A. As with single factor anova, hypothesis testing for nested ANOVA assumes the residuals are:</p>
+<ul>
+<li><p>normally distributed. Factors higher up in the hierarchy of a nested model are based on means (or means of means) of lower factors and thus the <em>Central Limit Theory</em> would predict that normality will usually be satisfied for the higher level factors. Nevertheless, boxplots using the appropriate scale of replication should be used to explore normality. Scale transformations are often useful.</p></li>
+<li><p>equally varied. Boxplots and plots of means against variance (using the appropriate scale of replication) should be used to explore the spread of values. Residual plots should reveal no patterns. Scale transformations are often useful.</p></li>
+<li><p>independent of one another - this requires special consideration so as to ensure that the scale at which sub-replicates are measured is still great enough to enable observations to be independent.</p></li>
+</ul>
+</section>
+<section id="unbalanced-nested-designs" class="level2">
+<h2 class="anchored" data-anchor-id="unbalanced-nested-designs">Unbalanced nested designs</h2>
+<p>Designs that incorporate fixed and random factors (either nested or factorial), involve F-ratio calculations in which the denominators are themselves random factors other than the overall residuals. Many statisticians argue that when such denominators are themselves not statistically significant (at the <span class="math inline">\(0.25\)</span> level), there are substantial power benefits from pooling together successive non-significant denominator terms. Thus an F-ratio for a particular factor might be recalculated after pooling together its original denominator with its denominators denominator and so on. The conservative <span class="math inline">\(0.25\)</span> is used instead of the usual 0.05 to reduce further the likelihood of Type II errors (falsely concluding an effect is non-significant - that might result from insufficient power).</p>
+<p>For a simple completely balanced nested ANOVA, it is possible to pool together (calculate their mean) each of the sub-replicates within each nest (site) and then perform single factor ANOVA on those aggregates. Indeed, for a <em>balanced design</em>, the estimates and hypothesis for Factor A will be identical to that produced via nested ANOVA. However, if there are an unequal number of sub-replicates within each nest, then the single factor ANOVA will be less powerful that a proper nested ANOVA. <em>Unbalanced designs</em> are those designs in which sample (subsample) sizes for each level of one or more factors differ. These situations are relatively common in biological research, however such imbalance has some important implications for nested designs.</p>
+<p>Firstly, hypothesis tests are more robust to the assumptions of normality and equal variance when the design is balanced. Secondly (and arguably, more importantly), the model contrasts are not orthogonal (independent) and the sums of squares component attributed to each of the model terms cannot be calculated by simple additive partitioning of the total sums of squares. In such situations, exact F-ratios cannot be constructed (at least in theory), variance components calculations are more complicated and significance tests cannot be computed. The denominator MS in an <em>F-ratio</em> is determined by examining the expected value of the mean squares of each term in a model. Unequal sample sizes result in expected means squares for which there are no obvious logical comparators that enable the impact of an individual model term to be isolated. The severity of this issue depends on which scale of the sub-sampling hierarchy the unbalance(s) occurs as well whether the unbalance occurs in the replication of a fixed or random factor. For example, whilst unequal levels of the first nesting factor (e.g.&nbsp;unequal number of burn vs un-burnt sites) has no effect on F-ratio construction or hypothesis testing for the top level factor (irrespective of whether either of the factors are fixed or random), unequal sub-sampling (replication) at the level of a random (but not fixed) nesting factor will impact on the ability to construct F-ratios and variance components of all terms above it in the hierarchy. There are a number of alternative ways of dealing with unbalanced nested designs. All alternatives assume that the imbalance is not a direct result of the treatments themselves. Such outcomes are more appropriately analysed by modelling the counts of surviving observations via frequency analysis.</p>
+<ul>
+<li>Split the analysis up into separate smaller simple ANOVA’s each using the means of the nesting factor to reflect the appropriate scale of replication. As the resulting sums of squares components are thereby based on an aggregated dataset the analyses then inherit the procedures and requirements of single ANOVA.</li>
+<li>Adopt mixed-modelling techniques.</li>
+</ul>
+<p>We note that, in a Bayesian framework, issues of design balance essentially evaporate.</p>
+</section>
+<section id="linear-mixed-effects-models" class="level2">
+<h2 class="anchored" data-anchor-id="linear-mixed-effects-models">Linear mixed effects models</h2>
+<p>Although the term “mixed-effects” can be used to refer to any design that incorporates both fixed and random predictors, its use is more commonly restricted to designs in which factors are nested or grouped within other factors. Typical examples include nested, longitudinal (measurements repeated over time) data, repeated measures and blocking designs. Furthermore, rather than basing parameter estimations on observed and expected mean squares or error strata (as outline above), mixed-effects models estimate parameters via <strong>maximum likelihood</strong> (ML) or <strong>residual maximum likelihood</strong> (REML). In so doing, mixed-effects models more appropriately handle estimation of parameters, effects and variance components of unbalanced designs (particularly for random effects). Resulting fitted (or expected) values of each level of a factor (for example, the expected population site means) are referred to as <em>Best Linear Unbiased Predictors</em> (BLUP’s). As an acknowledgement that most estimated site means will be more extreme than the underlying true population means they estimate (based on the principle that smaller sample sizes result in greater chances of more extreme observations and that nested sub-replicates are also likely to be highly intercorrelated), BLUP’s are less spread from the overall mean than are simple site means. In addition, mixed-effects models naturally model the “within-block” correlation structure that complicates many longitudinal designs.</p>
+<p>Whilst the basic concepts of mixed-effects models have been around for a long time, recent computing advances and adoptions have greatly boosted the popularity of these procedures. Linear mixed effects models are currently at the forefront of statistical development, and as such, are very much a work in progress - both in theory and in practice. Recent developments have seen a further shift away from the traditional practices associated with degrees of freedom, probability distribution and p-value calculations. The traditional approach to inference testing is to compare the fit of an alternative (full) model to a null (reduced) model (via an F-ratio). When assumptions of normality and homogeneity of variance apply, the degrees of freedom are easily computed and the F-ratio has an exact F-distribution to which it can be compared. However, this approach introduces two additional problematic assumptions when estimating fixed effects in a mixed effects model. Firstly, when estimating the effects of one factor, the parameter estimates associated with other factor(s) are assumed to be the true values of those parameters (not estimates). Whilst this assumption is reasonable when all factors are fixed, as random factors are selected such that they represent one possible set of levels drawn from an entire population of possible levels for the random factor, it is unlikely that the associated parameter estimates accurately reflect the true values. Consequently, there is not necessarily an appropriate F-distribution. Furthermore, determining the appropriate degrees of freedom (nominally, the number of independent observations on which estimates are based) for models that incorporate a hierarchical structure is only possible under very specific circumstances (such as completely balanced designs). Degrees of freedom is a somewhat arbitrary defined concept used primarily to select a theoretical probability distribution on which a statistic can be compared. Arguably, however, it is a concept that is overly simplistic for complex hierarchical designs. Most statistical applications continue to provide the “approximate” solutions (as did earlier versions within <code>R</code>). However, <code>R</code> linear mixed effects development leaders argue strenuously that given the above shortcomings, such approximations are variably inappropriate and are thus omitted.</p>
+<p><strong>Markov chain Monte Carlo</strong> (MCMC) sampling methods provide a Bayesian-like alternative for inference testing. Markov chains use the mixed model parameter estimates to generate posterior probability distributions of each parameter from which Monte Carlo sampling methods draw a large set of parameter samples. These parameter samples can then be used to calculate <em>highest posterior density</em> (HPD) intervals (also known as Bayesian credible intervals). Such intervals indicate the interval in which there is a specified probability (typically <span class="math inline">\(95\)</span>%) that the true population parameter lies. Furthermore, whilst technically against the spirit of the Bayesian philosophy, it is also possible to generate P values on which to base inferences.</p>
+</section>
+</section>
+<section id="data-generation" class="level1">
+<h1>Data generation</h1>
+<p>Imagine we has designed an experiment in which we intend to measure a response (<span class="math inline">\(y\)</span>) to one of treatments (three levels; “a1”, “a2” and “a3”). The treatments occur at a spatial scale (over an area) that far exceeds the logistical scale of sampling units (it would take too long to sample at the scale at which the treatments were applied). The treatments occurred at the scale of hectares whereas it was only feasible to sample y using 1m quadrats. Given that the treatments were naturally occurring (such as soil type), it was not possible to have more than five sites of each treatment type, yet prior experience suggested that the sites in which you intended to sample were very uneven and patchy with respect to <span class="math inline">\(y\)</span>. In an attempt to account for this inter-site variability (and thus maximize the power of the test for the effect of treatment, you decided to employ a nested design in which 10 quadrats were randomly located within each of the five replicate sites per three treatments. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>nTreat <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>nSites <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>nSitesPerTreat <span class="ot">&lt;-</span> nSites<span class="sc">/</span>nTreat</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>nQuads <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>site.sigma <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> nSites <span class="sc">*</span> nQuads</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>sites <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="at">n=</span>nSites,<span class="at">k=</span>nQuads, <span class="at">lab=</span><span class="fu">paste0</span>(<span class="st">'S'</span>,<span class="dv">1</span><span class="sc">:</span>nSites))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">gl</span>(nTreat, nSitesPerTreat<span class="sc">*</span>nQuads, n, <span class="at">labels=</span><span class="fu">c</span>(<span class="st">'a1'</span>,<span class="st">'a2'</span>,<span class="st">'a3'</span>))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>a.means <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">40</span>,<span class="dv">70</span>,<span class="dv">80</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="do">## the site means (treatment effects) are drawn from normal distributions</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="do">## with means of 40, 70 and 80 and standard deviations of 12</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>A.effects <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nSites, <span class="fu">rep</span>(a.means,<span class="at">each=</span>nSitesPerTreat),site.sigma)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#A.effects &lt;- a.means %*% t(model.matrix(~A, data.frame(A=gl(nTreat,nSitesPerTreat,nSites))))+rnorm(nSites,0,site.sigma)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>sites <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>lin.pred <span class="ot">&lt;-</span> Xmat <span class="sc">%*%</span> <span class="fu">c</span>(A.effects)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="do">## the quadrat observations (within sites) are drawn from</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="do">## normal distributions with means according to the site means</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="do">## and standard deviations of 5</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,lin.pred,sigma)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>data.nest <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y, <span class="at">A=</span>A, <span class="at">Sites=</span>sites,<span class="at">Quads=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y))</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.nest)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA          y  A Sites Quads
+NA 1 42.20886 a1    S1     1
+NA 2 35.76354 a1    S1     2
+NA 3 23.44121 a1    S1     3
+NA 4 36.78107 a1    S1     4
+NA 5 30.91034 a1    S1     5
+NA 6 27.93517 a1    S1     6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.nest, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span><span class="dv">1</span>)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">facet_grid</span>(.<span class="sc">~</span>Sites)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
+<p><strong>Normality and Homogeneity of variance</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Effects of treatment</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>A, <span class="fu">ddply</span>(data.nest, <span class="sc">~</span>A<span class="sc">+</span>Sites,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Site effects</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Sites, <span class="fu">ddply</span>(data.nest, <span class="sc">~</span>A<span class="sc">+</span>Sites<span class="sc">+</span>Quads,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## with ggplot2</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">ddply</span>(data.nest, <span class="sc">~</span>A<span class="sc">+</span>Sites,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)), <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>A)) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li><p>there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.</p></li>
+<li><p>there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the y-axis. Hence it there is no evidence of non-homogeneity.</p></li>
+</ul>
+<p>Obvious violations could be addressed either by:</p>
+<ul>
+<li>transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).</li>
+</ul>
+</section>
+</section>
+<section id="model-fitting" class="level1">
+<h1>Model fitting</h1>
+<p>For non-hierarchical linear models, uniform priors on variance (standard deviation) parameters seem to work reasonably well. <span class="citation" data-cites="gelman2006prior">Gelman et al. (<a href="#ref-gelman2006prior" role="doc-biblioref">2006</a>)</span> warns that the use of the inverse-gamma family of non-informative priors are very sensitive to ϵ particularly when variance is close to zero and this may lead to unintentionally informative priors. When the number of groups (treatments or varying/random effects) is large (more than <span class="math inline">\(5\)</span>), <span class="citation" data-cites="gelman2006prior">Gelman et al. (<a href="#ref-gelman2006prior" role="doc-biblioref">2006</a>)</span> advocated the use of either uniform or half-cauchy priors. Yet when the number of groups is low, <span class="citation" data-cites="gelman2006prior">Gelman et al. (<a href="#ref-gelman2006prior" role="doc-biblioref">2006</a>)</span> indicates that uniform priors have a tendency to result in inflated variance estimates. Consequently, half-Cauchy priors are generally recommended for variances.</p>
+<p><strong>Full parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\alpha_0 + \alpha_i + \beta_{j(i)},
+\]</span></p>
+<p>where <span class="math inline">\(\beta_{ij)} \sim N(0, \sigma^2_B)\)</span>, <span class="math inline">\(\alpha_0, \alpha_i \sim N(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>. The <em>full parameterisation</em>, shows the effects parameterisation in which there is an intercept (<span class="math inline">\(\alpha_0\)</span>) and two treatment effects (<span class="math inline">\(\alpha_i\)</span>, where <span class="math inline">\(i\)</span> is <span class="math inline">\(1,2\)</span>).</p>
+<p><strong>Matrix parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}=\boldsymbol \alpha \boldsymbol X + \beta_{j(i)},
+\]</span></p>
+<p>where <span class="math inline">\(\beta_{ij} \sim N(0, \sigma^2_B)\)</span>, <span class="math inline">\(\boldsymbol \alpha \sim MVN(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>. The full parameterisation, shows the effects parameterisation in which there is an intercept (<span class="math inline">\(\alpha_0\)</span>) and two treatment effects (<span class="math inline">\(\alpha_i\)</span>, where <span class="math inline">\(i\)</span> is <span class="math inline">\(1,2\)</span>). The <em>matrix parameterisation</em> is a compressed notation, In this parameterisation, there are three alpha parameters (one representing the mean of treatment a1, and the other two representing the treatment effects (differences between a2 and a1 and a3 and a1). In generating priors for each of these three alpha parameters, we could loop through each and define a non-informative normal prior to each (as in the Full parameterisation version). However, it turns out that it is more efficient (in terms of mixing and thus the number of necessary iterations) to define the priors from a multivariate normal distribution. This has as many means as there are parameters to estimate (<span class="math inline">\(3\)</span>) and a <span class="math inline">\(3\times3\)</span> matrix of zeros and <span class="math inline">\(100\)</span> in the diagonals.</p>
+<p><span class="math display">\[
+\boldsymbol \mu =
+  \begin{bmatrix} 0  \\ 0  \\ 0 \end{bmatrix}, \;\;\; \sigma^2 \sim   
+  \begin{bmatrix}
+   1000000 &amp; 0 &amp; 0 \\
+   0 &amp; 1000000 &amp; 0 \\
+   0 &amp; 0 &amp; 1000000
+   \end{bmatrix}.
+\]</span></p>
+<p><strong>Hierarchical parameterisation</strong></p>
+<p><span class="math display">\[
+y_{ijk} \sim N(\beta_{i(j)}, \sigma^2), \;\;\; \beta_{i(j)}\sim N(\mu_i, \sigma^2_B),
+\]</span></p>
+<p>where <span class="math inline">\(\mu_i = \boldsymbol \alpha \boldsymbol X\)</span>, <span class="math inline">\(\alpha_i \sim N(0, 1000000)\)</span>, and <span class="math inline">\(\sigma^2, \sigma^2_B \sim \text{Cauchy(0, 25)}\)</span>. In the <em>heirarchical parameterisation</em>, we are indicating two residual layers - one representing the variability in the observed data between individual observations (within sites) and the second representing the variability between site means (within the three treatments).</p>
+<section id="full-effect-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="full-effect-parameterisation">Full effect parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">      mu[i] &lt;- alpha0 + alpha[A[i]] + beta[site[i]]</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">   </span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="st">   alpha0 ~ dnorm(0, 1.0E-6)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="st">   alpha[1] &lt;- 0</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 2:nA) {</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="st">     alpha[i] ~ dnorm(0, 1.0E-6) #prior</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nSite) {</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="st">     beta[i] ~ dnorm(0, tau.B) #prior</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.B &lt;- pow(sigma.B,-2)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.B &lt;-z/sqrt(chSq.B)</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="st">   z.B ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.B ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"fullModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>JAGS</code>). As input, <code>JAGS</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">site=</span><span class="fu">as.numeric</span>(Sites),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">A=</span><span class="fu">as.numeric</span>(A),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">nSite=</span><span class="fu">length</span>(<span class="fu">levels</span>(Sites)),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nA =</span> <span class="fu">length</span>(<span class="fu">levels</span>(A))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>,<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma.B"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>adaptSteps <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>R2jags</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>JAGS</code> code via the <code>R2jags</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.f <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"fullModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 22
+NA    Total graph size: 502
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "fullModel.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA alpha[1]   0.000   0.000   0.000   0.000   0.000   0.000   0.000 1.000     1
+NA alpha[2]  27.388   7.149  13.085  22.881  27.312  31.980  41.230 1.001  3000
+NA alpha[3]  40.839   7.083  26.936  36.251  40.800  45.412  55.107 1.002  3000
+NA alpha0    42.325   4.978  32.452  39.136  42.215  45.422  52.310 1.002  3000
+NA sigma      5.069   0.307   4.530   4.851   5.051   5.265   5.722 1.002  3000
+NA sigma.B   10.990   2.527   7.168   9.260  10.656  12.306  17.136 1.009   190
+NA deviance 909.635   5.937 899.898 905.400 908.952 913.145 923.175 1.001  3000
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 17.6 and DIC = 927.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="matrix-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-parameterisation">Matrix parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>modelString2<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">      mu[i] &lt;- inprod(alpha[],X[i,]) + inprod(beta[], Z[i,])</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="st">   } </span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="st">   </span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="st">   alpha ~ dmnorm(a0,A0)</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nZ) {</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="st">     beta[i] ~ dnorm(0, tau.B) #prior</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.B &lt;- pow(sigma.B,-2)</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.B &lt;-z/sqrt(chSq.B)</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="st">   z.B ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.B ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString2, <span class="at">con =</span> <span class="st">"matrixModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>JAGS</code>). As input, <code>JAGS</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>A.Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A,data.nest)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>Zmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Sites, data.nest)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">X=</span>A.Xmat,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">Z=</span>Zmat, <span class="at">nZ=</span><span class="fu">ncol</span>(Zmat),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">a0=</span><span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">3</span>), <span class="at">A0=</span><span class="fu">diag</span>(<span class="dv">3</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma.B"</span>,<span class="st">'beta'</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>JAGS</code> code via the <code>R2jags</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.m <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"matrixModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 20
+NA    Total graph size: 3231
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "matrixModel.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA alpha[1]   0.201   1.016  -1.750  -0.474   0.215   0.872   2.161 1.001  3000
+NA alpha[2]   0.082   0.972  -1.835  -0.585   0.092   0.730   1.954 1.003  2000
+NA alpha[3]   0.077   1.005  -1.867  -0.608   0.075   0.771   2.055 1.001  3000
+NA beta[1]   31.532   1.871  27.942  30.237  31.536  32.794  35.248 1.001  3000
+NA beta[2]   38.069   1.911  34.289  36.788  38.125  39.343  41.817 1.001  3000
+NA beta[3]   59.346   1.872  55.692  58.089  59.346  60.579  63.088 1.001  3000
+NA beta[4]   40.644   1.936  36.885  39.378  40.659  41.960  44.321 1.002  1400
+NA beta[5]   40.506   1.855  36.802  39.248  40.492  41.750  44.199 1.001  3000
+NA beta[6]   90.495   2.131  86.451  89.013  90.489  91.970  94.602 1.001  3000
+NA beta[7]   75.252   2.114  71.007  73.850  75.238  76.681  79.322 1.002  1200
+NA beta[8]   57.061   2.180  52.888  55.574  57.032  58.568  61.289 1.001  2400
+NA beta[9]   61.336   2.171  57.214  59.855  61.372  62.822  65.415 1.001  3000
+NA beta[10]  62.816   2.159  58.580  61.353  62.774  64.268  67.144 1.001  3000
+NA beta[11]  93.379   2.134  89.192  91.945  93.374  94.750  97.533 1.001  3000
+NA beta[12]  83.011   2.161  78.822  81.508  83.024  84.486  87.245 1.001  3000
+NA beta[13]  82.765   2.202  78.398  81.292  82.774  84.252  87.054 1.001  3000
+NA beta[14]  81.140   2.165  76.775  79.675  81.185  82.598  85.236 1.001  3000
+NA beta[15]  74.041   2.119  70.008  72.616  74.027  75.493  78.245 1.001  3000
+NA sigma      5.058   0.306   4.499   4.844   5.049   5.255   5.710 1.002  1200
+NA sigma.B   68.791  13.133  48.825  59.338  66.869  75.995  98.963 1.002  3000
+NA deviance 909.431   6.235 899.560 905.043 908.621 913.008 923.865 1.003   810
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 19.4 and DIC = 928.8
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="hierarchical-parameterisation" class="level2">
+<h2 class="anchored" data-anchor-id="hierarchical-parameterisation">Hierarchical parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>modelString3<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood (esimating site means (gamma.site)</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(quad.means[i],tau)</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="st">      quad.means[i] &lt;- gamma.site[site[i]]</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:s) {</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="st">      gamma.site[i] ~ dnorm(site.means[i], tau.site)</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="st">      site.means[i] &lt;- inprod(beta[],A.Xmat[i,])</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:a) {</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="st">     beta[i] ~ dnorm(0, 1.0E-6) #prior</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.B &lt;- pow(sigma.B,-2)</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.B &lt;-z/sqrt(chSq.B)</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="st">   z.B ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.B ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.site &lt;- pow(sigma.site,-2)</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.site &lt;-z/sqrt(chSq.site)</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="st">   z.site ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.site ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString3, <span class="at">con =</span> <span class="st">"hierarchicalModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Arrange the data as a list (as required by <code>JAGS</code>). As input, <code>JAGS</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>A.Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A,<span class="fu">ddply</span>(data.nest,<span class="sc">~</span>Sites,<span class="fu">catcolwise</span>(unique)))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">site=</span>Sites,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">A.Xmat=</span> A.Xmat,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest),</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">s=</span><span class="fu">length</span>(<span class="fu">levels</span>(Sites)),</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">a =</span> <span class="fu">ncol</span>(A.Xmat)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma.site"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now run the <code>JAGS</code> code via the <code>R2jags</code> interface.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.h <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"hierarchicalModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 24
+NA    Total graph size: 406
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.h)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "hierarchicalModel.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA            mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA beta[1]     42.139   4.991  32.186  38.913  42.226  45.346  51.751 1.001  3000
+NA beta[2]     27.611   6.859  13.692  23.437  27.617  31.993  41.118 1.001  3000
+NA beta[3]     41.048   7.032  26.813  36.805  41.067  45.316  55.566 1.002  1200
+NA sigma        5.058   0.315   4.483   4.841   5.036   5.257   5.763 1.001  3000
+NA sigma.site  10.889   2.386   7.235   9.269  10.578  12.125  16.695 1.005  3000
+NA deviance   909.557   6.168 899.915 905.154 908.708 913.153 923.686 1.001  1900
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 19.0 and DIC = 928.6
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p>If you want to include finite-population standard deviations in the model you can use the following code.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>modelString4<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood (esimating site means (gamma.site)</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(quad.means[i],tau)</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="st">      quad.means[i] &lt;- gamma.site[site[i]]</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="st">      y.err[i]&lt;- quad.means[i]-y[i]</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:s) {</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="st">      gamma.site[i] ~ dnorm(site.means[i], tau.site)</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="st">      site.means[i] &lt;- inprod(beta[],A.Xmat[i,])</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="st">      site.err[i] &lt;- site.means[i] - gamma.site[i]</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:a) {</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="st">     beta[i] ~ dnorm(0, 1.0E-6) #prior</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.site &lt;- pow(sigma.site,-2)</span></span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.site &lt;-z/sqrt(chSq.site)</span></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="st">   z.site ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.site ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a><span class="st">   </span></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.y &lt;- sd(y.err)</span></span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.site &lt;- sd(site.err)</span></span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.A &lt;- sd(beta)</span></span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString4, <span class="at">con =</span> <span class="st">"SDModel.txt"</span>)</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a><span class="co">#data list</span></span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>A.Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A,<span class="fu">ddply</span>(data.nest,<span class="sc">~</span>Sites,<span class="fu">catcolwise</span>(unique)))</span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest,</span>
+<span id="cb31-40"><a href="#cb31-40" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb31-41"><a href="#cb31-41" aria-hidden="true" tabindex="-1"></a>                 <span class="at">site=</span>Sites,</span>
+<span id="cb31-42"><a href="#cb31-42" aria-hidden="true" tabindex="-1"></a>         <span class="at">A.Xmat=</span> A.Xmat,</span>
+<span id="cb31-43"><a href="#cb31-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest),</span>
+<span id="cb31-44"><a href="#cb31-44" aria-hidden="true" tabindex="-1"></a>         <span class="at">s=</span><span class="fu">length</span>(<span class="fu">levels</span>(Sites)),</span>
+<span id="cb31-45"><a href="#cb31-45" aria-hidden="true" tabindex="-1"></a>                 <span class="at">a =</span> <span class="fu">ncol</span>(A.Xmat)</span>
+<span id="cb31-46"><a href="#cb31-46" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb31-47"><a href="#cb31-47" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-48"><a href="#cb31-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-49"><a href="#cb31-49" aria-hidden="true" tabindex="-1"></a><span class="co">#parameters and chain details</span></span>
+<span id="cb31-50"><a href="#cb31-50" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>,<span class="st">"sigma"</span>,<span class="st">"sd.y"</span>,<span class="st">'sd.site'</span>,<span class="st">'sd.A'</span>,<span class="st">'sigma.site'</span>)</span>
+<span id="cb31-51"><a href="#cb31-51" aria-hidden="true" tabindex="-1"></a>adaptSteps <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb31-52"><a href="#cb31-52" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb31-53"><a href="#cb31-53" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb31-54"><a href="#cb31-54" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb31-55"><a href="#cb31-55" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb31-56"><a href="#cb31-56" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb31-57"><a href="#cb31-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-58"><a href="#cb31-58" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.SD <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb31-59"><a href="#cb31-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"SDModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb31-60"><a href="#cb31-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 22
+NA    Total graph size: 571
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.SD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "SDModel.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA            mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA beta[1]     42.336   5.027  32.564  39.187  42.338  45.373  52.570 1.004   420
+NA beta[2]     27.417   7.290  12.457  22.904  27.308  31.955  42.039 1.001  2100
+NA beta[3]     40.862   7.164  26.163  36.386  40.920  45.444  55.173 1.007   770
+NA sd.A        10.042   4.276   2.657   7.162   9.646  12.369  19.900 1.001  2200
+NA sd.site     10.592   1.057   9.214   9.909  10.354  11.029  13.276 1.010   280
+NA sd.y         4.999   0.095   4.852   4.929   4.987   5.058   5.219 1.003   770
+NA sigma        5.047   0.309   4.489   4.830   5.029   5.257   5.705 1.005   310
+NA sigma.site  11.003   2.465   7.419   9.295  10.610  12.282  16.704 1.004   480
+NA deviance   909.411   6.011 899.576 904.938 908.750 913.034 922.925 1.003   630
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 18.0 and DIC = 927.5
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p>Calculate <span class="math inline">\(R^2\)</span> from the posterior of the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>data.nest.mcmc.listSD <span class="ot">&lt;-</span> <span class="fu">as.mcmc</span>(data.nest.r2jags.SD)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, data.nest)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">&lt;-</span> data.nest.r2jags.SD<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'beta'</span>]]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>fitted <span class="ot">&lt;-</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>X.var <span class="ot">&lt;-</span> <span class="fu">aaply</span>(fitted,<span class="dv">1</span>,<span class="cf">function</span>(x){<span class="fu">var</span>(x)})</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>Z.var <span class="ot">&lt;-</span> data.nest.r2jags.SD<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'sd.site'</span>]]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>R.var <span class="ot">&lt;-</span> data.nest.r2jags.SD<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'sd.y'</span>]]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>R2.marginal <span class="ot">&lt;-</span> (X.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>R2.marginal <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.marginal), <span class="at">Median=</span><span class="fu">median</span>(R2.marginal), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.marginal)))</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>R2.conditional <span class="ot">&lt;-</span> (X.var<span class="sc">+</span>Z.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>R2.conditional <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.conditional),</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">Median=</span><span class="fu">median</span>(R2.conditional), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.conditional)))</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>R2.site <span class="ot">&lt;-</span> (Z.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>R2.site <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.site), <span class="at">Median=</span><span class="fu">median</span>(R2.site), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.site)))</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>R2.res<span class="ot">&lt;-</span>(R.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>R2.res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.res), <span class="at">Median=</span><span class="fu">median</span>(R2.res), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.res)))</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">R2.site=</span>R2.site, <span class="at">R2.marginal=</span>R2.marginal, <span class="at">R2.res=</span>R2.res, <span class="at">R2.conditional=</span>R2.conditional)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA                      Mean    Median      lower      upper
+NA R2.site        0.26437322 0.2428822 0.16881028 0.41958555
+NA R2.marginal    0.67674004 0.6992418 0.49930501 0.78437310
+NA R2.res         0.05888674 0.0584191 0.03459529 0.08514432
+NA R2.conditional 0.94111326 0.9415809 0.91485568 0.96540471</code></pre>
+</div>
+</div>
+</section>
+<section id="graphical-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="graphical-summaries">Graphical summaries</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest, <span class="fu">data.frame</span>(<span class="at">A=</span><span class="fu">levels</span>(A)))</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, newdata)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">&lt;-</span> data.nest.r2jags.m<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'alpha'</span>]]</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">cbind</span>(newdata,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>   <span class="fu">adply</span>(fit, <span class="dv">2</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>          <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(x), <span class="at">Median=</span><span class="fu">median</span>(x), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)),</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>             <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x), <span class="at">p=</span><span class="fl">0.68</span>))</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>   })</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(grid)</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y=</span>Median, <span class="at">x=</span>A)) <span class="sc">+</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>lower, <span class="at">ymax=</span>upper), <span class="at">width=</span><span class="fl">0.01</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>lower<span class="fl">.1</span>, <span class="at">ymax=</span>upper<span class="fl">.1</span>), <span class="at">width=</span><span class="dv">0</span>, <span class="at">size=</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">4</span>, <span class="at">shape=</span><span class="dv">21</span>, <span class="at">fill=</span><span class="st">'white'</span>)<span class="sc">+</span></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">'Y'</span>)<span class="sc">+</span></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="st">'X'</span>)<span class="sc">+</span></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()<span class="sc">+</span></span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y=</span><span class="fu">element_text</span>(<span class="at">vjust=</span><span class="dv">2</span>, <span class="at">size=</span><span class="fu">rel</span>(<span class="fl">1.25</span>)),</span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x=</span><span class="fu">element_text</span>(<span class="at">vjust=</span><span class="sc">-</span><span class="dv">2</span>, <span class="at">size=</span><span class="fu">rel</span>(<span class="fl">1.25</span>)),</span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.margin=</span><span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="dv">2</span>,<span class="dv">2</span>), <span class="st">'lines'</span>)</span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="data-generation---second-example" class="level1">
+<h1>Data generation - second example</h1>
+<p>Now imagine a similar experiment in which we intend to measure a response (<span class="math inline">\(y\)</span>) to one of treatments (three levels; “a1”, “a2” and “a3”). As with the previous design, we decided to establish a nested design in which there are sub-replicate (<span class="math inline">\(1\)</span>m Quadrats) within each Site. In the current design, we have decided to further sub-replicate. Within each of the <span class="math inline">\(5\)</span> Quadrats, we are going to randomly place <span class="math inline">\(2\times10\)</span>cm pit traps. Now we have Sites nested within Treatments, Quadrats nested within Sites AND, Pits nested within Sites. The latter of these (Pits nested within Sites) are the observations (<span class="math inline">\(y\)</span>). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>nTreat <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>nSites <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>nSitesPerTreat <span class="ot">&lt;-</span> nSites<span class="sc">/</span>nTreat</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>nQuads <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>nPits <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>site.sigma <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="co"># sd within between sites within treatment</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>quad.sigma <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">7.5</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> nSites <span class="sc">*</span> nQuads <span class="sc">*</span> nPits</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>sites <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="at">n=</span>nSites,n<span class="sc">/</span>nSites,n, <span class="at">lab=</span><span class="fu">paste</span>(<span class="st">"site"</span>,<span class="dv">1</span><span class="sc">:</span>nSites))</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">gl</span>(nTreat, n<span class="sc">/</span>nTreat, n, <span class="at">labels=</span><span class="fu">c</span>(<span class="st">'a1'</span>,<span class="st">'a2'</span>,<span class="st">'a3'</span>))</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>a.means <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">40</span>,<span class="dv">70</span>,<span class="dv">80</span>)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="co">#A&lt;-gl(nTreat,nSites/nTreat,nSites,labels=c('a1','a2','a3'))</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>a<span class="ot">&lt;-</span><span class="fu">gl</span>(nTreat,<span class="dv">1</span>,nTreat,<span class="at">labels=</span><span class="fu">c</span>(<span class="st">'a1'</span>,<span class="st">'a2'</span>,<span class="st">'a3'</span>))</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>a.X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>a, <span class="fu">expand.grid</span>(a))</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>a.eff <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">solve</span>(a.X,a.means))</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>site.means <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nSites,a.X <span class="sc">%*%</span> a.eff,site.sigma)</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">gl</span>(nTreat,nSites<span class="sc">/</span>nTreat,nSites,<span class="at">labels=</span><span class="fu">c</span>(<span class="st">'a1'</span>,<span class="st">'a2'</span>,<span class="st">'a3'</span>))</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>A.X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, <span class="fu">expand.grid</span>(A))</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a><span class="co">#a.X &lt;- model.matrix(~A, expand.grid(A=gl(nTreat,nSites/nTreat,nSites,labels=c('a1','a2','a3'))))</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>site.means <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nSites,A.X <span class="sc">%*%</span> a.eff,site.sigma)</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>SITES <span class="ot">&lt;-</span> <span class="fu">gl</span>(nSites,(nSites<span class="sc">*</span>nQuads)<span class="sc">/</span>nSites,nSites<span class="sc">*</span>nQuads,<span class="at">labels=</span><span class="fu">paste</span>(<span class="st">'site'</span>,<span class="dv">1</span><span class="sc">:</span>nSites))</span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>sites.X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>SITES<span class="dv">-1</span>)</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>quad.means <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nSites<span class="sc">*</span>nQuads,sites.X <span class="sc">%*%</span> site.means,quad.sigma)</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a><span class="co">#SITES &lt;- gl(nSites,1,nSites,labels=paste('site',1:nSites))</span></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a><span class="co">#sites.X &lt;- model.matrix(~SITES-1)</span></span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a><span class="co">#quad.means &lt;- rnorm(nSites*nQuads,sites.X %*% site.means,quad.sigma)</span></span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>QUADS <span class="ot">&lt;-</span> <span class="fu">gl</span>(nSites<span class="sc">*</span>nQuads,n<span class="sc">/</span>(nSites<span class="sc">*</span>nQuads),n,<span class="at">labels=</span><span class="fu">paste</span>(<span class="st">'quad'</span>,<span class="dv">1</span><span class="sc">:</span>(nSites<span class="sc">*</span>nQuads)))</span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>quads.X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>QUADS<span class="dv">-1</span>)</span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a><span class="co">#quads.eff &lt;- as.vector(solve(quads.X,quad.means))</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a><span class="co">#pit.means &lt;- rnorm(n,quads.eff %*% t(quads.X),sigma)</span></span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a>pit.means <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,quads.X <span class="sc">%*%</span> quad.means,sigma)</span>
+<span id="cb38-39"><a href="#cb38-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-40"><a href="#cb38-40" aria-hidden="true" tabindex="-1"></a>PITS <span class="ot">&lt;-</span> <span class="fu">gl</span>(nPits<span class="sc">*</span>nSites<span class="sc">*</span>nQuads,<span class="dv">1</span>, n, <span class="at">labels=</span><span class="fu">paste</span>(<span class="st">'pit'</span>,<span class="dv">1</span><span class="sc">:</span>(nPits<span class="sc">*</span>nSites<span class="sc">*</span>nQuads)))</span>
+<span id="cb38-41"><a href="#cb38-41" aria-hidden="true" tabindex="-1"></a>data.nest1<span class="ot">&lt;-</span><span class="fu">data.frame</span>(<span class="at">Pits=</span>PITS,<span class="at">Quads=</span>QUADS,<span class="at">Sites=</span><span class="fu">rep</span>(SITES,<span class="at">each=</span><span class="dv">2</span>), <span class="at">A=</span><span class="fu">rep</span>(A,<span class="at">each=</span>nQuads<span class="sc">*</span>nPits),<span class="at">y=</span>pit.means)</span>
+<span id="cb38-42"><a href="#cb38-42" aria-hidden="true" tabindex="-1"></a><span class="co">#data.nest1&lt;-data.nest1[order(data.nest1$A,data.nest1$Sites,data.nest1$Quads),]</span></span>
+<span id="cb38-43"><a href="#cb38-43" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.nest1)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA    Pits  Quads  Sites  A        y
+NA 1 pit 1 quad 1 site 1 a1 61.79607
+NA 2 pit 2 quad 1 site 1 a1 56.24699
+NA 3 pit 3 quad 2 site 1 a1 42.40885
+NA 4 pit 4 quad 2 site 1 a1 52.06672
+NA 5 pit 5 quad 3 site 1 a1 73.71286
+NA 6 pit 6 quad 3 site 1 a1 62.50529</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.nest1, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span><span class="dv">1</span>)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>() <span class="sc">+</span> <span class="fu">facet_grid</span>(.<span class="sc">~</span>Quads)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="exploratory-data-analysis-1" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-1">Exploratory data analysis</h2>
+<p><strong>Normality and Homogeneity of variance</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Effects of treatment</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>A, <span class="fu">ddply</span>(data.nest1, <span class="sc">~</span>A<span class="sc">+</span>Sites,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Site effects</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Sites, <span class="fu">ddply</span>(data.nest1, <span class="sc">~</span>A<span class="sc">+</span>Sites<span class="sc">+</span>Quads,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-23-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Quadrat effects</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Quads, <span class="fu">ddply</span>(data.nest1, <span class="sc">~</span>A<span class="sc">+</span>Sites<span class="sc">+</span>Quads<span class="sc">+</span>Pits,<span class="fu">numcolwise</span>(mean, <span class="at">na.rm=</span>T)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-23-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>:</p>
+<ul>
+<li><p>there is no evidence that the response variable is consistently non-normal across all populations - each boxplot is approximately symmetrical.</p></li>
+<li><p>there is no evidence that variance (as estimated by the height of the boxplots) differs between the five populations. More importantly, there is no evidence of a relationship between mean and variance - the height of boxplots does not increase with increasing position along the <span class="math inline">\(y\)</span>-axis. Hence it there is no evidence of non-homogeneity.</p></li>
+<li><p>it is a little difficult to assess normality/homogeneity of variance of quadrats since there are only two pits per quadrat. Nevertheless, there is no suggestion that variance increases with increasing mean.</p></li>
+</ul>
+<p>Obvious violations could be addressed either by:</p>
+<ul>
+<li>transform the scale of the response variables (to address normality, etc). Note transformations should be applied to the entire response variable (not just those populations that are skewed).</li>
+</ul>
+</section>
+</section>
+<section id="model-fitting-1" class="level1">
+<h1>Model fitting</h1>
+<section id="frequentist-for-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="frequentist-for-comparison">Frequentist for comparison</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>d.lme <span class="ot">&lt;-</span> <span class="fu">lme</span>(y <span class="sc">~</span> A, <span class="at">random=</span><span class="sc">~</span><span class="dv">1</span><span class="sc">|</span>Sites<span class="sc">/</span>Quads,<span class="at">data=</span>data.nest1)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(d.lme)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Linear mixed-effects model fit by REML
+NA   Data: data.nest1 
+NA        AIC      BIC   logLik
+NA   1137.994 1155.937 -562.997
+NA 
+NA Random effects:
+NA  Formula: ~1 | Sites
+NA         (Intercept)
+NA StdDev:    10.38249
+NA 
+NA  Formula: ~1 | Quads %in% Sites
+NA         (Intercept) Residual
+NA StdDev:    8.441617 7.161177
+NA 
+NA Fixed effects:  y ~ A 
+NA                Value Std.Error DF  t-value p-value
+NA (Intercept) 41.38646  5.043341 75 8.206159  0.0000
+NA Aa2         21.36271  7.132361 12 2.995180  0.0112
+NA Aa3         39.14584  7.132361 12 5.488482  0.0001
+NA  Correlation: 
+NA     (Intr) Aa2   
+NA Aa2 -0.707       
+NA Aa3 -0.707  0.500
+NA 
+NA Standardized Within-Group Residuals:
+NA         Min          Q1         Med          Q3         Max 
+NA -2.11852502 -0.54600753 -0.03428581  0.53382436  2.26256392 
+NA 
+NA Number of Observations: 150
+NA Number of Groups: 
+NA            Sites Quads %in% Sites 
+NA               15               75</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(d.lme)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA             numDF denDF  F-value p-value
+NA (Intercept)     1    75 446.9150  &lt;.0001
+NA A               2    12  15.1037   5e-04</code></pre>
+</div>
+</div>
+</section>
+<section id="full-effect-parameterisation-1" class="level2">
+<h2 class="anchored" data-anchor-id="full-effect-parameterisation-1">Full effect parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="st">      mu[i] &lt;- alpha0 + alpha[A[i]] + beta.site[site[i]] + beta.quad[quad[i]]</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="st">   </span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="st">   alpha0 ~ dnorm(0, 1.0E-6)</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="st">   alpha[1] &lt;- 0</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 2:nA) {</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="st">     alpha[i] ~ dnorm(0, 1.0E-6) #prior</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nSite) {</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="st">     beta.site[i] ~ dnorm(0, tau.Bs) #prior</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nQuad) {</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="st">     beta.quad[i] ~ dnorm(0, tau.Bq) #prior</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.Bs &lt;- pow(sigma.Bs,-2)</span></span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.Bs &lt;-z/sqrt(chSq.Bs)</span></span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a><span class="st">   z.Bs ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.Bs ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.Bq &lt;- pow(sigma.Bq,-2)</span></span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.Bq &lt;-z/sqrt(chSq.Bq)</span></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a><span class="st">   z.Bq ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.Bq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"fullModel2.txt"</span>)</span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest1,</span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>                 <span class="at">site=</span><span class="fu">as.numeric</span>(Sites),</span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">A=</span><span class="fu">as.numeric</span>(A),</span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest1),</span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>         <span class="at">nSite=</span><span class="fu">length</span>(<span class="fu">levels</span>(Sites)),</span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nA =</span> <span class="fu">length</span>(<span class="fu">levels</span>(A)),</span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>         <span class="at">nQuad=</span><span class="fu">length</span>(<span class="fu">levels</span>(Quads)),</span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>                 <span class="at">quad =</span> <span class="fu">as.numeric</span>(Quads)</span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>,<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma.Bs"</span>,<span class="st">"sigma.Bq"</span>)</span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.f2 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"fullModel2.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 99
+NA    Total graph size: 793
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.f2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "fullModel2.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA           mu.vect sd.vect    2.5%      25%      50%      75%    97.5%  Rhat
+NA alpha[1]    0.000   0.000   0.000    0.000    0.000    0.000    0.000 1.000
+NA alpha[2]   21.147   7.532   6.252   16.137   21.140   25.968   35.890 1.001
+NA alpha[3]   38.985   7.635  23.341   34.130   39.120   43.879   53.757 1.001
+NA alpha0     41.541   5.460  30.677   37.967   41.659   45.032   52.383 1.001
+NA sigma       7.294   0.604   6.238    6.870    7.264    7.664    8.580 1.003
+NA sigma.Bq    8.433   1.132   6.355    7.650    8.378    9.175   10.757 1.005
+NA sigma.Bs   10.779   2.673   6.704    8.951   10.409   12.219   17.127 1.017
+NA deviance 1020.495  17.724 988.898 1007.948 1019.500 1032.389 1056.708 1.005
+NA          n.eff
+NA alpha[1]     1
+NA alpha[2]  3000
+NA alpha[3]  3000
+NA alpha0    3000
+NA sigma      970
+NA sigma.Bq   420
+NA sigma.Bs   100
+NA deviance   510
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 156.8 and DIC = 1177.3
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+</section>
+<section id="matrix-parameterisation-1" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-parameterisation-1">Matrix parameterisation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>modelString2<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="st">   #Likelihood</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:n) {</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="st">      y[i]~dnorm(mu[i],tau)</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a><span class="st">      mu[i] &lt;- inprod(alpha[], X[i,]) + inprod(beta.site[],Z.site[i,]) + inprod(beta.quad[],Z.quad[i,])</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="st">      y.err[i] &lt;- y[i]-mu[i]</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a><span class="st">   </span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a><span class="st">   #Priors</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nX) {</span></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a><span class="st">     alpha[i] ~ dnorm(0, 1.0E-6) #prior</span></span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nSite) {</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a><span class="st">     beta.site[i] ~ dnorm(0, tau.Bs) #prior</span></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="st">   for (i in 1:nQuad) {</span></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a><span class="st">     beta.quad[i] ~ dnorm(0, tau.Bq) #prior</span></span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a><span class="st">   }</span></span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a><span class="st">   tau &lt;- pow(sigma,-2)</span></span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma &lt;-z/sqrt(chSq)</span></span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a><span class="st">   z ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.Bs &lt;- pow(sigma.Bs,-2)</span></span>
+<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.Bs &lt;-z/sqrt(chSq.Bs)</span></span>
+<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a><span class="st">   z.Bs ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.Bs ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-30"><a href="#cb52-30" aria-hidden="true" tabindex="-1"></a><span class="st">   tau.Bq &lt;- pow(sigma.Bq,-2)</span></span>
+<span id="cb52-31"><a href="#cb52-31" aria-hidden="true" tabindex="-1"></a><span class="st">   sigma.Bq &lt;-z/sqrt(chSq.Bq)</span></span>
+<span id="cb52-32"><a href="#cb52-32" aria-hidden="true" tabindex="-1"></a><span class="st">   z.Bq ~ dnorm(0, .0016)I(0,)</span></span>
+<span id="cb52-33"><a href="#cb52-33" aria-hidden="true" tabindex="-1"></a><span class="st">   chSq.Bq ~ dgamma(0.5, 0.5)</span></span>
+<span id="cb52-34"><a href="#cb52-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-35"><a href="#cb52-35" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.res &lt;- sd(y.err[])</span></span>
+<span id="cb52-36"><a href="#cb52-36" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.site &lt;- sd(beta.site[])</span></span>
+<span id="cb52-37"><a href="#cb52-37" aria-hidden="true" tabindex="-1"></a><span class="st">   sd.quad &lt;- sd(beta.quad[])   </span></span>
+<span id="cb52-38"><a href="#cb52-38" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
+<span id="cb52-39"><a href="#cb52-39" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb52-40"><a href="#cb52-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-41"><a href="#cb52-41" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
+<span id="cb52-42"><a href="#cb52-42" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString2, <span class="at">con =</span> <span class="st">"matrixModel2.txt"</span>)</span>
+<span id="cb52-43"><a href="#cb52-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-44"><a href="#cb52-44" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, <span class="at">data=</span>data.nest1)</span>
+<span id="cb52-45"><a href="#cb52-45" aria-hidden="true" tabindex="-1"></a>Zsite <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Sites, <span class="at">data=</span>data.nest1)</span>
+<span id="cb52-46"><a href="#cb52-46" aria-hidden="true" tabindex="-1"></a>Zquad <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~-</span><span class="dv">1</span><span class="sc">+</span>Quads, <span class="at">data=</span>data.nest1)</span>
+<span id="cb52-47"><a href="#cb52-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-48"><a href="#cb52-48" aria-hidden="true" tabindex="-1"></a>data.nest.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.nest1,</span>
+<span id="cb52-49"><a href="#cb52-49" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">y=</span>y,</span>
+<span id="cb52-50"><a href="#cb52-50" aria-hidden="true" tabindex="-1"></a>         <span class="at">n=</span><span class="fu">nrow</span>(data.nest1),</span>
+<span id="cb52-51"><a href="#cb52-51" aria-hidden="true" tabindex="-1"></a>                 <span class="at">X=</span>Xmat, <span class="at">nX=</span><span class="fu">ncol</span>(Xmat),</span>
+<span id="cb52-52"><a href="#cb52-52" aria-hidden="true" tabindex="-1"></a>         <span class="at">Z.site=</span>Zsite, <span class="at">nSite=</span><span class="fu">ncol</span>(Zsite),</span>
+<span id="cb52-53"><a href="#cb52-53" aria-hidden="true" tabindex="-1"></a>                 <span class="at">Z.quad=</span>Zquad, <span class="at">nQuad=</span><span class="fu">ncol</span>(Zquad)</span>
+<span id="cb52-54"><a href="#cb52-54" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb52-55"><a href="#cb52-55" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb52-56"><a href="#cb52-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-57"><a href="#cb52-57" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma.Bs"</span>,<span class="st">"sigma.Bq"</span>,<span class="st">'sd.res'</span>,<span class="st">'sd.site'</span>,<span class="st">'sd.quad'</span>)</span>
+<span id="cb52-58"><a href="#cb52-58" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb52-59"><a href="#cb52-59" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb52-60"><a href="#cb52-60" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
+<span id="cb52-61"><a href="#cb52-61" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb52-62"><a href="#cb52-62" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb52-63"><a href="#cb52-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-64"><a href="#cb52-64" aria-hidden="true" tabindex="-1"></a>data.nest.r2jags.m2 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.nest.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<span id="cb52-65"><a href="#cb52-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"matrixModel2.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
+<span id="cb52-66"><a href="#cb52-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 150
+NA    Unobserved stochastic nodes: 99
+NA    Total graph size: 14993
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.nest.r2jags.m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "matrixModel2.txt", fit using jags,
+NA  2 chains, each with 4500 iterations (first 3000 discarded)
+NA  n.sims = 3000 iterations saved
+NA           mu.vect sd.vect    2.5%      25%      50%      75%    97.5%  Rhat
+NA alpha[1]   41.247   5.438  30.494   37.721   41.227   44.692   52.262 1.002
+NA alpha[2]   21.535   7.824   6.537   16.541   21.439   26.473   37.416 1.003
+NA alpha[3]   39.276   7.723  24.165   34.357   39.319   44.191   54.637 1.001
+NA sd.quad     8.427   0.828   6.866    7.889    8.420    8.956   10.131 1.001
+NA sd.res      7.221   0.420   6.500    6.924    7.186    7.486    8.137 1.010
+NA sd.site    10.263   1.703   7.202    9.180   10.187   11.240   13.917 1.002
+NA sigma       7.261   0.598   6.189    6.845    7.209    7.631    8.540 1.010
+NA sigma.Bq    8.514   1.064   6.557    7.776    8.454    9.189   10.801 1.001
+NA sigma.Bs   10.703   2.802   6.379    8.805   10.283   12.108   17.304 1.001
+NA deviance 1019.366  17.429 987.783 1007.166 1018.196 1030.618 1056.340 1.010
+NA          n.eff
+NA alpha[1]  3000
+NA alpha[2]  3000
+NA alpha[3]  2500
+NA sd.quad   3000
+NA sd.res     150
+NA sd.site   3000
+NA sigma      160
+NA sigma.Bq  3000
+NA sigma.Bs  3000
+NA deviance   160
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 151.0 and DIC = 1170.4
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+<p>If we use the <code>JAGS</code> matrix parameterisation model from above, the <code>JAGS</code> model is already complete (as we defined the sd components in that model already).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>data.nest1.mcmc.listSD <span class="ot">&lt;-</span> <span class="fu">as.mcmc</span>(data.nest.r2jags.m2)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, data.nest1)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">&lt;-</span> data.nest.r2jags.m2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'alpha'</span>]]</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>fitted <span class="ot">&lt;-</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>X.var <span class="ot">&lt;-</span> <span class="fu">aaply</span>(fitted,<span class="dv">1</span>,<span class="cf">function</span>(x){<span class="fu">var</span>(x)})</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>Z.var <span class="ot">&lt;-</span> data.nest.r2jags.m2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'sd.site'</span>]]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>R.var <span class="ot">&lt;-</span> data.nest.r2jags.m2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list[[<span class="st">'sd.res'</span>]]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>R2.marginal <span class="ot">&lt;-</span> (X.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>R2.marginal <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.marginal), <span class="at">Median=</span><span class="fu">median</span>(R2.marginal), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.marginal)))</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>R2.conditional <span class="ot">&lt;-</span> (X.var<span class="sc">+</span>Z.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>R2.conditional <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.conditional),</span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">Median=</span><span class="fu">median</span>(R2.conditional), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.conditional)))</span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>R2.site <span class="ot">&lt;-</span> (Z.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>R2.site <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.site), <span class="at">Median=</span><span class="fu">median</span>(R2.site), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.site)))</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>R2.res<span class="ot">&lt;-</span>(R.var)<span class="sc">/</span>(X.var<span class="sc">+</span>Z.var<span class="sc">+</span>R.var)</span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a>R2.res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Mean=</span><span class="fu">mean</span>(R2.res), <span class="at">Median=</span><span class="fu">median</span>(R2.res), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(R2.res)))</span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">R2.site=</span>R2.site, <span class="at">R2.marginal=</span>R2.marginal, <span class="at">R2.res=</span>R2.res, <span class="at">R2.conditional=</span>R2.conditional)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA                     Mean    Median     lower     upper
+NA R2.site        0.2537842 0.2373232 0.1145934 0.4450797
+NA R2.marginal    0.6199972 0.6408875 0.4077973 0.7873383
+NA R2.res         0.1262186 0.1233096 0.0646023 0.1907540
+NA R2.conditional 0.8737814 0.8766904 0.8092460 0.9353977</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-gelman2006prior" class="csl-entry" role="listitem">
+Gelman, Andrew et al. 2006. <span>“Prior Distributions for Variance Parameters in Hierarchical Models (Comment on Article by Browne and Draper).”</span> <em>Bayesian Analysis</em> 1 (3): 515–34.
+</div>
+<div id="ref-plummer2004jags" class="csl-entry" role="listitem">
+Plummer, Martyn. 2004. <span>“JAGS: Just Another Gibbs Sampler.”</span>
+</div>
+<div id="ref-su2015package" class="csl-entry" role="listitem">
+Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements. 2015. <span>“Package <span>‘R2jags’</span>.”</span> <em>R Package Version 0.03-08, URL Http://CRAN. R-Project. Org/Package= R2jags</em>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
