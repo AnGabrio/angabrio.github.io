@@ -1,0 +1,20 @@
+
+model{
+  for (i in 1:N) {
+    y[i] ~ dbern(p[i])
+    logit(p[i]) <- max(-20,min(20,eta[i]))
+    eta[i] <- beta0+beta1*x[i]
+    YNew[i] ~dbern(p[i])
+    varY[i] <- p[i]*(1-p[i])
+    PRes[i] <- (y[i] - p[i]) / sqrt(varY[i])
+    PResNew[i] <- (YNew[i] - p[i]) / sqrt(varY[i])
+    D[i] <- pow(PRes[i],2)
+    DNew[i] <- pow(PResNew[i],2)
+  }
+  Fit <- sum(D[1:N])
+  FitNew <-sum(DNew[1:N]) 
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  pvalue <- mean(FitNew>Fit)
+}
+

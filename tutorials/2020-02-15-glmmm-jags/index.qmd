@@ -1,0 +1,965 @@
+---
+title: "Generalised Linear Mixed Models (JAGS)"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    email: a.gabrio@maastrichtuniversity.nl
+    corresponding: true    
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2020-02-15
+categories: [Quarto, R, Academia, Software, Statistics] # self-defined categories
+#image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+abstract: > 
+  [This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models ...]{style="font-size: 85%"}
+keywords:
+  - Software
+  - Statistics
+  - Stan
+#license: "GPL-2"
+#copyright: 
+#  holder: CRAN
+#  year: 2023
+#citation: 
+#  title: missingHE
+#  author: Andrea Gabrio
+#  note: R package version 4.4.2
+#  url: https://cran.r-project.org/web/packages/missingHE
+#funding: "The author received no specific funding for this work."
+bibliography: citations_jags16.bib
+#nocite: |
+#  @gabrio2017handling
+---
+
+This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. `BUGS` (Bayesian inference Using *Gibbs Sampling*) is an algorithm and supporting language (resembling `R`) dedicated to performing the Gibbs sampling implementation of *Markov Chain Monte Carlo* (MCMC) method. Dialects of the `BUGS` language are implemented within three main projects:
+
+1. **OpenBUGS** - written in component pascal.
+ 
+2. **JAGS** - (Just Another Gibbs Sampler) - written in `C++`. 
+
+3. **STAN** - a dedicated Bayesian modelling framework written in `C++` and implementing *Hamiltonian* MCMC samplers.
+
+Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of `R`, and thus, they are best accessed from within `R` itself. As such there are multiple packages devoted to interfacing with the various software implementations:
+
+* *R2OpenBUGS* - interfaces with `OpenBUGS`
+
+* *R2jags* - interfaces with `JAGS`
+
+* *rstan* - interfaces with `STAN`
+
+This tutorial will demonstrate how to fit models in `JAGS` (@plummer2004jags) using the package `R2jags` (@su2015package) as interface, which also requires to load some other packages.
+
+# Overview
+
+In some respects, *Generalized Linear Mixed effects Models* (GLMM) are a hierarchical extension of *Generalized linear models* (GLM) in a similar manner that Linear Mixed effects Models (LMM) are a hierarchical extension of Linear Models (LM). However, whilst the Gaussian (normal) distribution facilitates a relatively straight way of generating the marginal likelihood of the observed response by integrating likelihoods across all possible (and unobserved) levels of a random effect to yield parameter estimates, the same cannot be said for other distributions. Consequently various approximations have been developed to estimate the fixed and random parameters for GLMM's:
+
+  1. **Penalized quasi-likelihood** (PQL). This method approximates a quasi-likelihood by iterative fitting of (re)weighted linear mixed effects models based on the fit of GLM fit. Specifically, it estimates the fixed effects parameters by fitting a GLM that incorporates a correlation (variance-covariance) structure resulting from a LMM and then refits a LMM to re-estimate the variance-covariance structure by using the variance structure from the previous GLM. The cycle continues to iterate until either the fit improvement is below a threshold or a defined number of iterations has occurred. Whilst this is a relatively simple approach, that enables us to leverage methodologies for accommodating heterogeneity and spatial/temporal autocorrelation, it is known to perform poorly (estimates biased towards large variance) for Poisson distributions when the expected value is less than $5$ and for binary data when the expected number of successes or failures are less than $5$. Moreover, as it approximates quasi-likelihood rather than likelihood, likelihood based inference and information criterion methods (such as likelihood ratio tests and AIC) are not appropriate with this approach. Instead, Wald tests are required for inference.
+  
+  2. **Laplace approximation**. This approach utilises a second-order Taylor series expansion to approximate (a mathematical technique for approximating the properties of a function around a point by taking multiple derivatives of the function and summing them together) the likelihood function. If we assume that the likelihood function is approximately normal and thus a quadratic function on a log scale, we can use second-order Taylor series expansion to approximate this likelihood. Whilst this approach is considered to be more accurate than PQL, it is considerably slower and unable to accommodate alternative variance and correlation structures.
+  
+  3. **Gauss-Hermite quadrature** (GHQ). This approach approximates the marginal likelihood by approximating the value of integrals at specific points (quadratures). This technique can be further adapted by allowing the number of quadratures and their weights to be optimized via a set of rules.
+  
+  4. **Markov-chain Monte-Carlo** (MCMC). This takes a bruit force approach by recreating the likelihood by traversing the likelihood function with sequential sampling proportional to the likelihood. Although this approach is very robust (when the posteriors have converged), they are computationally very intense. Interestingly, some (including Andrew Gelman) argue that PQL, Laplace and GHQ do not yield estimates. Rather they are only approximations of estimates. By contrast, as MCMC methods are able to integrate over all levels by bruit force, the resulting parameters are indeed true estimates.
+
+We will focus on the last approach which is the more general among the ones considered here and which is based on a Bayesian approach, which can be very flexible and accurate, yet very slow and complex.
+
+# Hierarchical Poisson regression
+
+The model I will be developing is a Bayesian hierarchical Poisson regression model which I borrow from a very interesting work about modelling match results in soccer, available both as a [technical report](http://www.sumsar.net/papers/baath_2015_modeling_match_resluts_in_soccer.pdf) and as a series of [online posts](http://www.sumsar.net/blog/2013/07/modeling-match-results-in-la-liga-part-one/). The objective of the analysis was to model the match results from the last five seasons of *La Liga*, the premium Spanish football (soccer) league. In total there were $1900$ rows in the dataset each with information regarding which was the home and away team, what these teams scored and what season it was. The goal outcomes of the teams are assumed to be distributed according to a Poisson distribution, while also taking into account the dependence between the goals scored by the attacking and defensive teams in each match. 
+
+# Loading the data
+
+I start by loading libraries, reading in the data and preprocessing it for `JAGS`. The last $50$ matches have unknown outcomes and I create a new data frame `d` holding only matches with known outcomes. I will come back to the unknown outcomes later when it is time to use the model for prediction. I also load a `R` function called `plotPost` which was previously coded in order to facilitate the plotting of the posterior results of the model. All information about the model structure, data and functions can be found on the webpage of the original post of the author or in his technical report (@baaaath2015modeling). 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(R2jags)
+library(coda)
+library(mcmcplots)
+library(stringr)
+library(plyr)
+library(xtable)
+library(ggplot2)
+source("plotPost.R")
+set.seed(12345)  # for reproducibility
+
+load("laliga.RData")
+
+# -1 = Away win, 0 = Draw, 1 = Home win
+laliga$MatchResult <- sign(laliga$HomeGoals - laliga$AwayGoals)
+
+# Creating a data frame d with only the complete match results
+d <- na.omit(laliga)
+teams <- unique(c(d$HomeTeam, d$AwayTeam))
+seasons <- unique(d$Season)
+
+# A list for JAGS with the data from d where the strings are coded as
+# integers
+data_list <- list(HomeGoals = d$HomeGoals, AwayGoals = d$AwayGoals, HomeTeam = as.numeric(factor(d$HomeTeam,
+    levels = teams)), AwayTeam = as.numeric(factor(d$AwayTeam, levels = teams)),
+    Season = as.numeric(factor(d$Season, levels = seasons)), n_teams = length(teams),
+    n_games = nrow(d), n_seasons = length(seasons))
+
+# Convenience function to generate the type of column names Jags outputs.
+col_name <- function(name, ...) {
+    paste0(name, "[", paste(..., sep = ","), "]")
+}
+data_list$n_seasons<-NULL
+data_list$Season<-NULL
+```
+
+# Modeling Match Results
+
+## Data check
+
+How are the number of goals for each team in a football match distributed? Well, let’s start by assuming that all football matches are roughly equally long, that both teams have many chances at making a goal and that each team have the same probability of making a goal each goal chance. Given these assumptions the distribution of the number of goals for each team should be well captured by a Poisson distribution. A quick and dirty comparison between the actual distribution of the number of scored goals and a Poisson distribution having the same mean number of scored goals support this notion.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+par(mfcol = c(2, 1), mar = rep(2.2, 4))
+hist(c(d$AwayGoals, d$HomeGoals), xlim = c(-0.5, 8), breaks = -1:9 + 0.5, main = "Distribution of the number of goals\nscored by a team in a match.")
+mean_goals <- mean(c(d$AwayGoals, d$HomeGoals))
+hist(rpois(9999, mean_goals), xlim = c(-0.5, 8), breaks = -1:9 + 0.5, main = "Random draw from a Poisson distribution with\nthe same mean as the distribution above.")
+```
+
+## Model fitting
+
+All teams aren’t equally good and it will be assumed that all teams have a latent skill variable and the skill of a team minus the skill of the opposing team defines the predicted outcome of a game. As the number of goals are assumed to be Poisson distributed it is natural that the skills of the teams are on the log scale of the mean of the distribution. The distribution of the number of goals for team $i$ when facing team $j$ is then
+
+$$
+\text{Goals} \sim \text{Pois}(\lambda)
+$$
+
+where $\log(\lambda)=\text{baseline} + \text{skill}_i - \text{skill}_j$. Baseline is the log average number of goals when both teams are equally good. The goal outcome of a match between home team $i$ and away team $j$ is modeled as:
+
+$$
+\text{HomeGoals}_{ij} \sim \text{Pois}(\lambda_{\text{home},ij}),
+$$
+
+$$
+\text{AwayGoals}_{ij} \sim \text{Pois}(\lambda_{\text{away},ij}),
+$$
+
+where 
+
+$$
+\log(\lambda_{\text{home},ij}) = \text{baseline} + \text{skill}_i - \text{skill}_j,
+$$
+
+$$
+\log(\lambda_{\text{away},ij}) = \text{baseline} + \text{skill}_j - \text{skill}_i. 
+$$
+
+Add some priors to that and you’ve got a Bayesian model going! I set the prior distributions over the baseline to:
+
+$$
+\text{baseline} \sim N(0, 4^2),
+$$
+
+and the skill of all $n$ teams using a hierarchical approach to :
+
+$$
+\text{skill}_{1,\ldots,n} \sim N(\mu_{\text{teams}}, \sigma^2_{\text{teams}}),
+$$
+
+so that teams are assumed to have similar but not identical mean and variance parameters for thier skill parameters.  These priors are made vague. For example, the prior on the baseline have a SD of `4` but since this is on the log scale of the mean number of goals it corresponds to one SD from the mean `0` covering the range of `[0.02,54.6]` goals. Turning this into a `JAGS` model requires some minor adjustments. The model have to loop over all the match results, which adds some for-loops. `JAGS` parameterises the normal distribution with precision (the reciprocal of the variance) instead of variance so the hyperpriors have to be converted. Finally I have to "anchor" the skill of one team to a constant otherwise the mean skill can drift away freely (*conrner constraint*) and the model cannot be identified. Doing these adjustments results in the following model description:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+m1_string <- "model {
+for(i in 1:n_games) {
+  HomeGoals[i] ~ dpois(lambda_home[HomeTeam[i],AwayTeam[i]])
+  AwayGoals[i] ~ dpois(lambda_away[HomeTeam[i],AwayTeam[i]])
+}
+
+for(home_i in 1:n_teams) {
+  for(away_i in 1:n_teams) {
+    lambda_home[home_i, away_i] <- exp(baseline + skill[home_i] - skill[away_i])
+    lambda_away[home_i, away_i] <- exp(baseline + skill[away_i] - skill[home_i])
+  }
+}
+
+skill[1] <- 0
+for(j in 2:n_teams) {
+  skill[j] ~ dnorm(group_skill, group_tau)
+}  
+
+group_skill ~ dnorm(0, 0.0625)
+group_tau <- 1 / pow(group_sigma, 2)
+group_sigma ~ dunif(0, 3)
+baseline ~ dnorm(0, 0.0625)
+}
+"
+
+## write the model to a text file
+writeLines(m1_string, con = "model1.txt")
+```
+
+Next, we define the nodes (parameters and derivatives) to monitor and the chain parameters.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("baseline", "skill", "group_skill", "group_sigma")
+nChains = 2
+burnInSteps = 3000
+thinSteps = 1
+numSavedSteps = 15000  #across all chains
+nIter = ceiling(burnInSteps + (numSavedSteps * thinSteps)/nChains)
+nIter
+```
+
+Start the `JAGS` model (check the model, load data into the model, specify the number of chains and compile the model). Run the `JAGS` code via the `R2jags` interface and the `jags` function. Note that the first time jags is run after the `R2jags` package is loaded, it is often necessary to run any kind of randomisation function just to initiate the .Random.seed variable.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+m1.r2jags <- jags(data = data_list, inits = NULL, parameters.to.save = params,
+    model.file = "model1.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(m1.r2jags)
+```
+
+## MCMC diagnostics
+
+Using the generated MCMC samples I can now look at the credible skill values of any team. Let’s look at the trace plot and the distribution of the skill parameters for FC Sevilla and FC Valencia.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+team_par<-c(which(teams == c("FC Sevilla")), which(teams == "FC Valencia"))
+denplot(m1.r2jags, parms = team_par, style = "plain", main = c("Sevilla","Valenica"))
+traplot(m1.r2jags, parms = team_par, style = "plain", main = c("Sevilla","Valenica"))
+```
+
+## Model validation
+
+Seems like Sevilla and Valencia have similar skill with Valencia being slightly better. Using the MCMC samples it is not only possible to look at the distribution of parameter values but it is also straight forward to simulate matches between teams and look at the credible distribution of number of goals scored and the probability of a win for the home team, a win for the away team or a draw. The following functions simulates matches with one team as home team and one team as away team and plots the predicted result together with the actual outcomes of any matches in the `laliga` data set.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# Plots histograms over home_goals, away_goals, the difference in goals
+# and a barplot over match results.
+plot_goals <- function(home_goals, away_goals) {
+    n_matches <- length(home_goals)
+    goal_diff <- home_goals - away_goals
+    match_result <- ifelse(goal_diff < 0, "away_win", ifelse(goal_diff > 0,
+        "home_win", "equal"))
+    hist(home_goals, xlim = c(-0.5, 10), breaks = (0:100) - 0.5)
+    hist(away_goals, xlim = c(-0.5, 10), breaks = (0:100) - 0.5)
+    hist(goal_diff, xlim = c(-6, 6), breaks = (-100:100) - 0.5)
+    barplot(table(match_result)/n_matches, ylim = c(0, 1))
+}
+
+
+plot_pred_comp1 <- function(home_team, away_team, ms) {
+    # Simulates and plots game goals scores using the MCMC samples from the m1
+    # model.
+    par(mar=c(2,2,2,2))
+    par(mfrow = c(2, 4))
+    baseline <- ms[, "baseline"]
+    home_skill <- ms[, which(teams == home_team)]
+    away_skill <- ms[, which(teams == away_team)]
+    home_goals <- rpois(nrow(ms), exp(baseline + home_skill - away_skill))
+    away_goals <- rpois(nrow(ms), exp(baseline + away_skill - home_skill))
+    plot_goals(home_goals, away_goals)
+    # Plots the actual distribution of goals between the two teams
+    home_goals <- d$HomeGoals[d$HomeTeam == home_team & d$AwayTeam == away_team]
+    away_goals <- d$AwayGoals[d$HomeTeam == home_team & d$AwayTeam == away_team]
+    plot_goals(home_goals, away_goals)
+}
+```
+
+Let’s look at Valencia (home team) vs. Sevilla (away team). The graph below shows the simulation on the first row and the historical data on the second row.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+ms1<-as.matrix(m1.r2jags$BUGSoutput$sims.matrix)
+plot_pred_comp1("FC Valencia", "FC Sevilla", ms1)
+```
+
+Here we discover a problem with the current model. While the simulated data looks the same, except that the home team and the away team swapped places, the historical data now shows that Sevilla often wins against Valencia when being the home team. Our model doesn’t predict this because it doesn’t considers the advantage of being the home team. 
+
+# Accounting for home advantage
+
+The only change to the model needed to account for the home advantage is to split the baseline into two components, a home baseline and an away baseline. The following `JAGS` model implements this change by splitting `baseline` into `home_baseline` and `away_baseline`.
+
+## Model fitting
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# model 2
+m2_string <- "model {
+for(i in 1:n_games) {
+  HomeGoals[i] ~ dpois(lambda_home[HomeTeam[i],AwayTeam[i]])
+  AwayGoals[i] ~ dpois(lambda_away[HomeTeam[i],AwayTeam[i]])
+}
+
+for(home_i in 1:n_teams) {
+  for(away_i in 1:n_teams) {
+    lambda_home[home_i, away_i] <- exp( home_baseline + skill[home_i] - skill[away_i])
+    lambda_away[home_i, away_i] <- exp( away_baseline + skill[away_i] - skill[home_i])
+  }
+}
+
+skill[1] <- 0 
+for(j in 2:n_teams) {
+  skill[j] ~ dnorm(group_skill, group_tau)
+}
+
+group_skill ~ dnorm(0, 0.0625)
+group_tau <- 1/pow(group_sigma, 2)
+group_sigma ~ dunif(0, 3)
+
+home_baseline ~ dnorm(0, 0.0625)
+away_baseline ~ dnorm(0, 0.0625)
+}
+"
+
+## write the model to a text file
+writeLines(m2_string, con = "model2.txt")
+```
+
+And now re-fit the model
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+params <- c("home_baseline", "away_baseline", "skill", "group_sigma", "group_skill")
+nChains = 2
+burnInSteps = 3000
+thinSteps = 1
+numSavedSteps = 15000  #across all chains
+nIter = ceiling(burnInSteps + (numSavedSteps * thinSteps)/nChains)
+
+m2.r2jags <- jags(data = data_list, inits = NULL, parameters.to.save = params,
+    model.file = "model2.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(m2.r2jags)
+```
+
+## MCMC diagnostics
+
+Looking at the trace plots and distributions of `home_baseline` and `away_baseline` shows that there is a considerable home advantage.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+team_par<-c("home_baseline", "away_baseline")
+denplot(m2.r2jags, parms = team_par, style = "plain", main = c("home_baseline","away_baseline"))
+traplot(m2.r2jags, parms = team_par, style = "plain", main = c("home_baseline","away_baseline"))
+```
+
+## Model validation
+
+Looking at the difference between `exp(home_baseline)` and `exp(away_baseline)` shows that the home advantage is realised as roughly $0.5$ more goals for the home team.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+ms2<-as.matrix(m2.r2jags$BUGSoutput$sims.matrix)
+plotPost(exp(ms2[, "home_baseline"]) - exp(ms2[, "away_baseline"]), compVal = 0,
+    xlab = "Home advantage in number of goals")
+```
+
+Comparing the DIC of the of the two models also indicates that the new model is better.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dic_m1<-m1.r2jags$BUGSoutput$DIC
+dic_m2<-m2.r2jags$BUGSoutput$DIC
+diff_dic<-dic_m1 - dic_m2
+diff_dic
+```
+
+Finally we’ll look at the simulated results for Valencia (home team) vs Sevilla (away team) using the estimates from the new model with the first row of the graph showing the predicted outcome and the second row showing the actual data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+plot_pred_comp2 <- function(home_team, away_team, ms) {
+    par(mar=c(2,2,2,2))
+    par(mfrow = c(2, 4))
+    home_baseline <- ms[, "home_baseline"]
+    away_baseline <- ms[, "away_baseline"]
+    home_skill <- ms[, col_name("skill", which(teams == home_team))]
+    away_skill <- ms[, col_name("skill", which(teams == away_team))]
+    home_goals <- rpois(nrow(ms), exp(home_baseline + home_skill - away_skill))
+    away_goals <- rpois(nrow(ms), exp(away_baseline + away_skill - home_skill))
+    plot_goals(home_goals, away_goals)
+    home_goals <- d$HomeGoals[d$HomeTeam == home_team & d$AwayTeam == away_team]
+    away_goals <- d$AwayGoals[d$HomeTeam == home_team & d$AwayTeam == away_team]
+    plot_goals(home_goals, away_goals)
+}
+
+plot_pred_comp2("FC Valencia", "FC Sevilla", ms2)
+```
+
+And similarly Sevilla (home team) vs Valencia (away team).
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+plot_pred_comp2("FC Sevilla", "FC Valencia", ms2)
+```
+
+Now the results are closer to the historical data as both Sevilla and Valencia are more likely to win when playing as the home team. At this point in the modeling process I decided to try to split the skill parameter into two components, offence skill and defense skill, thinking that some teams might be good at scoring goals but at the same time be bad at keeping the opponent from scoring. This didn’t seem to result in any better fit however, perhaps because the offensive and defensive skill of a team tend to be highly related. There is however one more thing I would like to change with the model.
+
+# Allowing for skill variation over the season
+
+The data set `laliga` contains data from five different seasons and an assumption of the current model is that a team has the same skill during all seasons. This is probably not a realistic assumption, teams probably differ in their year-to-year performance. And what more, some teams do not even participate in all seasons in the `laliga` data set, as a result of dropping out of the first division, as the following diagram shows:
+
+## Data check
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+qplot(Season, HomeTeam, data = d, ylab = "Team", xlab = "Particicipation by Season") + theme_classic()
+```
+
+The second iteration of the model was therefore modified to include the year-to-year variability in team skill. This was done by allowing each team to have one skill parameter per season but to connect the skill parameters by using a team’s skill parameter for season $t$ in the prior distribution for that team’s skill parameter for season $t+1$ so that
+
+$$
+\text{skill}_{t+1} \sim N(\text{skill}_t,\sigma^2_{\text{season}})
+$$
+
+for all different $t$, except the first season which is given a vague prior. Here $\sigma^2_{\text{season}}$ is a parameter estimated using the whole data set. The home and away baselines are given the same kind of priors and below is the resulting `JAGS` model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# model 3
+m3_string <- "model {
+for(i in 1:n_games) {
+  HomeGoals[i] ~ dpois(lambda_home[Season[i], HomeTeam[i],AwayTeam[i]])
+  AwayGoals[i] ~ dpois(lambda_away[Season[i], HomeTeam[i],AwayTeam[i]])
+}
+
+for(season_i in 1:n_seasons) {
+  for(home_i in 1:n_teams) {
+    for(away_i in 1:n_teams) {
+      lambda_home[season_i, home_i, away_i] <- exp( home_baseline[season_i] + skill[season_i, home_i] - skill[season_i, away_i])
+      lambda_away[season_i, home_i, away_i] <- exp( away_baseline[season_i] + skill[season_i, away_i] - skill[season_i, home_i])
+    }
+  }
+}
+
+skill[1, 1] <- 0 
+for(j in 2:n_teams) {
+  skill[1, j] ~ dnorm(group_skill, group_tau)
+}
+
+group_skill ~ dnorm(0, 0.0625)
+group_tau <- 1/pow(group_sigma, 2)
+group_sigma ~ dunif(0, 3)
+
+home_baseline[1] ~ dnorm(0, 0.0625)
+away_baseline[1] ~ dnorm(0, 0.0625)
+
+for(season_i in 2:n_seasons) {
+  skill[season_i, 1] <- 0 
+  for(j in 2:n_teams) {
+    skill[season_i, j] ~ dnorm(skill[season_i - 1, j], season_tau)
+  }
+  home_baseline[season_i] ~ dnorm(home_baseline[season_i - 1], season_tau)
+  away_baseline[season_i] ~ dnorm(away_baseline[season_i - 1], season_tau)
+}
+
+season_tau <- 1/pow(season_sigma, 2) 
+season_sigma ~ dunif(0, 3) 
+}
+"
+
+## write the model to a text file
+writeLines(m3_string, con = "model3.txt")
+```
+
+And now re-fit the model. These changes to the model unfortunately introduce quite a lot of autocorrelation when running the MCMC sampler. Also, I re-define the data list to include information for the season parameters. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+data_list_m3 <- list(HomeGoals = d$HomeGoals, AwayGoals = d$AwayGoals, HomeTeam = as.numeric(factor(d$HomeTeam,
+    levels = teams)), AwayTeam = as.numeric(factor(d$AwayTeam, levels = teams)),
+    Season = as.numeric(factor(d$Season, levels = seasons)), n_teams = length(teams),
+    n_games = nrow(d), n_seasons = length(seasons))
+params <- c("home_baseline", "away_baseline", "skill", "season_sigma", "group_sigma", "group_skill")
+nChains = 2
+burnInSteps = 3000
+thinSteps = 1
+numSavedSteps = 15000  #across all chains
+nIter = ceiling(burnInSteps + (numSavedSteps * thinSteps)/nChains)
+
+m3.r2jags <- jags(data = data_list_m3, inits = NULL, parameters.to.save = params,
+    model.file = "model3.txt", n.chains = nChains, n.iter = nIter,
+    n.burnin = burnInSteps, n.thin = thinSteps)
+
+print(m3.r2jags)
+```
+
+## MCMC diagnostics
+
+The following graph shows the trace plot and distribution of the `season_sigma` parameter.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+denplot(m3.r2jags, parms = "season_sigma", style = "plain")
+traplot(m3.r2jags, parms = "season_sigma", style = "plain")
+```
+
+Calculating and comparing the DIC of this model with the former model show no substantial difference.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dic_m2<-m2.r2jags$BUGSoutput$DIC
+dic_m3<-m3.r2jags$BUGSoutput$DIC
+diff_dic<-dic_m2 - dic_m3
+diff_dic
+```
+
+However, I believe the assumptions of the current model (m3) are more reasonable so I’ll stick with this model.
+
+# Ranking the teams of La Liga
+
+We’ll start by ranking the teams of La Liga using the estimated skill parameters from the 2012/2013 season. The values of the skill parameters are difficult to interpret as they are relative to the skill of the team that had its skill parameter "anchored" at zero. To put them on a more interpretable scale I’ll first zero center the skill parameters by subtracting the mean skill of all teams, I then add the home baseline and exponentiate the resulting values. These rescaled skill parameters are now on the scale of expected number of goals when playing home team. Below is a caterpillar plot of the median of the rescaled skill parameters together with the $68$% and $95$% credible intervals. The plot is ordered according to the median skill and thus also gives the ranking of the teams.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+# The ranking of the teams for the 2012/13 season.
+ms3<-m3.r2jags$BUGSoutput$sims.matrix
+team_skill <- ms3[, str_detect(string = colnames(ms3), "skill\\[5,")]
+team_skill <- (team_skill - rowMeans(team_skill)) + ms3[, "home_baseline[5]"]
+team_skill <- exp(team_skill)
+colnames(team_skill) <- teams
+team_skill <- team_skill[, order(colMeans(team_skill), decreasing = T)]
+par(mar = c(2, 0.7, 0.7, 0.7), xaxs = "i")
+caterplot(team_skill, labels.loc = "above", val.lim = c(0.7, 3.8), style = "plain")
+```
+
+Two teams are clearly ahead of the rest, FC Barcelona and Real Madrid CF. Let’s look at the credible difference between the two teams.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+plotPost(team_skill[, "FC Barcelona"] - team_skill[, "Real Madrid CF"], compVal = 0,
+    xlab = "← Real Madrid     vs     Barcelona →")
+```
+
+FC Barcelona is the better team with a probability of $82$%
+
+# Predicting the End Game of La Liga 2012/2013
+
+In the laliga data set the results of the $50$ last games of the 2012/2013 season was missing. Using our model we can now both predict and simulate the outcomes of these $50$ games. The R code below calculates a number of measures for each game (both the games with known and unknown outcomes):
+
+* The mode of the simulated number of goals, that is, the most likely number of scored goals. If we were asked to bet on the number of goals in a game this is what we would use.
+
+* The mean of the simulated number of goals, this is our best guess of the average number of goals in a game.
+
+* The most likely match result for each game.
+
+* A random sample from the distributions of credible home scores, away scores and match results. This is how La Liga actually could have played out in an alternative reality.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+n <- nrow(ms3)
+m3_pred <- sapply(1:nrow(laliga), function(i) {
+  home_team <- which(teams == laliga$HomeTeam[i])
+  away_team <- which(teams == laliga$AwayTeam[i])
+  season <- which(seasons == laliga$Season[i])
+  home_skill <- ms3[, col_name("skill", season, home_team)]
+  away_skill <- ms3[, col_name("skill", season, away_team)]
+  home_baseline <- ms3[, col_name("home_baseline", season)]
+  away_baseline <- ms3[, col_name("away_baseline", season)]
+
+  home_goals <- rpois(n, exp(home_baseline + home_skill - away_skill))
+  away_goals <- rpois(n, exp(away_baseline + away_skill - home_skill))
+  home_goals_table <- table(home_goals)
+  away_goals_table <- table(away_goals)
+  match_results <- sign(home_goals - away_goals)
+  match_results_table <- table(match_results)
+
+  mode_home_goal <- as.numeric(names(home_goals_table)[ which.max(home_goals_table)])
+  mode_away_goal <- as.numeric(names(away_goals_table)[ which.max(away_goals_table)])
+  match_result <-  as.numeric(names(match_results_table)[which.max(match_results_table)])
+  rand_i <- sample(seq_along(home_goals), 1)
+
+  c(mode_home_goal = mode_home_goal, mode_away_goal = mode_away_goal, match_result = match_result,
+    mean_home_goal = mean(home_goals), mean_away_goal = mean(away_goals),
+    rand_home_goal = home_goals[rand_i], rand_away_goal = away_goals[rand_i],
+    rand_match_result = match_results[rand_i])
+})
+m3_pred <- t(m3_pred)
+```
+
+First let’s compare the distribution of the number of goals in the data with the predicted mode, mean and randomised number of goals for all the games (focusing on the number of goals for the home team). First the actual distribution of the number of goals for the home teams.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(laliga$HomeGoals, breaks = (-1:10) + 0.5, xlim = c(-0.5, 10), main = "Distribution of the number of goals\nscored by a home team in a match.", xlab = "")
+```
+
+This next plot shows the distribution of the modes from the predicted distribution of home goals from each game. That is, what is the most probable outcome, for the home team, in each game.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(m3_pred[, "mode_home_goal"], breaks = (-1:10) + 0.5, xlim = c(-0.5, 10),
+    main = "Distribution of predicted most\nprobable scoreby a home team in\na match.", xlab = "")
+```
+
+For almost all games the single most likely number of goals is one. Actually, if you know nothing about a La Liga game betting on one goal for the home team is $78$% of the times the best bet. Lest instead look at the distribution of the predicted mean number of home goals in each game.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(m3_pred[, "mean_home_goal"], breaks = (-1:10) + 0.5, xlim = c(-0.5, 10),
+    main = "Distribution of predicted mean \n score by a home team in a match.", xlab = "")
+```
+
+For most games the expected number of goals are $2$. That is, even if your safest bet is one goal you would expect to see around two goals. The distribution of the mode and the mean number of goals doesn’t look remotely like the actual number of goals. This was not to be expected, we would however expect the distribution of randomized goals (where for each match the number of goals has been randomly drawn from that match’s predicted home goal distribution) to look similar to the actual number of home goals. Looking at the histogram below, this seems to be the case.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(m3_pred[, "rand_home_goal"], breaks = (-1:10) + 0.5, xlim = c(-0.5, 10),
+    main = "Distribution of randomly draw \n score by a home team in a match.", xlab = "")
+```
+
+We can also look at how well the model predicts the data. This should probably be done using cross validation, but as the number of effective parameters are much smaller than the number of data points a direct comparison should at least give an estimated prediction accuracy in the right ballpark.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+mean(laliga$HomeGoals == m3_pred[, "mode_home_goal"], na.rm = T)
+
+mean((laliga$HomeGoals - m3_pred[, "mean_home_goal"])^2, na.rm = T)
+```
+
+So on average the model predicts the correct number of home goals $34$% of the time and guesses the average number of goals with a mean squared error of $1.45$. Now we’ll look at the actual and predicted match outcomes. The graph below shows the match outcomes in the data with $1$ being a home win, $0$ being a draw and $-1$ being a win for the away team.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(laliga$MatchResult, breaks = (-2:1) + 0.5, main = "Actual match results.", xlab = "")
+```
+
+Now looking at the most probable outcomes of the matches according to the model.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(m3_pred[, "match_result"], breaks = (-2:1) + 0.5, main = "Predicted match results.", xlab = "")
+```
+
+For almost all matches the safest bet is to bet on the home team. While draws are not uncommon it is never the safest bet. As in the case with the number of home goals, the randomized match outcomes have a distribution similar to the actual match outcomes:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(m3_pred[, "rand_match_result"], breaks = (-2:1) + 0.5, main = "Randomized match results.", xlab = "")
+mean(laliga$MatchResult == m3_pred[, "match_result"], na.rm = T)
+```
+
+The model predicts the correct match outcome $56$% of the time. Pretty good! Now that we’ve checked that the model reasonably predicts the La Liga history let’s predict the La Liga endgame! The code below displays the predicted mode and mean number of goals for the endgame and the predicted winner of each game.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+laliga_forecast <- laliga[is.na(laliga$HomeGoals), c("Season", "Week", "HomeTeam",
+    "AwayTeam")]
+m3_forecast <- m3_pred[is.na(laliga$HomeGoals), ]
+laliga_forecast$mean_home_goals <- round(m3_forecast[, "mean_home_goal"], 1)
+laliga_forecast$mean_away_goals <- round(m3_forecast[, "mean_away_goal"], 1)
+laliga_forecast$mode_home_goals <- m3_forecast[, "mode_home_goal"]
+laliga_forecast$mode_away_goals <- m3_forecast[, "mode_away_goal"]
+laliga_forecast$predicted_winner <- ifelse(m3_forecast[, "match_result"] ==
+    1, laliga_forecast$HomeTeam, ifelse(m3_forecast[, "match_result"] == -1,
+    laliga_forecast$AwayTeam, "Draw"))
+
+rownames(laliga_forecast) <- NULL
+knitr::kable(laliga_forecast, "pandoc", align = "c")
+```
+
+While these predictions are good if you want to bet on the likely winner they do not reflect how the actual endgame will play out, e.g., there is not a single draw in the predicted_winner column. So at last let’s look at a possible version of the La Liga endgame by displaying the simulated match results calculated earlier.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+laliga_sim <- laliga[is.na(laliga$HomeGoals), c("Season", "Week", "HomeTeam",
+    "AwayTeam")]
+laliga_sim$home_goals <- m3_forecast[, "rand_home_goal"]
+laliga_sim$away_goals <- m3_forecast[, "rand_away_goal"]
+laliga_sim$winner <- ifelse(m3_forecast[, "rand_match_result"] == 1, laliga_forecast$HomeTeam,
+    ifelse(m3_forecast[, "rand_match_result"] == -1, laliga_forecast$AwayTeam,
+        "Draw"))
+
+rownames(laliga_sim) <- NULL
+knitr::kable(laliga_sim, "pandoc", align = "c")
+```
+
+Now we see a number of games resulting in a draw. We also see that Malaga manages to beat Real Madrid in week $36$, against all odds, even though playing as the away team. 
+
+# Calculating the Predicted Payout for Sevilla vs Valencia, 2013-06-01
+
+At the time when this model was developed (2013-05-28) most of the matches in the 2012/2013 season had been played and Barcelona was already the winner (and the most skilled team as predicted by my model). There were however some matches left, for example, Sevilla (home team) vs Valencia (away team) at the $1$st of June, 2013. One of the powers with using Bayesian modeling and MCMC sampling is that once you have the MCMC samples of the parameters it is straight forward to calculate any quantity resulting from these estimates while still retaining the uncertainty of the parameter estimates. So let’s look at the predicted distribution of the number of goals for the Sevilla vs Valencia game and see if I can use my model to make some money. I’ll start by using the MCMC samples to calculate the distribution of the number of goals for Sevilla and Valencia.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+n <- nrow(ms3)
+home_team <- which(teams == "FC Sevilla")
+away_team <- which(teams == "FC Valencia")
+season <- which(seasons == "2012/13")
+home_skill <- ms3[, col_name("skill", season, home_team)]
+away_skill <- ms3[, col_name("skill", season, away_team)]
+home_baseline <- ms3[, col_name("home_baseline", season)]
+away_baseline <- ms3[, col_name("away_baseline", season)]
+
+home_goals <- rpois(n, exp(home_baseline + home_skill - away_skill))
+away_goals <- rpois(n, exp(away_baseline + away_skill - home_skill))
+```
+
+Looking at summary of these two distributions shows that it will be a close game but with a slight advantage for the home team Sevilla.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+par(mfrow = c(2, 2), mar = rep(2.2, 4))
+plot_goals(home_goals, away_goals)
+```
+
+When developing the model (2013-05-28) the author got the specific payouts (that is, how much would I get back if my bet was successful) for betting on the outcome of this game on a betting site. Using my simulated distribution of the number of goals I can calculate the predicted payouts of my model. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+1/c(Sevilla = mean(home_goals > away_goals), Draw = mean(home_goals == away_goals),
+    Valencia = mean(home_goals < away_goals))
+```
+
+I should clearly bet on Sevilla as my model predicts a payout of $2.24$ (that is, a likely win for Sevilla) while betsson.com gives me the much higher payout of $3.2$. It is also possible to bet on the final goal outcome so let’s calculate what payouts my model predicts for different goal outcomes.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+goals_payout <- laply(0:6, function(home_goal) {
+    laply(0:6, function(away_goal) {
+        1/mean(home_goals == home_goal & away_goals == away_goal)
+    })
+})
+
+colnames(goals_payout) <- paste("Valencia", 0:6, sep = " - ")
+rownames(goals_payout) <- paste("Sevilla", 0:6, sep = " - ")
+goals_payout <- round(goals_payout, 1)
+knitr::kable(goals_payout, "pandoc", align = "c")
+```
+
+The most likely result is 1 - 1 with a predicted payout of $8.4$ and the beeting site agrees with this also offering their lowest payout for this bet, $5.3$. Not good enough! Looking at the payouts at the beeting site I can see that Sevilla - Valencia: 2 - 0 gives me a payout of $16.0$, that’s much better than my predicted payout of $13.1$. I’ll go for that!
+
+# Conclusions
+
+I believe the model has a lot things going for it. It is conceptually quite simple and easy to understand, implement and extend. It captures the patterns in and distribution of the data well. It allows me to easily calculate the probability of any outcome, from a game with whichever teams from any La Liga season. Want to calculate the probability that RCD Mallorca (home team) vs Malaga CF (away team) in the Season 2009/2010 would result in a draw? Easy! What’s the probability of the total number of goals in Granada CF vs Athletic Club Bilbao being a prime number? No problemo! What if Real Madrid from 2008/2009 met Barcelona from 2012/2013 in 2010/2011 and both teams had the home advantage? Well, that’s possible. There are also a couple of things that could be improved (many which are not too hard to address). Currently there is assumed to be no dependency between the goal distributions of the home and away teams, but this might not be realistic. Maybe if one team have scored more goals the other team "looses steam" (a negative correlation between the teams’ scores) or instead maybe the other team tries harder (a positive correlation). Such dependencies could maybe be added to the model using copulas. * One of the advantages of Bayesian statistics is the possibility to used informative priors. As I have no knowledge of football I’ve been using vague priors but with the help of a more knowledgeable football fan the model could be given more informative priors. Also, the predictive performance of the model has not been as thoroughly examined and this could be remedied with a healthy dose of cross validation. 
+
+# References

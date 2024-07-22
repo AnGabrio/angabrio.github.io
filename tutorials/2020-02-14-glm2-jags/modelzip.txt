@@ -1,0 +1,15 @@
+
+model {
+  for (i in 1:N) {
+     z[i] ~ dbern(one.minus.theta)
+     Y[i] ~ dpois(lambda[i])
+     lambda[i] <- z[i]*eta[i]
+     log(eta[i]) <- beta0 + beta1*X[i]
+  }
+  one.minus.theta <- 1-theta
+  logit(theta) <- gamma0
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  gamma0 ~ dnorm(0,1.0E-06)
+} 
+

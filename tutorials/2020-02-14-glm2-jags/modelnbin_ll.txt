@@ -1,0 +1,16 @@
+
+model {
+  for (i in 1:N) {
+     zeros[i] ~ dpois(zeros.lambda[i])
+     zeros.lambda[i] <- -ll[i] + C     
+     ll[i] <- loggam(Y[i]+size) - loggam(Y[i]+1) - loggam(size) + size*(log(p[i]) - log(p[i]+1)) - 
+              Y[i]*log(p[i]+1)
+     p[i] <- size/lambda[i]
+     eta[i] <- inprod(beta[], X[i,])
+     log(lambda[i]) <- eta[i]
+  }
+  beta ~ dmnorm(mu[],Sigma[,])
+  size ~ dunif(0.001,1000)
+  dev <- sum(-2*ll)
+} 
+

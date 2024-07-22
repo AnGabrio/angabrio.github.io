@@ -1,0 +1,1763 @@
+---
+title: "Generalised Linear Models part II (JAGS)"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    email: a.gabrio@maastrichtuniversity.nl
+    corresponding: true    
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2020-02-14
+categories: [Quarto, R, Academia, Software, Statistics] # self-defined categories
+#image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+abstract: > 
+  [The focus of this simple tutorial is to provide a brief introduction and overview about how to fit Bayesian models using `JAGS` via `R` ...]{style="font-size: 85%"}
+keywords:
+  - Software
+  - Statistics
+  - Stan
+#license: "GPL-2"
+#copyright: 
+#  holder: CRAN
+#  year: 2023
+#citation: 
+#  title: missingHE
+#  author: Andrea Gabrio
+#  note: R package version 4.4.2
+#  url: https://cran.r-project.org/web/packages/missingHE
+#funding: "The author received no specific funding for this work."
+bibliography: citations_jags15.bib
+#nocite: |
+#  @gabrio2017handling
+---
+
+This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. `BUGS` (Bayesian inference Using *Gibbs Sampling*) is an algorithm and supporting language (resembling `R`) dedicated to performing the Gibbs sampling implementation of *Markov Chain Monte Carlo* (MCMC) method. Dialects of the `BUGS` language are implemented within three main projects:
+
+1. **OpenBUGS** - written in component pascal.
+ 
+2. **JAGS** - (Just Another Gibbs Sampler) - written in `C++`. 
+
+3. **STAN** - a dedicated Bayesian modelling framework written in `C++` and implementing *Hamiltonian* MCMC samplers.
+
+Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of `R`, and thus, they are best accessed from within `R` itself. As such there are multiple packages devoted to interfacing with the various software implementations:
+
+* *R2OpenBUGS* - interfaces with `OpenBUGS`
+
+* *R2jags* - interfaces with `JAGS`
+
+* *rstan* - interfaces with `STAN`
+
+This tutorial will demonstrate how to fit models in `JAGS` (@plummer2004jags) using the package `R2jags` (@su2015package) as interface, which also requires to load some other packages.
+
+# Overview
+
+## Introduction
+
+Whilst in many instances, count data can be approximated reasonably well by a normal distribution (particularly if the counts are all above zero and the mean count is greater than about $20$), more typically, when count data are modelled via normal distribution certain undesirable characteristics arise that are a consequence of the nature of discrete non-negative data.
+
+* Expected (predicted) values and confidence bands less than zero are illogical, yet these are entirely possible from a normal distribution
+
+* The distribution of count data are often skewed when their mean is low (in part because the distribution is truncated to the left by zero) and variance usually increases with increasing mean (variance is typically proportional to mean in count data). By contrast, the Gaussian (normal) distribution assumes that mean and variance are unrelated and thus estimates (particularly of standard error) might well be reasonable inaccurate.
+
+Poisson regression is a type of **generalised linear model** (GLM) in which a non-negative integer (natural number) response is modelled against a linear predictor via a specific link function. The linear predictor is typically a linear combination of effects parameters. The role of the link function is to transform the expected values of the response y (which is on the scale of ($0;\infty$), as is the Poisson distribution from which expectations are drawn) into the scale of the linear predictor (which is $-\infty;\infty$).
+
+As implied in the name of this group of analyses, a Poisson rather than Gaussian (normal) distribution is used to represent the errors (residuals). Like count data (number of individuals, species etc), the Poisson distribution encapsulates positive integers and is bound by zero at one end. Consequently, the degree of variability is directly related the expected value (equivalent to the mean of a Gaussian distribution). Put differently, the variance is a function of the mean. Repeated observations from a Poisson distribution located close to zero will yield a much smaller spread of observations than will samples drawn from a Poisson distribution located a greater distance from zero. In the Poisson distribution, the variance has a 1:1 relationship with the mean. The canonical link function for the Poisson distribution is a log-link function.
+
+Whilst the expectation that the mean=variance ($\mu=\sigma$) is broadly compatible with actual count data (that variance increases at the same rate as the mean), under certain circumstances, this might not be the case. For example, when there are other unmeasured influences on the response variable, the distribution of counts might be somewhat clumped which can result in higher than expected variability (that is $\sigma > \mu$). The variance increases more rapidly than does the mean. This is referred to as **overdispersion**. The degree to which the variability is greater than the mean (and thus the expected degree of variability) is called **dispersion**. Effectively, the Poisson distribution has a dispersion parameter (or **scaling factor**) of $1$.
+
+It turns out that overdispersion is very common for count data and it typically underestimates variability, standard errors and thus deflated p-values. There are a number of ways of overcoming this limitation, the effectiveness of which depend on the causes of overdispersion.
+
+**Quasi-Poisson models** - these introduce the dispersion parameter ($\phi$) into the model. This approach does not utilize an underlying error distribution to calculate the maximum likelihood (there is no quasi-Poisson distribution). Instead, if the Newton-Ralphson iterative reweighting least squares algorithm is applied using a direct specification of the relationship between mean and variance ($\text{var}(y)=\phi\mu$, the estimates of the regression coefficients are identical to those of the maximum likelihood estimates from the Poisson model. This is analogous to fitting ordinary least squares on symmetrical, yet not normally distributed data - the parameter estimates are the same, however they won't necessarily be as efficient. The standard errors of the coefficients are then calculated by multiplying the Poisson model coefficient standard errors by $\sqrt{\phi}$. Unfortunately, because the quasi-poisson model is not estimated via maximum likelihood, properties such as AIC and log-likelihood cannot be derived. Consequently, quasi-poisson and Poisson model fits cannot be compared via either AIC or likelihood ratio tests (nor can they be compared via deviance as uasi-poisson and Poisson models have the same residual deviance). That said, quasi-likelihood can be obtained by dividing the likelihood from the Poisson model by the dispersion (scale) factor.
+
+**Negative binomial model** - technically, the negative binomial distribution is a probability distribution for the number of successes before a specified number of failures. However, the negative binomial can also be defined (parameterised) in terms of a mean ($\mu$) and scale factor ($\omega$),
+
+$$
+p(y_i) = \frac{\Gamma(y_i+\omega)}{\Gamma(\omega)y!} \times \frac{\mu^{y_i}_i\omega^\omega}{(\mu_i+\omega)^{\mu_i+\omega}},
+$$
+
+where the expectected value of the values $y_i$ (the means) are ($\mu_i$) and the variance is $y_i=\frac{\mu_i+\mu^2_i}{\omega}$. In this way, the negative binomial is a two-stage hierarchical process in which the response is modeled against a Poisson distribution whose expected count is in turn modeled by a Gamma distribution with a mean of $\mu$ and constant scale parameter ($\omega$). Strictly, the negative binomial is not an exponential family distribution (unless $\omega$ is fixed as a constant), and thus negative binomial models cannot be fit via the usual GLM iterative reweighting algorithm. Instead estimates of the regression parameters along with the scale factor ($\omega$) are obtained via maximum likelihood. The negative binomial model is useful for accommodating overdispersal when it is likely caused by clumping (due to the influence of other unmeasured factors) within the response.
+
+**Zero-inflated Poisson model** - overdispersion can also be caused by the presence of a greater number of zero's than would otherwise be expected for a Poisson distribution. There are potentially two sources of zero counts - genuine zeros and false zeros. Firstly, there may genuinely be no individuals present. This would be the number expected by a Poisson distribution. Secondly, individuals may have been present yet not detected or may not even been possible. These are false zero's and lead to zero inflated data (data with more zeros than expected). For example, the number of joeys accompanying an adult koala could be zero because the koala has no offspring (true zero) or because the koala is male or infertile (both of which would be examples of false zeros). Similarly, zero counts of the number of individual in a transect are due either to the absence of individuals or the inability of the observer to detect them. Whilst in the former example, the latent variable representing false zeros (sex or infertility) can be identified and those individuals removed prior to analysis, this is not the case for the latter example. That is, we cannot easily partition which counts of zero are due to detection issues and which are a true indication of the natural state.
+
+Consistent with these two sources of zeros, zero-inflated models combine a binary logistic regression model (that models count membership according to a latent variable representing observations that can only be zeros - not detectable or male koalas) with a Poisson regression (that models count membership according to a latent variable representing observations whose values could be 0 or any positive integer - fertile female koalas).
+
+## Poisson regression
+
+The following equations are provided since in Bayesian modelling, it is occasionally necessary to directly define the log-likelihood calculations (particularly for zero-inflated models and other mixture models).
+
+$$
+f(y \mid \lambda) = \frac{\lambda^ye^{-\lambda}}{y!},
+$$
+
+where $E[Y]=Var(Y)=\lambda$ and $\lambda$ is the mean.
+
+## Data generation
+
+Lets say we wanted to model the abundance of an item ($y$) against a continuous predictor ($x$). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(8)
+#The number of samples
+n.x <- 20
+#Create x values that at uniformly distributed throughout the rate of 1 to 20
+x <- sort(runif(n = n.x, min = 1, max =20))
+mm <- model.matrix(~x)
+intercept <- 0.6
+slope=0.1
+#The linear predictor
+linpred <- mm %*% c(intercept,slope)
+#Predicted y values
+lambda <- exp(linpred)
+#Add some noise and make binomial
+y <- rpois(n=n.x, lambda=lambda)
+dat <- data.frame(y,x)
+```
+
+With these sort of data, we are primarily interested in investigating whether there is a relationship between the binary response variable and the linear predictor (linear combination of one or more continuous or categorical predictors).
+
+## Exploratory data analysis
+
+There are at least five main potential models we could consider fitting to these data:
+
+* **Ordinary least squares regression (general linear model)** - assumes normality of residuals
+
+* **Poisson regression** - assumes mean=variance (dispersion$=1$)
+
+* **Quasi-poisson regression** - a general solution to overdispersion. Assumes variance is a function of mean, dispersion estimated, however likelihood based statistics unavailable
+
+* **Negative binomial regression** - a specific solution to overdispersion caused by clumping (due to an unmeasured latent variable). Scaling factor ($\omega$) is estimated along with the regression parameters.
+
+* **Zero-inflation model** - a specific solution to overdispersion caused by excessive zeros (due to an unmeasured latent variable). Mixture of binomial and Poisson models.
+
+When counts are all very large (not close to $0$) and their ranges do not span orders of magnitude, they take on very Gaussian properties (symmetrical distribution and variance independent of the mean). Given that models based on the Gaussian distribution are more optimized and recognized than Generalized Linear Models, it can be prudent to adopt Gaussian models for such data. Hence it is a good idea to first explore whether a Poisson model is likely to be more appropriate than a standard Gaussian model. The potential for overdispersion can be explored by adding a rug to boxplot. The rug is simply tick marks on the inside of an axis at the position corresponding to an observation. As multiple identical values result in tick marks drawn over one another, it is typically a good idea to apply a slight amount of jitter (random displacement) to the values used by the rug.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat$x)
+
+boxplot(dat$y, horizontal=TRUE)
+rug(jitter(dat$y), side=1)
+```
+
+There is definitely signs of non-normality that would warrant Poisson models. The rug applied to the boxplots does not indicate a series degree of clumping and there appears to be few zero. Thus overdispersion is unlikely to be an issue. Lets now explore linearity by creating a histogram of the predictor variable ($x$) and a scatterplot of the relationship between the response ($y$) and the predictor ($x$)
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#now for the scatterplot
+plot(y~x, dat, log="y")
+with(dat, lines(lowess(y~x)))
+```
+
+**Conclusions**: the predictor ($x$) does not display any skewness or other issues that might lead to non-linearity. The lowess smoother on the scatterplot does not display major deviations from a straight line and thus linearity is satisfied. Violations of linearity could be addressed by either:
+
+* define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).
+
+* transform the scale of the predictor variables.
+
+Although we have already established that there are few zeros in the data (and thus overdispersion is unlikely to be an issue), we can also explore this by comparing the number of zeros in the data to the number of zeros that would be expected from a Poisson distribution with a mean equal to the mean count of the data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#proportion of 0's in the data
+dat.tab<-table(dat$y==0)
+dat.tab/sum(dat.tab)
+
+#proportion of 0's expected from a Poisson distribution
+mu <- mean(dat$y)
+cnts <- rpois(1000, mu)
+dat.tab <- table(cnts == 0)
+dat.tab/sum(dat.tab)
+```
+
+In the above, the value under `FALSE` is the proportion of non-zero values in the data and the value under `TRUE` is the proportion of zeros in the data. In this example, there are no zeros in the observed data which corresponds closely to the very low proportion expected ($0.003$).
+
+## Model fitting
+
+$$
+y_i \sim \text{Pois}(\lambda_i),
+$$
+
+where $\log(\lambda_i)=\eta_i$, with $\eta_i=\beta_0+\beta_1x_{i}$ and $\beta_0,\beta_1 \sim N(0, 10000)$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.list <- with(dat,list(Y=y, X=x,N=nrow(dat)))
+modelString="
+model {
+  for (i in 1:N) {
+     Y[i] ~ dpois(lambda[i])
+     log(lambda[i]) <- beta0 + beta1*X[i]
+  }
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+} 
+"
+writeLines(modelString, con='modelpois.txt')
+
+params <- c('beta0','beta1')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+library(R2jags)
+dat.P.jags <- jags(data=dat.list,model.file='modelpois.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+```
+
+## Model evaluation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(mcmcplots)
+denplot(dat.P.jags, parms = c("beta0","beta1"))
+traplot(dat.P.jags, parms = c("beta0","beta1"))
+
+raftery.diag(as.mcmc(dat.P.jags))
+
+autocorr.diag(as.mcmc(dat.P.jags))
+```
+
+One very important model validation procedure is to examine a plot of residuals against predicted or fitted values (the residual plot). Ideally, residual plots should show a random scatter of points without outliers. That is, there should be no patterns in the residuals. Patterns suggest inappropriate linear predictor (or scale) and/or inappropriate residual distribution/link function. The residuals used in such plots should be standardized (particularly if the model incorporated any variance-covariance structures - such as an autoregressive correlation structure) Pearsons's residuals standardize residuals by division with the square-root of the variance. We can generate Pearson's residuals within the `JAGS` model. Alternatively, we could use the parameters to generate the residuals outside of `JAGS`. Pearson's residuals are calculated according to:
+
+$$
+\epsilon = \frac{y_i - \mu}{\sqrt{\text{var}(y)}},
+$$
+
+where $\mu$ is the expected value of $Y$ ($=\lambda$ for Poisson) and var($y$) is the variance of $Y$ ($=\lambda$ for Poisson).
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.P.jags$BUGSoutput$sims.matrix[,1:2]
+Xmat <- model.matrix(~x, data=dat)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+#Expected value and variance are both equal to lambda
+expY <- varY <- lambda
+#sweep across rows and then divide by lambda
+Resid <- -1*sweep(expY,2,dat$y,'-')/sqrt(varY)
+#plot residuals vs expected values
+plot(apply(Resid,2,mean)~apply(eta,2,mean))
+```
+
+Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Poisson distribution matching that estimated by the model. Essentially this is estimating how well the Poisson distribution, the log-link function and the linear model approximates the observed data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+SSres<-apply(Resid^2,1,sum)
+
+#generate a matrix of draws from a poisson distribution
+# the matrix is the same dimensions as lambda and uses the probabilities of lambda
+YNew <- matrix(rpois(length(lambda),lambda=lambda),nrow=nrow(lambda))
+
+Resid1<-(lambda - YNew)/sqrt(lambda)
+SSres.sim<-apply(Resid1^2,1,sum)
+mean(SSres.sim>SSres, na.rm = T)
+```
+
+## Goodness of fit 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.list1 <- with(dat,list(Y=y, X=x,N=nrow(dat)))
+modelString="
+model {
+  for (i in 1:N) {
+    #likelihood function
+    Y[i] ~ dpois(lambda[i])
+    eta[i] <- beta0+beta1*X[i] #linear predictor
+    log(lambda[i]) <- eta[i]   #link function
+
+    #E(Y) and var(Y)
+    expY[i] <- lambda[i]
+    varY[i] <- lambda[i]
+
+    # Calculate RSS
+    Resid[i] <- (Y[i] - expY[i])/sqrt(varY[i])
+    RSS[i] <- pow(Resid[i],2)
+
+    #Simulate data from a Poisson distribution
+    Y1[i] ~ dpois(lambda[i])
+    #Calculate RSS for simulated data
+    Resid1[i] <- (Y1[i] - expY[i])/sqrt(varY[i])
+    RSS1[i] <-pow(Resid1[i],2) 
+  }
+  #Priors
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  #Bayesian P-value
+  Pvalue <- mean(sum(RSS1)>sum(RSS))
+} 
+"
+
+writeLines(modelString, con='modelpois_gof.txt')
+
+params <- c('beta0','beta1', 'Pvalue')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.P.jags1 <- jags(data=dat.list,model.file='modelpois_gof.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.P.jags1)
+```
+
+**Conclusions**: the Bayesian p-value is approximately $0.5$, suggesting that there is a good fit of the model to the data.
+
+Unfortunately, unlike with linear models (Gaussian family), the expected distribution of data (residuals) varies over the range of fitted values for numerous (often competing) ways that make diagnosing (and attributing causes thereof) miss-specified generalized linear models from standard residual plots very difficult. The use of standardized (Pearson) residuals or deviance residuals can partly address this issue, yet they still do not offer completely consistent diagnoses across all issues (miss-specified model, over-dispersion, zero-inflation). An alternative approach is to use simulated data from the model posteriors to calculate an empirical cumulative density function from which residuals are are generated as values corresponding to the observed data along the density function. Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Bernoulli distribution matching that estimated by the model. Essentially this is estimating how well the Bernoulli distribution and linear model approximates the observed data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.P.jags$BUGSoutput$sims.matrix[,1:2]
+Xmat <- model.matrix(~x, data=dat)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+
+simRes <- function(lambda, data,n=250, plot=T, family='poisson') {
+ require(gap)
+ N = nrow(data)
+ sim = switch(family,
+    'poisson' = matrix(rpois(n*N,apply(lambda,2,mean)),ncol=N, byrow=TRUE)
+ )
+ a = apply(sim + runif(n,-0.5,0.5),2,ecdf)
+ resid<-NULL
+ for (i in 1:nrow(data)) resid<-c(resid,a[[i]](data$y[i] + runif(1 ,-0.5,0.5)))
+ if (plot==T) {
+   par(mfrow=c(1,2))
+   gap::qqunif(resid,pch = 2, bty = "n",
+   logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals",
+   cex.main = 1, las=1)
+   plot(resid~apply(lambda,2,mean), xlab='Predicted value', ylab='Standardized residual', las=1)
+ }
+ resid
+}
+
+simRes(lambda,dat, family='poisson')
+```
+
+The trend (black symbols) in the qq-plot does not appear to be overly non-linear (matching the ideal red line well), suggesting that the model is not overdispersed. The spread of standardized (simulated) residuals in the residual plot do not appear overly non-uniform. That is there is not trend in the residuals. Furthermore, there is not a concentration of points close to $1$ or $0$ (which would imply overdispersion).
+
+Recall that the Poisson regression model assumes that variance=mean (var=μϕ where $\phi=1$) and thus dispersion ($\phi=\frac{\text{var}}{\mu}=1)$). However, we can also calculate approximately what the dispersion factor would be by using sum square of the residuals as a measure of variance and the model residual degrees of freedom as a measure of the mean (since the expected value of a Poisson distribution is the same as its degrees of freedom).
+
+$$
+\phi = \frac{RSS}{df},
+$$
+
+where $df=n−k$ and $k$ is the number of estimated model coefficients.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Resid <- -1*sweep(lambda,2,dat$y,'-')/sqrt(lambda)
+RSS<-apply(Resid^2,1,sum)
+(df<-nrow(dat)-ncol(coefs))
+
+Disp <- RSS/df
+data.frame(Median=median(Disp), Mean=mean(Disp), HPDinterval(as.mcmc(Disp)),
+           HPDinterval(as.mcmc(Disp),p=0.5))
+```
+
+We can incorporate the dispersion statistic directly into `JAGS`.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.list <- with(dat,list(Y=y, X=x,N=nrow(dat)))
+modelString="
+model {
+  for (i in 1:N) {
+     Y[i] ~ dpois(lambda[i])
+     eta[i] <- beta0 + beta1*X[i]
+     log(lambda[i]) <- eta[i]
+     expY[i] <- lambda[i]
+     varY[i] <- lambda[i]
+	 Resid[i] <- (Y[i] - expY[i])/sqrt(varY[i]) 
+  }
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  RSS <- sum(pow(Resid,2))
+  df <- N-2
+  phi <- RSS/df
+} 
+"
+
+writeLines(modelString, con='modelpois_disp.txt')
+
+params <- c('beta0','beta1','phi')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.P.jags <- jags(data=dat.list,model.file='modelpois_disp.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.P.jags)
+```
+
+The dispersion statistic is close to $1$ and thus there is no evidence that the data were overdispersed. The Poisson distribution was therefore appropriate.
+
+## Exploring the model parameters
+
+If there was any evidence that the assumptions had been violated or the model was not an appropriate fit, then we would need to reconsider the model and start the process again. In this case, there is no evidence that the test will be unreliable so we can proceed to explore the test statistics.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+library(coda)
+print(dat.P.jags)
+
+library(plyr)
+adply(dat.P.jags$BUGSoutput$sims.matrix[,1:2], 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+
+#on original scale
+adply(exp(dat.P.jags$BUGSoutput$sims.matrix[,1:2]), 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+```
+
+**Conclusions**: We would reject the null hypothesis of no effect of $x$ on $y$. An increase in x is associated with a significant linear increase (positive slope) in the abundance of y. Every $1$ unit increase in $x$ results in a log $0.11$ unit increase in $y$. We usually express this in terms of abundance rather than log abundance, so every $1$ unit increase in $x$ results in a ($e^{ 0.11} = 1.12 $) $1.12$ unit increase in the abundance of $y$.
+
+## Explorations of the trends
+
+A measure of the strength of the relationship can be obtained according to:
+
+$$
+R^2 = 1 - \frac{\text{RSS}_{model}}{\text{RSS}_{null}}
+$$
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, data=dat)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+#calculate the raw SS residuals
+SSres <- apply((-1*(sweep(lambda,2,dat$y,'-')))^2,1,sum)
+SSres.null <- sum((dat$y - mean(dat$y))^2)
+#OR 
+SSres.null <- crossprod(dat$y - mean(dat$y))
+#calculate the model r2
+1-mean(SSres)/SSres.null
+```
+
+**Conclusions**: $65$% of the variation in $y$ abundance can be explained by its relationship with $x$. We can also do it directly into `JAGS`.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.list <- with(dat,list(Y=y, X=x,N=nrow(dat)))
+modelString="
+model {
+  for (i in 1:N) {
+     Y[i] ~ dpois(lambda[i])
+     eta[i] <- beta0 + beta1*X[i]
+     log(lambda[i]) <- eta[i]
+     res[i] <- Y[i] - lambda[i]
+     resnull[i] <- Y[i] - meanY
+  }
+  meanY <- mean(Y)
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  RSS <- sum(res^2)
+  RSSnull <- sum(resnull^2)
+  r2 <- 1-RSS/RSSnull
+} 
+"
+
+writeLines(modelString, con='modelpois_disp_r2.txt')
+
+params <- c('beta0','beta1','r2')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.P.jags <- jags(data=dat.list,model.file='modelpois_disp_r2.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.P.jags)
+```
+
+Finally, we will create a summary plot.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+par(mar = c(4, 5, 0, 0))
+plot(y ~ x, data = dat, type = "n", ann = F, axes = F)
+points(y ~ x, data = dat, pch = 16)
+xs <- seq(min(dat$x,na.rm=TRUE),max(dat$x,na.rm=TRUE), l = 1000)
+Xmat <- model.matrix(~xs)
+eta<-coefs %*% t(Xmat)
+ys <- exp(eta)
+library(plyr)
+library(coda)
+data.tab <- adply(ys,2,function(x) {
+  data.frame(Median=median(x), HPDinterval(as.mcmc(x)))
+})
+data.tab <- cbind(x=xs,data.tab)
+points(Median ~ x, data=data.tab,col = "black", type = "l")
+lines(lower ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+lines(upper ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+
+axis(1)
+mtext("X", 1, cex = 1.5, line = 3)
+axis(2, las = 2)
+mtext("Abundance of Y", 2, cex = 1.5, line = 3)
+box(bty = "l")
+```
+
+## Full log-likelihood function
+
+Now lets try it by specifying log-likelihood and the zero trick. When applying this trick, we need to manually calculate the deviance as the inbuilt deviance will be based on the log-likelihood of estimating the zeros (as part of the zero trick) rather than the deviance of the intended model. The one advantage of the zero trick is that the Deviance and thus DIC, AIC provided by `R2jags` will be incorrect. Hence, they too need to be manually defined within `JAGS` I suspect that the AIC calculation I have used is incorrect.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, dat)
+nX <- ncol(Xmat)
+dat.list2 <- with(dat,list(Y=y, X=Xmat,N=nrow(dat), mu=rep(0,nX),
+                  Sigma=diag(1.0E-06,nX), zeros=rep(0,nrow(dat)), C=10000))
+modelString="
+model {
+  for (i in 1:N) {
+     zeros[i] ~ dpois(zeros.lambda[i])
+     zeros.lambda[i] <- -ll[i] + C     
+     ll[i] <- Y[i]*log(lambda[i]) - lambda[i] - loggam(Y[i]+1)
+     eta[i] <- inprod(beta[], X[i,])
+     log(lambda[i]) <- eta[i]
+    llm[i] <- Y[i]*log(meanlambda) - meanlambda - loggam(Y[i]+1)
+  }
+  meanlambda <- mean(lambda)
+  beta ~ dmnorm(mu[],Sigma[,])
+  dev <- sum(-2*ll)
+  pD <- mean(dev)-sum(-2*llm)
+  AIC <- min(dev+(2*pD))
+} 
+"
+
+writeLines(modelString, con='modelpois_ll.txt')
+
+params <- c('beta','dev','AIC')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.P.jags3 <- jags(data=dat.list2,model.file='modelpois_ll.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.P.jags3)
+```
+
+# Negative binomial
+
+The following equations are provided since in Bayesian modelling, it is occasionally necessary to directly define the log-likelihood calculations (particularly for zero-inflated models and other mixture models).
+
+$$
+f(y \mid r, p) = \frac{\Gamma(y+r)}{\Gamma(r)\Gamma(y+1)}p^r(1-p)^y,
+$$
+
+where $p$ is the probability of $y$ successes until $r$ failures. If, we make $p=\frac{\text{size}}{\text{size}+\mu}$, then we can define the function in terms of $\mu$:
+
+$$
+\mu = \frac{r(1-p)}{p},
+$$
+
+where $E[Y]=\mu$, $Var(Y)=\mu + \frac{\mu^2}{r}$. 
+
+## Data generation
+
+Lets say we wanted to model the abundance of an item ($y$) against a continuous predictor ($x$). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(37) #16 #35
+#The number of samples
+n.x <- 20
+#Create x values that at uniformly distributed throughout the rate of 1 to 20
+x <- sort(runif(n = n.x, min = 1, max =20))
+mm <- model.matrix(~x)
+intercept <- 0.6
+slope=0.1
+#The linear predictor
+linpred <- mm %*% c(intercept,slope)
+#Predicted y values
+lambda <- exp(linpred)
+#Add some noise and make binomial
+y <- rnbinom(n=n.x, mu=lambda, size=1)
+dat.nb <- data.frame(y,x)
+```
+
+When counts are all very large (not close to $0$) and their ranges do not span orders of magnitude, they take on very Gaussian properties (symmetrical distribution and variance independent of the mean). Given that models based on the Gaussian distribution are more optimized and recognized than Generalized Linear Models, it can be prudent to adopt Gaussian models for such data. Hence it is a good idea to first explore whether a Poisson or Negative Binomial model is likely to be more appropriate than a standard Gaussian model. Recall from Poisson regression, there are five main potential models that we could consider fitting to these data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat$x)
+
+#now for the scatterplot
+plot(y~x, dat.nb, log="y")
+with(dat.nb, lines(lowess(y~x)))
+```
+
+**Conclusions**: the predictor ($x$) does not display any skewness or other issues that might lead to non-linearity. The lowess smoother on the scatterplot does not display major deviations from a straight line and thus linearity is satisfied. Violations of linearity could be addressed by either:
+
+* define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).
+
+* transform the scale of the predictor variables.
+
+Although we have already established that there are few zeros in the data (and thus overdispersion is unlikely to be an issue), we can also explore this by comparing the number of zeros in the data to the number of zeros that would be expected from a Poisson distribution with a mean equal to the mean count of the data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#proportion of 0's in the data
+dat.nb.tab<-table(dat.nb$y==0)
+dat.nb.tab/sum(dat.nb.tab)
+
+#proportion of 0's expected from a Poisson distribution
+mu <- mean(dat.nb$y)
+cnts <- rpois(1000, mu)
+dat.nb.tabE <- table(cnts == 0)
+dat.nb.tabE/sum(dat.nb.tabE)
+```
+
+In the above, the value under `FALSE` is the proportion of non-zero values in the data and the value under `TRUE` is the proportion of zeros in the data. In this example, the proportion of zeros observed is similar to the proportion expected. Indeed, there was only a single zero observed. Hence it is likely that if there is overdispersion it is unlikely to be due to excessive zeros.
+
+## Model fitting
+
+$$
+y_i \sim \text{NegBin}(p_i,r),
+$$
+
+where $p_i=\frac{r}{r+\lambda_i}$, with $\log(\lambda_i)=\beta_0+\beta_1x_{i}$ and $\beta_0,\beta_1 \sim N(0, 10000)$, $r \sim \text{Unif}(0.001,1000)$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.nb.list <- with(dat.nb,list(Y=y, X=x,N=nrow(dat.nb)))
+modelString="
+model {
+  for (i in 1:N) {
+     Y[i] ~ dnegbin(p[i],size)
+     p[i] <- size/(size+lambda[i])
+     log(lambda[i]) <- beta0 + beta1*X[i]
+  }
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  size ~ dunif(0.001,1000)
+  theta <- pow(1/mean(p),2)
+  scaleparam <- mean((1-p)/p) 
+} 
+"
+writeLines(modelString, con='modelnbin.txt')
+
+params <- c('beta0','beta1', 'size','theta','scaleparam')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.NB.jags <- jags(data=dat.nb.list,model.file='modelnbin.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+```
+
+## Model evaluation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+denplot(dat.NB.jags, parms = c("beta0","beta1","size"))
+traplot(dat.NB.jags, parms = c("beta0","beta1","size"))
+
+raftery.diag(as.mcmc(dat.NB.jags))
+
+autocorr.diag(as.mcmc(dat.NB.jags))
+```
+
+We now explore the goodness of fit of the models via the residuals and deviance. We could calculate the Pearsons's residuals within the `JAGS` model. Alternatively, we could use the parameters to generate the residuals outside of `JAGS`.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.NB.jags$BUGSoutput$sims.matrix[,1:2]
+size <- dat.NB.jags$BUGSoutput$sims.matrix[,'size']
+Xmat <- model.matrix(~x, data=dat.nb)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+varY <- lambda + (lambda^2)/size
+#sweep across rows and then divide by lambda
+Resid <- -1*sweep(lambda,2,dat.nb$y,'-')/sqrt(varY)
+#plot residuals vs expected values
+plot(apply(Resid,2,mean)~apply(eta,2,mean))
+```
+
+Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Negative binomial distribution matching that estimated by the model. Essentially this is estimating how well the Negative binomial distribution, the log-link function and the linear model approximates the observed data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+SSres<-apply(Resid^2,1,sum)
+
+#generate a matrix of draws from a negative binomial distribution
+# the matrix is the same dimensions as pi and uses the probabilities of pi
+YNew <- matrix(rnbinom(length(lambda),mu=lambda, size=size),nrow=nrow(lambda))
+Resid1<-(lambda - YNew)/sqrt(varY)
+SSres.sim<-apply(Resid1^2,1,sum)
+mean(SSres.sim>SSres, na.rm = T)
+```
+
+**Conclusions**: the Bayesian p-value is approximately $0.5$, suggesting that there is a good fit of the model to the data.
+
+Unfortunately, unlike with linear models (Gaussian family), the expected distribution of data (residuals) varies over the range of fitted values for numerous (often competing) ways that make diagnosing (and attributing causes thereof) miss-specified generalized linear models from standard residual plots very difficult. The use of standardized (Pearson) residuals or deviance residuals can partly address this issue, yet they still do not offer completely consistent diagnoses across all issues (miss-specified model, over-dispersion, zero-inflation). An alternative approach is to use simulated data from the model posteriors to calculate an empirical cumulative density function from which residuals are are generated as values corresponding to the observed data along the density function.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.NB.jags$BUGSoutput$sims.matrix[,1:2]
+size <- dat.NB.jags$BUGSoutput$sims.matrix[,'size']
+Xmat <- model.matrix(~x, data=dat.nb)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+
+simRes <- function(lambda, data,n=250, plot=T, family='negbin', size=NULL) {
+ require(gap)
+ N = nrow(data)
+ sim = switch(family,
+    'poisson' = matrix(rpois(n*N,apply(lambda,2,mean)),ncol=N, byrow=TRUE),
+    'negbin' = matrix(MASS:::rnegbin(n*N,apply(lambda,2,mean),size),ncol=N, byrow=TRUE)
+ )
+ a = apply(sim + runif(n,-0.5,0.5),2,ecdf)
+ resid<-NULL
+ for (i in 1:nrow(data)) resid<-c(resid,a[[i]](data$y[i] + runif(1 ,-0.5,0.5)))
+ if (plot==T) {
+   par(mfrow=c(1,2))
+   gap::qqunif(resid,pch = 2, bty = "n",
+   logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals",
+   cex.main = 1, las=1)
+   plot(resid~apply(lambda,2,mean), xlab='Predicted value', ylab='Standardized residual', las=1)
+ }
+ resid
+}
+
+simRes(lambda,dat.nb, family='negbin', size=mean(size))
+```
+
+The trend (black symbols) in the qq-plot does not appear to be overly non-linear (matching the ideal red line well), suggesting that the model is not overdispersed. The spread of standardized (simulated) residuals in the residual plot do not appear overly non-uniform. That is there is not trend in the residuals. Furthermore, there is not a concentration of points close to $1$ or $0$ (which would imply overdispersion).
+
+## Exploring the model parameters
+
+If there was any evidence that the assumptions had been violated or the model was not an appropriate fit, then we would need to reconsider the model and start the process again. In this case, there is no evidence that the test will be unreliable so we can proceed to explore the test statistics. As with most Bayesian models, it is best to base conclusions on medians rather than means.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(dat.NB.jags)
+
+adply(dat.NB.jags$BUGSoutput$sims.matrix, 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+
+#on original scale
+adply(exp(dat.NB.jags$BUGSoutput$sims.matrix[,1:2]), 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+```
+
+**Conclusions**: We would reject the null hypothesis of no effect of $x$ on $y$. An increase in x is associated with a significant linear increase (positive slope) in the abundance of $y$. Every $1$ unit increase in $x$ results in a log $0.09$ unit increase in $y$. We usually express this in terms of abundance rather than log abundance, so every $1$ unit increase in $x$ results in a ($e^{ 0.09} = 1.02 $) $1.02$ unit increase in the abundance of $y$.
+
+## Explorations of the trends
+
+A measure of the strength of the relationship can be obtained according to:
+
+$$
+R^2 = 1 - \frac{\text{RSS}_{model}}{\text{RSS}_{null}}
+$$
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, data=dat.nb)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+#calculate the raw SS residuals
+SSres <- apply((-1*(sweep(lambda,2,dat.nb$y,'-')))^2,1,sum)
+SSres.null <- sum((dat.nb$y - mean(dat.nb$y))^2)
+#OR 
+SSres.null <- crossprod(dat.nb$y - mean(dat.nb$y))
+#calculate the model r2
+1-mean(SSres)/SSres.null
+```
+
+**Conclusions**: $27$% of the variation in $y$ abundance can be explained by its relationship with $x$. We can also do it directly into `JAGS`.
+
+Finally, we will create a summary plot.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+par(mar = c(4, 5, 0, 0))
+plot(y ~ x, data = dat.nb, type = "n", ann = F, axes = F)
+points(y ~ x, data = dat.nb, pch = 16)
+xs <- seq(min(dat.nb$x,na.rm=TRUE),max(dat.nb$x,na.rm=TRUE), l = 1000)
+Xmat <- model.matrix(~xs)
+eta<-coefs %*% t(Xmat)
+ys <- exp(eta)
+library(plyr)
+library(coda)
+data.tab <- adply(ys,2,function(x) {
+  data.frame(Median=median(x), HPDinterval(as.mcmc(x)))
+})
+data.tab <- cbind(x=xs,data.tab)
+points(Median ~ x, data=data.tab,col = "black", type = "l")
+lines(lower ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+lines(upper ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+
+axis(1)
+mtext("X", 1, cex = 1.5, line = 3)
+axis(2, las = 2)
+mtext("Abundance of Y", 2, cex = 1.5, line = 3)
+box(bty = "l")
+```
+
+## Full log-likelihood function
+
+Now lets try it by specifying log-likelihood and the zero trick. When applying this trick, we need to manually calculate the deviance as the inbuilt deviance will be based on the log-likelihood of estimating the zeros (as part of the zero trick) rather than the deviance of the intended model. The one advantage of the zero trick is that the Deviance and thus DIC, AIC provided by `R2jags` will be incorrect. Hence, they too need to be manually defined within `JAGS` I suspect that the AIC calculation I have used is incorrect.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, dat.nb)
+nX <- ncol(Xmat)
+dat.nb.list2 <- with(dat.nb,list(Y=y, X=Xmat,N=nrow(dat.nb), mu=rep(0,nX),
+                  Sigma=diag(1.0E-06,nX), zeros=rep(0,nrow(dat.nb)), C=10000))
+modelString="
+model {
+  for (i in 1:N) {
+     zeros[i] ~ dpois(zeros.lambda[i])
+     zeros.lambda[i] <- -ll[i] + C     
+     ll[i] <- loggam(Y[i]+size) - loggam(Y[i]+1) - loggam(size) + size*(log(p[i]) - log(p[i]+1)) - 
+              Y[i]*log(p[i]+1)
+     p[i] <- size/lambda[i]
+     eta[i] <- inprod(beta[], X[i,])
+     log(lambda[i]) <- eta[i]
+  }
+  beta ~ dmnorm(mu[],Sigma[,])
+  size ~ dunif(0.001,1000)
+  dev <- sum(-2*ll)
+} 
+"
+
+writeLines(modelString, con='modelnbin_ll.txt')
+
+params <- c('beta','dev')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.NB.jags3 <- jags(data=dat.nb.list2,model.file='modelnbin_ll.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.NB.jags3)
+```
+
+# Zero inflated Poisson
+
+Zero-Inflation Poisson (ZIP) mixture model is defined as:
+
+$$
+p(y_i \mid \theta, \lambda) = \begin{cases}
+  \theta + (1-\theta) \times \text{Pois}(0 \mid \lambda) & \text{if } y_i = 0\\    
+  (1-\theta) \times \text{Pois}(y_i \mid \lambda) & \text{if } y_i > 0,    
+\end{cases}
+$$
+
+where $\theta$ is the probability of false values (zeros). Hence there is essentially two models coupled together (a mixture model) to yield an overall probability:
+
+* when an observed response is zero ($y_i=0$), it is the probability of getting a false value (zero) plus the probability of a true value multiplied probability of drawing a value of zero from a Poisson distribution of lambda.
+
+* when an observed response is greater than $0$, it is the probability of a true value multiplied probability of drawing that value from a Poisson distribution of lambda
+
+The above formulation indicates the same $\lambda$ for both the zeros and non-zeros components. In the model of zero values, we are essentially investigating whether the likelihood of false zeros is related to the linear predictor and then the greater than zero model investigates whether the counts are related to the linear predictor. However, we are typically less interested in modelling determinants of false zeros. Indeed, it is better that the likelihood of false zeros be unrelated to the linear predictor. For example, if excess (false zeros) are due to issues of detectability (individuals are present, just not detected), it is better that the detectability is not related to experimental treatments. Ideally, any detectability issues should be equal across all treatment levels. The expected value of $Y$ and the variance in $Y$ for a ZIP model are:
+
+$$
+E[y_i] = \lambda \times (1-\theta),
+$$
+
+$$
+\text{Var}(y_i) = \lambda \times (1-\theta) \times (1+\theta \times \lambda^2)
+$$
+
+## Data generation
+
+Lets say we wanted to model the abundance of an item ($y$) against a continuous predictor ($x$). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(9) #34.5  #4 #10 #16 #17 #26
+#The number of samples
+n.x <- 20
+#Create x values that at uniformly distributed throughout the rate of 1 to 20
+x <- sort(runif(n = n.x, min = 1, max =20))
+mm <- model.matrix(~x)
+intercept <- 0.6
+slope=0.1
+#The linear predictor
+linpred <- mm %*% c(intercept,slope)
+#Predicted y values
+lambda <- exp(linpred)
+#Add some noise and make binomial
+library(gamlss.dist)
+#fixed latent binomial
+y<- rZIP(n.x,lambda, 0.4)
+#latent binomial influenced by the linear predictor 
+#y<- rZIP(n.x,lambda, 1-exp(linpred)/(1+exp(linpred)))
+dat.zip <- data.frame(y,x)
+
+summary(glm(y~x, dat.zip, family="poisson"))
+
+plot(glm(y~x, dat.zip, family="poisson"))
+
+library(pscl)
+summary(zeroinfl(y ~ x | 1, dist = "poisson", data = dat.zip))
+
+plot(resid(zeroinfl(y ~ x | 1, dist = "poisson", data = dat.zip))~fitted(zeroinfl(y ~ x | 1, dist = "poisson")))
+
+library(gamlss)
+summary(gamlss(y~x,data=dat.zip, family=ZIP))
+
+predict(gamlss(y~x,data=dat.zip, family=ZIP), se.fit=TRUE, what="mu")
+```
+
+## Exploratory data analysis
+
+Check the distribution of the $y$ abundances.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat.zip$y)
+
+boxplot(dat.zip$y, horizontal=TRUE)
+rug(jitter(dat.zip$y))
+```
+
+There is definitely signs of non-normality that would warrant Poisson models. Further to that, there appears to be a large number of zeros that are likely to be the cause of overdispersion A zero-inflated Poisson model is likely to be one of the most effective for modeling these data. Lets now explore linearity by creating a histogram of the predictor variable ($x$). Note, it is difficult to directly assess issues of linearity. Indeed, a scatterplot with lowess smoother will be largely influenced by the presence of zeros. One possible way of doing so is to explore the trend in the non-zero data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat.zip$x)
+
+#now for the scatterplot
+plot(y~x, dat.zip)
+with(subset(dat.zip,y>0), lines(lowess(y~x)))
+```
+
+**Conclusions**: the predictor ($x$) does not display any skewness or other issues that might lead to non-linearity. The lowess smoother on the non-zero data cloud does not display major deviations from a straight line and thus linearity is likely to be satisfied. Violations of linearity (whilst difficult to be certain about due to the unknown influence of the zeros) could be addressed by either:
+
+* define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).
+
+* transform the scale of the predictor variables.
+
+Although we have already established that there are few zeros in the data (and thus overdispersion is unlikely to be an issue), we can also explore this by comparing the number of zeros in the data to the number of zeros that would be expected from a Poisson distribution with a mean equal to the mean count of the data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#proportion of 0's in the data
+dat.zip.tab<-table(dat.zip$y==0)
+dat.zip.tab/sum(dat.zip.tab)
+
+#proportion of 0's expected from a Poisson distribution
+mu <- mean(dat.zip$y)
+cnts <- rpois(1000, mu)
+dat.zip.tabE <- table(cnts == 0)
+dat.zip.tabE/sum(dat.zip.tabE)
+```
+
+In the above, the value under `FALSE` is the proportion of non-zero values in the data and the value under TRUE is the proportion of zeros in the data. In this example, the proportion of zeros observed ($45$%) far exceeds that that would have been expected ($7.9$%). Hence it is highly likely that any models will be zero-inflated.
+
+## Model fitting
+
+$$
+y_i \sim \text{ZIP}(\lambda_i, \theta),
+$$
+
+where $\text{logit}(\theta) = \gamma_0$, $\log(\lambda_i)=\eta_i$, with $\eta_i=\beta_0+\beta_1x_{i}$ and $\beta_0,\beta_1,\gamma_0 \sim N(0, 10000)$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.zip.list <- with(dat.zip,list(Y=y, X=x,N=nrow(dat.nb), z=ifelse(y==0,0,1)))
+modelString="
+model {
+  for (i in 1:N) {
+     z[i] ~ dbern(one.minus.theta)
+     Y[i] ~ dpois(lambda[i])
+     lambda[i] <- z[i]*eta[i]
+     log(eta[i]) <- beta0 + beta1*X[i]
+  }
+  one.minus.theta <- 1-theta
+  logit(theta) <- gamma0
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  gamma0 ~ dnorm(0,1.0E-06)
+} 
+"
+writeLines(modelString, con='modelzip.txt')
+
+params <- c('beta0','beta1', 'gamma0','theta')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.zip.jags <- jags(data=dat.zip.list,model.file='modelzip.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+```
+
+## Model evaluation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+denplot(dat.zip.jags, parms = c('beta', 'gamma0'))
+traplot(dat.zip.jags, parms = c('beta', 'gamma0'))
+
+raftery.diag(as.mcmc(dat.zip.jags))
+
+autocorr.diag(as.mcmc(dat.zip.jags))
+```
+
+## Goodness of fit 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.zip.jags$BUGSoutput$sims.matrix[,1:2]
+theta <- dat.zip.jags$BUGSoutput$sims.matrix[,'theta']
+Xmat <- model.matrix(~x, data=dat.zip)
+#expected values on a log scale
+lambda<-coefs %*% t(Xmat)
+#expected value on response scale
+eta <- exp(lambda)
+expY <- sweep(eta,1,(1-theta),"*")
+varY <- eta+sweep(eta^2,1,theta,"*")
+varY <- sweep(varY,1,(1-theta),'*')
+#sweep across rows and then divide by lambda
+Resid <- -1*sweep(expY,2,dat.zip$y,'-')/sqrt(varY)
+#plot residuals vs expected values
+plot(apply(Resid,2,mean)~apply(eta,2,mean))
+```
+
+Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Poisson distribution matching that estimated by the model. Essentially this is estimating how well the Poisson distribution, the log-link function and the linear model approximates the observed data. When doing so, we need to consider the expected value and variance of the zero-inflated poisson.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+SSres<-apply(Resid^2,1,sum, na.rm=T)
+
+#generate a matrix of draws from a zero-inflated poisson (ZIP) distribution
+# the matrix is the same dimensions as lambda
+library(gamlss.dist)
+#YNew <- matrix(rZIP(length(lambda),eta, theta),nrow=nrow(lambda))
+lambda <- sweep(eta,1,ifelse(dat.zip$y==0,0,1),'*')
+YNew <- matrix(rpois(length(lambda),lambda),nrow=nrow(lambda))
+Resid1<-(expY - YNew)/sqrt(varY)
+SSres.sim<-apply(Resid1^2,1,sum)
+mean(SSres.sim>SSres, na.rm = T)
+```
+
+Since it is difficult to diagnose many issues from the typical residuals we will now explore simulated residuals.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.zip.jags$BUGSoutput$sims.matrix[,1:2]
+theta <- dat.zip.jags$BUGSoutput$sims.matrix[,'theta']
+Xmat <- model.matrix(~x, data=dat.zip)
+#expected values on a log scale
+eta<-coefs %*% t(Xmat)
+#expected value on response scale
+lambda <- exp(eta)
+
+simRes <- function(lambda, data,n=250, plot=T, family='negbin', size=NULL,theta=NULL) {
+ require(gap)
+ N = nrow(data)
+ sim = switch(family,
+    'poisson' = matrix(rpois(n*N,apply(lambda,2,mean)),ncol=N, byrow=TRUE),
+    'negbin' = matrix(MASS:::rnegbin(n*N,apply(lambda,2,mean),size),ncol=N, byrow=TRUE),
+        'zip' = matrix(gamlss.dist:::rZIP(n*N,apply(lambda,2,mean),theta),ncol=N, byrow=TRUE)
+ )
+ a = apply(sim + runif(n,-0.5,0.5),2,ecdf)
+ resid<-NULL
+ for (i in 1:nrow(data)) resid<-c(resid,a[[i]](data$y[i] + runif(1 ,-0.5,0.5)))
+ if (plot==T) {
+   par(mfrow=c(1,2))
+   gap::qqunif(resid,pch = 2, bty = "n",
+   logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals",
+   cex.main = 1, las=1)
+   plot(resid~apply(lambda,2,mean), xlab='Predicted value', ylab='Standardized residual', las=1)
+ }
+ resid
+}
+
+simRes(lambda,dat.zip, family='zip',theta=theta)
+```
+
+The trend (black symbols) in the qq-plot does not appear to be overly non-linear (matching the ideal red line well), suggesting that the model is not overdispersed. The spread of standardized (simulated) residuals in the residual plot do not appear overly non-uniform. That is there is not trend in the residuals. Furthermore, there is not a concentration of points close to $1$ or $0$ (which would imply overdispersion). Hence, once zero-inflation is accounted for, the model does not display overdispersion. Although there is a slight hint of non-linearity in that the residuals are high for low and high fitted values and lower in the middle, this might well be an artifact of the small data set size. By change, most of the observed values in the middle range of the predictor were zero.
+
+## Exploring the model parameters
+
+If there was any evidence that the assumptions had been violated or the model was not an appropriate fit, then we would need to reconsider the model and start the process again. In this case, there is no evidence that the test will be unreliable so we can proceed to explore the test statistics. As with most Bayesian models, it is best to base conclusions on medians rather than means.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(dat.zip.jags)
+
+adply(dat.zip.jags$BUGSoutput$sims.matrix, 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+
+#on original scale
+adply(exp(dat.zip.jags$BUGSoutput$sims.matrix[,1:2]), 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+```
+
+**Conclusions**: We would reject the null hypothesis of no effect of $x$ on $y$. An increase in $x$ is associated with a significant linear increase (positive slope) in the abundance of $y$. Every $1$ unit increase in $x$ results in a log $0.09$ unit increase in $y$. We usually express this in terms of abundance rather than log abundance, so every $1$ unit increase in $x$ results in a ($e^{0.09}=1.1$) $1.1$ unit increase in the abundance of $y$.
+
+## Explorations of the trends
+
+A measure of the strength of the relationship can be obtained according to:
+
+$$
+R^2 = 1 - \frac{\text{RSS}_{model}}{\text{RSS}_{null}}
+$$
+
+Alternatively, we could use McFadden's psuedo
+
+$$
+R^2 = 1- \frac{LL(Model_{full})}{LL(Model_{reduced}}
+$$
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, dat=dat.zip)
+#expected values on a log scale
+neta<-coefs %*% t(Xmat)
+#expected value on response scale
+eta <- exp(neta)
+lambda <- sweep(eta,2,ifelse(dat.zip$y==0,0,1),'*')
+theta <- dat.zip.jags$BUGSoutput$sims.matrix[,'theta']
+expY <- sweep(lambda,2,1-theta,'*')
+#calculate the raw SS residuals
+SSres <- apply((-1*(sweep(expY,2,dat.zip$y,'-')))^2,1,sum)
+mean(SSres)
+
+SSres.null <- sum((dat.zip$y - mean(dat.zip$y))^2)
+#calculate the model r2
+1-mean(SSres)/SSres.null
+```
+
+**Conclusions**: $50$% of the variation in $y$ abundance can be explained by its relationship with $x$. Finally, we will create a summary plot.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+par(mar = c(4, 5, 0, 0))
+plot(y ~ x, data = dat.zip, type = "n", ann = F, axes = F)
+points(y ~ x, data = dat.zip, pch = 16)
+xs <- seq(min(dat.zip$x,na.rm=TRUE),max(dat.zip$x,na.rm=TRUE), l = 1000)
+Xmat <- model.matrix(~xs)
+eta<-coefs %*% t(Xmat)
+ys <- exp(eta)
+library(plyr)
+library(coda)
+data.tab <- adply(ys,2,function(x) {
+  data.frame(Median=median(x), HPDinterval(as.mcmc(x)))
+})
+data.tab <- cbind(x=xs,data.tab)
+points(Median ~ x, data=data.tab,col = "black", type = "l")
+lines(lower ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+lines(upper ~ x, data=data.tab,col = "black", type = "l", lty = 2)
+
+axis(1)
+mtext("X", 1, cex = 1.5, line = 3)
+axis(2, las = 2)
+mtext("Abundance of Y", 2, cex = 1.5, line = 3)
+box(bty = "l")
+```
+
+## Full log-likelihood function
+
+Now lets try it by specifying log-likelihood and the zero trick. When applying this trick, we need to manually calculate the deviance as the inbuilt deviance will be based on the log-likelihood of estimating the zeros (as part of the zero trick) rather than the deviance of the intended model. The one advantage of the zero trick is that the Deviance and thus DIC, AIC provided by `R2jags` will be incorrect. Hence, they too need to be manually defined within `JAGS` I suspect that the AIC calculation I have used is incorrect.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+Xmat <- model.matrix(~x, dat.zip)
+nX <- ncol(Xmat)
+dat.zip.list2 <- with(dat.zip,list(Y=y, X=Xmat,N=nrow(dat.zip), mu=rep(0,nX),
+                  Sigma=diag(1.0E-06,nX), zeros=rep(0,nrow(dat)), C=10000))
+modelString="
+model {
+  for (i in 1:N) {
+     zeros[i] ~ dpois(zeros.lambda[i])
+     zeros.lambda[i] <- -ll[i] + C     
+     ll[i] <- Y[i]*log(lambda[i]) - lambda[i] - loggam(Y[i]+1)
+     eta[i] <- inprod(beta[], X[i,])
+     log(lambda[i]) <- eta[i]
+    llm[i] <- Y[i]*log(meanlambda) - meanlambda - loggam(Y[i]+1)
+  }
+  meanlambda <- mean(lambda)
+  beta ~ dmnorm(mu[],Sigma[,])
+  dev <- sum(-2*ll)
+  pD <- mean(dev)-sum(-2*llm)
+  AIC <- min(dev+(2*pD))
+} 
+"
+
+writeLines(modelString, con='modelzip_ll.txt')
+
+params <- c('beta','dev','AIC')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.ZIP.jags3  <- jags(data=dat.zip.list2,model.file='modelzip_ll.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.ZIP.jags3 )
+```
+
+# Zero inflated Negative Binomial
+
+## Data generation
+
+Lets say we wanted to model the abundance of an item ($y$) against a continuous predictor ($x$). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+set.seed(37) #34.5  #4 #10 #16 #17 #26
+#The number of samples
+n.x <- 20
+#Create x values that at uniformly distributed throughout the rate of 1 to 20
+x <- sort(runif(n = n.x, min = 1, max =20))
+mm <- model.matrix(~x)
+intercept <- 0.6
+slope=0.1
+#The linear predictor
+linpred <- mm %*% c(intercept,slope)
+#Predicted y values
+lambda <- exp(linpred)
+#Add some noise and make binomial
+library(gamlss.dist)
+library(MASS)
+#fixed latent binomial
+y<- rZINBI(n.x,lambda, 0.4)
+#latent binomial influenced by the linear predictor 
+#y<- rZINB(n.x,lambda, 1-exp(linpred)/(1+exp(linpred)))
+dat.zinb <- data.frame(y,x)
+
+summary(dat.glm.nb<-glm.nb(y~x, dat.zinb))
+
+plot(glm.nb(y~x, dat.zinb))
+
+library(pscl)
+summary(dat.zeroinfl<-zeroinfl(y ~ x | 1, dist = "negbin", data = dat.zinb))
+
+plot(resid(zeroinfl(y ~ x | 1, dist = "negbin", data = dat.zinb))~fitted(zeroinfl(y ~ x | 1, dist = "negbin")))
+
+vuong(dat.glm.nb, dat.zeroinfl)
+
+library(gamlss)
+summary(gamlss(y~x, data=dat.zinb, family='ZINBI'))
+
+summary(gamlss(y~x, nu.fo=y~x,data=dat.zinb, family='ZINBI'))
+```
+
+## Exploratory data analysis
+
+Check the distribution of the $y$ abundances.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat.zinb$y)
+
+boxplot(dat.zinb$y, horizontal=TRUE)
+rug(jitter(dat.zinb$y))
+```
+
+There is definitely signs of non-normality that would warrant Poisson or negative binomial models. Further to that, there appears to be a large number of zeros and a possible clumpiness that are likely to be the cause of overdispersion A zero-inflated negative binomial model is likely to be one of the most effective for modeling these data. Lets now explore linearity by creating a histogram of the predictor variable ($x$). Note, it is difficult to directly assess issues of linearity. Indeed, a scatterplot with lowess smoother will be largely influenced by the presence of zeros. One possible way of doing so is to explore the trend in the non-zero data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+hist(dat.zinb$x)
+
+#now for the scatterplot
+plot(y~x, dat.zinb, log="y")
+with(subset(dat.zinb,y>0), lines(lowess(y~x)))
+```
+
+**Conclusions**: the predictor ($x$) does not display any skewness or other issues that might lead to non-linearity. The lowess smoother on the non-zero data cloud does not display major deviations from a straight line and thus linearity is likely to be satisfied. Violations of linearity (whilst difficult to be certain about due to the unknown influence of the zeros) could be addressed by either:
+
+* define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).
+
+* transform the scale of the predictor variables.
+
+Although we have already established that there are few zeros in the data (and thus overdispersion is unlikely to be an issue), we can also explore this by comparing the number of zeros in the data to the number of zeros that would be expected from a Poisson distribution with a mean equal to the mean count of the data.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#proportion of 0's in the data
+dat.zinb.tab<-table(dat.zinb$y==0)
+dat.zinb.tab/sum(dat.zinb.tab)
+
+#proportion of 0's expected from a Poisson distribution
+mu <- mean(dat.zinb$y)
+v <- var(dat.zinb$y)
+size <- mu + (mu^2)/v
+cnts <- rnbinom(1000, mu=mu, size=size)
+dat.zinb.tabE <- table(cnts == 0)
+dat.zinb.tabE/sum(dat.zinb.tabE)
+```
+
+In the above, the value under `FALSE` is the proportion of non-zero values in the data and the value under TRUE is the proportion of zeros in the data. In this example, the proportion of zeros observed ($45$%) far exceeds that that would have been expected ($14$%). Hence it is highly likely that any models will be zero-inflated.
+
+## Model fitting
+
+$$
+y_i \sim \text{ZINB}(\lambda_i, \theta),
+$$
+
+where $\text{logit}(\theta) = \gamma_0$, $\log(\lambda_i)=\eta_i$, with $\eta_i=\beta_0+\beta_1x_{i}$ and $\beta_0,\beta_1,\gamma_0 \sim N(0, 10000)$.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+dat.zinb.list <- with(dat.zinb,list(Y=y, X=x,N=nrow(dat.zinb),z=ifelse(y==0,0,1)))
+modelString="
+model {
+  for (i in 1:N) {
+     z[i] ~ dbern(psi.min)
+     Y[i] ~ dnegbin(p[i],size)
+     p[i] <- size/(size+mu.eff[i])
+     mu.eff[i] <- z[i]*mu[i]
+     eta[i] <- beta0 + beta1*X[i]
+     log(mu[i]) <- eta[i]
+  }
+  gamma ~ dnorm(0,0.001)
+  psi.min <- min(0.9999, max(0.00001, (1-psi)))
+  logit(psi) <- max(-20, min(20, gamma))
+  size ~ dunif(0.001, 5)
+  theta <- pow(1/mean(p),2)
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+} 
+"
+writeLines(modelString, con='modelzinb.txt')
+
+params <- c('beta0','beta1', 'size', 'theta')
+nChains = 2
+burnInSteps = 5000
+thinSteps = 1
+numSavedSteps = 20000
+nIter = ceiling((numSavedSteps * thinSteps)/nChains)
+
+dat.zinb.jags <- jags(data=dat.zinb.list,model.file='modelzinb.txt', param=params,
+                   n.chains=nChains, n.iter=nIter, n.burnin=burnInSteps, n.thin=thinSteps)
+
+print(dat.zinb.jags)
+```
+
+## Model evaluation
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+denplot(dat.zinb.jags, parms = c('beta0','beta1', 'size', 'theta'))
+traplot(dat.zinb.jags, parms = c('beta0','beta1', 'size', 'theta'))
+
+raftery.diag(as.mcmc(dat.zinb.jags))
+
+autocorr.diag(as.mcmc(dat.zinb.jags))
+```
+
+## Goodness of fit 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+#extract the samples for the two model parameters
+coefs <- dat.zinb.jags$BUGSoutput$sims.matrix[,1:2]
+theta <- dat.zinb.jags$BUGSoutput$sims.matrix[,'theta']
+Xmat <- model.matrix(~x, data=dat.zinb)
+#expected values on a log scale
+lambda<-coefs %*% t(Xmat)
+#expected value on response scale
+eta <- exp(lambda)
+expY <- sweep(eta,1,(1-theta),"*")
+varY <- eta+sweep(eta^2,1,theta,"*")
+head(varY)
+
+#varY <- sweep(varY,1,(1-theta),'*')
+#sweep across rows and then divide by lambda
+Resid <- -1*sweep(expY,2,dat.zinb$y,'-')/sqrt(varY)
+#plot residuals vs expected values
+plot(apply(Resid,2,mean)~apply(eta,2,mean))
+```
+
+Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Poisson distribution matching that estimated by the model. Essentially this is estimating how well the Poisson distribution, the log-link function and the linear model approximates the observed data. When doing so, we need to consider the expected value and variance of the zero-inflated poisson.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+SSres<-apply(Resid^2,1,sum, na.rm=T)
+
+#generate a matrix of draws from a zero-inflated poisson (ZINB) distribution
+# the matrix is the same dimensions as lambda
+library(gamlss.dist)
+#YNew <- matrix(rZINB(length(lambda),eta, theta),nrow=nrow(lambda))
+lambda <- sweep(eta,1,ifelse(dat.zinb$y==0,0,1),'*')
+YNew <- matrix(rpois(length(lambda),lambda),nrow=nrow(lambda))
+Resid1<-(expY - YNew)/sqrt(varY)
+SSres.sim<-apply(Resid1^2,1,sum)
+mean(SSres.sim>SSres, na.rm = T)
+```
+
+## Exploring the model parameters
+
+If there was any evidence that the assumptions had been violated or the model was not an appropriate fit, then we would need to reconsider the model and start the process again. In this case, there is no evidence that the test will be unreliable so we can proceed to explore the test statistics. As with most Bayesian models, it is best to base conclusions on medians rather than means.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+#| error: false
+#| comment: NA
+
+print(dat.zinb.jags)
+
+adply(dat.zinb.jags$BUGSoutput$sims.matrix, 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+
+#on original scale
+adply(exp(dat.zinb.jags$BUGSoutput$sims.matrix[,1:2]), 2, function(x) {
+  data.frame(Median=median(x), Mean=mean(x), HPDinterval(as.mcmc(x)), HPDinterval(as.mcmc(x),p=0.5))
+})
+```
+
+**Conclusions**: We would reject the null hypothesis of no effect of $x$ on $y$. An increase in $x$ is associated with a significant linear increase (positive slope) in the abundance of $y$. Every $1$ unit increase in $x$ results in a log $0.06$ unit increase in $y$. We usually express this in terms of abundance rather than log abundance, so every $1$ unit increase in $x$ results in a ($e^{0.06}=1.07$) $1.07$ unit increase in the abundance of $y$.
+
+# References

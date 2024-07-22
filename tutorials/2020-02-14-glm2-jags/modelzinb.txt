@@ -1,0 +1,19 @@
+
+model {
+  for (i in 1:N) {
+     z[i] ~ dbern(psi.min)
+     Y[i] ~ dnegbin(p[i],size)
+     p[i] <- size/(size+mu.eff[i])
+     mu.eff[i] <- z[i]*mu[i]
+     eta[i] <- beta0 + beta1*X[i]
+     log(mu[i]) <- eta[i]
+  }
+  gamma ~ dnorm(0,0.001)
+  psi.min <- min(0.9999, max(0.00001, (1-psi)))
+  logit(psi) <- max(-20, min(20, gamma))
+  size ~ dunif(0.001, 5)
+  theta <- pow(1/mean(p),2)
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+} 
+

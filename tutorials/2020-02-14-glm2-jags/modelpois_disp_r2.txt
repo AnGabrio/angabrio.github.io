@@ -1,0 +1,17 @@
+
+model {
+  for (i in 1:N) {
+     Y[i] ~ dpois(lambda[i])
+     eta[i] <- beta0 + beta1*X[i]
+     log(lambda[i]) <- eta[i]
+     res[i] <- Y[i] - lambda[i]
+     resnull[i] <- Y[i] - meanY
+  }
+  meanY <- mean(Y)
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  RSS <- sum(res^2)
+  RSSnull <- sum(resnull^2)
+  r2 <- 1-RSS/RSSnull
+} 
+

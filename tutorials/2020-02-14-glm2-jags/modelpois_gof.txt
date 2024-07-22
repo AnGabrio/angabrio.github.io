@@ -1,0 +1,29 @@
+
+model {
+  for (i in 1:N) {
+    #likelihood function
+    Y[i] ~ dpois(lambda[i])
+    eta[i] <- beta0+beta1*X[i] #linear predictor
+    log(lambda[i]) <- eta[i]   #link function
+
+    #E(Y) and var(Y)
+    expY[i] <- lambda[i]
+    varY[i] <- lambda[i]
+
+    # Calculate RSS
+    Resid[i] <- (Y[i] - expY[i])/sqrt(varY[i])
+    RSS[i] <- pow(Resid[i],2)
+
+    #Simulate data from a Poisson distribution
+    Y1[i] ~ dpois(lambda[i])
+    #Calculate RSS for simulated data
+    Resid1[i] <- (Y1[i] - expY[i])/sqrt(varY[i])
+    RSS1[i] <-pow(Resid1[i],2) 
+  }
+  #Priors
+  beta0 ~ dnorm(0,1.0E-06)
+  beta1 ~ dnorm(0,1.0E-06)
+  #Bayesian P-value
+  Pvalue <- mean(sum(RSS1)>sum(RSS))
+} 
+

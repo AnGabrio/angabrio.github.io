@@ -1,0 +1,17 @@
+
+model {
+  for (i in 1:N) {
+     zeros[i] ~ dpois(zeros.lambda[i])
+     zeros.lambda[i] <- -ll[i] + C     
+     ll[i] <- Y[i]*log(lambda[i]) - lambda[i] - loggam(Y[i]+1)
+     eta[i] <- inprod(beta[], X[i,])
+     log(lambda[i]) <- eta[i]
+    llm[i] <- Y[i]*log(meanlambda) - meanlambda - loggam(Y[i]+1)
+  }
+  meanlambda <- mean(lambda)
+  beta ~ dmnorm(mu[],Sigma[,])
+  dev <- sum(-2*ll)
+  pD <- mean(dev)-sum(-2*llm)
+  AIC <- min(dev+(2*pD))
+} 
+

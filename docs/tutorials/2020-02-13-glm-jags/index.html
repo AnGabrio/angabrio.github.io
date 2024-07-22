@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2020-02-13">
+<meta name="keywords" content="Software, Statistics, Stan">
+
+<title>angabrio.github.io - Generalised Linear Models (JAGS)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">angabrio.github.io</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#data-types" id="toc-data-types" class="nav-link" data-scroll-target="#data-types">Data types</a></li>
+  <li><a href="#glms" id="toc-glms" class="nav-link" data-scroll-target="#glms">GLMs</a></li>
+  <li><a href="#link-functions" id="toc-link-functions" class="nav-link" data-scroll-target="#link-functions">Link functions</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation">Estimation</a></li>
+  <li><a href="#dispersion" id="toc-dispersion" class="nav-link" data-scroll-target="#dispersion">Dispersion</a></li>
+  <li><a href="#binary-data---logistic-regression" id="toc-binary-data---logistic-regression" class="nav-link" data-scroll-target="#binary-data---logistic-regression">Binary data - logistic regression</a>
+  <ul class="collapse">
+  <li><a href="#null-hypotheses" id="toc-null-hypotheses" class="nav-link" data-scroll-target="#null-hypotheses">Null hypotheses</a></li>
+  </ul></li>
+  <li><a href="#count-data---poisson-and-log-linear-models" id="toc-count-data---poisson-and-log-linear-models" class="nav-link" data-scroll-target="#count-data---poisson-and-log-linear-models">Count data - Poisson and log-linear models</a>
+  <ul class="collapse">
+  <li><a href="#null-hypothese" id="toc-null-hypothese" class="nav-link" data-scroll-target="#null-hypothese">Null hypothese</a></li>
+  </ul></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  </ul></li>
+  <li><a href="#data-generation" id="toc-data-generation" class="nav-link" data-scroll-target="#data-generation">Data generation</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory data analysis</a></li>
+  <li><a href="#model-fitting" id="toc-model-fitting" class="nav-link" data-scroll-target="#model-fitting">Model fitting</a></li>
+  <li><a href="#model-evaluation" id="toc-model-evaluation" class="nav-link" data-scroll-target="#model-evaluation">Model evaluation</a></li>
+  <li><a href="#exploring-the-model-parameters" id="toc-exploring-the-model-parameters" class="nav-link" data-scroll-target="#exploring-the-model-parameters">Exploring the model parameters</a></li>
+  <li><a href="#explorations-of-the-trends" id="toc-explorations-of-the-trends" class="nav-link" data-scroll-target="#explorations-of-the-trends">Explorations of the trends</a></li>
+  </ul></li>
+  <li><a href="#grouped-binary-data" id="toc-grouped-binary-data" class="nav-link" data-scroll-target="#grouped-binary-data">Grouped binary data</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis-1" id="toc-exploratory-data-analysis-1" class="nav-link" data-scroll-target="#exploratory-data-analysis-1">Exploratory data analysis</a></li>
+  <li><a href="#model-fitting-1" id="toc-model-fitting-1" class="nav-link" data-scroll-target="#model-fitting-1">Model fitting</a></li>
+  <li><a href="#model-evaluation-1" id="toc-model-evaluation-1" class="nav-link" data-scroll-target="#model-evaluation-1">Model evaluation</a></li>
+  <li><a href="#explorations-of-the-trends-1" id="toc-explorations-of-the-trends-1" class="nav-link" data-scroll-target="#explorations-of-the-trends-1">Explorations of the trends</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Generalised Linear Models (JAGS)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Software</div>
+    <div class="quarto-category">Statistics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="mailto:a.gabrio@maastrichtuniversity.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 13, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><span style="font-size: 85%">This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models …</span></p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Software, Statistics, Stan</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>This tutorial will focus on the use of Bayesian estimation to fit simple linear regression models. <code>BUGS</code> (Bayesian inference Using <em>Gibbs Sampling</em>) is an algorithm and supporting language (resembling <code>R</code>) dedicated to performing the Gibbs sampling implementation of <em>Markov Chain Monte Carlo</em> (MCMC) method. Dialects of the <code>BUGS</code> language are implemented within three main projects:</p>
+<ol type="1">
+<li><p><strong>OpenBUGS</strong> - written in component pascal.</p></li>
+<li><p><strong>JAGS</strong> - (Just Another Gibbs Sampler) - written in <code>C++</code>.</p></li>
+<li><p><strong>STAN</strong> - a dedicated Bayesian modelling framework written in <code>C++</code> and implementing <em>Hamiltonian</em> MCMC samplers.</p></li>
+</ol>
+<p>Whilst the above programs can be used stand-alone, they do offer the rich data pre-processing and graphical capabilities of <code>R</code>, and thus, they are best accessed from within <code>R</code> itself. As such there are multiple packages devoted to interfacing with the various software implementations:</p>
+<ul>
+<li><p><em>R2OpenBUGS</em> - interfaces with <code>OpenBUGS</code></p></li>
+<li><p><em>R2jags</em> - interfaces with <code>JAGS</code></p></li>
+<li><p><em>rstan</em> - interfaces with <code>STAN</code></p></li>
+</ul>
+<p>This tutorial will demonstrate how to fit models in <code>JAGS</code> (<span class="citation" data-cites="plummer2004jags">Plummer (<a href="#ref-plummer2004jags" role="doc-biblioref">2004</a>)</span>) using the package <code>R2jags</code> (<span class="citation" data-cites="su2015package">Su et al. (<a href="#ref-su2015package" role="doc-biblioref">2015</a>)</span>) as interface, which also requires to load some other packages.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Before discussing generalised linear models, we will first revise a couple of fundamental aspects of general linear models and in particular, how they restrict the usefulness of these models in clinical applications. General linear models provide a set of well adopted and recognised procedures for relating response variables to a linear combination of one or more continuous or categorical predictors (hence the “general”). Nevertheless, the reliability and applicability of such models are restricted by the degree to which the residuals conform to normality and the mean and variance are independent of one another. The general linear model essentially comprises three components.</p>
+<p><span class="math display">\[
+E[Y] = \beta_0 + \beta_1x_1 + \ldots + \beta_px_p + \epsilon.
+\]</span></p>
+<ol type="1">
+<li><p><strong>The Random (Stochastic) component</strong> that specifies the conditional distribution (Normal or Gaussian distribution) of the response variable. Whilst the mean of the normal distribution is assumed to vary as a function of the linear predictors (Systematic component - the regression equation), the variance is assumed to remain constant. Denoted <span class="math inline">\(\epsilon\)</span> in the above equation, the random component is more formally defined as <span class="math inline">\(Y_i \sim N(0, \sigma^2)\)</span>. That is, each value of <span class="math inline">\(Y\)</span> (the response) is assumed to be drawn from a normal distribution with different means (<span class="math inline">\(\mu_i\)</span>) yet fixed variance (<span class="math inline">\(\sigma^2\)</span>).</p></li>
+<li><p><strong>The Systematic component</strong> that represents the linear combination of predictors (which can be categorical, continuous, polynomial or other contrasts) for a linear predictor. The linear predictor describes (predict) the “expected” mean and variability of the response(s) (which are assumed to follow normal distribution(s)).</p></li>
+<li><p><strong>The Link function</strong> which links the expected values of the response (Random component) to the linear combination of predictors (systematic component). For the normal (Gaussian) distribution, the link function is a the “identity” link (<span class="math inline">\(\mu_i\)</span>). That is:</p></li>
+</ol>
+<p><span class="math display">\[
+\mu_i = \beta_0 + \beta_1x_{i1} + \ldots + \beta_px_{ip}
+\]</span></p>
+<p>There are many real situations for which the assumptions imposed by the normal distribution are unlikely to be satisfied. For example, if the measured response to a predictor treatment (such as nest parasite load) can only be binary (such as abandoned or not), then the differences between the observed and expected values (residuals) are unlikely to follow a normal distribution. Instead, in this case, they should follow a binomial distribution.</p>
+<p>Often response variables have a restricted range. For example a species may be either present or not present and thus the response is restricted to either <span class="math inline">\(1\)</span> (present) or absent (<span class="math inline">\(0\)</span>). Values less than <span class="math inline">\(0\)</span> or greater than <span class="math inline">\(1\)</span> are not logical. Similarly, the abundance of a species in a quadrat is bounded by a minimum value of zero - it is not possible to have fewer than zero individuals. Proportional abundances are also restricted to between <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> (or <span class="math inline">\(100\)</span>). The normal distribution however, is valid for the range between positive and negative infinity (ie not restricted) and thus expected values of the linear predictor can be outside of the restricted range that naturally operates on the response variable. Hence, the normal distribution might not always represent a sensible probability model as it can predict values outside the logical range of the data. Furthermore, the as a result of these range restrictions, variance can be tied to the mean in that expected probabilities towards the extremes of the restricted range tend to have lower variability (as the lower or upper bounds of the probabilities are trunctated).</p>
+</section>
+<section id="data-types" class="level2">
+<h2 class="anchored" data-anchor-id="data-types">Data types</h2>
+<p>Response data can generally be classified into one of four levels</p>
+<ul>
+<li><p><strong>Nominal</strong> - responses are those that represent un-ordered categories For example, we could record the ‘preferred’ food choice of an animal as either “Fruit”, “Meat”, “Seeds” or “Leaves”. The spacing between categories is undetermined and responses are restricted to those options.</p></li>
+<li><p><strong>Ordinal</strong> - responses are those that represent categories with sensible orders, yet undetermined spacing between categories. Likert scale questionnaire responses to questions such as “Rate the quality of your experience… on a scale of <span class="math inline">\(1\)</span> to <span class="math inline">\(5\)</span>” are a classic example. Categorized levels of a response (“High”, “Medium”,“Low”) would also be another example of an ordinal variable</p></li>
+<li><p><strong>Interval</strong> - responses are those for which both the order and scale (spacing) are meaningful, yet multiplication is meaningless due to the arbitrary scale of the data (where zero does not refer to nothing). Temperature in degrees C is a good example of such a response (consider whether <span class="math inline">\(-28\)</span> degrees <span class="math inline">\(^\star-1 = 28\)</span> degrees has a sensible interpretation).</p></li>
+<li><p><strong>Ratio</strong> - responses are those for which order, scale and zero are meaningful. For example a measurement scale such as length in millimeters or mass in grams.</p></li>
+</ul>
+</section>
+<section id="glms" class="level2">
+<h2 class="anchored" data-anchor-id="glms">GLMs</h2>
+<p><strong>Generalized linear models</strong> (GLM’s) extend the application range of linear modelling by accommodating non-stable variances as well as alternative exponential residual distributions (such as the binomial and Poisson distributions). GLMs have the same three components as general linear models (of which the systematic component is identical), yet a broader range of Random components are accommodated and thus alternative Link functions must also be possible.</p>
+<ul>
+<li><p>Random component defines the exponential distribution (Gaussian, Poisson, binomial, gamma, and inverse Gaussian distributions) from which the responses are assumed to be drawn. These distributions are characterised by some function of the mean (canonical or location parameter) and a function of the variance (dispersion parameter). Note that for binomial and Poisson distributions, the dispersion parameter is <span class="math inline">\(1\)</span>, whereas for the Guassian (normal) distribution the dispersion parameter is the error variance and is assumed to be independent of the mean. The negative binomial distribution can also be treated as an exponential distribution if the dispersion parameter is fixed as a constant.</p></li>
+<li><p>Systematic component again defines the linear combination of predictors</p></li>
+<li><p>Link function, <span class="math inline">\(g(\mu)\)</span> links the systematic and random components. Although there are many commonly employed link functions, typically the exact form of the link function depends on the nature of the random response distribution. Some of the canonical (natural choice) link functions and distribution pairings that are suitable for different forms of generalized linear models are listed in the following table. The only real restriction on a link function is that it must preserve the order of values such that larger values are always larger than smaller values (be monotonic) and must yield derivatives that are legal throughout the entire range of the data.</p></li>
+</ul>
+</section>
+<section id="link-functions" class="level2">
+<h2 class="anchored" data-anchor-id="link-functions">Link functions</h2>
+<p>In contrast to fitting linear models to transformations of the raw data, the link functions transform the curve predicted by the systematic component into a scale approximating that of the response.</p>
+<ul>
+<li><p><strong>Logit</strong>. Log odds-ratio The slope parameter represents the rate of change in log odds-ratio per unit increase in a predictor.</p></li>
+<li><p><strong>Probit</strong>. The probit transformation is the inverse cumulative distribution for the standard normal distribution and is useful when the response is likely to be a categorization of an otherwise continuous scale. So whilst measurements might be recorded on a categorical scale (either for convenience or because that is how they manifest), these measurements are a proxy for an underlying variable (latent variable) that is actually continuous. So if the purpose of the linear modeling is to predict the underlying latent variable, then probit regression is likely to be appropriate. The slope parameter represents the rate of change in response probability per unit increase in a predictor.</p></li>
+<li><p><strong>Complementary log-log</strong>. The log-log transformation is useful for extremely asymmetrical distributions (notably survival analyses).</p></li>
+</ul>
+</section>
+<section id="estimation" class="level2">
+<h2 class="anchored" data-anchor-id="estimation">Estimation</h2>
+<p>The generalized nature of GLM’s makes them incompatible with ordinary least squares model fitting procedures. Instead, parameter estimates and model fitting are typically achieved by maximum likelihood methods based on an iterative re-weighting algorithm (such as the Newton-Raphson algorithm). Essentially, the Newton-Raphson algorithm (also known as a scoring algorithm) fits a linear model to an adjusted response variable (transformed via the link function) using a set of weights and then iteratively re-fits the model with new sets of weights recalculated according to the fit of the previous iteration. For canonical link-distribution pairs (see the table above), the Newton-Raphson algorithm usually converges (arrives at a common outcome or equilibrium) very efficiently and reliably. The Newton-Raphson algorithm facilitates a unifying model fitting procedure across the family of exponential probability distributions thereby providing a means by which binary and count data can be incorporated into the suit of regular linear model designs. In fact, linear regression (including ANOVA, ANCOVA and other general linear models) can be considered a special form of GLM that features a normal distribution and identity link function and for which the maximum likelihood procedure has an exact solution. Notably, when variance is stable, both maximum likelihood and ordinary least squares yield very similar parameter estimates.</p>
+<p>Typical distributions used for GLMs include:</p>
+<ul>
+<li><p><strong>Gaussian</strong>.</p></li>
+<li><p><strong>Binomial</strong>. Represents the number of successes out of <span class="math inline">\(n\)</span> independent trials each with a set probability (typically <span class="math inline">\(0.5\)</span>)</p></li>
+<li><p><strong>Poisson</strong>.</p></li>
+<li><p><strong>Negative Binomial</strong>. Represents the number of failures out of a sequence of n independent trials before a success is obtained each with a set probability. Alternatively, a negative binomial can be defined in terms of its mean (<span class="math inline">\(\mu\)</span>) and dispersion parameter. The dispersion parameter can be used to adjust the variances independent of the mean and is therefore useful as an alternative to the Poisson distribution when there is evidence of overdispersion (dispersion parameter <span class="math inline">\(&gt;1\)</span>).</p></li>
+</ul>
+</section>
+<section id="dispersion" class="level2">
+<h2 class="anchored" data-anchor-id="dispersion">Dispersion</h2>
+<p>The variance of binomial or Poisson distributions is assumed to be related to the sample size and mean respectively, and thus, there is not a variance parameter in their definitions. In fact, the variance (or dispersion) parameter is fixed to <span class="math inline">\(1\)</span>. As a result, logistic/probit regression as well as Poisson regression and log-linear modelling assume that sample variances conform to the respective distribution definitions. However, it is common for individual sampling units (e.g.&nbsp;individuals) to co-vary such that other, unmeasured influences, increase (or less commonly, decrease) variability. For example, although a population sex ratio might be 1:1, male to female ratios within a clutch might be highly skewed towards one or other sex. Positive correlations cause greater variance (overdispersion) and result in deflated standard errors (and thus exaggerated levels of precision and higher Type I errors). Additionally, count data (for example number of fish per transect) can be overdispersed as a result of an unexpectedly high number of zero’s (zero inflated). In this case, the zeros arise for two reasons.</p>
+<ol type="1">
+<li><p>Genuine zero values - zero fish counted because there were non present.</p></li>
+<li><p>False zeros - there were fish present, yet not detected (and thus not recorded).</p></li>
+</ol>
+<p>The dispersion parameter (degree of variance inflation or over-dispersion) can be estimated by dividing either the Pearsons <span class="math inline">\(\chi^2\)</span> or the Deviance by the degrees of freedom, where <span class="math inline">\(n\)</span> is the number of observations in p parameters). As a general rule, dispersion parameters approaching <span class="math inline">\(2\)</span> (or <span class="math inline">\(0.5\)</span>) indicate possible violations of this assumption (although large overdispersion parameters can also be the result of a poorly specified model or outliers). Where over (or under) dispersion is suspected to be an issue, the following options are available:</p>
+<ul>
+<li><p>use <strong>quasibinomial</strong> and <strong>quasipoisson</strong> families can be used as alternatives to model the dispersion. These quasi-likelihood models derive the dispersion parameter (function of the variance) from the observed data and are useful when overdispersion is suspected to be caused by positive correlations or other unobserved sources of variance. Rather than assuming that the variance is fixed, quasi- models assume that variance is a linear (multiplicative) function of the mean. Test statistics from such models should be based on F-tests rather than chi-squared tests.</p></li>
+<li><p>for count data, use a <strong>negative binomial</strong> as an alternative to a Poisson distribution. The negative binomial distribution also estimates the dispersion parameter and assumes that the variance is a quadratic function of the mean.</p></li>
+<li><p>use <strong>zero-inflated binomial</strong> (ZIB) and <strong>zero-inflated poisson</strong> (ZIP) when overdispersion is suspected to be caused by excessive numbers of zeros.</p></li>
+</ul>
+</section>
+<section id="binary-data---logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="binary-data---logistic-regression">Binary data - logistic regression</h2>
+<p>Logistic regression is a form of GLM that employs the logit-binomial link distribution canonical pairing to model the effects of one or more continuous or categorical (with dummy coding) predictor variables on a binary (dead/alive, presence/absence, etc) response variable. For example, we could investigate the relationship between salinity levels (salt concentration) and mortality of frogs. Similarly, we could model the presence of a species of bird as a function of habitat patch size, or nest predation (predated or not) as a function of the distance from vegetative cover. Consider the fictitious data presented in the following figure. Clearly, a regular simple linear model is inappropriate for modelling the probability of presence. Note that at very low and high levels of <span class="math inline">\(X\)</span>, the predicted probabilities (probabilities or proportions of the population) are less than zero and greater than one respectively - logically impossible outcomes. Note also, that the residuals cannot be drawn from a normal distribution, since for any value of <span class="math inline">\(X\)</span>, there are only two possible outcomes (<span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>).</p>
+<p>The logistic model (Figure c above) relating the probability (<span class="math inline">\(\pi(x)\)</span>) that the response (<span class="math inline">\(y_i\)</span>) equals one (present) for a given level of <span class="math inline">\(x_i\)</span> (patch size) is defined as:</p>
+<p><span class="math display">\[
+\pi(x) = \frac{e^{\beta_0 + \beta_1x}}{1+e^{\beta_0+\beta_1x}}
+\]</span></p>
+<p>Appropriately, since <span class="math inline">\(e^{\beta_0+\beta_1x}\)</span> (the “natural constant” raised to a simple linear model) must evaluate to between 0 and infinity, the logistic model must asymptote towards (and is thus bounded by) zero and one. Alternatively (as described briefly above), the logit link function can be used to transform <span class="math inline">\(\pi(x)\)</span> such that the logistic model is expressed as the log odds (probability of one state relative to the alternative) against a familiar linear combination of the explanatory variables (as is linear regression).</p>
+<p><span class="math display">\[
+ln \left(  \frac{\pi(x)}{1-\pi(x)} \right) = \beta_0 + \beta_1x_i
+\]</span></p>
+<p>Although the <span class="math inline">\(\beta_0\)</span> (<span class="math inline">\(y\)</span>-intercept) parameter is interpreted similar to that of linear regression (albeit of little clinical interest), this is not the case for the slope parameter (<span class="math inline">\(\beta_1\)</span>). Rather than representing the rate of change in the response for a given change in the predictor, in logistic regression, <span class="math inline">\(\beta_1\)</span> represents the rate of change in the odds ratio (ratio of odds of an event at two different levels of a predictor) for a given unit change in the predictor. The exponentiated slope represents the odds ratio (<span class="math inline">\(\theta=e^{\beta_1}\)</span>), the proportional rate at which the predicted odds change for a given unit change of the predictor.</p>
+<section id="null-hypotheses" class="level3">
+<h3 class="anchored" data-anchor-id="null-hypotheses">Null hypotheses</h3>
+<p>As with linear regression, a separate <span class="math inline">\(H_0\)</span> is tested for each of the estimated model parameters:</p>
+<ul>
+<li><p><span class="math inline">\(H_0:\beta_1=0\)</span> (the population slope - proportional rate of change in odds ratio). This test examines whether the log odds of an occurrence are independent of the predictor variable and thus whether or not there is likely to be a relationship between the response and predictor.</p></li>
+<li><p><span class="math inline">\(H_0:\beta_0=0\)</span> (the population intercept equals zero). As stated previously, this is typically of little clinical interest.</p></li>
+</ul>
+<p>Similar to linear regression, there are two ways of testing the main null hypotheses:</p>
+<ol type="1">
+<li><p>Parameter estimation approach. Maximum likelihood estimates of the parameters and their asymptoticd standard errors (<span class="math inline">\(S_{b1}\)</span>) are used to calculate the Wald <span class="math inline">\(t\)</span> (or <span class="math inline">\(t\)</span>-ratio) statistic <span class="math inline">\(W=\frac{b_1}{S_{b1}}\)</span>, which approximately follows a standard <span class="math inline">\(z\)</span> distribution when the null hypothesis is true. The reliability of Wald tests diminishes substantially with small sample sizes. For such cases, the second option is therefore more appropriate.</p></li>
+<li><p>(log)-likelihood ratio tests approach. This approach essentially involves comparing the fit of models with (full) and without (reduced) the term of interest:</p></li>
+</ol>
+<p><span class="math display">\[
+\text{logit}(\pi) = \beta_0 + \beta_1x_1 \;\;\; (\text{full model})
+\]</span></p>
+<p><span class="math display">\[
+\text{logit}(\pi) = \beta_0 \;\;\; (\text{reduced model})
+\]</span></p>
+<p>The fit of any given model is measured via log-likelihood and the differences between the fit of two models is described by a likelihood ratio statistic (G2 <span class="math inline">\(= 2\)</span>(log-likelihood reduced model - log-likelihood full model)). The G2 quantity is also known as deviance and is analogous to the residual sums of squares in a linear model. When the null hypothesis is true, the G2 statistic approximately follows a <span class="math inline">\(\chi^2\)</span> distribution with one degree of freedom. An analogue of the linear model <span class="math inline">\(r^2\)</span> measure can be calculated as:</p>
+<p><span class="math display">\[
+r^2 = 1- \frac{G^2_0}{G^2_1},
+\]</span></p>
+<p>where <span class="math inline">\(G^2_0\)</span> and <span class="math inline">\(G^2_1\)</span> are the deviances due to the intercept and slope terms respectively. Analogous to the ANOVA table that partitions the total variation into components explained by each of the model terms (and the unexplained error), it is possible to construct a analysis of deviance table that partitions the deviance into components explained by each of the model terms.</p>
+</section>
+</section>
+<section id="count-data---poisson-and-log-linear-models" class="level2">
+<h2 class="anchored" data-anchor-id="count-data---poisson-and-log-linear-models">Count data - Poisson and log-linear models</h2>
+<p>Another form of data for which scale transformations are often unsuitable or unsuccessful are count data. Count data tend to follow a Poisson distribution (see here) and consequently, the mean and variance are usually related. Generalized linear models provide appropriate means to model count data according to two design contexts:</p>
+<ol type="1">
+<li><p>as an alternative to linear regression for modeling count data against a linear combination of continuous and/or categorical predictor variables (<strong>Poisson regression</strong>)</p></li>
+<li><p>as an alternative to contingency tables in which the associations between categorical variables are explored (<strong>log-linear modelling</strong>)</p></li>
+</ol>
+<p><strong>Poisson regression</strong></p>
+<p>The Poisson regression model is</p>
+<p><span class="math display">\[
+\log(\mu)=\beta_0 + \beta_1x_1+ \ldots + \beta_px_p,
+\]</span></p>
+<p>where <span class="math inline">\(\log(\mu)\)</span> is the link function used to link the mean of the Poisson response variable to the linear combination of predictor variables. Poisson regression otherwise shares null hypotheses, parameter estimation, model fitting and selection with logistic regression.</p>
+<p><strong>Log-linear modelling</strong></p>
+<p>Contingency tables were introduced along with caveats regarding the reliability and interoperability of such analyses (particularly when expected proportions are small or for multi-way tables). In contrast to logistic and Poisson regression, all variables in a log-linear model do not empirically distinguish between response and predictor variables. Nevertheless, as in contingency tables, causality can be implied when logical and justified by interpretation. The saturated (or full) log-linear model resembles a multiway ANOVA model. The full and reduced log-linear models for a two factor design are:</p>
+<p><span class="math display">\[
+\log(f_{ij}) = \mu + \gamma^A_i + \gamma^B_j + \gamma^{AB}_{ij} \;\;\; (\text{full model}),
+\]</span></p>
+<p><span class="math display">\[
+\log(f_{ij}) = \mu + \gamma^A_i + \gamma^B_j \;\;\; (\text{reduced model})
+\]</span></p>
+<p>where <span class="math inline">\(\log(f_{ij}\)</span> is the log link function, <span class="math inline">\(\mu\)</span> is the mean of the (log) of expected frequencies (<span class="math inline">\(f_{ij}\)</span>) and <span class="math inline">\(\gamma^A_i\)</span> is the effect of the ith category of the variable (A), <span class="math inline">\(\gamma^B_j\)</span> is the effect of the <span class="math inline">\(j\)</span>-th category of B and <span class="math inline">\(\gamma^{AB}_{ij}\)</span> is the interactive effect of each category combination on the (log) expected frequencies. Reduced models differ from full models in the absence of all higher order interaction terms. Comparing the fit of full and reduced models therefore provides a means of assessing the effect of the interaction. Whilst two-way tables contain only a single interaction term (and thus a single full and reduced model), multiway tables have multiple interactions. For example, a three-way table has a three way interaction (ABC) as well as three two-way interactions (AB, AC, BC). Consequently, there are numerous full and reduced models, each appropriate for different interaction terms. The following table indicates the association between null hypothesis and fitted models.</p>
+<section id="null-hypothese" class="level3">
+<h3 class="anchored" data-anchor-id="null-hypothese">Null hypothese</h3>
+<p>Consistent with contingency table analysis, log-linear models test the null hypothesis (<span class="math inline">\(H_0\)</span>) that the categorical variables are independent of (not associated with) one another. Such null hypotheses are tested by comparing the fit (deviance, G2) of full and reduced models. The G2 is compared to a <span class="math inline">\(\chi^2\)</span> distribution with degrees of freedom equal to the difference in degrees of freedom of the full and reduced models. Thereafter, odds ratios are useful for interpreting any lack of independence. For multi-way tables, there are multiple full and reduced models:</p>
+<ul>
+<li><p><strong>Complete dependence</strong>: <span class="math inline">\(H_0: ABC = 0\)</span>. No three way interaction. Either no association (conditional independence) between each pair of variables, or else the patterns of associations (conditional dependencies) are the same for each level of the third. If this null hypothesis is rejected (<span class="math inline">\(ABC \neq 0\)</span>), the causes of lack of independence can be explored by examining the residuals or odds ratios. Alternatively, main effects tests (testing the effects of two-way interactions separately at each level of the third) can be performed. If the three-way interaction is not rejected (no three-way association), lower order interactions can be explored.</p></li>
+<li><p><strong>Conditional independence/dependence</strong>: if the three-way interaction is not rejected (no three-way association), lower order interactions can be explored.</p>
+<ul>
+<li><span class="math inline">\(H_0: AB=0\)</span> - A and B conditionally independent (not associated) within each level of C.</li>
+<li><span class="math inline">\(H_0: AC=0\)</span> - A and C conditionally independent (not associated) within each level of B.</li>
+<li><span class="math inline">\(H_0: BC=0\)</span> - B and C conditionally independent (not associated) within each level of A.</li>
+</ul></li>
+<li><p><strong>Marginal independence</strong>:</p>
+<ul>
+<li><span class="math inline">\(H_0: AB=0\)</span> - no association between A and B pooling over C.</li>
+<li><span class="math inline">\(H_0: AC=0\)</span> - no association between A and C pooling over B.</li>
+<li><span class="math inline">\(H_0: BC=0\)</span> - no association between B and C pooling over A.</li>
+</ul></li>
+<li><p><strong>Complete independence</strong>: If none of the two-way interactions are rejected (no two-way associations), complete independence (all two-way interactions equal zero) can be explored.</p>
+<ul>
+<li><span class="math inline">\(H_0: AB=AC=BC=0\)</span> - Each of the variables are completely independent of all the other variables.</li>
+</ul></li>
+</ul>
+<p>Analysis of designs with more than three factors proceed similarly, starting with tests of higher order interactions and progressing to lower order interactions only in the absence of higher order interactions.</p>
+</section>
+</section>
+<section id="assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
+<p>Compared to general linear models, the requirements of generalised linear models are less stringent. In particular, neither normality nor homoscedasticity are assumed. Nevertheless, to maximize the reliability of null hypotheses tests, the following assumptions do apply:</p>
+<ul>
+<li><p>all observations should be <strong>independent</strong> to ensure that the samples provide an unbiased estimate of the intended population.</p></li>
+<li><p>it is important to establish that no observations are overly influential. Most linear model <strong>influence</strong> (and outlier) diagnostics extend to generalized linear models and are taken from the final iteration of the weighted least squares algorithm. Useful diagnoses include:</p>
+<ol type="1">
+<li><p><em>Residuals</em> - there are numerous forms of residuals that have been defined for generalized linear models, each essentially being a variant on the difference between observed and predicted (influence in <span class="math inline">\(y\)</span>-space) theme. Note that the residuals from logistic regression are difficult to interpret.</p></li>
+<li><p><em>Leverage</em> - a measure of outlyingness and influence in <span class="math inline">\(x\)</span>-space.</p></li>
+<li><p><em>Dfbeta</em> - an analogue of Cook’s D statistic which provides a standardized measure of the overall influence of observations on the parameter estimates and model fit.</p></li>
+</ol></li>
+<li><p>although <strong>linearity</strong> between the response and predictors is not assumed, the relationship between each of the predictors and the link function is assumed to be linear. This linearity can be examined via the following:</p>
+<ol type="1">
+<li><p><em>goodness-of-fit</em>. For log-linear models, <span class="math inline">\(\chi^2\)</span> contingency tables can be performed, however due to the low reliability of such tests with small sample sizes, this is not an option for logistic regression with continuous predictor(s) (since each combination is typically unique and thus the expected values are always <span class="math inline">\(1\)</span>).</p></li>
+<li><p><em>Hosmer-Lemeshow</em> (<span class="math inline">\(\hat{C}\)</span>). Data are aggregated into <span class="math inline">\(10\)</span> groups or bins (either by cutting the data according to the predictor range or equal frequencies in each group) such that goodness-of-fit test is more reliable. Nevertheless, the Hosmer-Lemeshow statistic has low power and relies on the somewhat arbitrary bin sizes.</p></li>
+<li><p><em>le Cessie-van Houwelingen-Copas omnibus test</em>. This is a goodness-of-fit test for binary data based on the smoothing of residuals.</p></li>
+<li><p><em>component + residual</em> (partial residual) plots. Non-linearity is diagnosed as a substantial deviation from a linear trend.</p></li>
+</ol></li>
+</ul>
+<p>Non-linearity can be dealt with either by transformation (of the predictor variable(s), fitting polynomial terms or via splines/generalised additive modelling (GAM) depending on the degree and nature of the non-linearity.</p>
+<ul>
+<li>(over or under) <strong>dispersion</strong>.</li>
+</ul>
+</section>
+</section>
+<section id="data-generation" class="level1">
+<h1>Data generation</h1>
+<p>Logistic regression is a type of generalised linear model (GLM) that models a binary response against a linear predictor via a specific link function. The linear predictor is the typically a linear combination of effects parameters (e.g.&nbsp;<span class="math inline">\(\beta_0+\beta_1x_1\)</span>). The role of the link function is to transform the expected values of the response <span class="math inline">\(y\)</span> (which is on the scale of (<span class="math inline">\(0,1\)</span>), as is the binomial distribution from which expectations are drawn) into the scale of the linear predictor (which is <span class="math inline">\(-\infty;\infty\)</span>). GLM’s transform the expected values (via a link) whereas LM’s transform the observed data. Thus while GLM’s operate on the scale of the original data and yet also on a scale appropriate of the residuals, LM’s do neither. There are many ways (transformations) that can map values on the (<span class="math inline">\(0,1\)</span>) scale into values on the (<span class="math inline">\(-\infty;\infty\)</span>) scale, however, the three most common are:</p>
+<ul>
+<li><p>logit: <span class="math inline">\(\log\left(\frac{\pi}{1-\pi}\right)\)</span> - log odds ratio.</p></li>
+<li><p>probit: <span class="math inline">\(\phi^{-1}(\pi)\)</span> where <span class="math inline">\(\phi^{-1}\)</span> is an inverse normal cumulative density function.</p></li>
+<li><p>complimentary log-log: <span class="math inline">\(\log(−\log(1−\pi))\)</span>.</p></li>
+</ul>
+<p>Lets say we wanted to model the presence/absence of an item (<span class="math inline">\(y\)</span>) against a continuous predictor (<span class="math inline">\(x\)</span>) As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">865</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#The number of samples</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n.x <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Create x values that at uniformly distributed throughout the rate of 1 to 20</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(<span class="at">n =</span> n.x, <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max =</span><span class="dv">20</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#The slope is the rate of change in log odds ratio for each unit change in x</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># the smaller the slope, the slower the change (more variability in data too)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>slope<span class="ot">=</span><span class="fl">0.5</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Inflection point is where the slope of the line is greatest</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#this is also the LD50 point</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>inflect <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Intercept (no interpretation)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>intercept <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(slope<span class="sc">*</span>inflect)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#The linear predictor</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>linpred <span class="ot">&lt;-</span> intercept<span class="sc">+</span>slope<span class="sc">*</span>x</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#Predicted y values</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>y.pred <span class="ot">&lt;-</span> <span class="fu">exp</span>(linpred)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(linpred))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#Add some noise and make binomial</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>n.y <span class="ot">&lt;-</span><span class="fu">rbinom</span>(<span class="at">n=</span>n.x,<span class="dv">20</span>,<span class="at">p=</span><span class="fl">0.9</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>y<span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> n.x,<span class="at">size=</span><span class="dv">1</span>, <span class="at">prob =</span> y.pred)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With these sort of data, we are primarily interested in investigating whether there is a relationship between the binary response variable and the linear predictor (linear combination of one or more continuous or categorical predictors).</p>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
+<p>So lets explore linearity by creating a histogram of the predictor variable (<span class="math inline">\(x\)</span>) and a scatterplot of the relationship between the response (<span class="math inline">\(y\)</span>) and the predictor (<span class="math inline">\(x\)</span>)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(dat<span class="sc">$</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#now for the scatterplot</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y<span class="sc">~</span>x, dat)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(dat, <span class="fu">lines</span>(<span class="fu">lowess</span>(y<span class="sc">~</span>x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>: the predictor (<span class="math inline">\(x\)</span>) does not display any skewness or other issues that might lead to non-linearity. The lowess smoother on the scatterplot does not display major deviations from a standard sigmoidal curve and thus linearity is satisfied. Violations of linearity could be addressed by either:</p>
+<ul>
+<li><p>define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).</p></li>
+<li><p>transform the scale of the predictor variables.</p></li>
+</ul>
+</section>
+<section id="model-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="model-fitting">Model fitting</h2>
+<p><strong>Effects model</strong></p>
+<p>Note that in order to prevent arithmetic overflows (particularly with the clog-log model, I am going to constrain the estimated linear predictor to between <span class="math inline">\(-20\)</span> and <span class="math inline">\(20\)</span>. Values outside of this on a inverse-log scale are extremely small and huge respectively. I will demonstrate logistic regression with a range of possible link functions (each of which yield different parameter interpretations). Consider first the logit function:</p>
+<p><span class="math display">\[
+y \sim \text{Bern}(\pi),
+\]</span></p>
+<p>where <span class="math inline">\(\text{logit}(\pi)=\beta_0+\beta_1x_1\)</span> and <span class="math inline">\(\beta_0,\beta_1 \sim N(0, 10000)\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">    y[i] ~ dbern(p[i])</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">    logit(p[i]) &lt;- max(-20,min(20,beta0+beta1*x[i]))</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con=</span><span class="st">'modellogit.txt'</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>dat.list <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">x=</span>x, <span class="at">N=</span><span class="fu">nrow</span>(dat)))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta0'</span>,<span class="st">'beta1'</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">20000</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>dat.logit.jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modellogit.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 20
+NA    Unobserved stochastic nodes: 2
+NA    Total graph size: 147
+NA 
+NA Initializing model</code></pre>
+</div>
+</div>
+<p>Second, we consider the probit function:</p>
+<p><span class="math display">\[
+y \sim \text{Bern}(\pi),
+\]</span></p>
+<p>where <span class="math inline">\(\text{probit}(\pi)=\beta_0+\beta_1x_1\)</span> and <span class="math inline">\(\beta_0,\beta_1 \sim N(0, 10000)\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>modelString2<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">    y[i] ~ dbern(p[i])</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">    probit(p[i]) &lt;- max(-20,min(20,beta0+beta1*x[i]))</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString2, <span class="at">con=</span><span class="st">'modelprobit.txt'</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>dat.list <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">x=</span>x, <span class="at">N=</span><span class="fu">nrow</span>(dat)))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta0'</span>,<span class="st">'beta1'</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">20000</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>dat.probit.jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modelprobit.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 20
+NA    Unobserved stochastic nodes: 2
+NA    Total graph size: 147
+NA 
+NA Initializing model</code></pre>
+</div>
+</div>
+<p>Finally, the complementary log-log</p>
+<p><span class="math display">\[
+y \sim \text{Bern}(\pi),
+\]</span></p>
+<p>where <span class="math inline">\(\text{probit}(\pi)=\beta_0+\beta_1x_1\)</span> and <span class="math inline">\(\beta_0,\beta_1 \sim N(0, 10000)\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>modelString3<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">    y[i] ~ dbern(p[i])</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">    cloglog(p[i]) &lt;- max(-20,min(20,beta0+beta1*x[i]))</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString3, <span class="at">con=</span><span class="st">'modelcloglog.txt'</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>dat.list <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">x=</span>x, <span class="at">N=</span><span class="fu">nrow</span>(dat)))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta0'</span>,<span class="st">'beta1'</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">20000</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>dat.cloglog.jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modelcloglog.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 20
+NA    Unobserved stochastic nodes: 2
+NA    Total graph size: 147
+NA 
+NA Initializing model</code></pre>
+</div>
+</div>
+<p>Prior to exploring the model parameters, it is prudent to confirm that the model did indeed fit the assumptions and was an appropriate fit to the data as well as that the MCMC sampling chain was adequately mixed and the retained samples independent. Whilst I will only demonstrate this for the logit model, the procedure would be identical for exploring the probit and clog-log models.</p>
+</section>
+<section id="model-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="model-evaluation">Model evaluation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(dat.logit.jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(dat.logit.jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(dat.logit.jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [[1]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                 
+NA           Burn-in  Total Lower bound  Dependence
+NA           (M)      (N)   (Nmin)       factor (I)
+NA  beta0    50       54338 3746         14.50     
+NA  beta1    36       39555 3746         10.60     
+NA  deviance 4        4955  3746          1.32     
+NA 
+NA 
+NA [[2]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                 
+NA           Burn-in  Total Lower bound  Dependence
+NA           (M)      (N)   (Nmin)       factor (I)
+NA  beta0    30       31743 3746          8.47     
+NA  beta1    40       52860 3746         14.10     
+NA  deviance 8        10336 3746          2.76</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(dat.logit.jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA            beta0     beta1  deviance
+NA Lag 0  1.0000000 1.0000000 1.0000000
+NA Lag 1  0.9816715 0.9811729 0.5841946
+NA Lag 5  0.9190319 0.9197111 0.4477029
+NA Lag 10 0.8458674 0.8477906 0.3948904
+NA Lag 50 0.4300407 0.4306464 0.2065881</code></pre>
+</div>
+</div>
+<p>It seems that the level of auto-correlation at the nominated lag of <span class="math inline">\(10\)</span> is extremely high. Ideally, the level of auto-correlation should be less than <span class="math inline">\(0.1\)</span>. To achieve this, we need a lag of <span class="math inline">\(1000\)</span>. Consequently, we will resample at a lag of <span class="math inline">\(1000\)</span> and obviously we are going to need more iterations to ensure that we retain a large enough sample from which to derive estimates. In order to support a thinning rate of <span class="math inline">\(1000\)</span>, the number of iterations is going to need to be very high. Hence, the following might take considerable time to run.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dat.logit.jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modellogit.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 20
+NA    Unobserved stochastic nodes: 2
+NA    Total graph size: 147
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dat.logit.jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "modellogit.txt", fit using jags,
+NA  2 chains, each with 10000 iterations (first 5000 discarded), n.thin = 100
+NA  n.sims = 100 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%    75%  97.5%  Rhat n.eff
+NA beta0     -16.51   9.652 -40.133 -20.118 -14.170 -9.587 -5.463 1.040    58
+NA beta1       1.66   0.973   0.458   0.979   1.427  2.032  3.926 1.026   100
+NA deviance    9.94   2.764   7.457   8.161   8.942 10.678 16.848 1.024   100
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.8 and DIC = 13.8
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(dat.logit.jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA               beta0      beta1   deviance
+NA Lag 0     1.0000000  1.0000000  1.0000000
+NA Lag 100   0.4435502  0.4390086  0.1529258
+NA Lag 500   0.1102886  0.1246140  0.1950554
+NA Lag 1000 -0.1091505 -0.1008427 -0.1582021</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: the samples are now less auto-correlated and the chains are arguably mixed better. We now explore the goodness of fit of the models via the residuals and deviance. We could calculate the Pearsons’s residuals within the <code>JAGS</code> model. Alternatively, we could use the parameters to generate the residuals outside of <code>JAGS</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">&lt;-</span> dat.logit.jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, <span class="at">data=</span>dat)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>eta<span class="ot">&lt;-</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>pi <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(eta)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#sweep across rows and then divide by pi</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>Resid <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span><span class="fu">sweep</span>(pi,<span class="dv">2</span>,dat<span class="sc">$</span>y,<span class="st">'-'</span>)<span class="sc">/</span><span class="fu">sqrt</span>(pi<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pi))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">apply</span>(Resid,<span class="dv">2</span>,mean)<span class="sc">~</span><span class="fu">apply</span>(eta,<span class="dv">2</span>,mean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Bernoulli distribution matching that estimated by the model. Essentially this is estimating how well the Bernoulli distribution and linear model approximates the observed data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>SSres<span class="ot">&lt;-</span><span class="fu">apply</span>(Resid<span class="sc">^</span><span class="dv">2</span>,<span class="dv">1</span>,sum)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#generate a matrix of draws from a binomial distribution</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the matrix is the same dimensions as pi and uses the probabilities of pi</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>YNew <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(<span class="fu">length</span>(pi),<span class="at">prob=</span>pi,<span class="at">size=</span><span class="dv">1</span>),<span class="at">nrow=</span><span class="fu">nrow</span>(pi))</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>Resid1<span class="ot">&lt;-</span>(pi <span class="sc">-</span> YNew)<span class="sc">/</span><span class="fu">sqrt</span>(pi<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pi))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>SSres.sim<span class="ot">&lt;-</span><span class="fu">apply</span>(Resid1<span class="sc">^</span><span class="dv">2</span>,<span class="dv">1</span>,sum)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(SSres.sim<span class="sc">&gt;</span>SSres, <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0.21875</code></pre>
+</div>
+</div>
+<p>Alternatively, we could generate the new samples and calculate the sums squares of residuals etc all within <code>JAGS</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dat.list <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">x=</span>x, <span class="at">N=</span><span class="fu">nrow</span>(dat)))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="st">    y[i] ~ dbern(p[i])</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="st">    logit(p[i]) &lt;- max(-20,min(20,eta[i]))</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="st">    eta[i] &lt;- beta0+beta1*x[i]</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="st">    YNew[i] ~dbern(p[i])</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="st">    varY[i] &lt;- p[i]*(1-p[i])</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="st">    PRes[i] &lt;- (y[i] - p[i]) / sqrt(varY[i])</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="st">    PResNew[i] &lt;- (YNew[i] - p[i]) / sqrt(varY[i])</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="st">    D[i] &lt;- pow(PRes[i],2)</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="st">    DNew[i] &lt;- pow(PResNew[i],2)</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="st">  Fit &lt;- sum(D[1:N])</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="st">  FitNew &lt;-sum(DNew[1:N]) </span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="st">  pvalue &lt;- mean(FitNew&gt;Fit)</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con=</span><span class="st">'modellogit_v2.txt'</span>)</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta0'</span>,<span class="st">'beta1'</span>,<span class="st">'Fit'</span>,<span class="st">'FitNew'</span>)</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">20000</span></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>dat.logit.jags1 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modellogit_v2.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 20
+NA    Unobserved stochastic nodes: 22
+NA    Total graph size: 343
+NA 
+NA Initializing model</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dat.logit.jags1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "modellogit_v2.txt", fit using jags,
+NA  2 chains, each with 10000 iterations (first 5000 discarded)
+NA  n.sims = 10000 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%     75%   97.5%  Rhat n.eff
+NA Fit       38.470 339.283   6.122   8.237  12.604  24.120 186.621 1.013   540
+NA FitNew    15.837 230.080   0.395   2.025   3.780   8.372  63.411 1.001  3800
+NA beta0    -15.507   7.665 -35.657 -19.433 -13.831 -10.040  -4.873 1.024   660
+NA beta1      1.570   0.791   0.501   0.991   1.390   1.979   3.656 1.017 10000
+NA deviance   9.678   2.175   7.482   8.070   9.018  10.581  15.412 1.013   220
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 2.4 and DIC = 12.0
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> dat.logit.jags1<span class="sc">$</span>BUGSoutput</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(out<span class="sc">$</span>sims.list<span class="sc">$</span>FitNew <span class="sc">&gt;</span> out<span class="sc">$</span>sims.list<span class="sc">$</span>Fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0.1947</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: although the Bayesian p-value is quite a bit lower than <span class="math inline">\(0.5\)</span>, suggesting that there is more variability in the data than should be expected from this simple logistic regression model, this value is not any closer to <span class="math inline">\(0\)</span> (a value that would indicate that the model does not fit the data at all well. Thus we might conclude that whilst not ideal, the model is adequate.</p>
+</section>
+<section id="exploring-the-model-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-the-model-parameters">Exploring the model parameters</h2>
+<p>If there was any evidence that the assumptions had been violated or the model was not an appropriate fit, then we would need to reconsider the model and start the process again. In this case, there is no evidence that the test will be unreliable so we can proceed to explore the test statistics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dat.logit.jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Inference for Bugs model at "modellogit.txt", fit using jags,
+NA  2 chains, each with 10000 iterations (first 5000 discarded), n.thin = 100
+NA  n.sims = 100 iterations saved
+NA          mu.vect sd.vect    2.5%     25%     50%    75%  97.5%  Rhat n.eff
+NA beta0     -16.51   9.652 -40.133 -20.118 -14.170 -9.587 -5.463 1.040    58
+NA beta1       1.66   0.973   0.458   0.979   1.427  2.032  3.926 1.026   100
+NA deviance    9.94   2.764   7.457   8.161   8.942 10.678 16.848 1.024   100
+NA 
+NA For each parameter, n.eff is a crude measure of effective sample size,
+NA and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+NA 
+NA DIC info (using the rule, pD = var(deviance)/2)
+NA pD = 3.8 and DIC = 13.8
+NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">adply</span>(dat.logit.jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="dv">2</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(x), <span class="at">Mean=</span><span class="fu">mean</span>(x), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x),<span class="at">p=</span><span class="fl">0.5</span>))</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA      X1     Median       Mean       lower     upper    lower.1   upper.1
+NA 1 beta0 -14.169526 -16.510277 -38.4322729 -2.190571 -15.809670 -6.767604
+NA 2 beta1   1.427161   1.660376   0.3019023  3.728819   0.866335  1.791501</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: We would reject the null hypothesis (p<span class="math inline">\(&lt;0.05\)</span>). An increase in <span class="math inline">\(x\)</span> is associated with a significant linear increase (positive slope) in log odds of y success. Every <span class="math inline">\(1\)</span> unit increase in <span class="math inline">\(x\)</span> results in a <span class="math inline">\(0.86\)</span> unit increase in log odds-ratio. We usually express this in terms of odds-ratio rather than log odds-ratio, so every <span class="math inline">\(1\)</span> unit increase in <span class="math inline">\(x\)</span> results in a (<span class="math inline">\(e^{0.86}=2.36\)</span>) <span class="math inline">\(2.36\)</span> unit increase in odds-ratio.</p>
+</section>
+<section id="explorations-of-the-trends" class="level2">
+<h2 class="anchored" data-anchor-id="explorations-of-the-trends">Explorations of the trends</h2>
+<p>We might also be interested in the LD50 - the value of <span class="math inline">\(x\)</span> where the probability switches from favoring <span class="math inline">\(1\)</span> to favoring <span class="math inline">\(0\)</span>. LD50 is calculated as:</p>
+<p><span class="math display">\[
+LD50 = - \frac{\text{intercept}}{\text{slope}}
+\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.mcmc</span>(<span class="sc">-</span>coefs[,<span class="dv">1</span>]<span class="sc">/</span>coefs[,<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA Iterations = 1:100
+NA Thinning interval = 1 
+NA Number of chains = 1 
+NA Sample size per chain = 100 
+NA 
+NA 1. Empirical mean and standard deviation for each variable,
+NA    plus standard error of the mean:
+NA 
+NA           Mean             SD       Naive SE Time-series SE 
+NA        9.92488        0.84980        0.08498        0.06916 
+NA 
+NA 2. Quantiles for each variable:
+NA 
+NA   2.5%    25%    50%    75%  97.5% 
+NA  7.737  9.460  9.894 10.448 11.538</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#OR</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>LD50 <span class="ot">&lt;-</span> <span class="sc">-</span>coefs[,<span class="dv">1</span>]<span class="sc">/</span>coefs[,<span class="dv">2</span>]</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(LD50), <span class="at">Mean=</span><span class="fu">mean</span>(LD50), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(LD50)), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(LD50),<span class="at">p=</span><span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA        Median     Mean    lower    upper  lower.1  upper.1
+NA var1 9.894002 9.924877 7.930942 11.59808 9.547373 10.50285</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: the LD50 is <span class="math inline">\(10.5\)</span>. Finally, we will create a summary plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ann =</span> F, <span class="at">axes =</span> F)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(y <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">20</span>, <span class="at">l =</span> <span class="dv">1000</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>xs)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>eta<span class="ot">&lt;-</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(eta)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">adply</span>(ys,<span class="dv">2</span>,<span class="cf">function</span>(x) {</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(x), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)))</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">x=</span>xs,data.tab)</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(Median <span class="sc">~</span> x, <span class="at">data=</span>data.tab,<span class="at">col =</span> <span class="st">"black"</span>, <span class="at">type =</span> <span class="st">"l"</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(lower <span class="sc">~</span> x, <span class="at">data=</span>data.tab,<span class="at">col =</span> <span class="st">"black"</span>, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(upper <span class="sc">~</span> x, <span class="at">data=</span>data.tab,<span class="at">col =</span> <span class="st">"black"</span>, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"X"</span>, <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">line =</span> <span class="dv">3</span>)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las =</span> <span class="dv">2</span>)</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Y"</span>, <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">line =</span> <span class="dv">3</span>)</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a><span class="fu">box</span>(<span class="at">bty =</span> <span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="grouped-binary-data" class="level1">
+<h1>Grouped binary data</h1>
+<p>In the previous demonstration, the response variable represented the state of a single item per level of the predictor variable (<span class="math inline">\(x\)</span>). That single item could be observed having a value of either <span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>. Another common situation is to observe the number of items in one of two states (typically dead or alive) for each level of a treatment. For example, you could tally up the number of germinated and non-germinated seeds out of a bank of <span class="math inline">\(10\)</span> seeds at each of <span class="math inline">\(8\)</span> temperature or nutrient levels. Recall that the binomial distribution represents the density (probability) of all possible successes (germinations) out of a total of <span class="math inline">\(N\)</span> items (seeds). Hence the binomial distribution is also a suitable error distribution for such grouped binary data. For this demonstration, we will model the number of successes against a uniformly distributed predictor (<span class="math inline">\(x\)</span>). The number of trials in each group (level of the predictor) will vary slightly (yet randomly) so as to mimick complications that inevadably occur in real experiments.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">876</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co">#The number of levels of x</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>n.x <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Create x values that at uniformly distributed throughout the rate of 10 to 20</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">runif</span>(<span class="at">n =</span> n.x, <span class="at">min =</span> <span class="dv">10</span>, <span class="at">max =</span><span class="dv">20</span>))</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co">#The slope is the rate of change in log odds ratio for each unit change in x</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co"># the smaller the slope, the slower the change (more variability in data too)</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>slope<span class="ot">=</span><span class="sc">-</span>.<span class="dv">25</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Inflection point is where the slope of the line is greatest</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="co">#this is also the LD50 point</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>inflect <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Intercept (no interpretation)</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>intercept <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>(slope<span class="sc">*</span>inflect)</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co">#The linear predictor</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>linpred <span class="ot">&lt;-</span> intercept<span class="sc">+</span>slope<span class="sc">*</span>x</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="co">#Predicted y values</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>y.pred <span class="ot">&lt;-</span> <span class="fu">exp</span>(linpred)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(linpred))</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="co">#Add some noise and make binary (0's and 1's)</span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>n.trial <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n=</span>n.x,<span class="dv">20</span>, <span class="at">prob=</span><span class="fl">0.9</span>)</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>success <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> n.x, <span class="at">size =</span> n.trial,<span class="at">prob =</span> y.pred)</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>failure <span class="ot">&lt;-</span> n.trial <span class="sc">-</span> success</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(success,failure,x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="exploratory-data-analysis-1" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-1">Exploratory data analysis</h2>
+<p>So lets explore linearity by creating a histogram of the predictor variable (<span class="math inline">\(x\)</span>) and a scatterplot of the relationship between the either the number of successes (success) or the number of (failures) and the predictor (<span class="math inline">\(x\)</span>). Note, that this will not account for the differences in trial size per group and so a scatterplot of the relationship between the number of successes (success) or the number of (failures) divided by the total number of trials against the predictor (<span class="math inline">\(x\)</span>) might be more appropriate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(dat<span class="sc">$</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#now for the scatterplot</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success<span class="sc">~</span>x, dat)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(dat, <span class="fu">lines</span>(<span class="fu">lowess</span>(success<span class="sc">~</span>x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot standardised for trial size</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success<span class="sc">/</span>(success<span class="sc">+</span>failure)<span class="sc">~</span>x, dat)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(dat, <span class="fu">lines</span>(<span class="fu">lowess</span>(success<span class="sc">/</span>(success<span class="sc">+</span>failure)<span class="sc">~</span>x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>: the predictor (<span class="math inline">\(x\)</span>) does not display any skewness (although it is not all that uniform - random data) or other issues that might lead to non-linearity. The lowess smoother on either scatterplot does not display major deviations from a standard sigmoidal curve and thus linearity is likely to be satisfied. Violations of linearity could be addressed by either:</p>
+<ul>
+<li><p>define a non-linear linear predictor (such as a polynomial, spline or other non-linear function).</p></li>
+<li><p>transform the scale of the predictor variables.</p></li>
+</ul>
+</section>
+<section id="model-fitting-1" class="level2">
+<h2 class="anchored" data-anchor-id="model-fitting-1">Model fitting</h2>
+<p>Clearly the number of successes is also dependent on the number of trials. Larger numbers of trials might be expected to yeild higher numbers of successes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>dat.list <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, <span class="fu">list</span>(<span class="at">success=</span>success, <span class="at">total=</span>success<span class="sc">+</span>failure, <span class="at">x=</span>x, <span class="at">N=</span><span class="fu">nrow</span>(dat)))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="st">model{</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="st">    success[i] ~ dbin(p[i],total[i])</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="st">    logit(p[i]) &lt;- max(-20,min(20,beta0+beta1*x[i]))</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="st">  beta0 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="st">  beta1 ~ dnorm(0,1.0E-06)</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con=</span><span class="st">'modelgbin.txt'</span>)</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'beta0'</span>,<span class="st">'beta1'</span>)</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">20000</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>dat.logit.jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data=</span>dat.list,<span class="at">model.file=</span><span class="st">'modelgbin.txt'</span>, <span class="at">param=</span>params,</span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>                   <span class="at">n.chains=</span>nChains, <span class="at">n.iter=</span>nIter, <span class="at">n.burnin=</span>burnInSteps, <span class="at">n.thin=</span>thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA Compiling model graph
+NA    Resolving undeclared variables
+NA    Allocating nodes
+NA Graph information:
+NA    Observed stochastic nodes: 10
+NA    Unobserved stochastic nodes: 2
+NA    Total graph size: 87
+NA 
+NA Initializing model</code></pre>
+</div>
+</div>
+<p>As with the logistic regression presented earlier, we could alternatively use probit or clog-log link functions.</p>
+</section>
+<section id="model-evaluation-1" class="level2">
+<h2 class="anchored" data-anchor-id="model-evaluation-1">Model evaluation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(dat.logit.jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(dat.logit.jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(dat.logit.jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [[1]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                 
+NA           Burn-in  Total Lower bound  Dependence
+NA           (M)      (N)   (Nmin)       factor (I)
+NA  beta0    46       50468 3746         13.50     
+NA  beta1    90       98698 3746         26.30     
+NA  deviance 6        8920  3746          2.38     
+NA 
+NA 
+NA [[2]]
+NA 
+NA Quantile (q) = 0.025
+NA Accuracy (r) = +/- 0.005
+NA Probability (s) = 0.95 
+NA                                                  
+NA           Burn-in  Total  Lower bound  Dependence
+NA           (M)      (N)    (Nmin)       factor (I)
+NA  beta0    84       103188 3746         27.50     
+NA  beta1    52       58312  3746         15.60     
+NA  deviance 8        9488   3746          2.53</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(dat.logit.jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA            beta0     beta1   deviance
+NA Lag 0  1.0000000 1.0000000 1.00000000
+NA Lag 1  0.9830416 0.9831425 0.56062724
+NA Lag 5  0.9248140 0.9256704 0.42678260
+NA Lag 10 0.8543024 0.8555131 0.36633408
+NA Lag 50 0.4631353 0.4636323 0.07250394</code></pre>
+</div>
+</div>
+<p>Lets explore the diagnostics - particularly the residuals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>inv.logit <span class="ot">&lt;-</span> <span class="fu">binomial</span>()<span class="sc">$</span>linkinv</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Calculate residuals</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">&lt;-</span> dat.logit.jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x, <span class="at">data=</span>dat)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>eta<span class="ot">&lt;-</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>pi <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(eta)</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="co">#sweep across rows and then divide by pi</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>Resid <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span><span class="fu">sweep</span>(pi,<span class="dv">2</span>,dat<span class="sc">$</span>success<span class="sc">/</span>(dat<span class="sc">$</span>success<span class="sc">+</span>dat<span class="sc">$</span>failure),<span class="st">'-'</span>)<span class="sc">/</span><span class="fu">sqrt</span>(pi<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pi))</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">apply</span>(Resid,<span class="dv">2</span>,mean)<span class="sc">~</span><span class="fu">apply</span>(eta,<span class="dv">2</span>,mean))</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">lowess</span>(<span class="fu">apply</span>(Resid,<span class="dv">2</span>,mean)<span class="sc">~</span><span class="fu">apply</span>(eta,<span class="dv">2</span>,mean)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Conclusions</strong>: there is no obvious patterns in the residuals, or at least there are no obvious trends remaining that would be indicative of non-linearity.</p>
+<p>Now we will compare the sum of squared residuals to the sum of squares residuals that would be expected from a Bernoulli distribution matching that estimated by the model. Essentially this is estimating how well the Bernoulli distribution and linear model approximates the observed data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>SSres<span class="ot">&lt;-</span><span class="fu">apply</span>(Resid<span class="sc">^</span><span class="dv">2</span>,<span class="dv">1</span>,sum)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co">#generate a matrix of draws from a binomial distribution</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co">#the matrix is the same dimensions as pi and uses the probabilities of pi</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>YNew <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(<span class="fu">length</span>(pi),<span class="at">prob=</span>pi,<span class="at">size=</span>(dat<span class="sc">$</span>success<span class="sc">+</span>dat<span class="sc">$</span>failure)),<span class="at">nrow=</span><span class="fu">nrow</span>(pi))</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>Resid1 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">*</span>(pi<span class="sc">-</span>YNew<span class="sc">/</span>(dat<span class="sc">$</span>success<span class="sc">+</span>dat<span class="sc">$</span>failure))<span class="sc">/</span><span class="fu">sqrt</span>(pi<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pi))</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>SSres.sim<span class="ot">&lt;-</span><span class="fu">apply</span>(Resid1<span class="sc">^</span><span class="dv">2</span>,<span class="dv">1</span>,sum)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(SSres.sim<span class="sc">&gt;</span>SSres, <span class="at">na.rm=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA [1] 0.4559</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: this Bayesian p-value is reasonably close to <span class="math inline">\(0.5\)</span>. Therefore we would conclude that there was no strong evidence for a lack of fit of the model.</p>
+</section>
+<section id="explorations-of-the-trends-1" class="level2">
+<h2 class="anchored" data-anchor-id="explorations-of-the-trends-1">Explorations of the trends</h2>
+<p>We might also be interested in the LD50 - the value of <span class="math inline">\(x\)</span> where the probability switches from favoring <span class="math inline">\(1\)</span> to favoring <span class="math inline">\(0\)</span>. LD50 is calculated as:</p>
+<p><span class="math display">\[
+LD50 = - \frac{\text{intercept}}{\text{slope}}
+\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.mcmc</span>(<span class="sc">-</span>coefs[,<span class="dv">1</span>]<span class="sc">/</span>coefs[,<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA 
+NA Iterations = 1:10000
+NA Thinning interval = 1 
+NA Number of chains = 1 
+NA Sample size per chain = 10000 
+NA 
+NA 1. Empirical mean and standard deviation for each variable,
+NA    plus standard error of the mean:
+NA 
+NA           Mean             SD       Naive SE Time-series SE 
+NA       12.80838        6.30455        0.06305        0.05732 
+NA 
+NA 2. Quantiles for each variable:
+NA 
+NA  2.5%   25%   50%   75% 97.5% 
+NA 10.09 12.45 13.08 13.58 14.41</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">#OR</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>LD50 <span class="ot">&lt;-</span> <span class="sc">-</span>coefs[,<span class="dv">1</span>]<span class="sc">/</span>coefs[,<span class="dv">2</span>]</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(LD50), <span class="at">Mean=</span><span class="fu">mean</span>(LD50), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(LD50)), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(LD50),<span class="at">p=</span><span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NA        Median     Mean    lower    upper  lower.1  upper.1
+NA var1 13.08204 12.80838 10.76017 14.74202 12.71997 13.79013</code></pre>
+</div>
+</div>
+<p><strong>Conclusions</strong>: the LD50 is <span class="math inline">\(13.1\)</span>. Finally, we will create a summary plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success<span class="sc">/</span>(success<span class="sc">+</span>failure) <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ann =</span> F, <span class="at">axes =</span> F)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(success<span class="sc">/</span>(success<span class="sc">+</span>failure) <span class="sc">~</span> x, <span class="at">data =</span> dat, <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(dat<span class="sc">$</span>x, <span class="at">na.rm=</span><span class="cn">TRUE</span>),<span class="fu">max</span>(dat<span class="sc">$</span>x, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">l =</span> <span class="dv">1000</span>)</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>xs)</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>eta<span class="ot">&lt;-</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(eta)</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">adply</span>(ys,<span class="dv">2</span>,<span class="cf">function</span>(x) {</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(x), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)))</span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">x=</span>xs,data.tab)</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(Median <span class="sc">~</span> x, <span class="at">data=</span>data.tab,<span class="at">col =</span> <span class="st">"black"</span>, <span class="at">type =</span> <span class="st">"l"</span>)</span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.tab,<span class="fu">polygon</span>(<span class="fu">c</span>(x,<span class="fu">rev</span>(x)),<span class="fu">c</span>(lower,<span class="fu">rev</span>(upper)), <span class="at">col=</span><span class="st">"#0000ff60"</span>, <span class="at">border=</span><span class="cn">NA</span>))</span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a><span class="co">#lines(lower ~ x, data=data.tab,col = "black", type = "l", lty = 2)</span></span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a><span class="co">#lines(upper ~ x, data=data.tab,col = "black", type = "l", lty = 2)</span></span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
+<span id="cb59-19"><a href="#cb59-19" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"X"</span>, <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">line =</span> <span class="dv">3</span>)</span>
+<span id="cb59-20"><a href="#cb59-20" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las =</span> <span class="dv">2</span>)</span>
+<span id="cb59-21"><a href="#cb59-21" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Probability of success"</span>, <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">line =</span> <span class="dv">3</span>)</span>
+<span id="cb59-22"><a href="#cb59-22" aria-hidden="true" tabindex="-1"></a><span class="fu">box</span>(<span class="at">bty =</span> <span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#or via ggplot</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(dat<span class="sc">$</span>x, <span class="at">na.rm=</span><span class="cn">TRUE</span>),<span class="fu">max</span>(dat<span class="sc">$</span>x, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">l =</span> <span class="dv">1000</span>)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>xs)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>eta<span class="ot">&lt;-</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">inv.logit</span>(eta)</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">adply</span>(ys,<span class="dv">2</span>,<span class="cf">function</span>(x) {</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Median=</span><span class="fu">median</span>(x), <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)))</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>data.tab <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">x=</span>xs,data.tab)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(grid)</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>p <span class="ot">&lt;-</span> <span class="fu">with</span>(dat, success<span class="sc">/</span>(success<span class="sc">+</span>failure))</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data.tab,<span class="fu">aes</span>(<span class="at">y=</span>Median, <span class="at">x=</span>x)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data=</span>dat,<span class="fu">aes</span>(<span class="at">y=</span>p, <span class="at">x=</span>x),<span class="at">color=</span><span class="st">"gray40"</span>)<span class="sc">+</span></span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>             <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>lower, <span class="at">ymax=</span>upper), <span class="at">stat=</span><span class="st">"identity"</span>)<span class="sc">+</span></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">scale_x_continuous</span>(<span class="st">"X"</span>)<span class="sc">+</span><span class="fu">scale_y_continuous</span>(<span class="st">"Probability of success"</span>)</span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>p1<span class="sc">+</span><span class="fu">theme</span>(<span class="at">panel.grid.major=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">panel.grid.minor=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">panel.border=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">panel.background=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.title.y=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">15</span>,<span class="at">vjust=</span><span class="dv">0</span>,<span class="at">angle=</span><span class="dv">90</span>),</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.title.x=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">15</span>,<span class="at">vjust=</span><span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.text.y=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>),</span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.text.x=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">12</span>),</span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">axis.line=</span><span class="fu">element_line</span>(),</span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>                 <span class="at">plot.margin=</span><span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="dv">2</span>,<span class="dv">2</span>), <span class="st">"lines"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-plummer2004jags" class="csl-entry" role="listitem">
+Plummer, Martyn. 2004. <span>“JAGS: Just Another Gibbs Sampler.”</span>
+</div>
+<div id="ref-su2015package" class="csl-entry" role="listitem">
+Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements. 2015. <span>“Package <span>‘R2jags’</span>.”</span> <em>R Package Version 0.03-08, URL Http://CRAN. R-Project. Org/Package= R2jags</em>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
