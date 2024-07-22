@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "tutorials.html",
+    "href": "tutorials.html",
+    "title": "Tutorials",
+    "section": "",
+    "text": "Super basic introduction to JAGS\n\n\n\nQuarto\n\n\nR\n\n\nAcademia\n\n\nSoftware\n\n\nStatistics\n\n\n\nThe focus of this simple tutorial is to provide a brief introduction and overview about how to fit Bayesian models using JAGS via R …\n\n\n\nAndrea Gabrio\n\n\nJul 1, 2019\n\n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "software.html",
     "href": "software.html",
     "title": "Software",
@@ -782,5 +789,68 @@
     "title": "missingHE",
     "section": "Installation",
     "text": "Installation\nThere are two ways of installing missingHE. A stable version (currently 4.2.0) is packaged and available from CRAN. You can simply type on your R terminal\n\ninstall.packages(\"missingHE\")\n\nThe second way involves using the development version of missingHE, which is available from GitHub - this will usually be updated more frequently and may be continuously tested. On Windows machines, you need to install a few dependencies, including Rtools first, e.g. by running\n\npkgs &lt;- c(\"R2jags\",\"ggplot2\",\"gridExtra\",\"BCEA\",\"ggmcmc\",\"loo\",\"Rtools\",\"devtools\", \"utils\")\nrepos &lt;- c(\"https://cran.rstudio.com\") \ninstall.packages(pkgs,repos=repos,dependencies = \"Depends\")\n\nbefore installing the package using devtools:\n\ndevtools::install_github(\"AnGabrio/missingHE\", build_vignettes = TRUE)\n\nThe optional argument build_vignettes = TRUE allows to install the vignettes of the package locally on your computer. These consist in brief tutorials to guid the user on how to use and customise the models in missingHE using different functions of the package. Once the package is installed, they can be accessed by using the command\n\nutils::browseVignettes(package = \"missingHE\")\n\nAll models implemented in missingHE are written in the BUGS language using the software JAGS, which needs to be installed from its own repository and instructions for installations under different OS can be found online. Once installed, the software is called in missingHE via the R package R2jags. Note that the missingHE package is currently under active development and therefore it is advisable to reinstall the package directly from GitHub before each use to ensure that you are using the most updated version."
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html",
+    "href": "tutorials/2019-07-01-intro-jags/index.html",
+    "title": "Super basic introduction to JAGS",
+    "section": "",
+    "text": "The focus of this simple tutorial is to provide a brief introduction and overview about how to fit Bayesian models using JAGS via R.\nPrerequisites:"
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#what-is-jags",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#what-is-jags",
+    "title": "Super basic introduction to JAGS",
+    "section": "What is JAGS?",
+    "text": "What is JAGS?\nJAGS or Just Another Gibbs Sampler is a program for analysis of Bayesian models using Markov Chain Monte Carlo (MCMC) methods (Plummer (2004)). JAGS is a free software based on the Bayesian inference Using Gibbs Sampling (informally BUGS) language at the base of WinBUGS/OpenBUGS but, unlike these programs, it is written in C++ and is platform independent. The latest version of JAGS can be downloaded from Martyn Plummer’s repository and is available for different OS. There are different R packages which function as frontends for JAGS. These packages make it easy to process the output of Bayesian models and present it in publication-ready form. In this brief introduction, I will specifically focus on the R2jags package (Su et al. (2015)) and show how to fit JAGS models using this package."
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#installing-jags-and-r2jags",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#installing-jags-and-r2jags",
+    "title": "Super basic introduction to JAGS",
+    "section": "Installing JAGS and R2jags",
+    "text": "Installing JAGS and R2jags\nInstall the latest version of JAGS for your OS. Next, install the package R2jags from within R or Rstudio, via the package installer or by typing in the command line\n\ninstall.packages(\"R2jags\", dependencies = TRUE)\n\nThe dependencies = TRUE option will automatically install all the packages on which the functions in the R2jags package rely."
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#simulate-data",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#simulate-data",
+    "title": "Super basic introduction to JAGS",
+    "section": "Simulate data",
+    "text": "Simulate data\nFor an example dataset, I simulate my own data in R. I create a continuous outcome variable \\(y\\) as a function of one predictor \\(x\\) and a disturbance term \\(\\epsilon\\). I simulate a dataset with 100 observations. Create the error term, the predictor and the outcome using a linear form with an intercept \\(\\beta_0\\) and slope \\(\\beta_1\\) coefficients, i.e.\n\\[\ny = \\beta_0 + \\beta_1 x + \\epsilon  \n\\]\nThe R commands which I use to simulate the data are the following:\n\nn.sim=100; set.seed(123)\nx=rnorm(n.sim, mean = 5, sd = 2)\nepsilon=rnorm(n.sim, mean = 0, sd = 1)\nbeta0=1.5\nbeta1=1.2\ny=beta0 + beta1 * x + epsilon\n\nThen, I define all the data for JAGS in a list object\n\ndatalist=list(\"y\",\"x\",\"n.sim\")"
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#model-file",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#model-file",
+    "title": "Super basic introduction to JAGS",
+    "section": "Model file",
+    "text": "Model file\nNow, I write the model for JAGS and save it as a text file named \"basic.mod.txt\" in the current working directory\n\nbasic.mod= \"\nmodel {\n#model\n for(i in 1:n.sim){\n  y[i] ~ dnorm(mu[i], tau)\n  mu[i] = beta0 + beta1 * x[i]\n }\n#priors\nbeta0 ~ dnorm(0, 0.01)\nbeta1 ~ dnorm(0, 0.01)\ntau ~ dgamma(0.01,0.01)\n}\n\"\n\nThe part of the model inside the for loop denotes the likelihood, which is evaluated for each individual in the sample using a Normal distribution parameterised by some mean mu and precision tau (where, precision = 1/variance). The covariate x is included at the mean level using a linear regression, which is indexed by the intercept beta0 and slope beta1 terms. The second part defines the prior distributions for all parameters of the model, namely the regression coefficients and the precision. Weakly informative priors are used since I assume that I do not have any prior knowledge about these parameters.\nTo write and save the model as the text file “basic.mod.txt” in the current working directory, I use the writeLines function\n\nwriteLines(basic.mod, \"basic.mod.txt\")"
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#pre-processing",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#pre-processing",
+    "title": "Super basic introduction to JAGS",
+    "section": "Pre-processing",
+    "text": "Pre-processing\nDefine the parameters whose posterior distribtuions we are interested in summarising later and set up the initial values for the MCMC sampler in JAGS\n\nparams=c(\"beta0\",\"beta1\")\ninits=function(){list(\"beta0\"=rnorm(1), \"beta1\"=rnorm(1))}\n\nThe function creates a list that contains one element for each parameter, which gets assigned a random draw from a normal distribution as a strating value for each chain in the model. For simple models like this, it is generally easy to define the intial values for all parameters. However, for more complex models, this may not be immediate and a lot of trial and error may be required. However, JAGS can automatically select the initial values for all parameters in an efficient way even for relatively complex models. This can be achieved by setting inits=NULL, which is then passed to the jags function in R2jags.\nBefore using R2jags for the first time, you need to load the package, and you may want to set a random seed number for making your estimates replicable\n\nlibrary(R2jags)\nset.seed(123)"
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#fit-the-model",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#fit-the-model",
+    "title": "Super basic introduction to JAGS",
+    "section": "Fit the model",
+    "text": "Fit the model\nNow, we can fit the model in JAGS using the jags function in the R2jags package and save it in the object basic.mod\n\nbasic.mod=jags(data = datalist, inits = inits,\n  parameters.to.save = params, n.chains = 2, n.iter = 2000, \n  n.burnin = 1000, model.file = \"basic.mod.txt\")\n\nNA Compiling model graph\nNA    Resolving undeclared variables\nNA    Allocating nodes\nNA Graph information:\nNA    Observed stochastic nodes: 100\nNA    Unobserved stochastic nodes: 3\nNA    Total graph size: 406\nNA \nNA Initializing model\n\n\nWhile the model is running, the function prints out some information related to the Bayesian graph (corresponding to the specification used for the model) underneath JAGS, such as number of observed and unobserved nodes and graph size."
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#post-processing",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#post-processing",
+    "title": "Super basic introduction to JAGS",
+    "section": "Post-processing",
+    "text": "Post-processing\nOnce the model has finished running, a summary of the posteiror estimates and convergence diagnostics for all parameters specified can be seen by typing print(basic.mod) or, alternatively,\n\nprint(basic.mod$BUGSoutput$summary)\n\n\n\nNA           mean    sd   2.5%   25%   50%   75% 97.5% Rhat n.eff\nNA beta0      1.5 0.294   0.95   1.3   1.5   1.7   2.1    1  2000\nNA beta1      1.2 0.054   1.07   1.1   1.2   1.2   1.3    1  2000\nNA deviance 278.8 2.475 276.03 277.1 278.2 279.9 285.1    1  2000\n\n\nThe posterior distribution of each parameter is summarised in terms of:\n\nThe mean, sd and some percentiles\nPotential scale reduction factor Rhat and effective sample size n.eff (Gelman et al. (2013)). The first is a measure to assess issues in convergence of the MCMC algorithm (typically a value below \\(1.05\\) for all parameters is considered ok). The second is a measure which assesses the adequacy of the posterior sample (typically values close to the total number of iterations are desirable for all parameters).\n\nThe deviance is a goodness of fit statistic and is used in the construction of the “Deviance Information Criterion” or DIC (Spiegelhalter et al. (2014)), which is a relative measure of model comparison. The DIC of the model can be accessed by typing\n\nbasic.mod$BUGSoutput$DIC\n\nNA [1] 282"
+  },
+  {
+    "objectID": "tutorials/2019-07-01-intro-jags/index.html#diagnostics",
+    "href": "tutorials/2019-07-01-intro-jags/index.html#diagnostics",
+    "title": "Super basic introduction to JAGS",
+    "section": "Diagnostics",
+    "text": "Diagnostics\nMore diagnostics are available when we convert the model output into an MCMC object using the command\n\nbasic.mod.mcmc=as.mcmc(basic.mod)\n\nDifferent packages are available to perform diagnostic checks for Bayesian models. Here, I install and load the mcmcplots package (Curtis (2015)) to obtain graphical diagnostics and results.\n\ninstall.packages(\"mcmcplots\")\nlibrary(mcmcplots)\n\nFor example, density and trace plots can be obtained by typing\n\ndenplot(basic.mod.mcmc, parms = c(\"beta0\",\"beta1\"))\n\n\n\n\n\n\n\ntraplot(basic.mod.mcmc, parms = c(\"beta0\",\"beta1\"))\n\n\n\n\n\n\n\n\nBoth types of graphs suggest that there are not issues in the convergence of the algorithm (smooth normal densities and hairy caterpillar graphs for both MCMC chains)."
   }
 ]
