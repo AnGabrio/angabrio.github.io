@@ -1,0 +1,154 @@
+---
+title: "In which Dutch province do people travel the most?"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2024-09-14
+categories: [Quarto, R, Academia] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.jpg){fig-align="center"}
+Hello dear readers, I hope everything is well with you and welcome back for another post on my site. Today I would like to continue the little exercise I started last time where I played a bit using some Dutch data related to the different provinces of the country to make some comparisons between them. Again, I apologise to my readers who are looking forward to some more health economics topic, but I really want to continue the previous topic with some additional fun examples.
+
+What I am focussing today is still about using some Dutch-province level data, this time taken directly from the [CBS website](https://opendata.cbs.nl/statline/#/CBS/en/dataset/84710eng/table?ts=1726493735067) and related to the average number of travels per person per year. My  basic idea is very simple. Which province has the largest average number of travels per year? and can we also identify some temporal trend? in order to answer this question I have taken from the above link information about the average number of travels per person per year for each of the $12$ provinces of the Netherlands over a period of $6$ years, between 2018 and 2023.
+
+As usual, let's start by drawing a map of the country divided into provinces:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(tmap)
+tmap_mode("plot")
+data(NLD_prov)
+tm_shape(NLD_prov) +
+  tm_borders(lwd=2) + 
+  tm_fill("name") + 
+  tm_format("NLD", title="Dutch provinces", bg.color="white")
+```
+
+Next, let's download the CBS data we are interested as a `.csv` file, import it into `R` and let's explore the data. 
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+NLD_prov_travel <- read.csv("per_person__travel_modes__travel_purpose_16092024_155133.csv", header = T, sep = ";")
+
+#create a subset of the dataset and rename the variables
+NLD_prov_travel <- NLD_prov_travel[,5:7]
+names(NLD_prov_travel) <- c("Province","Year","Travels")
+
+#let's extract the travel data for all provinces for 1 year first, say 2023
+NLD_prov_travel_2023 <- NLD_prov_travel[NLD_prov_travel$Year==2023,]
+
+#see the data
+NLD_prov_travel_2023
+```
+
+We can see that in 2023 it appears that Overijssel, Gelderland, Utrecht, and Noord-Brabant were the provinces associated with most average number of travels per person (above $1020$ travels). It could interesting to get some information about how the number of travels has changed over time for each province. To achieve this we can try to compute some summary statistics:
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#load package
+library(data.table)
+#create custom summary function
+my.summary <- function(x, na.rm=TRUE){list(n= length(x),
+                                  Mean=mean(x),
+                                  SD=sd(x),
+                                  Median=median(x), 
+                                  Min=min(x),
+                                  Max=max(x))}
+#summarise data
+sum_data_travel <- setDT(NLD_prov_travel)[, unlist(lapply(.SD, my.summary),recursive=FALSE), Province]
+
+#extract and display relevant data
+sum_data_travel.dt <- sum_data_travel[,c(1,8:13)] 
+sum_data_travel.dt
+```
+
+Creating summary statistics per Province over a period of 6 years (2018-2023), we can see that on average Overijssel still places at the top with a mean number of travels per person of $1002$, followed by Gelderland ($999$) and Utrecht ($992$), while all other Provinces seem to fall a bit behind with very similar values between $900$ and $976$. However, we also notice that, for some Provinces, median values are a bit different from means (typically higher), with also some minimum and maximum values that can be quite extreme in some cases. So, let's have a look at the shape of the data distribution. For example, we may plot via histograms the travel data by Province over the 6-year period considered.
+
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+library(ggplot2)
+ggplot(data = NLD_prov_travel, aes(x = Travels)) + geom_histogram(binwidth = 30, fill="white", color = "black") + facet_wrap(~Province, scales = "free") + theme_classic()
+```
+
+Although 6 data points per Province is not a lot to look at, we can notice that for some Provinces the distribution of the number of travels is skewed, therefore suggesting how the mean perhaps is not a good indicator for these data. 
+
+What at this point if we want to try and make a prediction of what the number of travels would be for each Province in 2024? and what about the expected number of travels over the 6 year period across all Provinces? Well, for that we need some **inferential statistics**! For example, taking into account the time dependence of the 6 observations per Province, let's try to fit a linear mixed effects model including a random error term to capture the clustering nature of the data at the level of the Provinces:
+
+$$
+\text{Travel}_{ij} = \beta_0 + \beta_1 \times \text{Year} + \omega_j + \varepsilon_{ij}
+$$
+
+where: $\text{Travel}_{ij}$ refers to the number of travels per person for Province $i$ in Year $j$, while $\beta_0$ is the intercept, $\beta_1$ is the year regression coefficient, $\varepsilon_{ij}$ and $\omega_j$ are the random error term and the Province-specific random effect term.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#load package
+library(lme4)
+fm <- lmer(Travels ~ Year + (1 | Province), data = NLD_prov_travel)
+#define new data for prediction
+newdata <- expand.grid(
+  Year = c(2024),
+  Province = unique(NLD_prov_travel$Province)
+)
+#predict
+fm_pred <- predict(fm, newdata = newdata)
+names(fm_pred) <- unique(NLD_prov_travel$Province)
+
+#look at predictions
+fm_pred
+```
+
+We can see that, according to the model predictions Overijssel still is associated with the largest number of travels even in 2024, followed by Gelderland and Utrecht, although the difference now seems a little bit smaller compared to what observed from the descriptive analysis of the data. Finally, we can also try to obtain an estimate of the average number of travels across Years and Provinces. This can be done, if we consider Year as a continuous variable, by setting its value equal to the average across the years considered ($\bar{\text{Year}}=\text{E}[\text{Year}]_i$, for $i=,2018,2019,\ldots,2023$), generate the predictions by Province, and then take the expectation across them.
+
+```{r}
+#| eval: true
+#| echo: true
+#| message: false
+#| warning: false
+
+#define new data for prediction
+newdata <- expand.grid(
+  Year = c(mean(2018:2023)),
+  Province = unique(NLD_prov_travel$Province)
+)
+#predict
+fm_pred_avg <- predict(fm, newdata = newdata)
+names(fm_pred_avg) <- unique(NLD_prov_travel$Province)
+
+#look at predictions
+mean(fm_pred_avg)
+```
+
+So, based on the model and data, we would expect an average number of travels per person across Provinces between 2018-2023 of about `r round(mean(fm_pred_avg),2)`.  
+
+I hope you enjoyed this little exercise as much as I did. It is a nice distraction from the usual work I do and a bit of fesh air. But no worries, I will soon come back to talk more about health economics and Bayesian statstics!
