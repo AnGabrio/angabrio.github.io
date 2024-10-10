@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2024-10-07">
+
+<title>Decision Tree Models in Economic Evaluations – Andrea Gabrio</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andrea Gabrio</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#decision-tree-models" id="toc-decision-tree-models" class="nav-link active" data-scroll-target="#decision-tree-models">Decision Tree Models</a></li>
+  <li><a href="#a-simple-example" id="toc-a-simple-example" class="nav-link" data-scroll-target="#a-simple-example">A simple example</a></li>
+  <li><a href="#what-about-uncertainty" id="toc-what-about-uncertainty" class="nav-link" data-scroll-target="#what-about-uncertainty">What about uncertainty?</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Decision Tree Models in Economic Evaluations</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Health Economics</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 7, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center"> Hello folks and welcome back to a new update of my blog, which today is finally back focussing on my main field of interest, health economic evaluations! After a couple of months of detour from the topic just to talk about something different for once, I am happy to go back to health economics and, more specifically, how we can use statistics to perform different types of tasks in cost-effectiveness analyses. In particular, today’s topic is quite a broad one and also something that I am not super familiar with myself, namely a specific type of <strong>decision analytic models</strong> (DAMs) and reasons for using such approach to perform certain types of health economic analyses. I hope that I will be able to quickly summarise the main concepts related to these models and offer a general overview of what they are used for and why so. As a warning for the casual reader: in this post I may use some terms that are specific to the health economics literature and field without diving into too many explanations; when this is the case, please bear with me and perhaps make a quick online search (or check my previous posts) to check if anything is unclear to you. Also, as a more in depth introduction on this topic, I recommend reading the book <span class="citation" data-cites="khan2015design">Khan (<a href="#ref-khan2015design" role="doc-biblioref">2015</a>)</span>, specifically Chapter 6. For a look at how to implement more complex types of decision trees in <code>R</code> and perform dufferent types of ancillary analyses, I recommend checking this nice <a href="https://rpubs.com/mbounthavong/decision_tree_model_tutorial">post</a></p>
+<section id="decision-tree-models" class="level2">
+<h2 class="anchored" data-anchor-id="decision-tree-models">Decision Tree Models</h2>
+<p>When patient-level data are not available (due to limited follow-up time), an alternative approach to estimating the mean costs, effects and incremental cost-effectiveness ratio (ICER) is required. One way is to use published data or data summarised in the clinical study report to build an overarching economic model using evidence from difference sources. This post is particularly focussed on a type of decision models known as <em>Decison Tree</em> as one of the most popular and simple DAGs to implement to perform economic analyses. Decision trees are normally used to predict what would happen in terms of the outcomes (or payoffs) after a decision has been made about a treatment strategy. Each treatment strategy will involve a series of pathways that will ultimately lead to some kind of outcome. Some examples of outcomes common with decision tree analysis are survival, response, life years, and quality-adjusted life years (QALYs). Another element that is also evaluated is the cost of the treatment strategy. Just like the outcomes, each treatment strategy will have costs associated with each pathway. Summing these up for each pathway, an health economist can determine the total cost of that treatment strategy. Decision trees are used to evaluate the value of a treatment strategy by measuring the outcomes alongside the costs associated with each treatment pathway and comparing these to other treatment strategies (e.g.&nbsp;usual care or standard care). This corresponds to a systematic evaluation of the value of a treatment strategy compared to an alternative treatment strategy.</p>
+</section>
+<section id="a-simple-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-example">A simple example</h2>
+<p>A typical decision tree model structure is shown in <strong>?@fig-dt</strong>: the “tree” has branches that relate to either actions or decisions taken by patients or clinicians, or outcomes (such as measures of treatment effect). The starting point is always a <em>Root node</em> (R), followed by <em>Decision nodes</em> (A and B) denoting a decision between alternative treatments, followed in turn by <em>Leaf nodes</em> (A1, A2, B1 and B2) indicating events. Each branch has a probability, graphically represented via arrows (often expressed as a rate, percentage or proportion), and each decision or leaf node is associated with a specific effects/costs (i.e.&nbsp;some form of payoffs). For each branch, the expected costs and effects are calculated by multiplying the probability of decisions/outcomes by the costs/effects for the branch. The expected costs and effects are then summed up for each treatment and used to derive the ICER of the treatments under comparison. A critical part is the determination of the inputs (i.e.&nbsp;justification for the choice of probabilities, rates, costs, etc.), which are typically obtained from either published clinical trials, observational studies or surveys. An important aspect of designing the “branches” of the tree is understanding the treatment pathway, that is, what happens to patients in terms of their treatment plan and how they are likely to be followed during their treatment programme. For example, in a the very simplified tree structure in <strong>?@fig-dt</strong>, the pathway might be:</p>
+<ol type="1">
+<li><em>Root node</em> (R): Patients start taking one of two treatments to treat the disease, let’s say with a chance of 50%, therefore being assigned to one of two alternative decision nodes with a 50% probability (A or B).</li>
+<li><em>Decision node</em> A (or B): Patients may experience some pain relief from taking one of two treatments, each being associated with specific implementation and delivery costs for each individual (say <span class="math inline">\(C_a=1000\)</span> and <span class="math inline">\(C_b=500\)</span> euros).</li>
+<li><em>Leaf nodes</em> A1 and A2: About 60% of the patients who undergo treatment A experience pain relief and an improved quality of life (say <span class="math inline">\(E_{a1}=0.9\)</span> QALYs), while the remaining 40% does not experience any pain relief (say <span class="math inline">\(E_{a2}=0.6\)</span> QALYs).</li>
+<li><em>Leaf nodes</em> B1 and B2: About 30% of the patients who undergo treatment B experience pain relief and an improved quality of life (say <span class="math inline">\(E_{b1}=0.8\)</span> QALYs), while the remaining 70% does not experience any pain relief (say <span class="math inline">\(E_{b2}=0.6\)</span> QALYs).</li>
+</ol>
+<p>Now, the objective of decision trees is to estimate the total costs and benefits (in this case measured by QALYs) for the target patient population and the treatments involved so to be able to compare the two alternative options in terms of their total expected costs and benefits generated using standardised health economic measures, e.g.&nbsp;ICER or Net Benefit. For our simple case, we can calculate this in <code>R</code> for an hypothetical patient population cohort of, say, <span class="math inline">\(n=100000\)</span> subjects and using as model inputs the information detailed before for each branch of the decision tree:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of individuals in cohort</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100000</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#set model inputs</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_a <span class="ot">&lt;-</span> n<span class="sc">/</span><span class="dv">2</span>; n_b <span class="ot">&lt;-</span> n<span class="sc">-</span>n_a</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>C_a <span class="ot">&lt;-</span> <span class="dv">1000</span>; C_b <span class="ot">&lt;-</span> <span class="dv">500</span> <span class="co">#treatment costs for each individual</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>E_a1 <span class="ot">&lt;-</span> <span class="fl">0.9</span>; E_a2 <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="co">#possible QALYs for each individual in arm A</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>E_b1 <span class="ot">&lt;-</span> <span class="fl">0.8</span>; E_b2 <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="co">#possible QALYs for each individual in arm B</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>p_a1 <span class="ot">&lt;-</span> <span class="fl">0.6</span>; p_a2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span>p_a1 <span class="co">#prob of resulting in outcome a1 or a2</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>p_b1 <span class="ot">&lt;-</span> <span class="fl">0.3</span>; p_b2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span>p_b1 <span class="co">#prob of resulting in outcome b1 or b2</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p_a <span class="ot">&lt;-</span> <span class="fl">0.5</span> ; p_b <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">-</span> p_a <span class="co">#prob of being assigned to treat A or B</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#create simple function to "run this model"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>dectree <span class="ot">&lt;-</span> <span class="cf">function</span>(n, p_a, p_b, C_a, C_b, E_a1, E_a2, E_b1, E_b2, </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                    p_a1, p_a2, p_b1, p_b2){</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#number of individuals from cohort in each arm</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>n_a <span class="ot">&lt;-</span> n<span class="sc">*</span>p_a; n_b <span class="ot">&lt;-</span> n<span class="sc">*</span>p_b </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#total costs for using treat A or B    </span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>cost_a <span class="ot">&lt;-</span> C_a<span class="sc">*</span>n_a; cost_b <span class="ot">&lt;-</span> C_b<span class="sc">*</span>n_b</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#number of individuals with each possible QALY outcome</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>n_a1 <span class="ot">&lt;-</span> n_a<span class="sc">*</span>p_a1; n_a2 <span class="ot">&lt;-</span> n_a<span class="sc">*</span>p_a2</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>n_b1 <span class="ot">&lt;-</span> n_b<span class="sc">*</span>p_b1; n_b2 <span class="ot">&lt;-</span> n_b<span class="sc">*</span>p_b2</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#total QALYs for each possible leaf node </span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>QALY_a1 <span class="ot">&lt;-</span> n_a1<span class="sc">*</span>E_a1; QALY_a2 <span class="ot">&lt;-</span> n_a2<span class="sc">*</span>E_a2</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>QALY_b1 <span class="ot">&lt;-</span> n_b1<span class="sc">*</span>E_b1; QALY_b2 <span class="ot">&lt;-</span> n_b2<span class="sc">*</span>E_b2</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#sum up QALY results by arm</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>QALYs_a <span class="ot">&lt;-</span> QALY_a1 <span class="sc">+</span> QALY_a2</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>QALYs_b <span class="ot">&lt;-</span> QALY_b1 <span class="sc">+</span> QALY_b2</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">#store all results in terms of QALYs and costs</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"A"</span><span class="ot">=</span>cost_a, <span class="st">"B"</span><span class="ot">=</span>cost_b)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"A"</span><span class="ot">=</span>QALYs_a, <span class="st">"B"</span><span class="ot">=</span>QALYs_b)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>output <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"Cost"</span><span class="ot">=</span>Costs, <span class="st">"QALYs"</span><span class="ot">=</span>QALYs)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(output)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co">#run function</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>dt_model <span class="ot">&lt;-</span> <span class="fu">dectree</span>(<span class="at">n=</span><span class="dv">100000</span>, <span class="at">p_a=</span><span class="fl">0.5</span>, <span class="at">p_b=</span><span class="fl">0.5</span>, <span class="at">C_a=</span><span class="dv">1000</span>, <span class="at">C_b=</span><span class="dv">500</span>, <span class="at">E_a1=</span><span class="fl">0.9</span>, <span class="at">E_a2=</span><span class="fl">0.6</span>, <span class="at">E_b1=</span><span class="fl">0.8</span>, <span class="at">E_b2=</span><span class="fl">0.6</span>, <span class="at">p_a1=</span><span class="fl">0.6</span>, <span class="at">p_a2=</span><span class="fl">0.4</span>, <span class="at">p_b1=</span><span class="fl">0.3</span>, <span class="at">p_b2=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">#print</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>dt_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Cost
+$Cost$A
+[1] 50000000
+
+$Cost$B
+[1] 25000000
+
+
+$QALYs
+$QALYs$A
+[1] 39000
+
+$QALYs$B
+[1] 33000</code></pre>
+</div>
+</div>
+<p>As we can see, the model produced as results the total costs and QALYs associated with each treatment arm assuming an initial population cohort size of 100000 and the other model inputs that we provided. We can then derive the average outcomes per treatment arm by dividing the costs and QALYs by the number of individuals assigned to each arm within the cohort, that is:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mu_cA <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>Cost<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mu_cB <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>Cost<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mu_eA <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>QALYs<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>mu_eB <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>QALYs<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#avg costs and QALYs in arm A</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>mu_cA; mu_eA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1000</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.78</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#avg costs and QALYs in arm B</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mu_cB; mu_eB</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 500</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.66</code></pre>
+</div>
+</div>
+<p>Using these summarises, we can compute standardised measures of cost-effectiveness when comparing treatment A and B, such as the ICER and the Net Benefit (NB), after we make an assumption about a plausible value for the decision-maker preferences expressed in terms of a decision threshold value, say <span class="math inline">\(K=10000\)</span> in our case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> (mu_cA <span class="sc">-</span> mu_cB)<span class="sc">/</span>(mu_eA<span class="sc">-</span>mu_eB)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>(mu_eA<span class="sc">-</span>mu_eB) <span class="sc">-</span> (mu_cA <span class="sc">-</span> mu_cB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assuming a value of the threshold parameter of 10000, we can see that treatment A seems to be cost-effective compared to B given the value of the ICER or 4166.6666667 (&lt;K) and a value of the Net Benefit of 700 (&gt;0). Note that for simplicity here I have not considered the need to account for time discount or price inflation which instead may be needed, especially when trying to predict the generation of outcomes in the long term.</p>
+</section>
+<section id="what-about-uncertainty" class="level2">
+<h2 class="anchored" data-anchor-id="what-about-uncertainty">What about uncertainty?</h2>
+<p>Everything seems so easy right? well this is in reality only part of the story since when looking at the values of point statistics such as ICER and NB we are implicitly assuming that there is no uncertainty about these derived values, i.e.&nbsp;everything is obtained in a deterministic way in the model without any source of uncertainty. In reality, decision-makers will never make a decision about reimbursement on the basis of such strong assumptions as the impact of uncertainty on the results should be at least partially captured from the model. This is where <em>uncertainty analysis</em> plays a key role in any type of health economic analysis since it is realistic to assume that there are many possible sources of uncertainty that may affect our results. For example, we may not be so sure about the actual individual implementation/delivery costs per treatment, the actual QALYs associated with presence or absence of relief for each treatment, or even about the chance of experiencing a relief for someone undergoing a given treatment. More realistically, we can use the inputs provided before about all these scenarios as good indicators around which center our model input values but without assuming their values to be constant and identical for everyone in the cohort. To account for this sort of uncertainty about model input values and quantify their impact on the results, probability distributions are often used as they allow to parameterise in a convenient way the level of uncertainty associated with each input in the model. For example, we may want to use a Uniform distribution to express our level of uncertainty around the probability for a patient to experience pain relief or not in each treatment arm, centering these distributions around the assumed value in the determinsitic analysis as good starting point. We can do the same with other model parameters, such as expected QALYs and costs associated with each treatment, taking care that appropriate probability distributions are used to express our level of uncertainty around specific parameter values. Let’s now try to replicate the model run before using these distributions to account for this sort of uncertainty.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of model replications to account for parameter uncertainty</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#create simple function to "run this model"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>dectree_prob <span class="ot">&lt;-</span> <span class="cf">function</span>(n, p_a, p_b, C_a_mu, C_a_sigma, C_b_mu, C_b_sigma, </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                    E_a1_mu, E_a1_sigma, E_a2_mu, E_a2_sigma,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                    E_b1_mu, E_b1_sigma, E_b2_mu, E_b2_sigma,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                    p_a1_low, p_a1_up, p_a2_low, p_a2_up, </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                    p_b1_low, p_b1_up, p_b2_low, p_b2_up, </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                    S){</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#number of individuals from cohort in each arm</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>n_a <span class="ot">&lt;-</span> n<span class="sc">*</span>p_a; n_b <span class="ot">&lt;-</span> n<span class="sc">*</span>p_b </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#create empty vectors to contain simulation results</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>cost_a <span class="ot">&lt;-</span> cost_b <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, S)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>QALYs_a <span class="ot">&lt;-</span> QALYs_b <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, S)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S){</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#assign Gamma distributions to generate costs</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>C_a <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(<span class="dv">1</span>,<span class="at">shape=</span>C_a_mu<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>C_a_sigma<span class="sc">^</span><span class="dv">2</span>,<span class="at">scale=</span>C_a_sigma<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>C_a_mu)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>C_b <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(<span class="dv">1</span>,<span class="at">shape=</span>C_b_mu<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>C_b_sigma<span class="sc">^</span><span class="dv">2</span>,<span class="at">scale=</span>C_b_sigma<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>C_b_mu)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">#assign Uniform distributions to generate prob of each possible QALY outcome</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>p_a1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>,<span class="at">min=</span>p_a1_low,<span class="at">max=</span>p_a1_up)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>p_a2 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">-</span>p_a1</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>p_b1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>,<span class="at">min=</span>p_b1_low,<span class="at">max=</span>p_b1_up)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>p_b2 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">-</span>p_b1</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>n_a1 <span class="ot">&lt;-</span> n_a<span class="sc">*</span>p_a1; n_a2 <span class="ot">&lt;-</span> n_a<span class="sc">*</span>p_a2</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>n_b1 <span class="ot">&lt;-</span> n_b<span class="sc">*</span>p_b1; n_b2 <span class="ot">&lt;-</span> n_b<span class="sc">*</span>p_b2</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co">#assign Beta distributions to generate QALY for each possible leaf node </span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>E_a1 <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">1</span>, <span class="at">shape1 =</span> (E_a1_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a1_mu)<span class="sc">/</span>E_a1_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>E_a1_mu, <span class="at">shape2 =</span> (E_a1_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a1_mu)<span class="sc">/</span>E_a1_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a1_mu))</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>E_a2 <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">1</span>, <span class="at">shape1 =</span> (E_a2_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a2_mu)<span class="sc">/</span>E_a2_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>E_a2_mu, <span class="at">shape2 =</span> (E_a2_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a2_mu)<span class="sc">/</span>E_a2_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_a2_mu))</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>E_b1 <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">1</span>, <span class="at">shape1 =</span> (E_b1_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b1_mu)<span class="sc">/</span>E_b1_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>E_b1_mu, <span class="at">shape2 =</span> (E_b1_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b1_mu)<span class="sc">/</span>E_b1_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b1_mu))</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>E_b2 <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">1</span>, <span class="at">shape1 =</span> (E_b2_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b2_mu)<span class="sc">/</span>E_b2_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>E_b2_mu, <span class="at">shape2 =</span> (E_b2_mu<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b2_mu)<span class="sc">/</span>E_b2_sigma<span class="sc">^</span><span class="dv">2-1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>E_b2_mu))</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>QALY_a1 <span class="ot">&lt;-</span> n_a1<span class="sc">*</span>E_a1; QALY_a2 <span class="ot">&lt;-</span> n_a2<span class="sc">*</span>E_a2</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>QALY_b1 <span class="ot">&lt;-</span> n_b1<span class="sc">*</span>E_b1; QALY_b2 <span class="ot">&lt;-</span> n_b2<span class="sc">*</span>E_b2</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="co">#sum up QALY results by arm</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co">#store results for simualtion S</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>cost_a[s] <span class="ot">&lt;-</span> C_a<span class="sc">*</span>n_a</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>cost_b[s] <span class="ot">&lt;-</span> C_b<span class="sc">*</span>n_b</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>QALYs_a[s] <span class="ot">&lt;-</span> QALY_a1 <span class="sc">+</span> QALY_a2</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>QALYs_b[s] <span class="ot">&lt;-</span> QALY_b1 <span class="sc">+</span> QALY_b2</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="co">#store all simulation results in terms of QALYs and costs</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"A"</span><span class="ot">=</span>cost_a, <span class="st">"B"</span><span class="ot">=</span>cost_b)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"A"</span><span class="ot">=</span>QALYs_a, <span class="st">"B"</span><span class="ot">=</span>QALYs_b)</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>output <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"Cost"</span><span class="ot">=</span>Costs, <span class="st">"QALYs"</span><span class="ot">=</span>QALYs)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(output)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="co">#run function</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>) <span class="co">#set rng seed for replicability</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>dt_model_prob <span class="ot">&lt;-</span> <span class="fu">dectree_prob</span>(<span class="at">n=</span><span class="dv">100000</span>, <span class="at">p_a=</span><span class="fl">0.5</span>, <span class="at">p_b=</span><span class="fl">0.5</span>, <span class="at">C_a_mu=</span><span class="dv">1000</span>, <span class="at">C_a_sigma=</span><span class="dv">200</span>, <span class="at">C_b_mu=</span><span class="dv">500</span>, <span class="at">C_b_sigma=</span><span class="dv">150</span>, <span class="at">E_a1_mu=</span><span class="fl">0.9</span>, <span class="at">E_a1_sigma=</span><span class="fl">0.15</span>, <span class="at">E_a2_mu=</span><span class="fl">0.6</span>, <span class="at">E_a2_sigma=</span><span class="fl">0.1</span>, <span class="at">E_b1_mu=</span><span class="fl">0.8</span>, <span class="at">E_b1_sigma=</span><span class="fl">0.15</span>, <span class="at">E_b2_mu=</span><span class="fl">0.6</span>, <span class="at">E_b2_sigma=</span><span class="fl">0.1</span>,<span class="at">p_a1_low=</span><span class="fl">0.35</span>, <span class="at">p_a1_up=</span><span class="fl">0.45</span>, <span class="at">p_b1_low=</span><span class="fl">0.25</span>, <span class="at">p_b1_up=</span><span class="fl">0.35</span>, <span class="at">S=</span>S)</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="co">#show first 10 simulations for total costs and QALY values per arm</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>Cost, head, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$A
+ [1] 37915244 51911020 68692051 40656708 39710123 45713125 56910465 38386590
+ [9] 62994357 63095265
+
+$B
+ [1] 12404090 27321412 14019824 25987217 35368975 21888540 19007477 21374435
+ [9] 17313133 25258554</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>QALYs, head, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$A
+ [1] 35783.21 40150.06 37249.58 39033.29 37068.99 43786.33 29538.04 35267.35
+ [9] 40420.99 36133.27
+
+$B
+ [1] 36926.62 36105.92 29120.86 37453.09 38721.19 37408.60 35173.30 38094.58
+ [9] 31830.00 36830.35</code></pre>
+</div>
+</div>
+<p>We have changed the type of inputs to be provided to the model since now we are using probability distributions to generate input values, which require the need to specify the assumed values associated with the parameters indexing such distributions. For example, we require now the specification of mean and standard deviation for cost inputs per treatment arm (modelled using Gamma distributions), mean and standard deviation for QALY inputs per treatment arm per type of outcome, i.e.&nbsp;pain relief or no relief (modelled using Beta distributions), and lower and upper bounds for the probability of experiencing pain relief in each arm (modelled using Uniform distributions). The core structure of the model remains the same but the need to account for paraemter uncertainty requires the generation of different outcomes depending on the specific values generated by the assumed distributions every time a new “random sample” is drawn from such distributions. The combination of these generated values put together will allow to represent and quantify the uncertainty surrounding the possible outcomes associated with each treatment. In this simple case, we choose a number of replications/simulations equal to 500 but, in general, larger values are typically required to ensure that results are robust to slight variations of the input parameters.</p>
+<p>We can now replicate the approach used for the deterministic model by summarising the results in terms of common health economic measures, such as ICER and NB, assuming a acceptance threshold parameter of 10000 for decision-making purposes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain mean outcome values per treatment per simulation</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mu_cA <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>Cost<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_cB <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>Cost<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>mu_eA <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>QALYs<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>mu_eB <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>QALYs<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#create data frame</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>mu_res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(mu_cA,mu_cB,mu_eA,mu_eB)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for costs and QALYs by arm across simulations</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mu_res) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     mu_cA            mu_cB            mu_eA            mu_eB       
+ Min.   : 490.4   Min.   : 202.9   Min.   :0.3749   Min.   :0.3903  
+ 1st Qu.: 860.1   1st Qu.: 401.0   1st Qu.:0.6798   1st Qu.:0.6062  
+ Median : 990.4   Median : 486.3   Median :0.7301   Median :0.6625  
+ Mean   : 995.9   Mean   : 501.5   Mean   :0.7231   Mean   :0.6616  
+ 3rd Qu.:1127.5   3rd Qu.: 584.1   3rd Qu.:0.7817   3rd Qu.:0.7236  
+ Max.   :1565.7   Max.   :1051.5   Max.   :0.9139   Max.   :0.8721  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> (mu_cA <span class="sc">-</span> mu_cB)<span class="sc">/</span>(mu_eA <span class="sc">-</span> mu_eB)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>(mu_eA<span class="sc">-</span>mu_eB) <span class="sc">-</span> (mu_cA <span class="sc">-</span> mu_cB)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for ICER/NB across simulations</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ICER) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-4077649    -2351     2888   -14177     6623   807046 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(NB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-4096.7  -597.5   124.3   121.1   988.6  3701.5 </code></pre>
+</div>
+</div>
+<p>Thanks to the implementation of probability distributions to express the degree of uncertainty around the model inputs, we are now able to produce summary statistics around standard measures of cost-effectiveness, such as ICER and NB. In addition, given <span class="math inline">\(K=10000\)</span>, we can also quantify the probability <span class="math inline">\(p_{AB}\)</span> that treatment A is cost-effective compared to B: using the NB distribution, this is represented by the proportion of NB values that are above <span class="math inline">\(0\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#prob of CE at K=10000</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pCE_nb <span class="ot">&lt;-</span> <span class="fu">sum</span>(NB<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">/</span>S </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>pCE_nb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.574</code></pre>
+</div>
+</div>
+<p>Finally, another typical source of uncertainty in these analyses is around the value of the acceptance threshold itself, as in many cases governments’ decisions are always characterised by some degree of uncertainty around what value for <span class="math inline">\(K\)</span> to use. Often this is quantified by computing the above probability of cost-effectiveness for a range of values of <span class="math inline">\(K\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#range of values to consider for K</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>k_value <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">1000</span>, <span class="at">to =</span> <span class="dv">20000</span>, <span class="at">by =</span> <span class="dv">50</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>n_kval <span class="ot">&lt;-</span> <span class="fu">length</span>(k_value)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>NB_k <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="at">nrow =</span> S, <span class="at">ncol =</span> n_kval)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>p_CE_nb_k <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, n_kval)  </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#compute prob CE based on NB at each value of K</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_kval){</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S){</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  NB_k[s,k] <span class="ot">&lt;-</span> k_value[k]<span class="sc">*</span>(mu_eA[s] <span class="sc">-</span> mu_eB[s]) <span class="sc">-</span> (mu_cA[s] <span class="sc">-</span> mu_cB[s])</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  p_CE_nb_k[k] <span class="ot">&lt;-</span> <span class="fu">sum</span>(NB_k[,k]<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">/</span>S</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and then plot the results in <a href="#fig-pce" class="quarto-xref">Figure&nbsp;1</a> to show what is known as the cost-effectiveness acceptability curve (CEAC), showing how the probability of cost-effectiveness changes as the value of <span class="math inline">\(K\)</span> is varied.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-pce" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="h">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pce-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-pce-1.png" class="img-fluid figure-img" style="width:80.0%" data-fig-pos="h">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pce-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Example of a typical structure of a decision tree model.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>I hope that you found today’s topic interesting as I wanted to explore something different from my usual comfort zone of trial-based analysis. To be honest I am not a huge fan of decision analytic models as they sometimes allow people to play around with the results and choose the inputs to ensure some “good” results are obtained. When the models become very complicated, it is also quite easy to hide some information in the model code which can be hard to detect if you are not expert and have time to do so. Regardless, in many cases it may not even be possible to run a trial to assess cost-effectiveness (e.g.&nbsp;over a lifetime horizon) and reliance on these methods becomes a necessity. This means that care must be used when either building or reviewing these types of models before committing to a final decision that is based on such evidence.</p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-khan2015design" class="csl-entry" role="listitem">
+Khan, Iftekhar. 2015. <em>Design &amp; Analysis of Clinical Trials for Economic Evaluation &amp; Reimbursement: An Applied Approach Using SAS &amp; STATA</em>. CRC Press.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
