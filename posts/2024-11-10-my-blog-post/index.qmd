@@ -1,0 +1,314 @@
+---
+title: "Markov Models in Economic Evaluations"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2024-11-10
+categories: [Quarto, R, Academia, Health Economics] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+bibliography: references.bib
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.png){fig-align="center"}
+
+Hello dear readers and welcome to a new post of my blog. Today, I would like to continue the discussion initiated with the last post about modelling in health economic evaluations, particularly with respect to the construction and implementation of decision analytic models or DAMs, such as the *Decision Tree Models* that were introduced last time. Picking up on this trend, in this post I would like to introduce and talk about *Markov Models* in economic evaluation, mostly drawing inspiration and references from the book @khan2015design (Chapter 6) which contains a nice introduction and overview on this topic. As usual warning for the casual reader: in this post I may use some terms that are specific to the health economics literature and field without diving into too many explanations; when this is the case, please bear with me and perhaps make a quick online search (or check my previous posts) to check if anything is unclear to you. For a look at how to implement more complex types of markov models, I recommend checking this nice [post](https://rpubs.com/mbounthavong/markov_model_using_excel), although it is mostly focussed on the implementation of such models in `Excel`, and `heemod` package [vignette](https://cran.r-project.org/web/packages/heemod/vignettes/c_homogeneous.html) for `R`.
+
+## Markov Models
+
+When the complexity of the modelling task for disease progression increases considerably, e.g. because of many possible mutually exclusive outcomes or the need to repeat the analysis at given time intervals, the use and implementation of decision tree (explored in the previous post) may become quite burdensome. Rather than creating very complex branches and estimate the costs and effects associated with each possible outcome within each branch of the decision tree, it is often more useful to specify the modelling task with respect to the transition of the patients through different (and more limited) health states via *Markov Models*. More specifically, a Markov model in economic evaluation aims at modelling the transition of patients from one health state to another, and estimate the costs and effects expected to accrue as a result of transitions between health states over a period of time. The period of time over which these transitions are observed (denoted as cycle) may vary depending on the context and the type of disease being modelled, e.g. a week, a month, a year, or even a lifetime. 
+
+In Markov Models, the probabilities of moving between health states are captured as a matrix of probabilities called a *transition matrix*, where chance of moving to a different health state depends only on the current health state (and not on health states prior to the current state). This is called the **Markov property**: $X_{t+1} = X_t + \varepsilon$, where $X_{t+1}$ is the health state at time $t+1$ and is dependent only on the current health state $X_t$. An example of a simple  Markov model is shown in the thumbnail figure of this post and formed by three health states (well, sick, dead) and arrows denoting the direction of the possible transitions between states. Since Markov Models are mostly simulation-based methods, no individual-level data are used to fit the models which are instead based on some aggregated data obtained from the literature or expert elicitation. This also includes the choice for the values of the transition probabilities, whose identification and selection should go through a rigorous process to ensure its reliability and appropriateness.
+
+## A simple example 
+
+As a demonstrative example, let's consider the transition matrix shown in @tbl-example, which displays the assumed transition probabilities for three health states (Well, Sick and Dead) from baseline (rows) to 1 month follow-up (columns), for an hypothetical experimental treatment.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-example
+#| tbl-cap: "Example Transition Matrix on Experimental Treatment after 1 Month Post-Randomisation"
+
+library(knitr)
+row1 <- c(0.45,0.35,0.2,1)
+row2 <- c(0.05,0.60,0.35,1)
+row3 <- c(0,0,1,1)
+tabex <- rbind.data.frame(row1,row2,row3)
+rownames(tabex) <- c("Well","Sick","Dead")
+colnames(tabex) <- c("Well","Sick","Dead","Total")
+
+kable(tabex)
+```
+
+Let's also assume that patients were randomised to one of two treatments, namely Experimental vs Control, and they were considered to be in either a Well or Sick state. From @tbl-example, we can see that the proportion of patients who started the hypothetical trial at baseline in a Well state and then remained in the same state after treatment was $45\%$, very few patients ($5\%$) who started the trial in a Sick state improved into a Well state at follow up, and $60\%$ of patients who were in the Sick state did not change states after starting treatment. In order to compute what the transition matrix will look like after $1$ month, we need to know the initial probabilities (or the probabilities at baseline), say equal to the first row of @tbl-example. After $1$ month of treatment, the transition matrix is updated by multiplying the initial probabilities by the $3\times3$ transition matrix in @tbl-example:
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+tm_update <- matrix(c(0.45,0.05,0,0.35,0.6,0,0.2,0.35,1),3,3) 
+tm_init <- c(0.45,0.35,0.2)
+tm_1m <- tm_init%*%tm_update
+
+tm_1m
+```
+
+The above $1\times3$ "matrix" denotes the probabilities in each of the three health states of the model at 1 month after treatment and becomes the initial matrix needed for further calculations. After $2$ months (second cycle of the process), the updated transition matrix is obtained by multiplying the above matrix again by the $3 \times 3$ transition matrix in @tbl-example, and so on. In general, one can compute the proportion of patients for the $n+1$-th step in any of these three health states by simply multiplying the updated transition matrix at step $n$ by the given transition matrix:
+
+$$
+M_n = M_{n-1}\times P, 
+$$
+where $M_n$ and $M_{n-1}$ denote the $1\times 3$ transition matrix at step $n$ and $n-1$, while $P$ denotes the constant $3\times3$ transition matrix used to update the probabilities at each step. Finally, the last important factor associated with the Markov model is the duration of the interval of time, termed a *cycle*, set to $1$ month in the example above. In general, the length of the cycle could be longer or shorter, with shorter cycles needing more computations since they imply a more frequent update of the transition probabilities, i.e. more steps to run.
+
+To continue our example, let's now consider a more realistic scenario where the transition matrix and initial probabilities are provided for both an experimental group and a control group form an hypothetical trial assessing the cost-effectiveness of the two treatments. The $3\times3$ transition matrices associated with the two treatments ($P^{exp},P^{ctr}$) are shown in @tbl-example2, while the $1\times3$ matrices of the initial probabilities ($M^{exp}_0,M^{ctr}_{0}$) of the two groups are assumed to be equal to the first row of their respective transition matrices. 
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-example2
+#| tbl-cap: "Example Transition Matrices on Experimental and Control Treatment after 1 Month Post-Randomisation"
+
+library(knitr)
+row1c <- c(0.25,0.25,0.50,1)
+row2c <- c(0.10,0.45,0.45,1)
+row3c <- c(0,0,1,1)
+tabexc <- rbind.data.frame(row1c,row2c,row3c)
+rownames(tabexc) <- c("Well","Sick","Dead")
+colnames(tabexc) <- c("Well","Sick","Dead","Total")
+
+kable(tabex)
+
+kable(tabexc)
+```
+
+We can therefore update the transition matrices of the two treatments over $5$ cycles, each of $1$ months, by doing the following
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#experimental treatment
+tm_exp_update <- matrix(c(0.45,0.05,0,0.35,0.6,0,0.2,0.35,1),3,3) 
+tm_exp_init <- c(0.45,0.35,0.2)
+#update over 5 cycles
+tm_exp_1m <- tm_exp_init%*%tm_exp_update
+tm_exp_2m <- tm_exp_1m%*%tm_exp_update
+tm_exp_3m <- tm_exp_2m%*%tm_exp_update
+tm_exp_4m <- tm_exp_3m%*%tm_exp_update
+tm_exp_5m <- tm_exp_4m%*%tm_exp_update
+
+#control treatment
+tm_ctr_update <- matrix(c(0.25,0.10,0,0.25,0.45,0,0.50,0.45,1),3,3) 
+tm_ctr_init <- c(0.25,0.25,0.50)
+#update over 5 cycles
+tm_ctr_1m <- tm_ctr_init%*%tm_ctr_update
+tm_ctr_2m <- tm_ctr_1m%*%tm_ctr_update
+tm_ctr_3m <- tm_ctr_2m%*%tm_ctr_update
+tm_ctr_4m <- tm_ctr_3m%*%tm_ctr_update
+tm_ctr_5m <- tm_ctr_4m%*%tm_ctr_update
+
+#experimental TM at the end of 5th cycle
+tm_exp_5m
+
+#control TM at the end of 5th cycle
+tm_ctr_5m
+```
+
+Once the transition probabilities over the desired number of cycles are estimated, further data manipulation can be carried out to estimate the expected costs and effects, which can be included in an additional vector and then multiplied with the elements of the matrices after each cycle to generate the expected total costs and effects. As an example, let's assume that patients were treated for $3$ months but followed up for $12$ months during the trial and that costs were collected from patients files and measured in euros, while effects were collected via self-reported questionnaires (e.g. EQ-5D) and measured via utilities. We need to associate to each health state and treatment in the model a corresponding value for each of the outcomes that we want to measure, i.e. costs and utilities. Thus, we may assume that (monthly) utilities for each health state are $u^{well}=0.78$, $u^{sick}=0.40$, and $u^{dead}=0$, but are constant across treatments. Conversely, we may assume that (monthly) costs are constant across health states but vary between treatment groups, i.e. $c_{exp}=954$ and $c^{ctr}=435$. Next, we need to determine the number of cycles of the model. In this case, we will use $12$ cycles given that we focus over a $1$ year follow-up, with each cycle being $1$ month long. Hence, the expected costs and QALYs for each month will be generated and then added up. 
+
+The proportion of patients in each of the health states at the start of the model needs to be determined, typically an arbitrary large number, e.g. $10000$, since the idea is to estimate the cumulative costs and effects over the $10000$ patients for each group. We can now proceed to calculate the transition matrices and total costs and QALYs associated with both treatment groups over $12$ months via our Markov Model.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#set up initial values for the model
+
+#initial transition probs by arm
+tm_exp_init <- c(0.45,0.35,0.2)
+tm_ctr_init <- c(0.25,0.25,0.50)
+#transition matrices by arm
+tm_exp_update <- matrix(c(0.45,0.05,0,0.35,0.6,0,0.2,0.35,1),3,3) 
+tm_ctr_update <- matrix(c(0.25,0.10,0,0.25,0.45,0,0.50,0.45,1),3,3) 
+#utilities by health state
+u_well <- 0.78
+u_sick <- 0.4
+u_dead <- 0
+#costs by arm
+c_exp <- 954
+c_ctr <- 435
+#number of cycles
+n_cycle <- 12
+#initial number of patients in the cohort
+n_pat <- 10000
+
+  #end of cycle 1 TP
+  trans_mat_cycle1_exp <- tm_exp_init%*%tm_exp_update
+  trans_mat_cycle1_ctr <- tm_ctr_init%*%tm_ctr_update
+  #lists to store TP results by cycle
+  trans_mat_cycles_exp <- list()
+  trans_mat_cycles_ctr <- list()
+  
+
+#create function to run the model
+mm_sim <- function(tm_exp_init,tm_ctr_init,tm_exp_update,tm_ctr_update,
+                   u_well,u_sick,u_dead,c_exp,c_ctr,n_cycle,n_pat){
+  
+  res_list <- res_list_exp <- res_list_ctr <- list()
+  #set up matrices to contain results from all TP over each cycle by group
+  tm_exp <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(tm_exp) <- c("Well","Sick","Dead")
+  tm_ctr <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(tm_ctr) <- c("Well","Sick","Dead")
+  #assign first row to be initial TP
+  tm_exp[1,] <- tm_exp_init
+  tm_ctr[1,] <- tm_ctr_init
+  #loop through cycles and update TM at each cycle
+  for(i in 2:c(n_cycle+1)){
+    tm_exp[i,] <- tm_exp[i-1,]%*%tm_exp_update
+    tm_ctr[i,] <- tm_ctr[i-1,]%*%tm_ctr_update
+  }
+  #remove intial TP from matrices
+  tm_exp <- tm_exp[-1,]
+  tm_ctr <- tm_ctr[-1,]
+  #using obtained TM to compute number of patients in each health state at each cycle
+  npat_cycle_exp <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(npat_cycle_exp) <- c("Well","Sick","Dead")
+  npat_cycle_ctr <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(npat_cycle_ctr) <- c("Well","Sick","Dead")
+  npat_cycle_exp <- tm_exp*n_pat
+  npat_cycle_ctr <- tm_ctr*n_pat
+  #and number still alive
+  nailive_cycle_exp <- as.matrix(rowSums(npat_cycle_exp[,-3]))
+  colnames(nailive_cycle_exp) <- "nalive"
+  nailive_cycle_ctr <- as.matrix(rowSums(npat_cycle_ctr[,-3]))
+  colnames(nailive_cycle_ctr) <- "nalive"
+  #use obtained number of patients at each cycle to get the same for costs and QALYs
+  costs_cycle_exp <- as.matrix(rowSums(as.matrix(tm_exp*c_exp)[,-3]))
+  colnames(costs_cycle_exp) <- "costs"
+  costs_cycle_ctr <- as.matrix(rowSums(as.matrix(tm_ctr*c_ctr)[,-3]))
+  colnames(costs_cycle_ctr) <- "costs"
+  QALY_cycle_exp <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(QALY_cycle_exp) <- c("Well","Sick","Dead")
+  QALY_cycle_ctr <- matrix(NA, nrow = n_cycle+1, ncol = 3)
+  colnames(QALY_cycle_ctr) <- c("Well","Sick","Dead")
+  u_well_v <- rep(u_well,n_cycle)
+  u_sick_v <- rep(u_sick,n_cycle)
+  u_dead_v <- rep(u_dead,n_cycle)
+  u_M <- cbind(u_well_v,u_sick_v,u_dead_v)
+  QALY_cycle_exp <- as.matrix(rowSums(as.matrix(tm_exp*u_M)[,-3]))
+  colnames(QALY_cycle_exp) <- c("QALYs")
+  QALY_cycle_ctr <- as.matrix(rowSums(as.matrix(tm_ctr*u_M)[,-3]))
+  colnames(QALY_cycle_ctr) <- c("QALYs")
+  #save output
+  res_list_exp[[1]] <- tm_exp
+  res_list_exp[[2]] <- npat_cycle_exp
+  res_list_exp[[3]] <- nailive_cycle_exp
+  res_list_exp[[4]] <- costs_cycle_exp
+  res_list_exp[[5]] <- QALY_cycle_exp
+  res_list_ctr[[1]] <- tm_ctr
+  res_list_ctr[[2]] <- npat_cycle_ctr
+  res_list_ctr[[3]] <- nailive_cycle_ctr
+  res_list_ctr[[4]] <- costs_cycle_ctr
+  res_list_ctr[[5]] <- QALY_cycle_ctr
+  names(res_list_exp)<-c("TM","npatients","nalive","costs","QALYs")
+  names(res_list_ctr)<-c("TM","npatients","nalive","costs","QALYs")
+  res_list[[1]] <- res_list_exp
+  res_list[[2]] <- res_list_ctr
+  names(res_list)<-c("Experimental","Control")
+  return(res_list)
+}
+
+#run the function and get the output
+mm_res <- mm_sim(tm_exp_init = tm_exp_init, tm_ctr_init = tm_ctr_init, tm_exp_update = tm_exp_update,
+       tm_ctr_update = tm_ctr_update, u_well = u_well, u_sick = u_sick, u_dead = u_dead, c_exp = c_exp,
+       c_ctr = c_ctr, n_cycle = n_cycle, n_pat = n_pat)
+```
+
+For example, we can extract information regarding the number of patients associated with each health state at each cycle of the model for both intervention groups:
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#experimental
+mm_res$Experimental$npatients
+
+#control
+mm_res$Control$npatients
+```
+
+
+or the costs and QALYs accrued at each cycle across the alive patients
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#experimental
+mm_res$Experimental$costs
+mm_res$Experimental$QALYs
+
+#control
+mm_res$Control$costs
+mm_res$Control$QALYs
+```
+
+from which an estimate of the mean costs and QALYs (and the group differences) over the $12$ months period (without discounting) can be obtained by taking the sum across these accrued expected values at each cycle
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#experimental
+mu_c_exp <- sum(mm_res$Experimental$costs)
+mu_e_exp <- sum(mm_res$Experimental$QALYs)
+
+#control
+mu_c_ctr <- sum(mm_res$Control$costs)
+mu_e_ctr <- sum(mm_res$Control$QALYs)
+
+mu_c_diff <- mu_c_exp-mu_c_ctr
+mu_e_diff <- mu_e_exp-mu_e_ctr
+
+```
+
+and form this an estimate of the ICER can be obtained:
+
+$$
+\text{ICER} = \frac{`r mu_c_exp` - `r mu_c_ctr`}{`r mu_e_exp`-`r mu_e_ctr`} =\frac{`r mu_c_diff`}{`r mu_e_diff`} = `r round(mu_c_diff/mu_e_diff,2)`
+$$
+
+I hope you enjoyed today's topic as it was quite interesting, at least for me. I always want to learn more about this stuff and rarely have the time do so. By going through the coding, I think things become much easier to understand, especially when these types of models can be quite complex and difficult to grasp by just reading it on a paper. Probably next time I will dive into the uncertainty assessment for these models, which at the moment I neglected due to time constraints. Well, then hope to see you back on my next post to learn how to do that as well (if you are interested). 
+
