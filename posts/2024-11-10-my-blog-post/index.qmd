@@ -92,12 +92,10 @@ tabexc <- rbind.data.frame(row1c,row2c,row3c)
 rownames(tabexc) <- c("Well","Sick","Dead")
 colnames(tabexc) <- c("Well","Sick","Dead","Total")
 
-kable(tabex)
-
 kable(tabexc)
 ```
 
-We can therefore update the transition matrices of the two treatments over $5$ cycles, each of $1$ months, by doing the following
+We can therefore update the transition matrices of the two treatments over $5$ cycles, each of $1$ month, by doing the following
 
 ```{r}
 #| echo: true 
@@ -164,12 +162,12 @@ n_cycle <- 12
 #initial number of patients in the cohort
 n_pat <- 10000
 
-  #end of cycle 1 TP
-  trans_mat_cycle1_exp <- tm_exp_init%*%tm_exp_update
-  trans_mat_cycle1_ctr <- tm_ctr_init%*%tm_ctr_update
-  #lists to store TP results by cycle
-  trans_mat_cycles_exp <- list()
-  trans_mat_cycles_ctr <- list()
+#end of cycle 1 TP
+trans_mat_cycle1_exp <- tm_exp_init%*%tm_exp_update
+trans_mat_cycle1_ctr <- tm_ctr_init%*%tm_ctr_update
+#lists to store TP results by cycle
+trans_mat_cycles_exp <- list()
+trans_mat_cycles_ctr <- list()
   
 
 #create function to run the model
@@ -304,11 +302,11 @@ mu_e_diff <- mu_e_exp-mu_e_ctr
 
 ```
 
-and form this an estimate of the ICER can be obtained:
+and from this an estimate of the ICER can be obtained:
 
 $$
 \text{ICER} = \frac{`r mu_c_exp` - `r mu_c_ctr`}{`r mu_e_exp`-`r mu_e_ctr`} =\frac{`r mu_c_diff`}{`r mu_e_diff`} = `r round(mu_c_diff/mu_e_diff,2)`
 $$
 
-I hope you enjoyed today's topic as it was quite interesting, at least for me. I always want to learn more about this stuff and rarely have the time do so. By going through the coding, I think things become much easier to understand, especially when these types of models can be quite complex and difficult to grasp by just reading it on a paper. Probably next time I will dive into the uncertainty assessment for these models, which at the moment I neglected due to time constraints. Well, then hope to see you back on my next post to learn how to do that as well (if you are interested). 
+I hope you enjoyed today's topic as it was quite interesting, at least for me. I always want to learn more about this stuff and rarely have the time do so. By going through the coding, I think things become much easier to understand, especially when these types of models can be quite complex and difficult to grasp by just reading it on a paper. Probably next time I will dive into the uncertainty assessment for these models, which at the moment I neglected due to time constraints. Well, I hope to see you back on my next post to learn how to do that as well (if you are interested). 
 

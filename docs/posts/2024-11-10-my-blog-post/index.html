@@ -370,42 +370,6 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Well</td>
-<td style="text-align: right;">0.45</td>
-<td style="text-align: right;">0.35</td>
-<td style="text-align: right;">0.20</td>
-<td style="text-align: right;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sick</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">0.60</td>
-<td style="text-align: right;">0.35</td>
-<td style="text-align: right;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Dead</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="cell-output-display">
-<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: right;">Well</th>
-<th style="text-align: right;">Sick</th>
-<th style="text-align: right;">Dead</th>
-<th style="text-align: right;">Total</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Well</td>
 <td style="text-align: right;">0.25</td>
 <td style="text-align: right;">0.25</td>
 <td style="text-align: right;">0.50</td>
@@ -432,7 +396,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 </figure>
 </div>
 </div>
-<p>We can therefore update the transition matrices of the two treatments over <span class="math inline">\(5\)</span> cycles, each of <span class="math inline">\(1\)</span> months, by doing the following</p>
+<p>We can therefore update the transition matrices of the two treatments over <span class="math inline">\(5\)</span> cycles, each of <span class="math inline">\(1\)</span> month, by doing the following</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental treatment</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tm_exp_update <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.05</span>,<span class="dv">0</span>,<span class="fl">0.35</span>,<span class="fl">0.6</span>,<span class="dv">0</span>,<span class="fl">0.2</span>,<span class="fl">0.35</span>,<span class="dv">1</span>),<span class="dv">3</span>,<span class="dv">3</span>) </span>
@@ -490,12 +454,12 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#initial number of patients in the cohort</span></span>
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>n_pat <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="co">#end of cycle 1 TP</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  trans_mat_cycle1_exp <span class="ot">&lt;-</span> tm_exp_init<span class="sc">%*%</span>tm_exp_update</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  trans_mat_cycle1_ctr <span class="ot">&lt;-</span> tm_ctr_init<span class="sc">%*%</span>tm_ctr_update</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">#lists to store TP results by cycle</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  trans_mat_cycles_exp <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  trans_mat_cycles_ctr <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#end of cycle 1 TP</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>trans_mat_cycle1_exp <span class="ot">&lt;-</span> tm_exp_init<span class="sc">%*%</span>tm_exp_update</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>trans_mat_cycle1_ctr <span class="ot">&lt;-</span> tm_ctr_init<span class="sc">%*%</span>tm_ctr_update</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#lists to store TP results by cycle</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>trans_mat_cycles_exp <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>trans_mat_cycles_ctr <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
 <span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="co">#create function to run the model</span></span>
@@ -691,11 +655,11 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>mu_c_diff <span class="ot">&lt;-</span> mu_c_exp<span class="sc">-</span>mu_c_ctr</span>
 <span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>and form this an estimate of the ICER can be obtained:</p>
+<p>and from this an estimate of the ICER can be obtained:</p>
 <p><span class="math display">\[
 \text{ICER} = \frac{1798.4846494 - 245.4238347}{0.9524298-0.2900002} =\frac{1553.0608148}{0.6624296} = 2344.49
 \]</span></p>
-<p>I hope you enjoyed today’s topic as it was quite interesting, at least for me. I always want to learn more about this stuff and rarely have the time do so. By going through the coding, I think things become much easier to understand, especially when these types of models can be quite complex and difficult to grasp by just reading it on a paper. Probably next time I will dive into the uncertainty assessment for these models, which at the moment I neglected due to time constraints. Well, then hope to see you back on my next post to learn how to do that as well (if you are interested).</p>
+<p>I hope you enjoyed today’s topic as it was quite interesting, at least for me. I always want to learn more about this stuff and rarely have the time do so. By going through the coding, I think things become much easier to understand, especially when these types of models can be quite complex and difficult to grasp by just reading it on a paper. Probably next time I will dive into the uncertainty assessment for these models, which at the moment I neglected due to time constraints. Well, I hope to see you back on my next post to learn how to do that as well (if you are interested).</p>
 
 
 
