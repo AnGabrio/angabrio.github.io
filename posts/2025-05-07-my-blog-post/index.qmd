@@ -1,0 +1,302 @@
+---
+title: "Re-analysing re-constructed published medical data"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2025-05-07
+categories: [Quarto, R, Academia, Missing Data] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+bibliography: references.bib
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+![](featured.jpg){fig-align="center"}
+Hello everybody, today I would like to take the chance of writing in this blog to explore some medical datasets which are publicly available in `R`, and which I may decide to use in the future for my own teaching or to check some of the methods implemented in such analyses. I think this could be a very interesting exercise to see not only what type of methods are/were used in practice in many clinical studies, but also to check whether I could replicate some of the original analyses and verify the results. This interested was born after checking the [medicaldata](https://higgi13425.github.io/medicaldata/) website, which is a data package with different medical datasets made available for teaching Reproducible Medical Research with `R`. I think the initiative is quite intriguing, especially since most of the times simulated data are used in teaching. This, per se, is not a problem, but perhaps the chance of having direct access to real medical data that students can look up online through an official article would provide them with more incentives to learn about the need and importance of applying statistical methods for data analysis.  
+
+The full list of the available dataset from `medicaldata` can be found in the linked webpage that I put before, together with current and future development plans for the package, if you are interested. Today, I will start focussing on a specific dataset to see whether some interesting things can be obtained from the re-analyses of the data and whether I might consider incorporating or adapting them in my teaching materials for my courses. They would fit my teaching topics quite well since, most of the times, I teach at medical students/researchers who should be pretty familiar with the context and terminology of these studies. 
+
+As a starting point of this re-analysis exercises, I consider the "Streptomycin for Tuberculosis" dataset, whose general description may be found in this [online document](https://htmlpreview.github.io/?https://github.com/higgi13425/medicaldata/blob/master/man/description_docs/strep_tb_desc.html) together with the [data codebook](https://htmlpreview.github.io/?https://github.com/higgi13425/medicaldata/blob/master/man/codebooks/strep_tb_codebook.html) for the available variables. I will briefly describe the dataset in the next few lines of text to give the context of the analysis, but you can refer to the above links if you would like to have more detailed information on the study.
+
+# Streptomycin for Tuberculosis data
+
+This dataset contains reconstructed records from a prospective, randomised, placebo-controlled two-arm clinical trial published on October 30, 1948 in the British Medical Journal, reported by the Tuberculosis Trials Committee of the Medical Research Council [@crofton1948streptomycin]. It is often considered the first modern randomised clinical trial ever published. The baseline characteristics and endpoints were re-created for each of the $107$ young participants with pulmonary tuberculosis, which were randomnly assigned to either streptomycin $2$ grams daily by mouth (Streptomycin) vs. bed rest (Control) to treat tuberculosis. The trial was helpful to prevent rationing and black market selling of streptomycin, and helped with allocation of limited hospital isolation beds for bedrest therapy (the control arm, and standard of care at the time). 
+
+Let's first install and lead the `medicaldata` dataset into the `R` workspace by typing
+
+```{r}
+#| echo: true 
+#| eval: false
+#| message: false
+#| warning: false
+#| error: false 
+
+remotes::install_github("higgi13425/medicaldata")
+library(medicaldata)
+```
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+library(medicaldata)
+library(gtsummary)
+n0 <- table(strep_tb$arm)[1]
+n1 <- table(strep_tb$arm)[1]
+strep_tb$arm <- factor(strep_tb$arm)
+strep_tb$baseline_condition <- factor(strep_tb$baseline_condition)
+strep_tb$baseline_temp <- factor(strep_tb$baseline_temp)
+strep_tb$baseline_esr <- factor(strep_tb$baseline_esr)
+strep_tb$gender <- factor(strep_tb$gender)
+strep_tb$baseline_cavitation <- factor(strep_tb$baseline_cavitation)
+strep_tb$strep_resistance <- factor(strep_tb$strep_resistance)
+strep_tb$radiologic_6m <- factor(strep_tb$radiologic_6m)
+strep_tb$improved <- factor(strep_tb$improved)
+
+```
+
+The dataset is called `strep_tb` and should be directly available in the `R` workspace once the package `medicaldata` is successfully loaded. We can obtain a general summary of the variables available in the dataset, for example, using the command `tbl_summary` from the `gtsummary` package.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-1
+#| tbl-cap: "Summary statistics of the variables in the Streptomycin for Tuberculosis dataset." 
+
+library(gtsummary)
+tbl_summary(strep_tb)
+```
+
+The variables in @tbl-1 provide the following information about the study participants:
+
+  - `patient_id`: patient identification number.
+  
+  - `arm`: study arm, either "Streptomycin" ($n_1=`r n1`$) or "Control" ($n_0=`r n0`$).
+  
+  - `dose_strep_g`: dose of Streptomycin in grams.
+  
+  - `dose_PAS_g`: dose of Para-Amino-Salicylate in grams.
+
+  - `gender`: gender, either "Male" or "Female".
+  
+  - `baseline_condition`: Condition of the patient at baseline, either "Good", "Fair" or "Poor".
+
+  - `baseline_temp`: oral temperature at baseline in degrees F, either $(\leq 99.9)$, $(99-99.9)$, $(100-100.9)$ or $(\geq 101)$.
+  
+  - `baseline_esr`: Erythrocyte sedimentation rate at baseline in mm/hour, either $(1-10)$, $(11-20)$, $(21-50)$ or $(51+)$.
+
+  - `baseline_cavitation`: Cavitation of the lungs on chest X-ray at baseline, either "yes" or "no".
+
+  - `strep_resistance`: Resistance to Streptomycin at 6 months follow-up, either "sensitive" $(0-8)$, "moderate" $(8-99)$ or resistant $(100+)$.
+
+  - `radiologic_6m`: Radiologic outcome at 6 months follow-up, either "death", "considerable deterioration", "moderate deterioration", "no change", "moderate improvement", or "considerable improvement". 
+
+  - `rad_num`: Numeric rating of chest X-ray at 6 months follow-up, ranging between $1-6$.
+
+  - `improved`: Dichotomous outcome of whether improvement in `rad_num` was recorded, either `TRUE` or `FALSE`.
+
+## Baseline characteristics 
+
+A summary of the key baseline characteristics reported in the original article can be obtained as follows.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-2
+#| tbl-cap: "Summary statistics of key baseline variables by study arm." 
+
+tbl_summary(strep_tb, 
+    by = arm,
+    include = c(baseline_condition, baseline_temp, baseline_esr, gender),
+        statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} / {N} ({p}%)"
+    ),
+    digits = all_continuous() ~ 2,
+#    label = list(grade = "Tumor Grade"),
+    missing_text = "(Missing)"
+  )
+```
+
+@tbl-2 shows that, in the Control group, about $46\%$ participants were associated with a poor baseline condition, $36\%$ had a maximum temperature of $101^{\circ}$ F, and $56\%$ had a sedimentation rate $>50$; conversely, in the Streptomycin group, the corresponding percentages were $54\%$, $44\%$, and $65\%$, respectively. Overall, the authors conclude that these characteristics reflected the fairly acute clinical condition of most of the study patients and that baseline differences between study arms were not strong enough to suggest a break in the randomisation procedure.
+
+## X-ray classification
+
+@tbl-3 reports summary statistics by study arm about `baseline_cavitation` based on X-ray films data, which show how about $58\%$ in both arms were associated with large or multiple cavities in the film taken on admission.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-3
+#| tbl-cap: "Summary statistics of X-ray films by study arm." 
+
+tbl_summary(strep_tb, 
+    by = arm,
+    include = c(baseline_cavitation),
+        statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} / {N} ({p}%)"
+    ),
+    digits = all_continuous() ~ 2,
+#    label = list(grade = "Tumor Grade"),
+    missing_text = "(Missing)"
+  )
+```
+
+## Results at 6 months follow-up
+
+@tbl-4 reports the numbers and proportions of patients associated with different value of `radiologic_6m`, separately displayed by study arm. 
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-4
+#| tbl-cap: "Summary statistics of X-ray films by study arm." 
+
+tbl_summary(strep_tb, 
+    by = arm,
+    include = c(radiologic_6m),
+        statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} / {N} ({p}%)"
+    ),
+    digits = all_continuous() ~ 2,
+#    label = list(grade = "Tumor Grade"),
+    missing_text = "(Missing)"
+  )
+```
+
+A key result which the authors highlight is considerable difference in the death rate between Control ($27\%$) and Streptomycin ($7\%$). They also claim it to be statistically significant, which we can easily verify using, for example, a simple $\chi^2$ test.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+strep_tb$death <- ifelse(strep_tb$radiologic_6m=="1_Death",1,0)
+death_diff <- chisq.test(strep_tb$death,strep_tb$arm, correct = FALSE)
+death_diff
+```
+
+The test statistic, computed without any correction method (since no expected cell counts were below $5$), is `r round(death_diff$statistic,2)` with a p-value of `r round(death_diff$p.value,4)`. In `R`, we may alternatively use a simple Z-test for the difference between two proportions.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+n0 <- nrow(strep_tb[strep_tb$arm=="Control",])
+n1 <- nrow(strep_tb[strep_tb$arm=="Streptomycin",])
+n0_dead <- nrow(strep_tb[strep_tb$arm=="Control" & strep_tb$radiologic_6m=="1_Death",])
+n1_dead <- nrow(strep_tb[strep_tb$arm=="Streptomycin" & strep_tb$radiologic_6m=="1_Death",])
+prop.test(x = c(n0_dead, n1_dead), n = c(n0, n1), correct = FALSE)
+```
+
+which returns exactly the same result in terms of test statistic and p-value. The authors clarify that an assessment of the condition at the end of the six-months period should be based on a judicious combination of changes in the radiological picture, changes in general condition, temperature, weight, sedimentation rate, and bacillary content of the sputum. To partly address this, they performed a preliminary analysis based on changes in the radiological picture alone, this being in their opinion
+the most important single factor to consider. The overall results given in @tbl-4 show differences in the two series that support this argument, especially with respect to the numbers related to a "considerable improvement " in the radiological picture, i.e. those for whom at the end of the six-months period there was a reasonable prospect of recovery. Indeed, a total of $51\%$ of the Streptomycin patients were considerably improved, compared with only $\8%$ of the Control patients. Again, we can check the statistical significance related to this comparison as we did before, for example by doing
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+strep_tb$cons_impr <- ifelse(strep_tb$radiologic_6m=="6_Considerable_improvement",1,0)
+cons_impr_diff <- chisq.test(strep_tb$cons_impr,strep_tb$arm, correct = FALSE)
+cons_impr_diff
+```
+
+They also state that results were comparable between genders, for which no statistical association with death was found. We can again check this by checking the pairwise associations between `gender` and `arm`
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+gender_arm <- chisq.test(strep_tb$gender,strep_tb$arm, correct = FALSE)
+gender_arm
+```
+
+and between `gender` and `death`
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+gender_death <- chisq.test(strep_tb$gender,strep_tb$death, correct = FALSE)
+gender_death
+```
+
+As it can be seen, no statistically significant association is detected between `gender` and any of the other two variables. 
+
+Finally, we may think to assess the association between `death` and `arm` while also accounting for possible baseline differences in the available baseline variables in `strep_tb`, which the authors considered to be important for assessing these results, namely `baseline_condition`, `baseline_temp` and `baseline_esr`. We can do this, for example, by means of a logistic regression 
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+death_lr <- glm(death ~ arm + baseline_condition + baseline_temp + baseline_esr, 
+                family=binomial(link='logit'), data = strep_tb)
+summary(death_lr)
+```
+
+As it can be seen, results for the coefficient associated with `arm` remain statistically significant, even after accounting for the different baseline variables included in the model. If we want to look at more interpretable results, we can re-scale the coefficient estimates on the exponential scale so to look at the odds ratios instead of their logarithmic value
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+exp(death_lr$coefficients)
+```
+
+We can also do the same to look at the corresponding $95\%$ confidence intervals related to the regression coefficients
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+death_lr_ci <- confint(death_lr, level = 0.95)
+exp(death_lr_ci)
+```
+
+So, what do you think? I think it is pretty nice to do these types of analyses using data from real studies. I believe this is much more interesting for students to look at, and it also gives us some information about the methods used by the original analysts and (perhaps) possible ways to do the analyses in a different way based on today's knowledge and approaches. I hope to be able to incorporate these examples in my teaching, although I will need to find the time to do it!
+
