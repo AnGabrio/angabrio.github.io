@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2020-12-20">
+<meta name="dcterms.date" content="2025-07-09">
 
-<title>It is Xmas again Yeah – Andrea Gabrio</title>
+<title>Seemingly Unreleated Regression – Andrea Gabrio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -70,6 +124,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -133,20 +216,28 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#general-sur-framework" id="toc-general-sur-framework" class="nav-link active" data-scroll-target="#general-sur-framework">General SUR framework</a></li>
+  <li><a href="#sur-applied-to-trial-based-economic-evaluations" id="toc-sur-applied-to-trial-based-economic-evaluations" class="nav-link" data-scroll-target="#sur-applied-to-trial-based-economic-evaluations">SUR applied to trial-based economic evaluations</a></li>
+  <li><a href="#how-to-fit-sur-models-in-r" id="toc-how-to-fit-sur-models-in-r" class="nav-link" data-scroll-target="#how-to-fit-sur-models-in-r">How to fit SUR models in R ?</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">It is Xmas again Yeah</h1>
+<h1 class="title">Seemingly Unreleated Regression</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Quarto</div>
     <div class="quarto-category">R</div>
     <div class="quarto-category">Academia</div>
-    <div class="quarto-category">publication</div>
+    <div class="quarto-category">Missing Data</div>
   </div>
   </div>
 
@@ -173,7 +264,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 20, 2020</p>
+      <p class="date">July 9, 2025</p>
     </div>
   </div>
   
@@ -185,73 +276,155 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
+<p>Hello everyone and welcome back to my regular post on this blog. Today I would like to talk about some technicalities related to a quite popular statistical methods used in the analysis of trial-based economic evaluations called <strong>seemingly unrelated regression</strong> or <strong>SUR</strong> <span class="citation" data-cites="zellner1962efficient">(<a href="#ref-zellner1962efficient" role="doc-biblioref">Zellner 1962</a>)</span>. Apologies for those who are not really into the details of statistical methodology but I hope that sharing more information about these methods may lead to a better understanding of why we should or should not prefer them when analysing cost-effectiveness data compared to altrnative approaches, e.g.&nbsp;a series of independent linear regressions.</p>
+<p>In short, SURs consist in a system of regression equations that are linked to each other by the fact that their residuals are allowed to be correlated. There are two main advantages of using a SUR system compared to fitting a series of separate regressions:</p>
+<ol type="1">
+<li><p>Gain in efficiency by recognising the correlation between individual level outcomes in the parameter estimation <span class="citation" data-cites="greene2008econometric">(<a href="#ref-greene2008econometric" role="doc-biblioref">Greene et al. 2008</a>)</span>.</p></li>
+<li><p>Possibility yo impose and/or test restrictions involving parameters in different equations <span class="citation" data-cites="fiebig2001seemingly">(<a href="#ref-fiebig2001seemingly" role="doc-biblioref">Fiebig 2001</a>)</span>.</p></li>
+</ol>
+<section id="general-sur-framework" class="level1">
+<h1>General SUR framework</h1>
+<p>Suppose <span class="math inline">\(y_{it}\)</span> is a dependent variable, <span class="math inline">\(\boldsymbol{x}_{it}=(x_{it1},\ldots,x_{itK})\)</span> is a <span class="math inline">\(K\)</span> vector of explanatory variables for observational unit <span class="math inline">\(i\)</span>, and <span class="math inline">\(u_{it}\)</span> is an unobservable error term, where the double index <span class="math inline">\(it\)</span> denotes the <span class="math inline">\(t\)</span>-th observation of the <span class="math inline">\(i\)</span>-th equation in the system. A classical SUR model is given by the system of linear regression equations</p>
+<p><span class="math display">\[
+\begin{align}
+y_{it}=&amp; \beta_1 x_{1t} + u_{1t} \\
+&amp;\vdots  \\
+y_{Nt}=&amp; \beta_N x_{Nt} + u_{Nt},
+\end{align}
+\]</span> where <span class="math inline">\(i=1,\ldots,N\)</span>, <span class="math inline">\(t=1,\ldots,T\)</span> and <span class="math inline">\(L=K_1,\ldots,K_N\)</span>. Further simplification can be obtained by stacking observations either in the <span class="math inline">\(t\)</span> or <span class="math inline">\(i\)</span> dimension: for example, if we stack for each observation <span class="math inline">\(t\)</span>, let <span class="math inline">\(Y_t=(y_{1t},\ldots,y_{Nt})^{\prime}\)</span>, <span class="math inline">\(\boldsymbol X_{t}=\text{diag}(x_{1t},\ldots,x_{Nt})\)</span>, <span class="math inline">\(U_t=(u_{1t},\ldots,u_{Nt})^{\prime}\)</span>, and <span class="math inline">\(\boldsymbol \beta=(\beta_1^{\prime},\ldots,\beta_N^{\prime})^{\prime}\)</span>, then we have</p>
+<p><span class="math display">\[
+Y_t = \boldsymbol X_t^{\prime} \boldsymbol \beta + U_t.
+\]</span> Alternatively, another way to represent a SUR model is to write it in a form of multivariate regression with parameter restrictions: define <span class="math inline">\(\boldsymbol X_{t}=[x_{1t}^{\prime},\ldots,x_{Nt}^{\prime}]^{\prime}\)</span> and <span class="math inline">\(A(\boldsymbol \beta)=\text{diag}(\beta_1,\ldots,\beta_N)\)</span>, so that we obtain</p>
+<p><span class="math display">\[
+Y_t = A(\boldsymbol \beta)^\prime X_t + U_t,
+\]</span> with the coefficients satisfying the restrictions <span class="math inline">\(\text{vec}(A(\boldsymbol \beta))=G \boldsymbol \beta\)</span>, for some full rank matrix <span class="math inline">\(G\)</span>.</p>
+<p>In the classical SUR model we assume that for each <span class="math inline">\(i=1,\ldots,N\)</span>, <span class="math inline">\(\boldsymbol x_{i}=[x_{i1},\ldots,x_{iT}]^{\prime}\)</span> is of full rank <span class="math inline">\(K\)</span> and that, conditional on all the regressors, the errors <span class="math inline">\(U_t\)</span> are <span class="math inline">\(\text{iid}\)</span> over <span class="math inline">\(t\)</span> with mean zero and homoskedastic variance <span class="math inline">\(\Sigma=\text{E}[u_t u_t^{\prime}\mid X]\)</span>, and that <span class="math inline">\(\Sigma\)</span> is positive definite with <span class="math inline">\(\sigma_{ij}=\text{E}[u_{it} u_{jt}\mid X]\)</span> denoting the <span class="math inline">\(ij\)</span>-th element of <span class="math inline">\(\Sigma\)</span>. Under this assumption the covariance matrix of the errors is given by <span class="math inline">\(\text{E}[\text{vec}(U)\text{vec}(U)^{\prime}]=\Sigma \otimes I_T\)</span>.</p>
+</section>
+<section id="sur-applied-to-trial-based-economic-evaluations" class="level1">
+<h1>SUR applied to trial-based economic evaluations</h1>
+<p>In the context of trial-based economic evaluations, particularly in a cross-sectional analysis setting based on some individual level cost and effectiveness measures <span class="math inline">\((c_{i},e_{i})\)</span>, SUR models are typically preferred to the fitting of separate linear regressions as they recognise the correlation between individual costs and health outcomes in the parameter estimation. The set of individual level covariates <span class="math inline">\((\boldsymbol x^c_{i},\boldsymbol x^e_{i})\)</span> can also differ for each endpoint but, often, the same <span class="math inline">\(\boldsymbol x_i\)</span> are used for each endpoint, so that the model becomes</p>
+<p><span class="math display">\[
+\begin{align}
+c_{i}=&amp; \boldsymbol \beta_c \boldsymbol x_{i} + u_{ci} \\
+&amp;\vdots  \\
+e_{i}=&amp; \boldsymbol \beta_e \boldsymbol x_{i} + u_{ei},
+\end{align}
+\]</span> where <span class="math inline">\(\boldsymbol x_{i}\)</span> denotes the set of common individual level covariates, typically including a treatment indicator and other baseline variables, whose regression coefficients are often meant to represent the incremental cost and effectiveness parameters estimated via OLS approach. Typically, SUR assumes that the individual error terms follow a bivariate normal distribution with mean zero and variances <span class="math inline">\(\sigma^2_c\)</span> and <span class="math inline">\(\sigma^2_e\)</span>, and with the correlation between the outcomes being captured through the correlation parameter <span class="math inline">\(\rho\)</span> <span class="citation" data-cites="gomes2012methods">(<a href="#ref-gomes2012methods" role="doc-biblioref">Gomes et al. 2012</a>)</span>.</p>
+</section>
+<section id="how-to-fit-sur-models-in-r" class="level1">
+<h1>How to fit SUR models in R ?</h1>
+<p>In <code>R</code>, the <code>systemfit</code> package allows a user to specify multiple equations and fit them in an SUR framework. After doing so, one can perform tests on coefficients across the equations. As an example, let’s simulate some bivariate cost and effectiveness data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#generate bivariate outcome data</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>) <span class="co"># cov matrix</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">E =</span> <span class="fl">0.5</span>, <span class="at">C =</span> <span class="fl">0.5</span>) <span class="co">#mean E and C outcome</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ec_data <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sigma =</span> Sigma)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>ec_data_new <span class="ot">&lt;-</span> ec_data</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#rescale e to 0-1 range</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ec_data_new[,<span class="dv">1</span>] <span class="ot">&lt;-</span> (ec_data[,<span class="dv">1</span>]<span class="sc">-</span><span class="fu">min</span>(ec_data[,<span class="dv">1</span>]))<span class="sc">/</span>(<span class="fu">max</span>(ec_data[,<span class="dv">1</span>])<span class="sc">-</span><span class="fu">min</span>(ec_data[,<span class="dv">1</span>]))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#rescale c to 0-1000 range</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ec_data_new[,<span class="dv">2</span>] <span class="ot">&lt;-</span> (ec_data[,<span class="dv">2</span>]<span class="sc">-</span><span class="fu">min</span>(ec_data[,<span class="dv">2</span>]))<span class="sc">/</span>(<span class="fu">max</span>(ec_data[,<span class="dv">2</span>])<span class="sc">-</span><span class="fu">min</span>(ec_data[,<span class="dv">2</span>]))<span class="sc">*</span><span class="dv">1000</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#add treatment covariate (under assumption of better outcome and less costs for t=1 vs t=0)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>t_data <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(ec_data_new[,<span class="dv">1</span>]<span class="sc">&gt;</span><span class="fl">0.6</span> <span class="sc">&amp;</span> ec_data_new[,<span class="dv">2</span>]<span class="sc">&lt;</span><span class="dv">500</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>t_data <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(ec_data_new[,<span class="dv">1</span>]<span class="sc">&lt;</span><span class="fl">0.6</span> <span class="sc">&amp;</span> ec_data_new[,<span class="dv">2</span>]<span class="sc">&gt;</span><span class="dv">500</span>,<span class="dv">0</span>,t_data)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>t_data <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(ec_data_new[,<span class="dv">1</span>]<span class="sc">&lt;</span><span class="fl">0.6</span> <span class="sc">&amp;</span> ec_data_new[,<span class="dv">2</span>]<span class="sc">&lt;</span><span class="dv">500</span>,<span class="fu">rbinom</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">0.5</span>),t_data)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>t_data <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(ec_data_new[,<span class="dv">1</span>]<span class="sc">&gt;</span><span class="fl">0.6</span> <span class="sc">&amp;</span> ec_data_new[,<span class="dv">2</span>]<span class="sc">&gt;</span><span class="dv">500</span>,<span class="fu">rbinom</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">0.5</span>),t_data)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain data frame</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>data.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ec_data_new[,<span class="dv">1</span>],ec_data_new[,<span class="dv">2</span>],t_data)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data.df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"e"</span>,<span class="st">"c"</span>,<span class="st">"t"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>It is Xmas again! Wow, how quickly time flies. The situation here in the Netherlands is not ideal as the number of infected is on the rise again and the government has declared a full lockdown until January 19th. Starting from next month I will start teaching in the department but everything will still be online due to the uncertainty of the pandemic. It is unfortunate but there is nothing we can do about it and let us just hope the situation will improve in the next few weeks/months.</p>
-<p>Aside from sad stuff, I have some good news about my research. My paper about longitudinal models in trial-based CEA, whose pre-print is available on my <a href="https://arxiv.org/abs/1805.07149">ArXiv account</a>, has been officially accepted for publication in Value in Health, after a very long time (more than 2 years of peer-review process I believe!). I am really happy as this is a paper for which I spent a lot of time and effort, so it is nice to see some ouput out of it. I am also glad to announce that a new paper I am co-authoring with <a href="https://www.lshtm.ac.uk/aboutus/people/leurent.baptiste">Baptiste</a> (LSHTM) and <a href="https://www.bangor.ac.uk/health-sciences/staff/catrin-plumpton/en">Catrin</a> (Bangor University) which is a tutorial on the use of mixed effects models for trial-based CEAs. The main idea is to make available and spread awareness in the HE community about the possibility to use these models to derive CEA results, rather than relying on the standard linear regression models. The methods are nothing special but we believe health economists are not well aware of the fact that sometimes they can be implemented in a much easier way compared to standard approaches. We tried to summarise the main advantages and disadvantages of the methods while also providing software code (in STATA and R) to show how they can be fitted. The paper has been accepted as a contributed presentation at the next <a href="https://hesg.org.uk/meetings/winter-2021-the-london-school-of-hygiene-tropical-medicine/">HESG meeting</a>. Unfortunately, I will not be able to attend the meeting as I will be quite busy with the teaching that week but Catrin has kindly agreed to present in behalf of all authors. I look forward to receive the feedback from the people attending the conference!</p>
-<p>The past month I have been quite busy with some teaching and consultancy work here at UM, mostly for medical students about basic statistical concepts and techniques but nonetheless very interesting for me in order to get acquainted with the new job and duties. A big thank is due to my new colleagues who have been incredibly nice to me and have helped me a lot to get into the system. I was actually planning to post my news earlier this month but with incredible disappointment I found out that the most recent updated of Hugo (the system used by blogdown for building this site) completely messed up my previous version of the website which was broken. I had to rebuild the website again copying and pasting all my previous material. Nothing crazy, but certainly very annoying to do. I just hope the next update will not force me to do it again! So, if you see something different compared to before, you know why (especially in the sections for the tutorials on using BUGS/JAGS/STAN). Related to this, I must acknowledge Mr.&nbsp;Kim who recently contacted me with regard to an incorrect specification for one of the STAN models in the tutorial on generalised linear mixed models. I would like to thank him again very much for noticing this mistake which I fixed in the new version of the website now online (apologies for the long time it took for me to make the changes!). I am happy to see that my code can be of help to anyone who might be interested in doing some nice modelling.</p>
-<p>Finally, a quick note about somehting I found curious. A medical statistician who I deeply respect and admire, Dr.<a href="https://iris.ucl.ac.uk/iris/browse/profile?upi=TNMOR17">Tim Morris</a> from <a href="https://www.ctu.mrc.ac.uk/">MRCCTU</a>, posted the following provocative tweet</p>
-<p></p><div id="tweet-59704"></div><script>tweet=<!DOCTYPE html>
-<html lang="en" class="dog">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X / ?</title>
-    <meta name="version" content="1">
-    <link href="https://abs.twimg.com/favicons/twitter.3.ico" rel="shortcut icon" type="image/x-icon">
-    <link rel="stylesheet" href="https://abs.twimg.com/errors/fullscreen_errors-047ca1475a6efac7c9c89a9ff92b7a20.css">
-  </head>
-  <body dir="auto">
-    <div class="top">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1519 200">
-        <defs/>
-        <path d="M708 103l9-5 13 1 2-2 5 1h8l1-1 42-5h7l7 3v1l12-2a9368 9368 0 0129-6l2-5 12 1 6-2 3 1 2 1v-2l13-2v1l4 2 7-1h1l17-3 1 2 4-1 18-7 3-1 4-1h9l13-1 1-4 3-2 13 1v2l22-2 10-3h6l10 5 16-5 15-3 2-1 8-4 6-2 12-1 7-2 8 5 7 1 22-9h7l5-1v-1l25-3 1 2 5 2v1h11l2 1 8-4h3l-1 1h11l10-6 6 3 9-1 4-1 1 1 1-2 6-1 1-1 10-2h2l7-5v1h4l3-1c11 0 23 2 34-3 2-2 7 0 10 0l12 1 4 1 9 2 12-1 11-3 11 1h4l10-6 17 1 2 1c9 2 19-3 22-11l1-1 9 1 15-5c3-1 9 4 9-5 5 0 5 3 5 7l2 3 4-1 4-2 9-4 3-3h3l8-4 6-3 26 2 7-4h18l7 1c10 3 13-6 17-12l8 4 3-1 14-3 15-2a38 38 0 01-5-1l-8-4 7-8 8-4-10-136-922 71 16 205z"/>
-        <path d="M-36 193l9-5 13 1 2-2 5 1h8l1-1 42-5h7l7 3v1l12-2a9328 9328 0 0129-6l2-5 12 1 6-2 3 1 2 1v-2l13-2v1l4 2 7-1h1l17-3 1 2 4-1 18-7 3-1 4-1h9l13-1 1-4 3-2 13 1v2l22-2 10-3h6l10 5 16-5 15-3 2-1 8-4 6-2 12-1 7-2 8 5 7 1 22-9h7l5-1v-1l25-3 1 2 5 2v1h11l2 1 8-4h3l-1 1h9a6 6 0 002 0l10-6 6 3 9-1 4-1a6 6 0 001 1l1-2 6-1 1-1 10-2h2l7-5v1h4l3-1c11 0 23 2 34-3 2-2 7 0 10 0l12 1 4 1 9 2 12-1 11-3 11 1h4l10-6 17 1 2 1c9 2 19-3 22-11l1-1 9 1 15-5c3-1 9 4 9-5 5 0 5 3 5 7l2 3 4-1 4-2 9-4 3-3h3l8-4 6-3 26 2 7-4h18l7 1c10 3 13-6 17-12l8 4 3-1 14-3 15-2a37 37 0 01-5-1l-8-4 7-8 8-4-10-136-922 71 16 205z"/>
-      </svg>
-    </div>
-    <div class="container">
-      <div class="content">
-        <a href="https://twitter.com" title="X logo">
-          <svg viewBox="0 0 24 24" aria-hidden="true" class="x-logo"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
-        </a>
-        <h1 id="header">Nothing to see here</h1>
-        <p id="description">Looks like this page doesn’t exist. Here’s a picture of a poodle sitting in a chair for your trouble.</p>
+<p>Next, let’s define the two system of equations using the <code>R</code> formula notation and pass them in a list to the <code>systemfit</code> command. A summary of the <code>systemfit</code> first shows a summary of the system, then the separate equations, and then how the residuals of the two equations are related. These are followed by the OLS fits of the separate equations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write formulae for the two outcome equations</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>eq_e <span class="ot">&lt;-</span> e <span class="sc">~</span> t</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>eq_c <span class="ot">&lt;-</span> c <span class="sc">~</span> t</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#fit SUR model</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fitsur_ec <span class="ot">&lt;-</span> <span class="fu">systemfit</span>(<span class="fu">list</span>(<span class="at">readreg =</span> eq_e, <span class="at">mathreg =</span> eq_c), <span class="at">data=</span>data.df)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise results</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fitsur_ec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+systemfit results 
+method: OLS 
 
-          <a id="button_search" href="/" class="button">Looking for this?</a>
+          N   DF      SSR detRCov  OLS-R2 McElroy-R2
+system 2000 1996 25310258 281.502 0.00189   0.032915
 
-      </div>
-      <img id="image" src="https://abs.twimg.com/errors/ErrorState_NotFound.png" alt="A primped poodle with a bow in its hair sitting in a chair like a human.">
-      <div class="footer">
-        <ul>
-          <li><a href="https://twitter.com/" id="footer_home">Home</a></li>
-          <li><a href="https://status.twitterstat.us/" id="footer_status">Status</a></li>
-          <li><a href="https://twitter.com/tos" id="footer_tos">Terms of Service</a></li>
-          <li><a href="https://twitter.com/privacy" id="footer_privacy">Privacy Policy</a></li>
-          <li><a href="https://support.twitter.com/articles/20170514" id="footer_cookie">Cookie Policy</a></li>
-          <li><a href="https://legal.twitter.com/imprint" id="footer_imprint">Imprint</a></li>
-          <li><a href="https://business.twitter.com/en/help/troubleshooting/how-twitter-ads-work.html" id="footer_ads">Ads info</a></li>
-          <li dir="ltr">&copy; X Corp. <span id="copyright-year">&emsp;&emsp;&emsp;&emsp;</span></li>
-        </ul>
-      </div>
-    </div>
-  </body>
-  <script src="https://abs.twimg.com/errors/404-8651f633fd193e0b546010676a4fac06.js"></script>
+           N  DF         SSR        MSE       RMSE       R2   Adj R2
+readreg 1000 998 2.23759e+01 2.2421e-02   0.149736 0.022027 0.021047
+mathreg 1000 998 2.53102e+07 2.5361e+04 159.251239 0.001890 0.000890
 
-;document.getElementById("tweet-59704").innerHTML = tweet["html"];<p></p>
-<p>where he asks about the interpretation of a Bayesian credible interval while also saying that quick and simple answers will not be considered reliable. Well, I have much to say on this but I feel like twitter is not the best location to try and argument a proper discussion. I hope I will be able to find some time to post on my website a more constructive answer. The topic is not very quick to grasp, especially if someone is used to think in frequentist terms and theory which, by definition, are not very useful to think at statistics from a Bayesian point of view. For the moment, as a quick answer, I would just say that in my opinion statistics is not a uniquely defined discipline but there are different ways it can be approached, and the rules and theory of one approach do not necessarily apply to others!</p>
-<p>Next time, perhaps, I will follow this with a proper argument, stay tuned!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://media.giphy.com/media/xTkcEHkC6P3I5VCDpm/giphy.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
+The covariance matrix of the residuals
+           readreg    mathreg
+readreg  0.0224207    16.9443
+mathreg 16.9442872 25360.9572
+
+The correlations of the residuals
+         readreg  mathreg
+readreg 1.000000 0.710584
+mathreg 0.710584 1.000000
+
+
+OLS estimates for 'readreg' (equation 1)
+Model Formula: e ~ t
+
+              Estimate Std. Error  t value   Pr(&gt;|t|)    
+(Intercept) 0.47041588 0.00477582 98.49946 &lt; 2.22e-16 ***
+t           0.17366078 0.03662888  4.74109 2.4346e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.149736 on 998 degrees of freedom
+Number of observations: 1000 Degrees of Freedom: 998 
+SSR: 22.375889 MSE: 0.022421 Root MSE: 0.149736 
+Multiple R-Squared: 0.022027 Adjusted R-Squared: 0.021047 
+
+
+OLS estimates for 'mathreg' (equation 2)
+Model Formula: c ~ t
+
+             Estimate Std. Error   t value Pr(&gt;|t|)    
+(Intercept) 511.30534    5.07933 100.66402  &lt; 2e-16 ***
+t           -53.56035   38.95665  -1.37487  0.16948    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 159.251239 on 998 degrees of freedom
+Number of observations: 1000 Degrees of Freedom: 998 
+SSR: 25310235.331251 MSE: 25360.957246 Root MSE: 159.251239 
+Multiple R-Squared: 0.00189 Adjusted R-Squared: 0.00089 </code></pre>
 </div>
+</div>
+<p>From the output above we can extract via the command <code>coef(fitsur_ec)</code> and <code>vcov(fitsur_ec)</code> the coefficient estimates and the covariance matrix for each equation in the model. In the <code>summary(fitsur_ec)</code> output we also see results related to standard testing procedures, such as t and p-values related to the estimated coefficients for each covariate included in each equation within the system. In this case, for both equations, we only have treatment as the covariate, whose coefficients represent the mean incremental between the two groups in terms of effectiveness and cost variables. We can also compute related <span class="math inline">\(95\%\)</span> confidence intervals using the command <code>confint(fitsur_ec)</code>.</p>
+<p>For today it is all and I hope you liked this quick overview of this specific topic. I might decide to do these “quick” descriptions of specific methods that are often used in economic evaluations, as I find them to be quite easy to follow and to have a sort of preliminary introduction to the topic under consideration. People may then decide to go in more depth into these topics based on their interest/curiosity, for example by consulting the literature or asking some experts. Till next time!</p>
 
 
 
-</main> <!-- /main -->
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-fiebig2001seemingly" class="csl-entry" role="listitem">
+Fiebig, Denzil G. 2001. <span>“Seemingly Unrelated Regression.”</span> <em>A Companion to Theoretical Econometrics</em>, 101–21.
+</div>
+<div id="ref-gomes2012methods" class="csl-entry" role="listitem">
+Gomes, Manuel, Richard Grieve, Richard Nixon, Edmond S-W Ng, James Carpenter, and Simon G Thompson. 2012. <span>“Methods for Covariate Adjustment in Cost-Effectiveness Analysis That Use Cluster Randomised Trials.”</span> <em>Health Economics</em> 21 (9): 1101–18.
+</div>
+<div id="ref-greene2008econometric" class="csl-entry" role="listitem">
+Greene, William H et al. 2008. <span>“The Econometric Approach to Efficiency Analysis.”</span> <em>The Measurement of Productive Efficiency and Productivity Growth</em> 1 (1): 92–250.
+</div>
+<div id="ref-zellner1962efficient" class="csl-entry" role="listitem">
+Zellner, Arnold. 1962. <span>“An Efficient Method of Estimating Seemingly Unrelated Regressions and Tests for Aggregation Bias.”</span> <em>Journal of the American Statistical Association</em> 57 (298): 348–68.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -690,5 +863,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
