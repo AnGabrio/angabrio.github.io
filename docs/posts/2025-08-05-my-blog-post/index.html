@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2023-04-10">
+<meta name="dcterms.date" content="2025-08-05">
 
-<title>Some updates … – Andrea Gabrio</title>
+<title>A quick intro on medical statistics – Andrea Gabrio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -70,6 +70,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -133,21 +162,33 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#measures-of-health" id="toc-measures-of-health" class="nav-link" data-scroll-target="#measures-of-health">Measures of health</a>
+  <ul class="collapse">
+  <li><a href="#descriptive-measures-for-binarytime-to-event-outcomes" id="toc-descriptive-measures-for-binarytime-to-event-outcomes" class="nav-link" data-scroll-target="#descriptive-measures-for-binarytime-to-event-outcomes">Descriptive measures for binary/time to event outcomes</a></li>
+  <li><a href="#measures-of-differenceassociation" id="toc-measures-of-differenceassociation" class="nav-link" data-scroll-target="#measures-of-differenceassociation">Measures of difference/association</a></li>
+  <li><a href="#absolute-measures" id="toc-absolute-measures" class="nav-link" data-scroll-target="#absolute-measures">Absolute measures</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Some updates …</h1>
+<h1 class="title">A quick intro on medical statistics</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Quarto</div>
     <div class="quarto-category">R</div>
     <div class="quarto-category">Academia</div>
-    <div class="quarto-category">publication</div>
-    <div class="quarto-category">conference</div>
+    <div class="quarto-category">Medical Statistics</div>
   </div>
   </div>
 
@@ -174,7 +215,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 10, 2023</p>
+      <p class="date">August 5, 2025</p>
     </div>
   </div>
   
@@ -186,24 +227,116 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p>Hello dear readers, and welcome back to a new post on this blog. Today I am finally entering my holidays period and therefore I look forward to enjoy a nice vacation period over the next couple of weeks. Before I do that, however, I thought it would be nice to post something light here (so no heavy math, promised!), taking this chance to talk about something I always wanted but for which I never found enough time. In particular, today’s topic is very close to what many medical researchers do in their work, i.e.&nbsp;analysing some medical data using basic statistical methods. Over the past few years I have collaborated with several medical researchers who seem to always struggle with interpreting the statistical output of their work. They seem to know how to produce standard statistical output to summarise their research but often they feel uncomfortable on interpreting said output. I know this is probably due to a lack of statistical background in their education but since this is part of their work I believe it should be important that they try to keep up-to-date with current statistical practice in their field and know how to properly interpret statistical output that they produce themselves.</p>
+<p>Well, nowadays we all know that mnay AI websites and tools exist that can aid researchers in the generation of the output and perhaps even suggest some interpretation if adequately asked. However, I must confess that many times this type of interpretations are lacking or even incorrect and therefore I would suggest researchers to refrain from an indiscriminate use of AI help as it can be quite dangerous if they are not aware of the possible mistakes such tools can make. So, at last for the moment, statisticians are still needed to be really sure of what you are saying is correct and hopefully this post will provide some basic reference for those who are interested in the topic. For today, let’s just start from the very basics, and perhaps I will expand the topic in future posts as I am also eager to start my holidays.</p>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>In medicine we typically distinguish two main types of study design, i.e.&nbsp;experimental and observational. The first one is usually aimed at developing new treatments and identify association between diseases and possible causes based on the people’s characteristics. The second one is often aimed at investigating risk factors for epidemic. In general, any study has a specific objective, such as the identification of: possible causes for a disease, information about common data features, comparison of results with respect to a non-affected group with similar features of the affected ones, establish robust findings by investigating risk of disease in different areas.</p>
+<p>The first official type of experimental study under the label of a <em>randomised control trial</em> is dated 1948 and was a streptomycin trial on Tuberculosis. The study enrolled <span class="math inline">\(107\)</span> patients from <span class="math inline">\(7\)</span> hospitals with acute progressive bilateral pulmonary tuberculosis and randomised them to either of two treatments: daily streptomycin + bed rest (intervention group) or bed rest alone (control group). The main outcomes of interest were X-ray improvement and death. Since then, publicly-funded clinical trials play an important role in medical statistics as they provided important contributions in many disease areas in terms of: development of new treatments, progressing treatments and improving survival/reduction of deaths, etc… Medical/Bio-statistics is a quite-well recognised discipline since the late 1940s which has continuously evolved over the years and has been subject to many debates. In particular, in many cases there have been discussions on possible issues affecting the filed, such as: vague definitions of trial aims, poor study design, unreliable date, inappropriate analysis and incorrect conclusions. Much of these problems are related to the fact that medical statistics is a very specialised area, i.e.&nbsp;experts and specialists (including statisticians) are needed to provide help with important aspects of research. They contribution is needed in order to: help with defining clear and precise aims for the trial, avoid bias due to bad study design, develop/evaluate methods to analyse the data, and help with interpretation of results.</p>
+</section>
+<section id="measures-of-health" class="level1">
+<h1>Measures of health</h1>
+<p>In order to ensure that a trial has a clear and precise objective, a key concept is the distinction between outcome and exposure variables in the context of a statistical analysis:</p>
+<ol type="1">
+<li><p>The <em>outcome</em> variable is the focus of the research, i.e.&nbsp;a trial whose aim is to find a treatment that can reduce cholesterol levels in a group of patients should have <em>cholesterol levels</em> as the main outcome.</p></li>
+<li><p>The <em>exposure</em> variables are those that may influence the outcome, i.e.&nbsp;type of treatment.</p></li>
+</ol>
+<p>In general, the aims of health studies include some form of: determining the risk factors for a given health outcome, identifying geographic patterns, describe the course of an health outcome, develop preventive measures, plan health services, provide administrative planning data. Descriptive statistics are routinely used to summarise the variables of interest in a study. They differ according to the specific type of variables considered: mean/median for continuous outcomes, incidence/prevalence rates, proportions, odds for binary/time to event outcomes. Often, when the objective of the tial is to make some comparison between groups of patients (e.g.&nbsp;based on treatment allocation), summary measures adopted include: mean difference for continuous outcomes, risk/rate/odds ratio, risk/rate difference for binary outcomes. It is important to remember that the suitability of a given summary measure compared to another (e.g.&nbsp;risk vs odds ratio) should also depend on the study design and objective.</p>
+<section id="descriptive-measures-for-binarytime-to-event-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="descriptive-measures-for-binarytime-to-event-outcomes">Descriptive measures for binary/time to event outcomes</h2>
+<p>One key summary measure for binary outcomes are:</p>
+<ol type="1">
+<li><p>Incidence: number of cases in a specified time period</p></li>
+<li><p>Prevalence: number of people in a population who have a disease at a given point in time</p></li>
+</ol>
+<p>The two concepts are different but connected in that each incident case enters a prevalence pool and remains there until either recovery or death occurs, while prevalence depends on incidence and duration, i.e.&nbsp;Prevalence <span class="math inline">\(=\)</span> incidence <span class="math inline">\(\times\)</span> average duration. As a result, if recovery and deaths are low, even a low incidence can produce a high prevalence. Diseases with large incidence rates may have low prevalence if they are rapidly fatal.</p>
+<p>Another popular measure is the Risk (proportion) which is defined as the ratio between the number of subjects with event of interest (<span class="math inline">\(x\)</span>) and the total number of subjects at risk (<span class="math inline">\(n\)</span>), i.e.&nbsp;<span class="math inline">\(\frac{x}{n}\)</span>. As an example, let’s consider an hypothetical cohort study where <span class="math inline">\(7989\)</span> men at risk of stroke were followed for <span class="math inline">\(12\)</span> years and interest was to understand whether smoking was a risk factor (exposure) for the event stroke (outcome). Consider the hypothetical output from the study being represented in <a href="#tbl-stroke" class="quarto-xref">Table&nbsp;1</a>.</p>
+<div id="tbl-stroke" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-stroke-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-stroke-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code>             Smok - Yes Smok - No Total
+Stroke - Yes        171       117   288
+Stroke - No        3264      4437  7701
+Total              3435      4554  7989</code></pre>
+</div>
+</div>
 </figure>
 </div>
-<p>Hello guys, I hope everything is well with you and that you had some nice Easter break (at least I did). Personally, I really needed this break as I was quite tired and without energy due to the heavy workload in the past months. Now I feel refreshed and ready to start anew (let’s see how long this can last). Anyway, today I wanted to give some updates about what is up for me in the upcoming months as it has been a while that I have not made a post like this.</p>
-<p>First of all, I am happy to announce that my working paper has been accepted fot discussion at <a href="https://www.eur.nl/en/events/lolahesg-2023-05-25">lolaHESG</a>, which is the corresponding Dutch conference to the popular Health Economics Study Group conference in the UK, dedicated to researchers involved in health economics’ topics. I already attened last year’s edition, held in Maastricht, which was a blast. Amazing people and colleagues to talk to, nice food and accommodation, and most importantly lots of different presentations to attend and opening up of new connections and work relationships. Similarly, to last year, also for this year I am going to present some on-going work focussed on the modelling of health economics trial-based data which takes inspriation from <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510">one of my most recently published papers</a> about the use of longitudinal linear mixed models for the analysis of health economics trial data. The paper was a simple introduction to practitioners to the use and specification of mixed models for the analysis of trial-based health economics data, with a practical illustration on how to specify the models in software such as <code>STATA</code> or <code>R</code>, full code available on my <a href="https://github.com/AnGabrio/Code/tree/master/lmm_in_CEA">GitHub</a>. In the work I am going to present at lolaHESG, I hope can start from this introductory and applied paper and perform some simulations to assess the performance of the proposed methods across different missingness and data structure scenarios. It takes a bit of time but I think it will definitely be worth it, at least so that I can get some feedback form the other attendees on how to extend the work further (perhaps for a future paper). I am finalising the work in these days but I need to hurry up as the deadline for the submission of the full paper is the end of this week, I hope I can make it! I also have some nice ideas to further extend the work but I need to have some feedback on what I have done so far first.</p>
-<p>Second, and a bit unrelated to what I said, I wanted to breifly comment a recent tweet from Gelman</p>
-<p></p><div id="tweet-32675"></div><script>tweet={"url":"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657","author_name":"Andrew Gelman et al.","author_url":"https:\/\/twitter.com\/StatModeling","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003E4 different meanings of p-value (and how my thinking has changed) \u003Ca href=\"https:\/\/t.co\/xY7vFX3IYf\"\u003Ehttps:\/\/t.co\/xY7vFX3IYf\u003C\/a\u003E\u003C\/p\u003E&mdash; Andrew Gelman et al. (@StatModeling) \u003Ca href=\"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657?ref_src=twsrc%5Etfw\"\u003EApril 14, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-32675").innerHTML = tweet["html"];</script><p></p>
-<p>which I find it extremely interesting from a purely statistical perspective (sorry health economist audience!). The tweet links back to his blog on a post about a discussion on the concept and definition of the term p-value under a classical statistical framework which, unlike what we are told in basic statistics course, is not so clear-cut across all scenarios. Indeed, he refers to four different alternative definitions of p-values, which vary depending on the specific <em>quantity</em> the researcher refers to with the concept of p-value. In some scenarios, and typically these are the cases encountered in basic analysis problems, these definitions coincide and we have our usual description of a p-value. However, when we go outside such simple scenarios and focus more on what we mean by the term p-value, e.g.&nbsp;based on an test statistic or family of hypothesis tests. This is very interesting to me as the already quite confusing concept of a p-value and its relevance in the context of hypothesis testing framework is further subjected to easy misunderstandings. The whole discussion is <strong>about how can we define in an unique way the concept of p-value</strong> and the answer, as it usually is in these cases, is that there is no unique definition as it depends on what we mean by the quantity that we define with p-value, e.g.&nbsp;probability statement or a general summary of the data without any probabilistic meaning attached to it. As also Gelman points out in his post, also my thinking about p-values has changed over time. From necessary evils to be used to achieve some statistical conclusions about the likely existence of an effect to until confusing terms that people tend to misinterpret and based on which no critical decision should be based blindly. Regardless of this rumble of thoughts about p-values, I too think that it is not a problem that p-values are used in their common interpretation even though a general an unique definition for such term may not be possible. What is important I feel is that people are aware of the possibly confusing term that a p-value is and that they need to not blindly trust and interpret such values as if they were true statements, as what is meant by such statement may not be fully clear from the start.</p>
-<p>Let’s think careful when we do data analysis!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://gifer.com/en/1qsy.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p>We can see that the overall risk among smokers is computed as: <span class="math inline">\(\frac{171}{3435}=0.049\)</span>.</p>
+<p>Another summary measure for binary outcomes are the odds, which are defined as the ratio between the number of subjects with event of interest (<span class="math inline">\(x\)</span>) and the difference between the total number of subjects at risk and those with the event of interest (<span class="math inline">\(n-x\)</span>), that is <span class="math inline">\(\frac{x}{(n-x)}\)</span>. Convenient mathematical properties of this measure ensure that, even when the risk of disease within exposure group is distorted, they can still work when using relative measures of comparison. Going back to the example in <a href="#tbl-stroke" class="quarto-xref">Table&nbsp;1</a>, we can see that the odds of having a stroke for smokers are: <span class="math inline">\(\frac{171}{3435-171}=0.05\)</span>.</p>
+<p>It is important to mention that there is a direct relation between odds and risk since: Risk <span class="math inline">\(= \frac{x}{n}\)</span> and odds <span class="math inline">\(=\frac{x}{(n-x)}\)</span>, which means we can define odds <span class="math inline">\(= \frac{\text{risk}}{1-\text{risk}}\)</span> and risk <span class="math inline">\(= \frac{\text{odds}}{(1+\text{odds})}\)</span>.</p>
+<p>Another summary measure for binary outcomes is the rate, usually applicable to follow-up studies. Indeed, its computation requires the calculation of person time, i.e.&nbsp;the time a person remained in the study (e.g.&nbsp;until event of interest occurred) and the sum over all subjects time, i.e.&nbsp;rate <span class="math inline">\(= \frac{\text{number of subjects with event of interest}}{\text{total time at risk by the study population}}\)</span>. As an example, let’s consider an hypothetical follow-up study over a period of five years and that we record for each of the four persons enrolled in the study whether the event “disease” has occurred. Imagine that over the study period we only observe a single person experiencing the event of the end of year 2, while for all the other three no event was observed until the end of the study period: two of them completed the study with no event, while one was lost to follow up at year 4. Thus, we can compute the rate as <span class="math inline">\(= \frac{1}{5+5+4+2}=\frac{1}{16}=0.0625\)</span>. An advantage of using rates over risks is that subjects in the study may not be followed for equal lengths of time, which may make risks and odds distorted measures.</p>
+</section>
+<section id="measures-of-differenceassociation" class="level2">
+<h2 class="anchored" data-anchor-id="measures-of-differenceassociation">Measures of difference/association</h2>
+<p>Many summary measures are used to compare disease/health outcome risks/rates between groups under the assumption that risks/rates in one group (i.e.&nbsp;exposed) are comparable to those in another group (i.e unexposed). Exposure may be defined according to some specific “risk factors” suspected of causing the disease or of protecting against it. To investigate association between risk factors and disease, it is common to compare the incidence of disease among exposed with respect to that among unexposed. There are mainly two types of these measures: relative (e.g.&nbsp;ratio) or absolute (difference).</p>
+<p>Relative measure estimate the magnitude of an association between exposure and disease, indicating how much more likely the exposed group is to develop disease than the unexposed group. Often, a value of <span class="math inline">\(1\)</span> for these measures means no difference between group, while a value above/below <span class="math inline">\(1\)</span> shows an adverse/protective effect of the exposure. The most commonly used measures are:</p>
+<ol type="1">
+<li><p>Risk ratio <span class="math inline">\(= \frac{\text{risk in exposed group}}{\text{risk in unexposed group}}\)</span></p></li>
+<li><p>Odds ratio <span class="math inline">\(= \frac{\text{odds in exposed group}}{\text{odds in unexposed group}}\)</span></p></li>
+<li><p>Rate ratio <span class="math inline">\(= \frac{\text{rate in exposed group}}{\text{rate in unexposed group}}\)</span></p></li>
+</ol>
+<p>These measures only provide point estmiates for the quantity of interest but quantification of the uncertainty surrounding these estimates is also often of great importance. Each of them has a different way to compute these measures of uncertainty, often represented in terms of some form of <span class="math inline">\(95\%\)</span> confidence interval. Consider the generic data in tabular format shown in <a href="#tbl-ci" class="quarto-xref">Table&nbsp;2</a></p>
+<div id="tbl-ci" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code>           Exposure No Exposure
+Disease    "a"      "b"        
+No Disease "c"      "d"        </code></pre>
+</div>
+</div>
 </figure>
 </div>
+<p>We may compute a <span class="math inline">\(95\%\)</span> confidence interval for a risk ratio (RR) using the following quantities:</p>
+<ol type="1">
+<li><p>RR <span class="math inline">\(= \frac{a}{(a+c)}/\frac{b}{(b+d)}\)</span></p></li>
+<li><p>SE log RR <span class="math inline">\(= \sqrt{\frac{1}{a}-\frac{1}{(a+c)}+\frac{1}{b}-\frac{1}{(b+d)}}\)</span></p></li>
+</ol>
+<p>and the final interval is obtained using Normal sampling distribution approximations as: estimated log RR <span class="math inline">\(\pm 1.96 \times\)</span> SE of estimated log RR. Note that by taking the exponent of the CI limits for log RR, it is possible to obtain the corresponding limits for RR.</p>
+<p>We may compute a <span class="math inline">\(95\%\)</span> confidence interval for an odds ratio (OR) using the following quantities:</p>
+<ol type="1">
+<li><p>OR <span class="math inline">\(= \frac{a}{c}/\frac{b}{d}\)</span></p></li>
+<li><p>SE log OR <span class="math inline">\(= \sqrt{\frac{1}{a}+\frac{1}{b}+\frac{1}{c}+\frac{1}{d}}\)</span></p></li>
+</ol>
+<p>and the final interval is obtained using Normal sampling distribution approximations as: estimated log OR <span class="math inline">\(\pm 1.96 \times\)</span> SE of estimated log OR. Note that by taking the exponent of the CI limits for log OR, it is possible to obtain the corresponding limits for OR.</p>
+<p>We may compute a <span class="math inline">\(95\%\)</span> confidence interval for an rate ratio using the following quantities:</p>
+<ol type="1">
+<li><p><span class="math inline">\(d_1 =\)</span> number of deaths in exposed group</p></li>
+<li><p><span class="math inline">\(d_0 =\)</span> number of deaths in unexposed group</p></li>
+<li><p>SE log rate ratio <span class="math inline">\(= \sqrt{\frac{1}{d_1}+\frac{1}{d_0}}\)</span></p></li>
+</ol>
+<p>and the final interval is obtained using Normal sampling distribution approximations as: estimated log rate ratio <span class="math inline">\(\pm 1.96 \times\)</span> SE of estimated log rate ratio. Note that by taking the exponent of the CI limits for log rate ratio, it is possible to obtain the corresponding limits for rate ratio.</p>
+<p>Note that, in general, risk ratio are easier to interpret than OR or rate ratio since they are effectively a measure of relative risk, which is true for the other two measures only when the disease are very rare.</p>
+<p>A limitation of these relative measures is that they fail to distinguish between huge and trivial exposure effects, i.e.&nbsp;the same relative risk measure may be computed using quite different risk differences between the groups. For example: 1) risk exposed <span class="math inline">\(=0.096\)</span> and unexposed <span class="math inline">\(=0.028\)</span> so that RR <span class="math inline">\(=3.42\)</span>; 2) risk exposed <span class="math inline">\(=0.96\)</span> and unexposed <span class="math inline">\(=0.28\)</span> so that RR <span class="math inline">\(=3.42\)</span>; 1) risk exposed <span class="math inline">\(=0.0000096\)</span> and unexposed <span class="math inline">\(=0.0000028\)</span> so that RR <span class="math inline">\(=3.42\)</span>.</p>
+</section>
+<section id="absolute-measures" class="level2">
+<h2 class="anchored" data-anchor-id="absolute-measures">Absolute measures</h2>
+<p>When interest is in estimating the extent to which adverse outcomes would disappear if we remove exposure, then relative measures are not enough and we also want to estimate the so-called risk/rate difference between the groups, i.e.&nbsp;difference <span class="math inline">\(=\)</span> risk/rate in exposed group <span class="math inline">\(-\)</span> risk/rate in unexposed group. Usually, when the difference takes value <span class="math inline">\(0\)</span> means absence of a difference between the groups, while when it is above/below <span class="math inline">\(0\)</span> it means presence of a greater/smaller risk in the exposed group.</p>
+<p>Absolute measures are often interpreted as estimates of the amount of risk/rate that is attributable to the exposure. Similarly to relative measures, also point estimates of absolute measures may be accompanied by measures of uncertainty. For example, SE for risk difference may be directly computed as: <span class="math inline">\(\sqrt{R_1\times(1-R_1)/n_1+R_2\times(1-R_2)/n_2}\)</span>, where <span class="math inline">\(R_1\)</span> and <span class="math inline">\(n_1\)</span> are the risk and number of individuals in the exposed group, while <span class="math inline">\(R_2\)</span> and <span class="math inline">\(n_2\)</span> are the risk and number of individuals in the unexposed group.</p>
+<p>We can also see that, unlike relative measures, absolute measures such as the risk difference (RD) are able to distinguish between different magnitudes of exposure effects. Using the examples above: 1) risk exposed <span class="math inline">\(=0.096\)</span> and unexposed <span class="math inline">\(=0.028\)</span> so that RD <span class="math inline">\(=0.068\)</span>; 2) risk exposed <span class="math inline">\(=0.96\)</span> and unexposed <span class="math inline">\(=0.28\)</span> so that RD <span class="math inline">\(=0.68\)</span>; 1) risk exposed <span class="math inline">\(=0.0000096\)</span> and unexposed <span class="math inline">\(=0.0000028\)</span> so that RD <span class="math inline">\(=0.0000068\)</span>.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<ol type="a">
+<li><p>Odds ratio, rate ratio, relative risk compare the relative likelihood of an event occurring between two groups.</p></li>
+<li><p>Relative risk is easier to interpret but some designs prevent its calculation.</p></li>
+<li><p>If the disease is rate, then the three relative measures are all very similar to each other.</p></li>
+<li><p>Differences in risk and rates can also be measured in absolute terms, depending on the type of study.</p></li>
+<li><p>It may be useful to estimate both relative and absolute measures as they convey different types of information.</p></li>
+</ol>
+<p>So, what do you think folks? did you find this sort of quick summary useful? I hope so as I have enjoyed myself in writing up this post. Perhaps I will follow this with more posts like this in the future. Till next time!</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -644,5 +777,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
