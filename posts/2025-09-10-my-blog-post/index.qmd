@@ -1,0 +1,150 @@
+---
+title: "Basic medical statistics exercises"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2025-09-10
+categories: [Quarto, R, Academia, Medical Statistics, Exercises] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+bibliography: references.bib
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello everybody and welcome back to my blog. Since I have just come back from my summer break I have many things to catch up to, which means that today's post will be a bit shorter than usual. Thus, I will take advantage of the fact that in my last post I have introduced the topic of medical statistics and some popular statistical measures in the field and discuss here some numeric exercises about those measures. You can think of these exercises as a sort of way to test your knowledge and see whether the computation of the measures is clear to you. If you are lost at any point, I refer you back to my previous post for a brief review of the theoretical concepts!
+Without further ado, let's dive into these exercises. If you are interested in these concepts, try first to answers the problems without looking at the results and then check if you did it right. This way you will be sure whether you fully understand the topic!
+
+# Exercises
+
+## Problem 1 {#sec-prob1}
+
+As a hypothetical example, consider a group of $30,000$ initially disease-free individuals observed for $10$ years, after which $50$ were diseased. The information is summarised in @tbl-ex1.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex1
+
+#generate data
+dis_y <- c(30,20,50)
+dis_n <- c(9970,19980,29950)
+total <- c(10000,20000,30000)
+dis_tab <- rbind(dis_y,dis_n,total)
+colnames(dis_tab) <- c("Exposed - Yes","Exposed - No","Total")
+rownames(dis_tab) <- c("Disease - Yes","Disease - No","Total")
+dis_tab
+```
+
+  a. Calculate the overall risk of disease in this group of subjects
+  
+  b. Calculate the risk ratio for exposed Vs unexposed individuals with $95\%$ confidence intervals
+  
+  c. Calculate the odds ratio for exposed Vs unexposed individuals and the $95\%$ confidence intervals
+  
+  d. Interpret the results
+  
+  e. What additional information do you need in order to calculate the disease rates in each group?
+
+## Problem 2 {#sec-prob2}
+
+In a group of $50000$ individuals, $20\%$ are exposed to a hazardous agent. Data on disease status obtained for exposed and unexposed individuals are shown in @tbl-ex2.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex2
+
+#generate data
+dis_y <- c(3000,5000,8000)
+dis_n <- c(7000,35000,42000)
+total <- c(10000,40000,50000)
+dis_tab <- rbind(dis_y,dis_n,total)
+colnames(dis_tab) <- c("Exposed - Yes","Exposed - No","Total")
+rownames(dis_tab) <- c("Disease - Yes","Disease - No","Total")
+dis_tab
+```
+
+The risk of disease in the exposed and unexposed groups are $0.3$ and $0.125$ respectively. The overall risk of the disease is $0.16$, the risk ratio is $2.4 (95\% CI: 2.31;2.50)$, and the odds ratio is $3 (95\% CI: 2.85;3.16)$.
+
+  a. How good is the agreement between the risk ratio and the odds ratio compared to that in @sec-prob1?
+  
+  b. Calculate the risk difference with $95\%$ CI
+  
+  c. Interpret the results
+
+## Problem 3 {#sec-prob3}
+
+A group of $15$ patients suffering from brain cancer was followed for a period of $500$ days to observe whether they suffered a relapse or not. Three patients did not suffer a relapse during the follow-up time. Data on whether a patient suffered a relapse or not and the follow-up time for each patient are shown in @tbl-ex3.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex3
+
+#generate data
+subject <- seq(1:15)
+relapse <- c("Yes","No","No","Yes","Yes","No","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes")
+ttr <- c(355,500,500,368,228,500,302,62,271,28,183,314,40,151,105)
+brain_c.df <- data.frame(subject,relapse,ttr)
+colnames(brain_c.df) <- c("Subject","Relapse","Time to relapse (days)")
+brain_c.df
+```
+
+  a. Calculate the rate of relapse
+  
+  b. Interpret the results
+
+
+
+
+# Solutions
+
+## Problem 1
+
+  a. The overall risk is computed as: $\text{Risk}=\frac{50}{30000}=0.0017$
+  
+  b. The risk ratio is computed as: $\text{RR}=\frac{30}{10000}/\frac{20}{20000}=3$ while the corresponding $95\%$ CI is calculated by taking the exponential of the limits: $\log \text{RR}\pm 1.96 \times \text{SE} \log \text{RR}$, where $\text{SE} \log \text{RR}=\sqrt{[1/30+1/(10000)+1/20+1/(20000)]}=0.2889$.  Generating the limits and taking their exponential, we have: $95\% \text{CI}=[1.70;5.28]$
+  
+  c. The odds ratio is computed as: $\text{OR}=\frac{30}{9970}/\frac{20}{19980}=3.01$ while the corresponding $95\%$ CI is calculated by taking the exponential of the limits: $\log \text{OR}\pm 1.96 \times \text{SE} \log \text{OR}$, where $\text{SE} \log \text{OR}=\sqrt{[1/30+1/20+1/9970+1/19980]}=0.2889$. Generating the limits and taking their exponential, we have: $95\% \text{CI}=[1.71;5.30]$
+  
+  d. Both odds and risk are higher in the exposed group, i.e. they are about three times greater than in the unexposed group. The CIs do not include $1$ suggesting the risk is significantly greater in the exposed group
+  
+  e. To calculate disease rates we need individual follow-up times
+  
+## Problem 2
+
+  a. The agreement between the OR and RR is better in @sec-prob1 because the disease is rarer, i.e. $0.17\%$ Vs $16\%$
+  
+  b. The risk difference is computed as: $\text{RD}=0.3-0.125=0.175$ while the corresponding $95\%$ CI is calculated as: $\text{RD}\pm 1.96 \times \text{SE RD}$, where $\text{SE RD}=\sqrt{0.3\times (1-0.3)/10000 + 0.125\times (1-0.125)/40000}=0.00487$. Thus we have: $95\% \text{CI}=[0.165;0.185]$
+  
+  c. $17.5$ excess events per $100$ people in the exposed group compared to $100$ people in the unexposed group
+
+
+## Problem 3
+
+  a. Given that we have a total of $12$ subjects who experienced the event (death) and a total follow-up time of $3907$ days, we can compute the rate of relapse as: $\text{Rate}=\frac{12}{3907}=0.0031$ events per day 
+  
+  b. We expect $1.12$ events per year
+
+
+So, what do you think? were you able to answers the problems without looking at the solutions? if yes, then you should have grasped a really good understanding of the topic!
+
+
+Before concluding the post (and going back to preparing my educational material), I wanted to mention that I will attend [Bayes Conference 2025](https://www.bayes-pharma.org/bayes-2025/), which this year will be held in Leiden (NL). To be honest, I think I only attended this conference once as a PhD student so I am not really sure what to expect. I know that the conference is a bit industry-oriented with many representative of pharmaceuticals or consultancy companies in the field. However, I also know of a few academics attending it and I look forward to give the presentation about my most recent work (hopefully published soon!). The conference will be held next month, between October 22-24 and is preceded by a workshop on Bayesian statistics in prediction modelling, and is hosted in a "nearby" Dutch city. This makes things a bit easier for me to attend it since it will placed during full teaching period. I will only need to take a couple of leave days and do not need to ask any colleagues to replace me in my teaching. I am looking forward to attend the conference and perhaps met a couple of people I still remember, which is always the best part of any conference.
+
+Well, that's all for me for today and, as it is common to say, I will see you next time!
+
