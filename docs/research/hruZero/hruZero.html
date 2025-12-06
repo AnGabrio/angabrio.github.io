@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2023-04-10">
 
-<title>Some updates … – Andrea Gabrio</title>
+<title>A Bayesian modelling framework for health care resource use and costs in trial-based economic evaluations – Andrea Gabrio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -43,6 +41,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,6 +71,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -134,50 +163,30 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#modelling-framework" id="toc-modelling-framework" class="nav-link" data-scroll-target="#modelling-framework">Modelling Framework</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Some updates …</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">Quarto</div>
-    <div class="quarto-category">R</div>
-    <div class="quarto-category">Academia</div>
-    <div class="quarto-category">publication</div>
-    <div class="quarto-category">conference</div>
-  </div>
-  </div>
+<h1 class="title">A Bayesian modelling framework for health care resource use and costs in trial-based economic evaluations</h1>
+</div>
 
 
-<div class="quarto-title-meta-author">
-  <div class="quarto-title-meta-heading">Author</div>
-  <div class="quarto-title-meta-heading">Affiliation</div>
-  
-    <div class="quarto-title-meta-contents">
-    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
-  </div>
-  <div class="quarto-title-meta-contents">
-        <p class="affiliation">
-            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
-            Maastricht University
-            </a>
-          </p>
-      </div>
-  </div>
 
 <div class="quarto-title-meta">
 
-      
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">April 10, 2023</p>
-    </div>
-  </div>
+    
   
     
   </div>
@@ -187,24 +196,34 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Building on the existent literature, we propose a novel Bayesian framework for the modelling of HRU data in trial-based economic evaluations, which allows a flexible model specification and the handling of missing data at HRU level. The choice of a Bayesian approach provides practical advantages compared to a standard frequentist framework, including: 1) use of a modular structure to increase model complexity in a relatively easy way; 2) natural interpretation of cost-effectiveness results in probabilistic terms; 3) direct implementation of Probabilistic Sensitivity Analysis (PSA), consisting in the quantification of the impact of parameters’ uncertainty on the economic conclusions. We show the benefits of using our framework on a real case study, with a focus on appropriately modelling partially-observed HRU values and its implications in terms of inferences and, crucially, cost-effectiveness results.</p>
+</section>
+<section id="modelling-framework" class="level1">
+<h1>Modelling Framework</h1>
+<p>We first present our modelling framework building upon previously-introduced approaches, starting at the level of total costs and QALYs or costs and utilities at different times22;23, and then extend these to account for partially-observed HRU data. The framework allows for typical features of cost-effectiveness data (e.g.&nbsp;skewness, correlation, structural values) while also handling missing HRU data without the need to rely on ad-hoc assumptions (e.g.&nbsp;assumed zeros).</p>
+<p>The framework allows the modelling of different types of variables, namely HRU and HrQol data, costs and utilities at each time, and total costs and QALYs. From a modelling perspective, it is often desirable to focus at the most aggregated level (e.g.&nbsp;cross-sectional modelling instead of longitudinal). However, in reality, the occurrence of missing values at the most disaggregated level (i.e.&nbsp;HRU and HrQol) is unavoidable, with proportions of unobserved values which are usually substantial5;6. This introduces the problem that individual-level cost values may not be computed and, when item non-response occurs, modelling at aggregated levels may result in considerable loss of information</p>
+<p><a href="#fig-framework" class="quarto-xref">Figure&nbsp;1</a> shows the joint outcomes distribution, expressed in terms of a conditional distributions for utilities, non-zero and structural zero HRUs at time <span class="math inline">\(j\)</span> given outcomes at time <span class="math inline">\(j−1\)</span>, respectively indicated with a blue, red and green line. The parameters indexing the corresponding distributions or “modules” are indicated with different Greek letters, while <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> denote the individual and time index. The black, magenta and green solid arrows show the dependence relationships between the parameters within and between the models and between times, respectively. The dashed arrows denote deterministic relationships.</p>
+<div id="fig-framework" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="60%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="model_diag_template_DI_v2.jpg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Schematic representation of the modelling framework for handling missing HRUs in trial-based CEA.
+</figcaption>
 </figure>
 </div>
-<p>Hello guys, I hope everything is well with you and that you had some nice Easter break (at least I did). Personally, I really needed this break as I was quite tired and without energy due to the heavy workload in the past months. Now I feel refreshed and ready to start anew (let’s see how long this can last). Anyway, today I wanted to give some updates about what is up for me in the upcoming months as it has been a while that I have not made a post like this.</p>
-<p>First of all, I am happy to announce that my working paper has been accepted fot discussion at <a href="https://www.eur.nl/en/events/lolahesg-2023-05-25">lolaHESG</a>, which is the corresponding Dutch conference to the popular Health Economics Study Group conference in the UK, dedicated to researchers involved in health economics’ topics. I already attened last year’s edition, held in Maastricht, which was a blast. Amazing people and colleagues to talk to, nice food and accommodation, and most importantly lots of different presentations to attend and opening up of new connections and work relationships. Similarly, to last year, also for this year I am going to present some on-going work focussed on the modelling of health economics trial-based data which takes inspriation from <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510">one of my most recently published papers</a> about the use of longitudinal linear mixed models for the analysis of health economics trial data. The paper was a simple introduction to practitioners to the use and specification of mixed models for the analysis of trial-based health economics data, with a practical illustration on how to specify the models in software such as <code>STATA</code> or <code>R</code>, full code available on my <a href="https://github.com/AnGabrio/Code/tree/master/lmm_in_CEA">GitHub</a>. In the work I am going to present at lolaHESG, I hope can start from this introductory and applied paper and perform some simulations to assess the performance of the proposed methods across different missingness and data structure scenarios. It takes a bit of time but I think it will definitely be worth it, at least so that I can get some feedback form the other attendees on how to extend the work further (perhaps for a future paper). I am finalising the work in these days but I need to hurry up as the deadline for the submission of the full paper is the end of this week, I hope I can make it! I also have some nice ideas to further extend the work but I need to have some feedback on what I have done so far first.</p>
-<p>Second, and a bit unrelated to what I said, I wanted to breifly comment a recent tweet from Gelman</p>
-<p></p><div id="tweet-36185"></div><script>tweet={"url":"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657","author_name":"Andrew Gelman et al.","author_url":"https:\/\/twitter.com\/StatModeling","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003E4 different meanings of p-value (and how my thinking has changed) \u003Ca href=\"https:\/\/t.co\/xY7vFX3IYf\"\u003Ehttps:\/\/t.co\/xY7vFX3IYf\u003C\/a\u003E\u003C\/p\u003E&mdash; Andrew Gelman et al. (@StatModeling) \u003Ca href=\"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657?ref_src=twsrc%5Etfw\"\u003EApril 14, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-36185").innerHTML = tweet["html"];</script><p></p>
-<p>which I find it extremely interesting from a purely statistical perspective (sorry health economist audience!). The tweet links back to his blog on a post about a discussion on the concept and definition of the term p-value under a classical statistical framework which, unlike what we are told in basic statistics course, is not so clear-cut across all scenarios. Indeed, he refers to four different alternative definitions of p-values, which vary depending on the specific <em>quantity</em> the researcher refers to with the concept of p-value. In some scenarios, and typically these are the cases encountered in basic analysis problems, these definitions coincide and we have our usual description of a p-value. However, when we go outside such simple scenarios and focus more on what we mean by the term p-value, e.g.&nbsp;based on an test statistic or family of hypothesis tests. This is very interesting to me as the already quite confusing concept of a p-value and its relevance in the context of hypothesis testing framework is further subjected to easy misunderstandings. The whole discussion is <strong>about how can we define in an unique way the concept of p-value</strong> and the answer, as it usually is in these cases, is that there is no unique definition as it depends on what we mean by the quantity that we define with p-value, e.g.&nbsp;probability statement or a general summary of the data without any probabilistic meaning attached to it. As also Gelman points out in his post, also my thinking about p-values has changed over time. From necessary evils to be used to achieve some statistical conclusions about the likely existence of an effect to until confusing terms that people tend to misinterpret and based on which no critical decision should be based blindly. Regardless of this rumble of thoughts about p-values, I too think that it is not a problem that p-values are used in their common interpretation even though a general an unique definition for such term may not be possible. What is important I feel is that people are aware of the possibly confusing term that a p-value is and that they need to not blindly trust and interpret such values as if they were true statements, as what is meant by such statement may not be fully clear from the start.</p>
-<p>Let’s think careful when we do data analysis!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://gifer.com/en/1qsy.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
-</div>
+<p>The proposed framework more challenging to implement compared to the modelling of QALYs/Total costs and utilities/costs due to multiple HRU variables, each consisting in a two-part mixture for the non-zero and structural zero components. However, by defining the model at the most disaggregated level, the framework provides the most efficient way to handle partially-observed HRUs. This may become a considerable advantage when applied to questionnaire data affected by item non-response and outweigh the additional complexity required to fit these models.</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>We have presented a general modelling framework to handle item-level HRU missingness without requiring any ah-hoc imputation. The framework takes advantage of the Bayesian setting to handle different features of the data while also directly quantifying the impact of missingness uncertainty on cost-effectiveness results. Our approach represents an improvement with respect to the current practice and can be implemented in a relatively easy way using freely available software.</p>
+<p><span style="text-align: center; font-size: 2rem"><a href="https://journals.sagepub.com/doi/full/10.1177/0272989X251376026"><i class="fa-solid fa-file-pdf" aria-label="file-pdf"></i></a> &nbsp; <a href="https://github.com/AnGabrio/Code/tree/master/hruZero"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -624,5 +643,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
