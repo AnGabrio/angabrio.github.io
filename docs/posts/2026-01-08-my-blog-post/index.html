@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2026-01-08">
+
+<title>Missing Data in Health Studies – Andrea Gabrio</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andrea Gabrio</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../teaching.html"> 
+<span class="menu-text">Teaching</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#why-missingness-matters" id="toc-why-missingness-matters" class="nav-link" data-scroll-target="#why-missingness-matters">Why missingness matters?</a></li>
+  <li><a href="#different-types-of-missingness-mechanism" id="toc-different-types-of-missingness-mechanism" class="nav-link" data-scroll-target="#different-types-of-missingness-mechanism">Different types of missingness mechanism</a></li>
+  </ul></li>
+  <li><a href="#handling-missing-data-in-analyses" id="toc-handling-missing-data-in-analyses" class="nav-link" data-scroll-target="#handling-missing-data-in-analyses">Handling missing data in analyses</a>
+  <ul class="collapse">
+  <li><a href="#complete-case-analysis-cca" id="toc-complete-case-analysis-cca" class="nav-link" data-scroll-target="#complete-case-analysis-cca">Complete Case Analysis (CCA)</a></li>
+  <li><a href="#single-imputation-si" id="toc-single-imputation-si" class="nav-link" data-scroll-target="#single-imputation-si">Single Imputation (SI)</a></li>
+  <li><a href="#multiple-imputation-mi" id="toc-multiple-imputation-mi" class="nav-link" data-scroll-target="#multiple-imputation-mi">Multiple Imputation (MI)</a></li>
+  <li><a href="#how-many-imputations" id="toc-how-many-imputations" class="nav-link" data-scroll-target="#how-many-imputations">How many imputations?</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Missing Data in Health Studies</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Medical Statistics</div>
+    <div class="quarto-category">Missing Data</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 8, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Happy 2026 dear readers! I hope you had a nice Xmas period and that you are ready for starting the upcoming year in the best way for you. I had a somewhat decent holiday break and am now ready to get back to business! January is usually very packed with stuff to do, especially in terms of meetings and planning. In any case, I wanted to begin the new year on my blog with an argument that links the current series of posts about medical statistics and my favorite research topic: <strong>missing data</strong>. I promise I keep things short, as this posts are not the place to discuss all details about missing data, but would still like to provide some useful information for those who are interested in the topic (or <em>have</em> to deal with it).</p>
+<p>Perhaps you may be wondering why I chose the thumbnail picture of this post? Well, if you have not recognised the man shown, for the moment I can tell you that he, i.e.&nbsp;<em>Donald Rumsfeld</em>, was the US Defence Secretary who became famous for his legendary remarks, one of which I will use to explain a key concept linked to missingness! Interested? then go ahead and read the post!</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Missing data are common in health studies, both in the context of observational and experimental designs, and can have an important role in affecting the conclusions of a study depending on whether the appropriate methods have been used to deal with me. A critical aspect that can inform the choice of the method, among others, is to look whether missingness affects only the outcome variable, only exploratory variables, or both types of variables.</p>
+<p>Let’s consider two examples:</p>
+<ol type="1">
+<li><p><strong>Observational study</strong>: a cohort study of <span class="math inline">\(199\)</span> cancer patients in palliative care, who were interviewed up to five times over a <span class="math inline">\(12\)</span>-month period <span class="citation" data-cites="king2008relationship">(<a href="#ref-king2008relationship" role="doc-biblioref">King et al. 2008</a>)</span>. The outcome variable of the study is some form of <em>continuity of care score</em>, and interest lies in investigating the association between the outcome and the following exploratory variables: <em>supportive care need score</em>, <em>mental health problem</em>, and <em>cancer type</em>. In this study, missingness affected both outcome and explanatory variables, with about <span class="math inline">\(50\%\)</span> of the patients having complete data and with about <span class="math inline">\(30\%\)</span> of assessments having missing outcome values.</p></li>
+<li><p><strong>Trial</strong>: a randomised clinical trial directed at evaluating the effectiveness of reducing weight in obese patients through a habit-formation behavioural intervention grounded on providing them with a series of <span class="math inline">\(10\)</span> “top” tips <span class="citation" data-cites="beeken2017brief">(<a href="#ref-beeken2017brief" role="doc-biblioref">Beeken et al. 2017</a>)</span>. The trial compared two groups: an intervention group receiving tips to reduce weight, and a control group receiving usual care. The primary outcome was <em>weight change</em> (Kg) measured at <span class="math inline">\(3\)</span> weeks from baseline. In this study, missingness lead to a <span class="math inline">\(28\%\)</span> dropout which caused people to not attend their follow-up weight visits.</p></li>
+</ol>
+<section id="why-missingness-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-missingness-matters">Why missingness matters?</h2>
+<p>There are few important reasons one should be “afraid” of having non-negligible amount of missing data in their study. Among the most critical, there are: missing data negatively affects the <em>power</em> of the study; and all statistical methods rely on some <em>assumptions</em> about the missing values. Depending on the analytical approach chosen to analyse the data, the occurrence of missingness can lead to: <em>biased estimates</em>, <em>biased standard errors</em> (resulting in incorrect p-values and confidence intervals), <em>inefficient estimates</em> (no full use of the data). It is therefore important to try to understand the process responsible for making these data missing, often referred to as the <strong>missing data mechanism</strong>. In order to derive “valid” inference, we need to have a reasonable idea about the mechanism underlying the occurrence of unobserved values.</p>
+<p>What is a missingness mechanism? well, this is the reason why I put the picture of Donald Rumsfeld in this post. We are going to use one of his many legendary remarks to help us understanding how a missingness mechanism can be defined and its implication for our analysis. Let’s directly start with the quote:</p>
+<p>“As we know, there are <strong>known knowns</strong>. There are things we know we know. We also know <strong>there are known unknowns</strong>. That is to say we know there are some things we do not know. But <strong>there are also unknown unknowns</strong>. The ones we do not know we do not know.” <span class="citation" data-cites="rumsfeld2002knowns">(<a href="#ref-rumsfeld2002knowns" role="doc-biblioref">Rumsfeld 2002</a>)</span>.</p>
+<p>We can use the above expression and apply it to the concept of missing data mechanism, following Rubin’s nomenclature, as follows: the things we know, <em>known knowns</em>, are the observed data (complete records); the things we know we do not know, <em>known unknowns</em>, are the missing data that occur randomly (<em>Missing Completely at Random</em> - MCAR) or that can be fully explained using the observed data (<em>Missing at Random</em> - MAR); the things we do not know we do not know, <em>unknown unknowns</em>, are the missing data that cannot be explained based on the current information we have (<em>Missing Not at Random</em> - MNAR). We now go a bit more technical on how we can define these different categories of missingness mechanisms.</p>
+</section>
+<section id="different-types-of-missingness-mechanism" class="level2">
+<h2 class="anchored" data-anchor-id="different-types-of-missingness-mechanism">Different types of missingness mechanism</h2>
+<p>Under a <strong>MCAR</strong> mechanism, we can express the probability of having a missing value as <strong>unrelated</strong> to the value of the variable itself or to any other variables in the data. The missing values are simply missing by chance and therefore are a random sample of all subjects in the study. This mechanism would imply, for example, that patients who do not complete their questionnaires on average have the same score and covariate values of those who completed them. A typical example of this situation occurs when by mistake a page of the questionnaire was not printed or a laboratory blood sample is accidentally dropped.</p>
+<p>Under a <strong>MAR</strong> mechanism, we can express the probability of having a missing value as <strong>related</strong> to an observed value of the variable itself (e.g.&nbsp;previously measured) or some other patient characteristics measured. In the second case, the mechanims is sometimes also referred to as a <em>Covariate dependent missingness mechanism</em>.</p>
+<p>Under a <strong>MNAR</strong> mechanism, we can express the probability of having a missing value as <strong>related</strong> to the (missing) value itself or some other unobserved patient characteristics, even after controlling for other observed variables in the analysis. An example of this would occur when a patient’s physical need deteriorates at a level that forces the patient to not complete the questionnaire, or individuals with high blood pressures are more likely to have their blood pressure recorded compared to other individuals with the same age.</p>
+<p>The importance of understanding the type of missingness mechanism at play is related to the fact that some assumptions are <strong>always</strong> required by statistical methods when analysing data affected by missingness. Typical test-based methods, e.g.&nbsp;t-tests or marginal models, assume MCAR, while likelihood-based methods, e.g.&nbsp;regression models, may assume MAR. However, none of the standard methods used in practice can be used to analyse the data under MNAR as they would lead biased estimates.</p>
+<p>A key consequence of the violations of the assumptions about the missingness mechanism made by the chosen methods is to obtain biased estimates, loss in efficiency and power. Possible strategies to have some idea about the plausibility of a given type of mechanism include: look at missing data patterns, compare proportions and reasons of missing data by variable of interest, identify predictors of missingness by variable of interest, look at baseline imbalances among those individuals with and without observed outcomes (in trials).</p>
+</section>
+</section>
+<section id="handling-missing-data-in-analyses" class="level1">
+<h1>Handling missing data in analyses</h1>
+<p>There are different possible strategies to handle missingness prior to the analysis stage of a study.</p>
+<ol type="1">
+<li>Drop patients having several predictors missing.</li>
+<li>Drop predictors is these are missing for most patients.</li>
+<li>Drop patients with information missing on important factors, such as demographic variables.</li>
+</ol>
+<p>Next, we need to define a strategy or method to handle the missing values at the analysis stage.</p>
+<section id="complete-case-analysis-cca" class="level2">
+<h2 class="anchored" data-anchor-id="complete-case-analysis-cca">Complete Case Analysis (CCA)</h2>
+<p>CCA restricts the analysis to subjects with no missing data, therefore implicitly assuming that subjects with incomplete information are not systematically different from the completers. As a result, CCA can provide unbiased estimates if the completers are a random sample of the original full sample - it assumes a <em>MCAR mechanism</em>. Key disadvantages of CCA is that it ignores possible systematic differences between completers and incomplete cases; leads to standard errors that are generally larger because less information is used; gets biased estimates if the reduced sample is not a random sample of the original full sample.</p>
+<p>In the context of MAR data, to obtain valid estimates using CCA, we have to include in the analysis the variables that are predictive of missingness. We can use, for example, logistic regression to identify predictors of missingness indicators: 0=observed, 1=missing. We can then include the identified predictors into the analysis as covariates. However, a possible drawback is that, in the presence of missing values in multiple variables, the need to explore missingness predictors for each variable can lead to a messy situation quite easily. In addition, when some missing covariate values occur, some for of “missing value imputation” is needed, which further complicates the analysis task.</p>
+</section>
+<section id="single-imputation-si" class="level2">
+<h2 class="anchored" data-anchor-id="single-imputation-si">Single Imputation (SI)</h2>
+<p>SI replaces a missing value with a given reasonable value, such as:</p>
+<ul>
+<li>Mean/mode of non-missing values for continuous/categorical variables</li>
+<li>best/worst value scenario</li>
+<li>baseline value</li>
+<li>last observed value (e.g.&nbsp;at the previous assessment)</li>
+</ul>
+<p>There a important disadvantages in using SI methods to deal with missingness. In general, any SI approach assumes that the replaced or “imputed” value corresponds exactly to the true unobserved value, thus leading to the calculation of underestimated standard errors. In addition, some specific methods, such as last value carried forward, assume that the unobserved value remains constant from the point of attrition to study completion (for dropout), potentially causing considerable bias in the estimates when such assumption is violated.</p>
+</section>
+<section id="multiple-imputation-mi" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-imputation-mi">Multiple Imputation (MI)</h2>
+<p>MI is one of the most advanced approaches to handle missingness and typically allows to obtain valid inferences under a MAR mechanism assumption, and essentially consists in combining results from a repeated use of single imputations.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mi_meth.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>We can break up the different steps forming MI into three distinct phases <span class="citation" data-cites="little2019statistical">(<a href="#ref-little2019statistical" role="doc-biblioref">Little and Rubin 2019</a>)</span>:</p>
+<ol type="1">
+<li><strong>Imputation step</strong>: missing values are filled in <span class="math inline">\(k=1,\ldots,K\)</span> times, with a value estimated by an appropriate imputation method.</li>
+<li><strong>Analysis step</strong>: each of the <span class="math inline">\(K\)</span> imputed values is separately combined with the observed data to generate <span class="math inline">\(K\)</span> distinct imputed data sets, which are then separately analysed using a chosen approach.</li>
+<li><strong>Pooling step</strong>: the <span class="math inline">\(K\)</span> estimates of interest derived from the analyses of the imputed data sets are combined using <em>Rubin’s rules</em> to obtain a pooled estimate.</li>
+</ol>
+<p>For example, consider two predictors <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> and one outcome <span class="math inline">\(Y\)</span>, with some values in <span class="math inline">\(x_1\)</span> being missing. Then, following the MI approach, we impute <span class="math inline">\(x_1\)</span> using the following model:</p>
+<p><span class="math display">\[
+x_1 = a+b_1y+b_2x_2
+\]</span> we can use the possible imputation model and the observed data to estimate the missing data after adding some random noise, e.g.&nbsp;<span class="math inline">\(\varepsilon \sim \text{Normal}(0,\sigma^2)\)</span>, and repeat the step several times <span class="math inline">\(K\)</span>. Once we generate <span class="math inline">\(K\)</span> imputations for each missing value, we can analyse the <span class="math inline">\(K\)</span> completed data sets (imputed+observed) in the usual way to obtain <span class="math inline">\(K\)</span> estimates with corresponding standard errors. Next, we combine the parameter estimates by taking the average across all imputed data sets and calculate the standard error based on the within and between imputations variance. The specific formulae used to pool the <span class="math inline">\(K\)</span> results together are known as <strong>Rubin’s rules</strong>.</p>
+<p>Consider the <span class="math inline">\(E_1,\ldots,E_K\)</span> estimates obtained from the analysis of <span class="math inline">\(K\)</span> imputed data sets, each associated with their respective within-imputation variances <span class="math inline">\(W_1,\ldots,W_K\)</span>. Computation of the pooled estimate is relatively simple as it corresponds to the average across all <span class="math inline">\(K\)</span> parameter estimates obtained from the analysis of the imputed data sets:</p>
+<p><span class="math display">\[
+E^{\star}=\frac{E_1+\ldots+E_K}{K}.
+\]</span> The computation of the variance for the pooled estimate however requires a bit more work. First, we calculate the within-imputation variance component as</p>
+<p><span class="math display">\[
+W=\frac{W_1+\ldots+W_K}{K},
+\]</span> and the between-imputation variance component as</p>
+<p><span class="math display">\[
+B=\frac{(E_1-E^{\star})^2+\ldots+(E_K-E^{\star})^2}{K-1}
+\]</span> to compute the total variance as</p>
+<p><span class="math display">\[
+T=W+(1+\frac{1}{K})B.
+\]</span></p>
+<p>From the calculation of the pooled variance estimate we can then also obtain confidence intervals, e.g.&nbsp;through some approximation methods:</p>
+<p><span class="math display">\[
+\frac{(E^{\star}-E)}{\sqrt{T}} \sim t_{\nu},
+\]</span></p>
+<p>where <span class="math inline">\(\nu=(K-1)(1+\frac{W/B}{1+1/K})^2\)</span>. Confidence intervals for <span class="math inline">\(E\)</span> are obtained from the <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(\nu\)</span> degrees of freedom.</p>
+</section>
+<section id="how-many-imputations" class="level2">
+<h2 class="anchored" data-anchor-id="how-many-imputations">How many imputations?</h2>
+<p>In the past, general recommendations indicated a number between <span class="math inline">\(5-10\)</span>, with uncertainty in the results due to finite <span class="math inline">\(K\)</span> that can be assessed via Monte Carlo error. More recently, the recommended number of imputations is approximately equal to the proportions of incomplete cases in the data <span class="citation" data-cites="white2010bias">(<a href="#ref-white2010bias" role="doc-biblioref">White and Carlin 2010</a>)</span>.</p>
+</section>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>It is important to realise that none of the above methods can be used to obtain valid results under MNAR, where more advanced analytic methods may be used in combination with external information. In addition, it should be noted that in practice it is never possible to distinguish between a MAR or MNAR situation unless the reasons for missingness is known for all missing data.</p>
+<p>Despite its limitations, MI can be very useful in observational studies when explanatory variables are incomplete. In trials, instead, it is often the outcome which is incomplete. When no information can be gained through imputations, then there is no advantage in using MI compared to alternative approaches. In trials, MI can be used when additional information, e.g.&nbsp;in the form of “auxiliary variables”, can be incorporated into the imputation model. A possible example includes secondary outcomes which may be used as auxiliary variables to impute the primary outcome.</p>
+<p>In general, a simple strategy revolves around:</p>
+<ul>
+<li>Identify predictors of missingness and perform a CCA, adjusting for said predictors.</li>
+<li>(if helpful) perform a sensitivity analysis using MI and compare the results with those from CCA.</li>
+</ul>
+<p>It is always optimal to reduce the amount of missing data, starting from the design stage, through a good communication with patients, objective to follow-up everyone, make repeated attempts using different recall/contact methods, collect reasons for missingness and on possible predictors of missingness, adjust sample size for anticipated missing values.</p>
+<p>I hope you enjoyed this little digression on missingness, which is always an amazing topic to discuss for me. Here I just kept things simple but, if interested, you are welcomed to explore my website under the “missing data” section to see some of the most popular approaches used in the statistical literature to handle missingness. Content warning, there might be some advanced statistics involved!</p>
+</section>
+<section id="references" class="level1">
+
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-beeken2017brief" class="csl-entry" role="listitem">
+Beeken, RJ, B Leurent, V Vickerstaff, R Wilson, H Croker, S Morris, RZ Omar, I Nazareth, and J Wardle. 2017. <span>“A Brief Intervention for Weight Control Based on Habit-Formation Theory Delivered Through Primary Care: Results from a Randomised Controlled Trial.”</span> <em>International Journal of Obesity</em> 41 (2): 246–54.
+</div>
+<div id="ref-king2008relationship" class="csl-entry" role="listitem">
+King, M, L Jones, A Richardson, S Murad, A Irving, H Aslett, A Ramsay, et al. 2008. <span>“The Relationship Between Patients’ Experiences of Continuity of Cancer Care and Health Outcomes: A Mixed Methods Study.”</span> <em>British Journal of Cancer</em> 98 (3): 529–36.
+</div>
+<div id="ref-little2019statistical" class="csl-entry" role="listitem">
+Little, Roderick JA, and Donald B Rubin. 2019. <em>Statistical Analysis with Missing Data</em>. John Wiley &amp; Sons.
+</div>
+<div id="ref-rumsfeld2002knowns" class="csl-entry" role="listitem">
+Rumsfeld, DH. 2002. <span>“Knowns &amp; Unknowns.”</span> JSTOR.
+</div>
+<div id="ref-white2010bias" class="csl-entry" role="listitem">
+White, Ian R, and John B Carlin. 2010. <span>“Bias and Efficiency of Multiple Imputation Compared with Complete-Case Analysis for Missing Covariate Values.”</span> <em>Statistics in Medicine</em> 29 (28): 2920–31.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
