@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -436,7 +439,7 @@ y=\beta_{A1B1}+\beta_{A2B1−A1B1}+\beta_{A1B2−A1B1}+\beta_{A1B3−A1B1}+\beta
 <h2 class="anchored" data-anchor-id="quasi-f-ratios">Quasi F-ratios</h2>
 <p>An additional complication for three or more factor models that contain two or more random factors, is that there may not be a single appropriate interaction term to use as the denominator for many of the main effects F-ratios. For example, if Factors A and B are random and C is fixed, then there are two random interaction terms of equivalent level under Factor C (<span class="math inline">\(A^\prime \times C\)</span> and <span class="math inline">\(B^\prime \times C\)</span>). As a result, the value of the of the <em>Mean Squares</em> (MS) expected when the null hypothesis is true cannot be easily defined. The solutions for dealing with such situations (<em>quasi F-ratios</em>) involve adding (and subtracting) terms together to create approximate estimates of F-ratio denominators. Alternatively, for random factors, variance components with confidence intervals can be used. These solutions are sufficiently unsatisfying as to lead many statisticians to recommend that factorial designs with two or more random factors should avoided if possible. Arguably however, linear mixed effects models offer more appropriate solutions to the above issues as they are more robust for unbalanced designs, accommodate covariates and provide a more comprehensive treatment and overview of all the underlying data structures.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fact_anova_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fact_anova_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA     df           MS       A,B fixed          A,B random       
 NA A   "a-1"        "MS A"   "(MS A)/(MS res)"  "(MS A)/(MS AB)" 
@@ -452,7 +455,7 @@ NA Res ""                         ""</code></pre>
 </div>
 <p>The corresponding <code>R</code> syntax is given below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Type I SS (Balanced)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Type I SS (Balanced)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(<span class="fu">lm</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Type II SS (Unbalanced)</span></span>
@@ -462,7 +465,7 @@ NA Res ""                         ""</code></pre>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">Anova</span>(<span class="fu">lm</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data), <span class="at">type =</span> <span class="st">"III"</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Variance components</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lmer</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> A) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> B) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> A<span class="sc">:</span>B), data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lmer</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> A) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> B) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> A<span class="sc">:</span>B), data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Note that for fixed factor models, when null hypotheses of interactions are rejected, the null hypothesis of the individual constituent factors are unlikely to represent the true nature of the effects and thus are of little value. The nature of such interactions are further explored by fitting simpler linear models (containing at least one less factor) separately for each of the levels of the other removed factor(s). Such <em>Main effects</em> tests are based on a subset of the data, and therefore estimates of the overall residual (unexplained) variability are unlikely to be as precise as the estimates based on the global model. Consequently, F-ratios involving <code>MSResid</code> should use the estimate of <code>MSResid</code> from the global model rather than that based on the smaller, theoretically less precise subset of data. For random and mixed models, since the objective is to generalise the effect of one factor over and above any interactions with other factors, the main factor effects can be interpreted even in the presence of significant interactions. Nevertheless, it should be noted that when a significant interaction is present in a mixed model, the power of the main fixed effects will be reduced (since the amount of variability explained by the interaction term will be relatively high, and this term is used as the denominator for the F-ratio calculation).</p>
 </section>
@@ -492,7 +495,7 @@ NA Res ""                         ""</code></pre>
 <h1>Data generation</h1>
 <p>Imagine we has designed an experiment in which we had measured the response (<span class="math inline">\(y\)</span>) under a combination of two different potential influences (Factor A: levels a1 and a2; and Factor B: levels b1, b2 and b3), each combination replicated <span class="math inline">\(10\)</span> times (<span class="math inline">\(n=10\)</span>). As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>nA <span class="ot">&lt;-</span> <span class="dv">2</span>  <span class="co">#number of levels of A</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>nB <span class="ot">&lt;-</span> <span class="dv">3</span>  <span class="co">#number of levels of B</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>nsample <span class="ot">&lt;-</span> <span class="dv">10</span>  <span class="co">#number of reps in each</span></span>
@@ -505,7 +508,7 @@ NA Res ""                         ""</code></pre>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(data)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma)  <span class="co">#residuals</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(X <span class="sc">%*%</span> eff <span class="sc">+</span> eps)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)  <span class="co">#print out the first six rows of the data set</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    A  B n        y
 NA 1 a1 b1 1 38.31857
@@ -515,7 +518,7 @@ NA 4 a2 b2 1 45.21153
 NA 5 a1 b3 1 40.38786
 NA 6 a2 b3 1 70.14519</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data, <span class="fu">interaction.plot</span>(A, B, y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data, <span class="fu">interaction.plot</span>(A, B, y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -523,18 +526,18 @@ NA 6 a2 b3 1 70.14519</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ALTERNATIVELY, we could supply the population means and get the effect parameters from these.  To</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ALTERNATIVELY, we could supply the population means and get the effect parameters from these.  To</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## correspond to the model matrix, enter the population means in the order of: a1b1, a2b1, a1b1,</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">## a2b2,a1b3,a2b3</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>pop.means <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">55</span>, <span class="dv">45</span>, <span class="dv">45</span>, <span class="dv">40</span>, <span class="dv">65</span>), <span class="at">byrow =</span> F)</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Generate a minimum model matrix for the effects</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>XX <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, <span class="fu">expand.grid</span>(<span class="at">A =</span> <span class="fu">factor</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>), <span class="at">B =</span> <span class="fu">factor</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)))</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Use the solve() function to solve what are effectively simultaneous equations</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>(eff <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">solve</span>(XX, pop.means)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>(eff <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">solve</span>(XX, pop.means)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1]  40  15   5   0 -15  10</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(X <span class="sc">%*%</span> eff <span class="sc">+</span> eps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(X <span class="sc">%*%</span> eff <span class="sc">+</span> eps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>With these sort of data, we are primarily interested in investigating whether there is a relationship between the continuous response variable and the treatment type. Does treatment type effect the response?.</p>
 <section id="assumptions-1" class="level2">
@@ -550,10 +553,10 @@ NA 6 a2 b3 1 70.14519</code></pre>
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
 <p><strong>Normality and Homogeneity of variance</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># OR via ggplot2</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -561,7 +564,7 @@ NA 6 a2 b3 1 70.14519</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">y =</span> y, <span class="at">x =</span> A, <span class="at">fill =</span> B)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">y =</span> y, <span class="at">x =</span> A, <span class="at">fill =</span> B)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -587,7 +590,7 @@ y_i \sim N(\mu_i,\sigma),
 <p>where <span class="math inline">\(\mu_i=\beta_0 +\boldsymbol \beta \boldsymbol X\)</span>. The assumed priors are: <span class="math inline">\(\beta \sim N(0,100)\)</span> and <span class="math inline">\(\sigma \sim \text{Cauchy}(0,5)\)</span>. Exploratory data analysis suggests that the intercept and effects could be drawn from similar distributions (with mean in the <span class="math inline">\(10\)</span>’s and variances in the <span class="math inline">\(100\)</span>’s). Whilst we might therefore be tempted to provide different priors for the intercept, compared to the effects, for a simple model such as this, it is unlikely to be necessary. However, for more complex models, where prior specification becomes more critical, separate priors would probably be necessary.</p>
 <p>We proceed to code the model into <code>JAGS</code> (remember that in this software normal distribution are parameterised in terms of precisions <span class="math inline">\(\tau\)</span> rather than variances, where <span class="math inline">\(\tau=\frac{1}{\sigma^2}\)</span>). Note the following example as group means calculated as derived posteriors.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>modelString <span class="ot">=</span> <span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>modelString <span class="ot">=</span> <span class="st">"</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">  model {</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">  #Likelihood</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (i in 1:n) {</span></span>
@@ -604,35 +607,35 @@ y_i \sim N(\mu_i,\sigma),
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"fact_anovaModel.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString, <span class="at">con =</span> <span class="st">"fact_anovaModel.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Arrange the data as a list (as required by <code>JAGS</code>). As input, <code>JAGS</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, data)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data, <span class="fu">list</span>(<span class="at">y =</span> y, <span class="at">X =</span> X, <span class="at">n =</span> <span class="fu">nrow</span>(data), <span class="at">ngroups =</span> <span class="fu">ncol</span>(X)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, data)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data, <span class="fu">list</span>(<span class="at">y =</span> y, <span class="at">X =</span> X, <span class="at">n =</span> <span class="fu">nrow</span>(data), <span class="at">ngroups =</span> <span class="fu">ncol</span>(X)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">15000</span>  <span class="co">#across all chains</span></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 10500</code></pre>
 </div>
 </div>
 <p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>R2jags</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now run the <code>JAGS</code> code via the <code>R2jags</code> interface. Note that the first time jags is run after the <code>R2jags</code> package is loaded, it is often necessary to run any kind of randomization function just to initiate the .Random.seed variable.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"fact_anovaModel.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -644,7 +647,7 @@ NA    Total graph size: 502
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "fact_anovaModel.txt", fit using jags,
 NA  2 chains, each with 10500 iterations (first 3000 discarded)
@@ -678,8 +681,8 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </ul>
 <p>Prior to examining the summaries, we should have explored the convergence diagnostics. We use the package <code>mcmcplots</code> to obtain density and trace plots for the effects model as an example. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters, e.g.&nbsp;<span class="math inline">\(\boldsymbol \beta\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -687,7 +690,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"beta"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -698,9 +701,9 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </div>
 <p>Trace plots show no evidence that the chains have not reasonably traversed the entire multidimensional parameter space. When there are a lot of parameters, this can result in a very large number of traceplots. To focus on just certain parameters (such as <span class="math inline">\(\beta\)</span>s).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>data.mcmc <span class="ot">=</span> <span class="fu">as.mcmc</span>(data.r2jags)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>data.mcmc <span class="ot">=</span> <span class="fu">as.mcmc</span>(data.r2jags)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Raftery diagnostic</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(data.mcmc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(data.mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [[1]]
 NA 
@@ -740,8 +743,8 @@ NA  sigma    4        5366  3746         1.430</code></pre>
 </div>
 <p>The Raftery diagnostics for each chain estimate that we would require no more than <span class="math inline">\(5000\)</span> samples to reach the specified level of confidence in convergence. As we have <span class="math inline">\(10500\)</span> samples, we can be confidence that convergence has occurred.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Autocorrelation diagnostic</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(data.mcmc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Autocorrelation diagnostic</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(data.mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA             beta[1]      beta[2]       beta[3]      beta[4]      beta[5]
 NA Lag 0   1.000000000  1.000000000  1.0000000000  1.000000000  1.000000000
@@ -771,17 +774,17 @@ NA Lag 50  0.003484518 -0.008999031 -0.012155151</code></pre>
 <p>he mark of a good model is being able to predict well. In an ideal world, we would have sufficiently large sample size as to permit us to hold a fraction (such as <span class="math inline">\(25\)</span>%) back thereby allowing us to train the model on <span class="math inline">\(75\)</span>% of the data and then see how well the model can predict the withheld <span class="math inline">\(25\)</span>%. Unfortunately, such a luxury is still rare. The next best option is to see how well the model can predict the observed data. Models tend to struggle most with the extremes of trends and have particular issues when the extremes approach logical boundaries (such as zero for count data and standard deviations). We can use the fitted model to generate random predicted observations and then explore some properties of these compared to the actual observed data.</p>
 <p>Rather than dublicate this for both additive and multiplicative models, we will only explore the multiplicative model. Residuals are not computed directly within <code>JAGS</code>. However, we can calculate them manually form the posteriors.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> data</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, newdata)</span>
 <span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
 <span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"beta</span><span class="sc">\\</span><span class="st">["</span>, <span class="fu">colnames</span>(mcmc))</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>wch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>wch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 1 2 3 4 5 6</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mcmc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA       beta[1]  beta[2]  beta[3]     beta[4]   beta[5]  beta[6] deviance
 NA [1,] 41.07993 14.73872 4.532543 -1.58279310 -14.91723 11.28780 292.8658
@@ -798,10 +801,10 @@ NA [4,] 2.561227
 NA [5,] 2.841503
 NA [6,] 3.403891</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc[, wch], <span class="dv">2</span>, median)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc[, wch], <span class="dv">2</span>, median)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> fit)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> fit)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -812,7 +815,7 @@ NA [6,] 3.403891</code></pre>
 </div>
 <p>Residuals against predictors</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"beta</span><span class="sc">\\</span><span class="st">["</span>, <span class="fu">colnames</span>(mcmc))</span>
@@ -821,15 +824,15 @@ NA [6,] 3.403891</code></pre>
 <span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, newdata)</span>
 <span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="do">## get median parameter estimates</span></span>
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> <span class="fu">apply</span>(mcmc[, wch], <span class="dv">2</span>, median)</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(coefs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(coefs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA     beta[1]     beta[2]     beta[3]     beta[4]     beta[5]     beta[6] 
 NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> newdata <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(fit, resid)</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> A)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> A)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -837,7 +840,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> B)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> resid, <span class="at">x =</span> B)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -848,7 +851,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </div>
 <p>And now for studentised residuals</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"beta</span><span class="sc">\\</span><span class="st">["</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a model matrix</span></span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> data</span>
@@ -858,7 +861,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 <span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">as.vector</span>(coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat))</span>
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">=</span> data<span class="sc">$</span>y <span class="sc">-</span> fit</span>
 <span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>sresid <span class="ot">=</span> resid<span class="sc">/</span><span class="fu">sd</span>(resid)</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> sresid, <span class="at">x =</span> fit)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> sresid, <span class="at">x =</span> fit)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -869,7 +872,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </div>
 <p>For this simple model, the studentised residuals yield the same pattern as the raw residuals (or the Pearson residuals for that matter). Lets see how well data simulated from the model reflects the raw data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"beta</span><span class="sc">\\</span><span class="st">["</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co">#generate a model matrix</span></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A<span class="sc">*</span>B, data)</span>
@@ -883,7 +886,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 <span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y=</span>Value, <span class="at">x=</span>A, <span class="at">fill=</span><span class="st">'Model'</span>), <span class="at">alpha=</span><span class="fl">0.5</span>)<span class="sc">+</span></span>
 <span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_violin</span>(<span class="at">data=</span>data, <span class="fu">aes</span>(<span class="at">y=</span>y,<span class="at">x=</span>A,<span class="at">fill=</span><span class="st">'Obs'</span>), <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
 <span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_point</span>(<span class="at">data=</span>data, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>A), <span class="at">position=</span><span class="fu">position_jitter</span>(<span class="at">width=</span><span class="fl">0.1</span>,<span class="at">height=</span><span class="dv">0</span>),</span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">color=</span><span class="st">'black'</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">color=</span><span class="st">'black'</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -891,9 +894,9 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata) <span class="sc">+</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y=</span>Value, <span class="at">x=</span>B, <span class="at">fill=</span><span class="st">'Model'</span>, <span class="at">group=</span>B, <span class="at">color=</span>A), <span class="at">alpha=</span><span class="fl">0.5</span>)<span class="sc">+</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_point</span>(<span class="at">data=</span>data, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>B, <span class="at">group=</span>B,<span class="at">color=</span>A)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_point</span>(<span class="at">data=</span>data, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>B, <span class="at">group=</span>B,<span class="at">color=</span>A)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -904,8 +907,8 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </div>
 <p>The predicted trends do encapsulate the actual data, suggesting that the model is a reasonable representation of the underlying processes. Note, these are prediction intervals rather than confidence intervals as we are seeking intervals within which we can predict individual observations rather than means. We can also explore the posteriors of each parameter.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_intervals</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix, <span class="at">regex_pars =</span> <span class="st">"beta|sigma"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_intervals</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix, <span class="at">regex_pars =</span> <span class="st">"beta|sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -913,7 +916,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_areas</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix, <span class="at">regex_pars =</span> <span class="st">"beta|sigma"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_areas</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix, <span class="at">regex_pars =</span> <span class="st">"beta|sigma"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -927,7 +930,7 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 <h1>Parameter estimates</h1>
 <p>Although all parameters in a Bayesian analysis are considered random and are considered a distribution, rarely would it be useful to present tables of all the samples from each distribution. On the other hand, plots of the posterior distributions have some use. Nevertheless, most workers prefer to present simple statistical summaries of the posteriors. Popular choices include the median (or mean) and <span class="math inline">\(95\)</span>% credibility intervals.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>mcmcpvalue <span class="ot">&lt;-</span> <span class="cf">function</span>(samp) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>mcmcpvalue <span class="ot">&lt;-</span> <span class="cf">function</span>(samp) {</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="do">## elementary version that creates an empirical p-value for the</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="do">## hypothesis that the columns of samp have mean zero versus a general</span></span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="do">## multivariate distribution with elliptical contours.</span></span>
@@ -948,11 +951,11 @@ NA  40.1859804  14.7407405   4.9960673  -0.3233121 -14.5348136  11.0732139</code
 <span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sum</span>(sqdist[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">&gt;</span> sqdist[<span class="dv">1</span>])<span class="sc">/</span><span class="fu">nrow</span>(samp)</span>
 <span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>First, we look at the results from the additive model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "fact_anovaModel.txt", fit using jags,
 NA  2 chains, each with 10500 iterations (first 3000 discarded)
@@ -974,10 +977,10 @@ NA DIC info (using the rule, pD = var(deviance)/2)
 NA pD = 8.0 and DIC = 304.7
 NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom.mixed)</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(data.r2jags), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(data.r2jags), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA # A tibble: 7 × 5
 NA   term    estimate std.error conf.low conf.high
@@ -1002,28 +1005,28 @@ NA 7 sigma      2.91      0.286     2.37      3.47</code></pre>
 </ul>
 <p>The <span class="math inline">\(95\)</span>% credibility interval for both interactive effects (Aa2:Bb2 and Aa2:Bb3) do not contain <span class="math inline">\(0\)</span>, implying significant interactions between A and B. While workers attempt to become comfortable with a new statistical framework, it is only natural that they like to evaluate and comprehend new structures and output alongside more familiar concepts. One way to facilitate this is via Bayesian p-values that are somewhat analogous to the frequentist p-values for investigating the hypothesis that a parameter is equal to zero.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="do">## since values are less than zero</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[2]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="do">## since values are less than zero</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[2]"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[3]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[3]"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.0004666667</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[4]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[4]"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.7912667</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[5]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[5]"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[6]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"beta[6]"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta[5]"</span>, <span class="st">"beta[6]"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmcpvalue</span>(data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="fu">c</span>(<span class="st">"beta[5]"</span>, <span class="st">"beta[6]"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0</code></pre>
 </div>
@@ -1034,7 +1037,7 @@ NA 7 sigma      2.91      0.286     2.37      3.47</code></pre>
 <h1>Graphical summaries</h1>
 <p>A nice graphic is often a great accompaniment to a statistical analysis. Although there are no fixed assumptions associated with graphing (in contrast to statistical analyses), we often want the graphical summaries to reflect the associated statistical analyses. After all, the sample is just one perspective on the population(s). What we are more interested in is being able to estimate and depict likely population parameters/trends. Thus, whilst we could easily provide a plot displaying the raw data along with simple measures of location and spread, arguably, we should use estimates that reflect the fitted model. In this case, it would be appropriate to plot the credibility interval associated with each group.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">=</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"^beta"</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculate the fitted values</span></span>
 <span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">A=</span><span class="fu">levels</span>(data<span class="sc">$</span>A), <span class="at">B=</span><span class="fu">levels</span>(data<span class="sc">$</span>B))</span>
@@ -1042,7 +1045,7 @@ NA 7 sigma      2.91      0.286     2.37      3.47</code></pre>
 <span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[,wch]</span>
 <span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span>coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
 <span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> newdata <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(<span class="fu">tidyMCMC</span>(fit, <span class="at">conf.int=</span><span class="cn">TRUE</span>, <span class="at">conf.method=</span><span class="st">'HPDinterval'</span>))</span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>newdata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>newdata</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    A  B term estimate std.error conf.low conf.high
 NA 1 a1 b1    1 40.18727 0.9270982 38.38136  42.02744
@@ -1052,7 +1055,7 @@ NA 4 a2 b2    4 45.37262 0.9197287 43.61538  47.19883
 NA 5 a1 b3    5 39.85206 0.9156380 38.11053  41.70144
 NA 6 a2 b3    6 65.67189 0.9209489 63.84038  67.47931</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y=</span>estimate, <span class="at">x=</span>B, <span class="at">fill=</span>A)) <span class="sc">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(newdata, <span class="fu">aes</span>(<span class="at">y=</span>estimate, <span class="at">x=</span>B, <span class="at">fill=</span>A)) <span class="sc">+</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_blank</span>() <span class="sc">+</span></span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.numeric</span>(B), <span class="at">linetype=</span>A)) <span class="sc">+</span></span>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_linerange</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>conf.low, <span class="at">ymax=</span>conf.high))<span class="sc">+</span></span>
@@ -1067,7 +1070,7 @@ NA 6 a2 b3    6 65.67189 0.9209489 63.84038  67.47931</code></pre>
 <span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">axis.title.y=</span><span class="fu">element_text</span>(<span class="at">vjust=</span><span class="dv">2</span>, <span class="at">size=</span><span class="fu">rel</span>(<span class="fl">1.25</span>)),</span>
 <span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">axis.title.x=</span><span class="fu">element_text</span>(<span class="at">vjust=</span><span class="sc">-</span><span class="dv">2</span>, <span class="at">size=</span><span class="fu">rel</span>(<span class="fl">1.25</span>)),</span>
 <span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot.margin=</span><span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="dv">2</span>,<span class="dv">2</span>), <span class="st">'lines'</span>),</span>
-<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.key.size=</span><span class="fu">unit</span>(<span class="dv">1</span>,<span class="st">'cm'</span>)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.key.size=</span><span class="fu">unit</span>(<span class="dv">1</span>,<span class="st">'cm'</span>)) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1123,7 +1126,7 @@ R^2 = \frac{\sigma^2_f}{\sigma^2_f + \sigma^2_e},
 \]</span></p>
 <p>where <span class="math inline">\(\sigma^2_f=\text{var}(\boldsymbol X \boldsymbol \beta)\)</span>, and for normal models <span class="math inline">\(\sigma^2_e=\text{var}(y-\boldsymbol X \boldsymbol \beta)\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, data)</span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"^beta"</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, wch]</span>
@@ -1132,15 +1135,15 @@ R^2 = \frac{\sigma^2_f}{\sigma^2_f + \sigma^2_e},
 <span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>var_f <span class="ot">=</span> <span class="fu">apply</span>(fit, <span class="dv">1</span>, var)</span>
 <span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>var_e <span class="ot">=</span> <span class="fu">apply</span>(resid, <span class="dv">1</span>, var)</span>
 <span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> var_f<span class="sc">/</span>(var_f <span class="sc">+</span> var_e)</span>
-<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(R2), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(<span class="fu">as.mcmc</span>(R2), <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA # A tibble: 1 × 5
 NA   term  estimate std.error conf.low conf.high
 NA   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 NA 1 var1     0.913   0.00817    0.897     0.925</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for comparison with frequentist</span></span>
-<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for comparison with frequentist</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> A <span class="sc">*</span> B, data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA Call:
@@ -1185,13 +1188,13 @@ NA F-statistic: 124.1 on 5 and 54 DF,  p-value: &lt; 2.2e-16</code></pre>
 <li>By generating the posteriors of the cell means (means of each factor combination) and then manually compare the appropriate columns for specific levels of factor B.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"^beta"</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">A =</span> <span class="fu">levels</span>(data<span class="sc">$</span>A), <span class="at">B =</span> <span class="fu">levels</span>(data<span class="sc">$</span>B))</span>
 <span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, <span class="at">data =</span> newdata)</span>
 <span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, wch]</span>
 <span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
-<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA             1        2        3        4        5        6
 NA [1,] 41.07993 55.81865 45.61247 45.43397 39.49714 65.52366
@@ -1201,9 +1204,9 @@ NA [4,] 39.79269 56.14951 45.56942 44.27930 39.26017 66.21183
 NA [5,] 39.40269 54.09738 44.64012 45.20530 39.11246 66.62467
 NA [6,] 41.27115 53.85821 47.17980 46.44773 38.92215 65.30783</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="do">## we want to compare columns 2-1, 4-3 and 6-5</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="do">## we want to compare columns 2-1, 4-3 and 6-5</span></span>
 <span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>comps <span class="ot">=</span> fit[, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)] <span class="sc">-</span> fit[, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>)]</span>
-<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(comps, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(comps, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA # A tibble: 3 × 5
 NA   term  estimate std.error conf.low conf.high
@@ -1217,7 +1220,7 @@ NA 3 6       25.8        1.30    23.2      28.4</code></pre>
 <li>By generating the posteriors of the cell means (means of each factor combination) and then manually compare the appropriate columns for specific levels of factor B.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>mcmc <span class="ot">&lt;-</span> data.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>wch <span class="ot">=</span> <span class="fu">grep</span>(<span class="st">"^beta"</span>, <span class="fu">colnames</span>(mcmc))</span>
 <span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">A =</span> <span class="fu">levels</span>(data<span class="sc">$</span>A), <span class="at">B =</span> <span class="fu">levels</span>(data<span class="sc">$</span>B))</span>
 <span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A <span class="sc">*</span> B, <span class="at">data =</span> newdata)</span>
@@ -1231,7 +1234,7 @@ NA 3 6       25.8        1.30    23.2      28.4</code></pre>
 <span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">=</span> Xmat.a2 <span class="sc">-</span> Xmat.a1</span>
 <span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a>coefs <span class="ot">=</span> mcmc[, wch]</span>
 <span id="cb71-14"><a href="#cb71-14" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> coefs <span class="sc">%*%</span> <span class="fu">t</span>(Xmat)</span>
-<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyMCMC</span>(fit, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.method =</span> <span class="st">"HPDinterval"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA # A tibble: 3 × 5
 NA   term  estimate std.error conf.low conf.high
@@ -1314,13 +1317,14 @@ Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -33,14 +33,15 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <link href="../../site_libs/quarto-contrib/academicons-1.9.2/all.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/academicons-1.9.2/size.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
@@ -87,7 +88,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -112,6 +113,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -208,7 +211,7 @@ p(\boldsymbol e_{it}, \boldsymbol c_{it} \mid \boldsymbol \theta) = p(\boldsymbo
 \tag{1}\]</span></span></p>
 <p>where <span class="math inline">\(p(\boldsymbol e_{it} \mid \boldsymbol  \theta_e)\)</span> is the marginal distribution of the effectiveness and <span class="math inline">\(p(\boldsymbol  c_{it} \mid \boldsymbol  e_{it} \boldsymbol  \theta_c)\)</span> is the conditional distribution of the costs given the effectiveness, respectively indexed by <span class="math inline">\(\boldsymbol  \theta_e\)</span> and <span class="math inline">\(\boldsymbol  \theta_c\)</span>, with <span class="math inline">\(\boldsymbol  \theta=(\boldsymbol  \theta_e,\boldsymbol  \theta_c)\)</span>. We specify the model in <a href="#eq-joint" class="quarto-xref">Equation&nbsp;1</a> in terms of a marginal distribution for the effectiveness and a conditional distribution for the costs. A key advantage of using a conditional factorisation, compared to a multivariate marginal approach, is that univariate models for each variable can be flexibly specified to tackle the idiosyncrasies of the data (e.g.&nbsp;non-normality ans spikes) while also capturing the potential correlation between the variables. We now describe how the two factors on the right-hand side of the Equation can be specified.</p>
 <p><a href="#fig-framework" class="quarto-xref">Figure&nbsp;1</a> provides a visual representation of the proposed modelling framework.</p>
-<div id="fig-framework" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="60%">
+<div id="fig-framework" class="quarto-float quarto-figure quarto-figure-center anchored" width="60%" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="partsurv_model.png" class="img-fluid figure-img">
@@ -280,13 +283,14 @@ Figure&nbsp;1: Visual representation of the proposed modelling framework
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

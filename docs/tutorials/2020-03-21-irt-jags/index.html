@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -350,8 +353,8 @@ p\_{ij} = P(Y\_{ij}=1 \mid \theta\_i,\delta\_j)=\frac{1}{1+\text{exp}(\theta_i-\
 <h2 class="anchored" data-anchor-id="load-the-data">Load the data</h2>
 <p>I read in the data from the file <code>wideformat.csv</code>, which contains (simulated) data from <span class="math inline">\(n=1000\)</span> individuals taking a <span class="math inline">\(5\)</span>-item test. Items are coded <span class="math inline">\(1\)</span> for correct and <span class="math inline">\(0\)</span> for incorrect responses. When we get descriptives of the data, we see that the items differ in terms of the proportion of people who answered correctly, so we expect that we have some differences in item difficulty here.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_dicho<span class="ot">&lt;-</span><span class="fu">read.csv</span>(<span class="st">"wideformat.csv"</span>, <span class="at">sep =</span> <span class="st">","</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data_dicho)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_dicho<span class="ot">&lt;-</span><span class="fu">read.csv</span>(<span class="st">"wideformat.csv"</span>, <span class="at">sep =</span> <span class="st">","</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data_dicho)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA        ID gender age Item.1 Item.2 Item.3 Item.4 Item.5
 NA 1 person1   Male  40      0      0      0      0      0
@@ -361,15 +364,15 @@ NA 4 person4 Female  17      0      0      0      0      1
 NA 5 person5 Female  30      0      0      0      0      1
 NA 6 person6 Female  46      0      0      0      0      1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#check proportion of correct responses by item</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(data_dicho[,<span class="dv">4</span><span class="sc">:</span><span class="dv">8</span>], <span class="dv">2</span>, sum)<span class="sc">/</span><span class="fu">nrow</span>(data_dicho)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#check proportion of correct responses by item</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(data_dicho[,<span class="dv">4</span><span class="sc">:</span><span class="dv">8</span>], <span class="dv">2</span>, sum)<span class="sc">/</span><span class="fu">nrow</span>(data_dicho)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Item.1 Item.2 Item.3 Item.4 Item.5 
 NA  0.924  0.709  0.553  0.763  0.870</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise the data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise the data</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(psych)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">describe</span>(data_dicho)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">describe</span>(data_dicho)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA         vars    n   mean     sd median trimmed    mad min  max range  skew
 NA ID*        1 1000 500.50 288.82  500.5  500.50 370.65   1 1000   999  0.00
@@ -396,14 +399,14 @@ NA Item.5      2.83 0.01</code></pre>
 <h2 class="anchored" data-anchor-id="fit-the-model">Fit the model</h2>
 <p>We fit the 1PLM to the data. First, I rename and preprocess the data to be passed to <code>JAGS</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Y<span class="ot">&lt;-</span>data_dicho[,<span class="dv">4</span><span class="sc">:</span><span class="dv">8</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Y<span class="ot">&lt;-</span>data_dicho[,<span class="dv">4</span><span class="sc">:</span><span class="dv">8</span>]</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n<span class="ot">&lt;-</span><span class="fu">nrow</span>(Y)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>p<span class="ot">&lt;-</span><span class="fu">ncol</span>(Y)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data_list<span class="ot">&lt;-</span><span class="fu">list</span>(<span class="st">"Y"</span>,<span class="st">"n"</span>,<span class="st">"p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data_list<span class="ot">&lt;-</span><span class="fu">list</span>(<span class="st">"Y"</span>,<span class="st">"n"</span>,<span class="st">"p"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Then I specify the model using the following <code>JAGS</code> code.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>model1<span class="ot">&lt;-</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>model1<span class="ot">&lt;-</span><span class="st">"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:n){</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (j in 1:p){</span></span>
@@ -429,29 +432,29 @@ NA Item.5      2.83 0.01</code></pre>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model1, <span class="at">con =</span> <span class="st">"model1PLM.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model1, <span class="at">con =</span> <span class="st">"model1PLM.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, I define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">500</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">2500</span>  <span class="co">#across all chains</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 1750</code></pre>
 </div>
 </div>
 <p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Run the <code>JAGS</code> code via the <code>R2jags</code> interface and the <code>jags</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3456</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>m1.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model1PLM.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -469,13 +472,13 @@ NA Initializing model</code></pre>
 <h2 class="anchored" data-anchor-id="plot-the-item-characteristic-curves">Plot the item characteristic curves</h2>
 <p><em>Item characteristic curves</em> (ICC) are the logistic curves which result from the fitted models (e.g.&nbsp;estimated item difficulty, plugged into the item response function). Latent trait/ability is plotted on the <span class="math inline">\(x\)</span>-axis (higher values represent hight ability). Probability of a “correct” answer (<span class="math inline">\(Y_{ij}=1\)</span>) to an item is plotted on the <span class="math inline">\(y\)</span>-axis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item difficulty</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item difficulty</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>diff<span class="ot">&lt;-</span>m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>delta</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] -2.8583972 -1.0620835 -0.2608953 -1.3853516 -2.2159276</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>theta<span class="ot">&lt;-</span><span class="fu">apply</span>(m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>theta, <span class="dv">2</span>, mean)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>prob<span class="ot">&lt;-</span><span class="fu">apply</span>(m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>prob,<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>),mean)</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,prob[,<span class="dv">1</span>], <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"probability of correct response"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
@@ -485,7 +488,7 @@ NA Initializing model</code></pre>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -500,7 +503,7 @@ NA Initializing model</code></pre>
 <h2 class="anchored" data-anchor-id="plot-the-item-information-curves">Plot the item information curves</h2>
 <p><em>Item information curves</em> (IIC) show how much “information” about the latent trait ability an item gives. Mathematically, these are the <span class="math inline">\(1\)</span>st derivatives of the ICCs or, equivalently, to the product of the probability of correct and incorrect response. Item information curves peak at the difficulty value (point where the item has the highest discrimination), with less information at ability levels farther from the difficulty estimate. Practically speaking, we can see how a very difficult item will provide very little information about persons with low ability (because the item is already too hard), and very easy items will provide little information about persons with high ability levels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>neg_prob<span class="ot">&lt;-</span><span class="dv">1</span><span class="sc">-</span>prob</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>information<span class="ot">&lt;-</span>prob<span class="sc">*</span>neg_prob</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,information[,<span class="dv">1</span>], <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"information"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
@@ -510,7 +513,7 @@ NA Initializing model</code></pre>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -522,11 +525,11 @@ NA Initializing model</code></pre>
 <p>Similar to the ICCs, we see that item <span class="math inline">\(3\)</span> provides the most information about high ability levels (the peak of its IIC is farthest to the right) and item <span class="math inline">\(1\)</span> and <span class="math inline">\(5\)</span> provides the most information about lower ability levels (the peak of its IIC is farthest to the left). We have seen that all ICCs and IICs for the items have the same shape in the 1PL model (i.e.&nbsp;all items are equally good at providing information about the latent trait). In the 2PL and 3PL models, we will see that this does not have to be the case.</p>
 <p>Next, we plot the information curve for the whole test. This is simply the sum of the individual IICs above. Ideally, we want a test which provides fairly good covereage of a wide range of latent ability levels. Otherwise, the test is only good at identifying a limited range of ability levels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>information_test<span class="ot">&lt;-</span><span class="fu">apply</span>(information,<span class="dv">1</span>,sum)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,information_test, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"information (test)"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">1.5</span>))</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -534,7 +537,7 @@ NA Initializing model</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
@@ -546,12 +549,12 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 <h2 class="anchored" data-anchor-id="assess-fit">Assess fit</h2>
 <p>We perform posterior predictive checks to test whether individual items fit the 1PLM by comparing quantities computed from the predictions of the model with those from the observed data. If these match reasonably well, then there is indication that the model has a good fit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>Y.rep<span class="ot">&lt;-</span>m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>Y.rep</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Bar plot of y with yrep medians and uncertainty intervals superimposed on the bars</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -559,7 +562,7 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -567,7 +570,7 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -575,7 +578,7 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -583,7 +586,7 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -597,16 +600,16 @@ NA  0.5472  0.5710  0.7669  0.7756  0.9305  1.0786</code></pre>
 <h2 class="anchored" data-anchor-id="plot-ability-scores">Plot ability scores</h2>
 <p>We can conclude by summarising and plotting the latent ability scores of the participants</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 NA -2.074587 -0.483828  0.078138  0.001189  0.692185  0.763989</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>dens.theta<span class="ot">&lt;-</span><span class="fu">density</span>(theta, <span class="at">bw=</span><span class="fl">0.3</span>)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(theta, <span class="at">breaks =</span> <span class="dv">5</span>, <span class="at">prob =</span> T)</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -629,7 +632,7 @@ p\_{ij} = P(Y\_{ij}=1 \mid \theta\_i,\delta\_j,\alpha\_j)=\frac{1}{1+\text{exp}(
 <h2 class="anchored" data-anchor-id="fit-the-model-1">Fit the model</h2>
 <p>We fit the 2PLM to the data using the following <code>JAGS</code> code.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model2<span class="ot">&lt;-</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model2<span class="ot">&lt;-</span><span class="st">"</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:n){</span></span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (j in 1:p){</span></span>
@@ -660,26 +663,26 @@ p\_{ij} = P(Y\_{ij}=1 \mid \theta\_i,\delta\_j,\alpha\_j)=\frac{1}{1+\text{exp}(
 <span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model2, <span class="at">con =</span> <span class="st">"model2PLM.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model2, <span class="at">con =</span> <span class="st">"model2PLM.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, I define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"alpha"</span>,<span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"alpha"</span>,<span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">500</span></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">2500</span>  <span class="co">#across all chains</span></span>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 1750</code></pre>
 </div>
 </div>
 <p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Run the <code>JAGS</code> code via the <code>R2jags</code> interface and the <code>jags</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>m2.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>m2.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model2PLM.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -697,19 +700,19 @@ NA Initializing model</code></pre>
 <h2 class="anchored" data-anchor-id="plot-the-item-characteristic-curves-1">Plot the item characteristic curves</h2>
 <p><em>Item characteristic curves</em> (ICC) are the logistic curves which result from the fitted models (e.g.&nbsp;estimated item difficulty, plugged into the item response function). Latent trait/ability is plotted on the <span class="math inline">\(x\)</span>-axis (higher values represent hight ability). Probability of a “correct” answer (<span class="math inline">\(Y_{ij}=1\)</span>) to an item is plotted on the <span class="math inline">\(y\)</span>-axis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>discr<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>alpha</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>discr<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>alpha</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>diff<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>delta</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item difficulty</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] -3.4898494 -1.4275914 -0.3210807 -1.8517091 -3.0020341</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item discriminability</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(discr,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item discriminability</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(discr,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.8300819 0.7204114 0.7766516 0.7243196 0.7142145</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>theta<span class="ot">&lt;-</span><span class="fu">apply</span>(m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>theta, <span class="dv">2</span>, mean)</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>prob<span class="ot">&lt;-</span><span class="fu">apply</span>(m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>prob,<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>),mean)</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,prob[,<span class="dv">1</span>], <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"probability of correct response"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
@@ -719,7 +722,7 @@ NA Initializing model</code></pre>
 <span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -734,7 +737,7 @@ NA Initializing model</code></pre>
 <h2 class="anchored" data-anchor-id="plot-the-item-information-curves-1">Plot the item information curves</h2>
 <p><em>Item information curves</em> (IIC) show how much “information” about the latent trait ability an item gives. Mathematically, these are the <span class="math inline">\(1\)</span>st derivatives of the ICCs or, equivalently, to the product of the probability of correct and incorrect response. Item information curves peak at the difficulty value (point where the item has the highest discrimination), with less information at ability levels farther from the difficulty estimate. Practially speaking, we can see how a very difficult item will provide very little information about persons with low ability (because the item is already too hard), and very easy items will provide little information about persons with high ability levels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>neg_prob<span class="ot">&lt;-</span><span class="dv">1</span><span class="sc">-</span>prob</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>information<span class="ot">&lt;-</span>prob<span class="sc">*</span>neg_prob</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>information2<span class="ot">&lt;-</span>information<span class="sc">*</span>(<span class="fu">apply</span>(discr,<span class="dv">2</span>,mean))<span class="sc">^</span><span class="dv">2</span></span>
@@ -745,7 +748,7 @@ NA Initializing model</code></pre>
 <span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information2[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information2[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information2[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -757,11 +760,11 @@ NA Initializing model</code></pre>
 <p>The item IICs demonstrate that some items provide more information about latent ability for different ability levels. The higher the item discriminability estimate, the more information an item provides about ability levels around the point where there is a <span class="math inline">\(50\%\)</span> chance of getting the item right (i.e.&nbsp;the steepest point in the ICC slope). For example, item <span class="math inline">\(3\)</span> (orange) clearly provides the most information at high ability levels, around <span class="math inline">\(\theta=-0.5\)</span>, but almost no information about low ability levels (<span class="math inline">\(&lt; -1\)</span>) because the item is already too hard for those participants. In contrast, item <span class="math inline">\(1\)</span> (red), which has low discriminability, doesn’t give very much information overall, but covers a wide range of ability levels.</p>
 <p>Next, we plot the item information curve for the whole test. This is the sum of all the item IICs above.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>information_test<span class="ot">&lt;-</span><span class="fu">apply</span>(information2,<span class="dv">1</span>,sum)</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,information_test, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"information (test)"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">1.5</span>))</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -769,7 +772,7 @@ NA Initializing model</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
@@ -781,10 +784,10 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 <h2 class="anchored" data-anchor-id="assess-fit-1">Assess fit</h2>
 <p>Next, we check how well the 2PLM fits the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>Y.rep<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>Y.rep</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>Y.rep<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>Y.rep</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Bar plot of y with yrep medians and uncertainty intervals superimposed on the bars</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -792,7 +795,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -800,7 +803,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -808,7 +811,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -816,7 +819,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -827,7 +830,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 </div>
 <p>We can also compare the fit of the 1PLM and 2PLM using relative measures of fit or <em>information criteria</em>. These are computed based on the deviance and a penalty for model complexity called the effective number of parameters <span class="math inline">\(p\)</span>. Here we consider two Bayesian measures known as the <em>Widely Applicable</em> (WAIC) and <em>Leave One Out</em> (LOOIC) Information Criterion, which can be easily obtained through the functions <code>waic</code> and <code>loo</code> in the package <code>loo</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co">#extract log-likelihood</span></span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>loglik_m1<span class="ot">&lt;-</span>m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>loglik_y</span>
 <span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>loglik_m2<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>loglik_y</span>
@@ -844,7 +847,7 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 <span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>table_waic<span class="ot">&lt;-</span><span class="fu">rbind</span>(waic_m1<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],waic_m2<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>])</span>
 <span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>table_looic<span class="ot">&lt;-</span><span class="fu">rbind</span>(looic_m1<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],looic_m2<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>])</span>
 <span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(table_waic)<span class="ot">&lt;-</span><span class="fu">rownames</span>(table_looic)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"1PLM"</span>,<span class="st">"2PLM"</span>)</span>
-<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">cbind</span>(table_waic,table_looic), <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">cbind</span>(table_waic,table_looic), <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -881,16 +884,16 @@ NA  0.3242  0.3973  0.4500  0.4541  0.5182  0.7528</code></pre>
 <h2 class="anchored" data-anchor-id="plot-ability-scores-1">Plot ability scores</h2>
 <p>Plot the density curve of the estimated ability scores</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 NA -1.917888 -0.419394  0.078240  0.001822  0.608518  0.677354</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>dens.theta<span class="ot">&lt;-</span><span class="fu">density</span>(theta, <span class="at">bw=</span><span class="fl">0.3</span>)</span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(theta, <span class="at">breaks =</span> <span class="dv">5</span>, <span class="at">prob =</span> T)</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -913,7 +916,7 @@ p_{ij} = P(Y_{ij}=1 \mid \theta_i,\delta_j,\alpha_j,\eta_j)=\eta_j + (1-\eta_j) 
 <h2 class="anchored" data-anchor-id="fit-the-model-2">Fit the model</h2>
 <p>We fit the 3PLM to the data using the following <code>JAGS</code> code.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>model3<span class="ot">&lt;-</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>model3<span class="ot">&lt;-</span><span class="st">"</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:n){</span></span>
 <span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="st">  for (j in 1:p){</span></span>
@@ -948,26 +951,26 @@ p_{ij} = P(Y_{ij}=1 \mid \theta_i,\delta_j,\alpha_j,\eta_j)=\eta_j + (1-\eta_j) 
 <span id="cb51-33"><a href="#cb51-33" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb51-34"><a href="#cb51-34" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb51-35"><a href="#cb51-35" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model3, <span class="at">con =</span> <span class="st">"model3PLM.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model3, <span class="at">con =</span> <span class="st">"model3PLM.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, I define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"alpha"</span>, <span class="st">"eta"</span>,<span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"delta"</span>, <span class="st">"alpha"</span>, <span class="st">"eta"</span>,<span class="st">"theta"</span>, <span class="st">"prob"</span>,<span class="st">"loglik_y"</span>,<span class="st">"Y.rep"</span>)</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">500</span></span>
 <span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">2500</span>  <span class="co">#across all chains</span></span>
 <span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 1750</code></pre>
 </div>
 </div>
 <p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Run the <code>JAGS</code> code via the <code>R2jags</code> interface and the <code>jags</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>m3.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>m3.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model3PLM.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -985,25 +988,25 @@ NA Initializing model</code></pre>
 <h2 class="anchored" data-anchor-id="plot-the-item-characteristic-curves-2">Plot the item characteristic curves</h2>
 <p><em>Item characteristic curves</em> (ICC) are the logistic curves which result from the fitted models (e.g.&nbsp;estimated item difficulty, plugged into the item response function). Latent trait/ability is plotted on the <span class="math inline">\(x\)</span>-axis (higher values represent hight ability). Probability of a “correct” answer (<span class="math inline">\(Y_{ij}=1\)</span>) to an item is plotted on the <span class="math inline">\(y\)</span>-axis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>discr<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>alpha</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>discr<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>alpha</span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>diff<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>delta</span>
 <span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>gues<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>eta</span>
 <span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item difficulty</span></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(diff,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] -2.8361776 -0.6672983  0.3323608 -1.0648926 -2.1758250</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item discriminability</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(discr,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item discriminability</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(discr,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.9249227 1.1278880 1.4997368 0.8733855 0.8561385</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item guessing</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(gues,<span class="dv">2</span>,mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#see average value of item guessing</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(gues,<span class="dv">2</span>,mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.2446947 0.2360422 0.2150625 0.2438348 0.2395731</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot icc for each individual with respect to each of the 5 items</span></span>
 <span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>theta<span class="ot">&lt;-</span><span class="fu">apply</span>(m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>theta, <span class="dv">2</span>, mean)</span>
 <span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>prob<span class="ot">&lt;-</span><span class="fu">apply</span>(m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>prob,<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>),mean)</span>
 <span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,prob[,<span class="dv">1</span>], <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"probability of correct response"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
@@ -1013,7 +1016,7 @@ NA Initializing model</code></pre>
 <span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(theta,prob[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1029,7 +1032,7 @@ NA Initializing model</code></pre>
 <p><em>Item information curves</em> (IIC) show how much “information” about the latent trait ability an item gives. Mathematically, these are the <span class="math inline">\(1\)</span>st derivatives of the ICCs or, equivalently, to the product of the probability of correct and incorrect response. Item information curves peak at the difficulty value (point where the item has the highest discrimination), with less information at ability levels farther from the difficulty estimate. Practially speaking, we can see how a very difficult item will provide very little information about persons with low ability (because the item is already too hard), and very easy items will provide little information about persons with high ability levels.</p>
 <p>Here I plot the IICs using points, rather than lines, to better display the patterns of the individuals, which vary substantially according to whether the item was correctly chosen due to chance or not.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to each of the 5 items</span></span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>neg_prob<span class="ot">&lt;-</span><span class="dv">1</span><span class="sc">-</span>prob</span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>information.p1<span class="ot">&lt;-</span>neg_prob<span class="sc">/</span>prob</span>
 <span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>information.p2<span class="ot">&lt;-</span>(prob<span class="sc">-</span><span class="fu">apply</span>(gues,<span class="dv">2</span>,mean))<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">apply</span>(gues,<span class="dv">2</span>,mean))<span class="sc">^</span><span class="dv">2</span></span>
@@ -1041,7 +1044,7 @@ NA Initializing model</code></pre>
 <span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(theta,information3[,<span class="dv">3</span>],<span class="at">col=</span><span class="st">"orange"</span>)</span>
 <span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(theta,information3[,<span class="dv">4</span>],<span class="at">col=</span><span class="st">"green"</span>)</span>
 <span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(theta,information3[,<span class="dv">5</span>],<span class="at">col=</span><span class="st">"black"</span>)</span>
-<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"orange"</span>,<span class="st">"green"</span>,<span class="st">"black"</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1052,11 +1055,11 @@ NA Initializing model</code></pre>
 </div>
 <p>Next, we plot the item information curve for the whole test. This is the sum of all the item IICs above.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot iic for each individual with respect to whole test</span></span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>information_test<span class="ot">&lt;-</span><span class="fu">apply</span>(information3,<span class="dv">1</span>,sum)</span>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta,information_test, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">ylab =</span> <span class="st">"information (test)"</span>, <span class="at">xlab=</span><span class="st">"ability"</span>,</span>
 <span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">1.5</span>))</span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(theta,information_test,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1064,7 +1067,7 @@ NA Initializing model</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(information_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
@@ -1075,10 +1078,10 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 <h2 class="anchored" data-anchor-id="assess-fit-2">Assess fit</h2>
 <p>Next, we check how well the 3PLM fits the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>Y.rep<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>Y.rep</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>Y.rep<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>Y.rep</span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Bar plot of y with yrep medians and uncertainty intervals superimposed on the bars</span></span>
-<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">1</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1086,7 +1089,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">2</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">2</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1094,7 +1097,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">3</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">3</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 3"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1102,7 +1105,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">4</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">4</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 4"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1110,7 +1113,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_bars</span>(Y[,<span class="dv">5</span>],Y.rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,,<span class="dv">5</span>]) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Item 5"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1121,7 +1124,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 </div>
 <p>We can also compare the fit of the 1PLM, 2PLM and 3PLM using relative measures of fit or <em>information criteria</em>. These are computed based on the deviance and a penalty for model complexity called the effective number of parameters <span class="math inline">\(p\)</span>. Here we consider two Bayesian measures known as the <em>Widely Applicable</em> (WAIC) and <em>Leave One Out</em> (LOOIC) Information Criterion, which can be easily obtained through the functions <code>waic</code> and <code>loo</code> in the package <code>loo</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract log-likelihood</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract log-likelihood</span></span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>loglik_m3<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>loglik_y</span>
 <span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="co">#waic</span></span>
@@ -1134,7 +1137,7 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 <span id="cb72-11"><a href="#cb72-11" aria-hidden="true" tabindex="-1"></a>table_waic<span class="ot">&lt;-</span><span class="fu">rbind</span>(waic_m1<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],waic_m2<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],waic_m3<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>])</span>
 <span id="cb72-12"><a href="#cb72-12" aria-hidden="true" tabindex="-1"></a>table_looic<span class="ot">&lt;-</span><span class="fu">rbind</span>(looic_m1<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],looic_m2<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],looic_m3<span class="sc">$</span>estimates[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>])</span>
 <span id="cb72-13"><a href="#cb72-13" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(table_waic)<span class="ot">&lt;-</span><span class="fu">rownames</span>(table_looic)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"1PLM"</span>,<span class="st">"2PLM"</span>,<span class="st">"3PLM"</span>)</span>
-<span id="cb72-14"><a href="#cb72-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">cbind</span>(table_waic,table_looic), <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb72-14"><a href="#cb72-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">cbind</span>(table_waic,table_looic), <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -1178,16 +1181,16 @@ NA  0.3793  0.4489  0.5062  0.6978  0.7956  1.5096</code></pre>
 <h2 class="anchored" data-anchor-id="plot-ability-scores-2">Plot ability scores</h2>
 <p>Plot the density curve of the estimated ability scores</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
-<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary stats for theta across both iterations and individuals</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA       Min.    1st Qu.     Median       Mean    3rd Qu.       Max. 
 NA -1.7435119 -0.4170588  0.0471025  0.0006053  0.6298597  0.7189831</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co">#histogram and kernel density plot of theta averaged across iterations</span></span>
 <span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>dens.theta<span class="ot">&lt;-</span><span class="fu">density</span>(theta, <span class="at">bw=</span><span class="fl">0.3</span>)</span>
 <span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(theta, <span class="at">breaks =</span> <span class="dv">5</span>, <span class="at">prob =</span> T)</span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(dens.theta, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1278,13 +1281,14 @@ Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -409,9 +412,9 @@ G^2 = 2 \sum o \; ln\frac{o}{e}
 <h1>Data generation</h1>
 <p>Goodness of fit tests are concerned with comparing the observed frequencies with those expected on the basis of a specific null hypothesis. So lets now fabricate a motivating scenario and some data. We will create a scenario that involves items classified into one of three groups (A, B and C). The number of items in each classification group are then tallied up. Out of a total of <span class="math inline">\(47\)</span> items, <span class="math inline">\(15\)</span> where of type A, <span class="math inline">\(9\)</span> where of type B and <span class="math inline">\(23\)</span> where of type C. We could evaluate a parity (a <span class="math inline">\(1:1:1\)</span> ratio from these data. In a frequentist context, this might involve testing a null hypothesis that the observed data could have come from a population with a <span class="math inline">\(1:1\)</span> item ratio. In this case the probability would be the probability of obtaining the observed ratio of frequencies when the null hypothesis is true. In a Bayesian context, there are numerous ways that we could tackle these data. We would be evaluating the evidence for the null hypothesis (<span class="math inline">\(1:1:1\)</span> item ratio) given the observed by estimating the degree of freedom from a chi-square distribution. Alternatively, we could estimate the value of the three population fractions which are expected to be <span class="math inline">\(1/3, 1/3, 1/3\)</span> when <span class="math inline">\(1:1:1\)</span>. We will explore this option first and then explore the chi-square approach second. To extend the example, lets also explore a <span class="math inline">\(1:1:2\)</span> ratio. We start by generating the observed data:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#the observed frequences of A and B</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#the observed frequences of A and B</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">15</span>,<span class="dv">9</span>,<span class="dv">23</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>obs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>obs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 15  9 23</code></pre>
 </div>
@@ -432,7 +435,7 @@ obs_i \sim \text{Bin}(p_i,n_i),
 <h2 class="anchored" data-anchor-id="model-fitting">Model fitting</h2>
 <p>We now translate the likelihood model into <code>JAGS</code> code and store the code in an external file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>modelString<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">  #Likelihood</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st"> for (i in 1:nGroups) {</span></span>
@@ -444,7 +447,7 @@ obs_i \sim \text{Bin}(p_i,n_i),
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file </span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString,<span class="at">con=</span><span class="st">"chi2model.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString,<span class="at">con=</span><span class="st">"chi2model.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li><p>The likelihood model indicates that the observed counts are modeled by a binomial distribution with a probability of p (fraction) from n trials (items).</p></li>
@@ -453,10 +456,10 @@ obs_i \sim \text{Bin}(p_i,n_i),
 </ul>
 <p>Define the data list. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The observed item frequencies</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The observed item frequencies</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">9</span>, <span class="dv">23</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">obs =</span> obs, <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">47</span>, <span class="dv">47</span>, <span class="dv">47</span>), <span class="at">nGroups =</span> <span class="dv">3</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data.list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data.list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA $obs
 NA [1] 15  9 23
@@ -470,20 +473,20 @@ NA [1] 3</code></pre>
 </div>
 <p>Define the parameters to monitor and the chain details</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"p"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"p"</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">1000</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">5000</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Fit the model in <code>JAGS</code> using the function <code>jags</code> in the package <code>R2jags</code> (which should be loaded first).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model for the 1:1:1 ratio</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params, </span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">model.file =</span> <span class="st">"chi2model.txt"</span>,<span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter, </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -495,7 +498,7 @@ NA    Total graph size: 18
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model.txt", fit using jags,
 NA  2 chains, each with 2500 iterations (first 1000 discarded)
@@ -519,8 +522,8 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <section id="model-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation">Model evaluation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"p"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"p"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -528,7 +531,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"p"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"p"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -536,7 +539,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [[1]]
 NA 
@@ -554,7 +557,7 @@ NA Probability (s) = 0.95
 NA 
 NA You need a sample size of at least 3746 with these values of q, r and s</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA          deviance       p[1]        p[2]       p[3]
 NA Lag 0  1.00000000 1.00000000  1.00000000 1.00000000
@@ -566,7 +569,7 @@ NA Lag 50 0.01818888 0.03336105 -0.05892592 0.01968776</code></pre>
 </div>
 <p><strong>Conclusions</strong>: Minimum required number of MCMC samples to ensure that sufficient samples had been collected to achieve good accuracy is <span class="math inline">\(3746\)</span>. We had <span class="math inline">\(5000\)</span> per chain (<span class="math inline">\(5000\times3=15000\)</span>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"p"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"p"</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">1000</span></span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">50</span></span>
@@ -574,7 +577,7 @@ NA Lag 50 0.01818888 0.03336105 -0.05892592 0.01968776</code></pre>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>data.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params, </span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">model.file =</span> <span class="st">"chi2model.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -586,7 +589,7 @@ NA    Total graph size: 18
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model.txt", fit using jags,
 NA  2 chains, each with 125000 iterations (first 1000 discarded), n.thin = 50
@@ -633,7 +636,7 @@ e=\text{total counts} \times \text{expected fraction}.
 <h2 class="anchored" data-anchor-id="model-fitting-1">Model fitting</h2>
 <p>We now translate the likelihood model into <code>JAGS</code> code and store the code in an external file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>modelString2<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>modelString2<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="st">data {</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="st">for (i in 1:n){</span></span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="st">     resid[i] &lt;- pow(obs[i]-exp[i],2)/exp[i]</span></span>
@@ -648,7 +651,7 @@ e=\text{total counts} \times \text{expected fraction}.
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="st"> }</span></span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file </span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString2,<span class="at">con=</span><span class="st">"chi2model2.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(modelString2,<span class="at">con=</span><span class="st">"chi2model2.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li><p>First of all, the standardized residuals and chi-square statistic are calculated according to the formula listed above.</p></li>
@@ -657,12 +660,12 @@ e=\text{total counts} \times \text{expected fraction}.
 </ul>
 <p>Define the data list. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The observed item frequencies</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The observed item frequencies</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">9</span>, <span class="dv">23</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The expected item frequencies (for a 1:1:1 ratio)</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>exp <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">sum</span>(obs) <span class="sc">*</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>data.list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">obs =</span> obs, <span class="at">exp =</span> exp, <span class="at">n =</span> <span class="dv">3</span>)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>data.list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>data.list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA $obs
 NA [1] 15  9 23
@@ -673,10 +676,10 @@ NA
 NA $n
 NA [1] 3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The expected item frequencies (for a 1:1:2 ratio)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The expected item frequencies (for a 1:1:2 ratio)</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>exp <span class="ot">&lt;-</span> <span class="fu">sum</span>(obs) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">4</span>)</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>data.list1 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">obs =</span> obs, <span class="at">exp =</span> exp, <span class="at">n =</span> <span class="dv">3</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>data.list1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>data.list1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA $obs
 NA [1] 15  9 23
@@ -690,19 +693,19 @@ NA [1] 3</code></pre>
 </div>
 <p>Define the parameters to monitor and the chain details</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"chisq"</span>, <span class="st">"resid"</span>, <span class="st">"k"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"chisq"</span>, <span class="st">"resid"</span>, <span class="st">"k"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">1000</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">5000</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Fit the model in <code>JAGS</code> using the function <code>jags</code> in the package <code>R2jags</code> (which should be loaded first).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model for the 1:1:1 ratio</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model for the 1:1:1 ratio</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>data.r2jags2 <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params, </span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">model.file =</span> <span class="st">"chi2model2.txt"</span>,<span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter, </span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling data graph
 NA    Resolving undeclared variables
@@ -719,7 +722,7 @@ NA    Total graph size: 14
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model2.txt", fit using jags,
 NA  2 chains, each with 2500 iterations (first 1000 discarded)
@@ -739,10 +742,10 @@ NA DIC info (using the rule, pD = var(deviance)/2)
 NA pD = 1.0 and DIC = 6.2
 NA DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model for the 1:1:2 ratio</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model for the 1:1:2 ratio</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>data.r2jags2<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data.list1, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params, </span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">model.file =</span> <span class="st">"chi2model2.txt"</span>,<span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter, </span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling data graph
 NA    Resolving undeclared variables
@@ -759,7 +762,7 @@ NA    Total graph size: 14
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2<span class="fl">.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2<span class="fl">.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model2.txt", fit using jags,
 NA  2 chains, each with 2500 iterations (first 1000 discarded)
@@ -784,7 +787,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <section id="model-evaluation-1" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation-1">Model evaluation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags2, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"k"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(data.r2jags2, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"k"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -792,7 +795,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags2, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"k"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(data.r2jags2, <span class="at">parms =</span> <span class="fu">c</span>(<span class="st">"k"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -800,7 +803,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">raftery.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [[1]]
 NA 
@@ -818,7 +821,7 @@ NA Probability (s) = 0.95
 NA 
 NA You need a sample size of at least 3746 with these values of q, r and s</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autocorr.diag</span>(<span class="fu">as.mcmc</span>(data.r2jags2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA        chisq     deviance           k resid[1] resid[2] resid[3]
 NA Lag 0    NaN  1.000000000 1.000000000      NaN      NaN      NaN
@@ -833,7 +836,7 @@ NA Lag 50   NaN -0.006497684 0.001119042      NaN      NaN      NaN</code></pre>
 <section id="exploring-model-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="exploring-model-parameters">Exploring model parameters</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model2.txt", fit using jags,
 NA  2 chains, each with 2500 iterations (first 1000 discarded)
@@ -856,7 +859,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </div>
 <p><strong>Conclusions</strong>: The median degrees of freedom (<span class="math inline">\(k\)</span>) was <span class="math inline">\(8.00\)</span> with a <span class="math inline">\(95\)</span>% spread of <span class="math inline">\(2.31-16.16\)</span>. This interval does not include the value of <span class="math inline">\(2\)</span> (expected value of the chi2 distribution for this hypothesis). Hence there is evidence that the population ratio deviates from a 1:1:1 ratio.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2<span class="fl">.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.r2jags2<span class="fl">.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "chi2model2.txt", fit using jags,
 NA  2 chains, each with 2500 iterations (first 1000 discarded)
@@ -883,15 +886,15 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="exploration-of-the-trends">Exploration of the trends</h2>
 <p>There are a number of avenues we could take in order to explore the data and models further. One thing we could do is calculate the probability that <span class="math inline">\(k\)</span> is greater than $24 (the expected value) for each hypothesis. This can be done either by modifying the <code>JAGS</code> code to include a derivative that uses the step function, or we can derive it within <code>R</code> from the <span class="math inline">\(k\)</span> samples. Lets explore the latter.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> data.r2jags2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"k"</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> data.r2jags2<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"k"</span>]</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>pr <span class="ot">&lt;-</span> <span class="fu">sum</span>(k <span class="sc">&gt;</span> <span class="dv">2</span>)<span class="sc">/</span><span class="fu">length</span>(k)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>pr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>pr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.982</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> data.r2jags2<span class="fl">.1</span><span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"k"</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> data.r2jags2<span class="fl">.1</span><span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix[, <span class="st">"k"</span>]</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>pr1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(k <span class="sc">&gt;</span> <span class="dv">2</span>)<span class="sc">/</span><span class="fu">length</span>(k)</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>pr1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>pr1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.7323333</code></pre>
 </div>
@@ -965,13 +968,14 @@ Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -289,13 +292,13 @@ window.Quarto = {
 <p>This dataset contains reconstructed records from a prospective, randomised, placebo-controlled two-arm clinical trial published on October 30, 1948 in the British Medical Journal, reported by the Tuberculosis Trials Committee of the Medical Research Council <span class="citation" data-cites="crofton1948streptomycin">(<a href="#ref-crofton1948streptomycin" role="doc-biblioref">Crofton and Mitchison 1948</a>)</span>. It is often considered the first modern randomised clinical trial ever published. The baseline characteristics and endpoints were re-created for each of the <span class="math inline">\(107\)</span> young participants with pulmonary tuberculosis, which were randomnly assigned to either streptomycin <span class="math inline">\(2\)</span> grams daily by mouth (Streptomycin) vs.&nbsp;bed rest (Control) to treat tuberculosis. The trial was helpful to prevent rationing and black market selling of streptomycin, and helped with allocation of limited hospital isolation beds for bedrest therapy (the control arm, and standard of care at the time).</p>
 <p>Let’s first install and lead the <code>medicaldata</code> dataset into the <code>R</code> workspace by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"higgi13425/medicaldata"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(medicaldata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"higgi13425/medicaldata"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(medicaldata)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The dataset is called <code>strep_tb</code> and should be directly available in the <code>R</code> workspace once the package <code>medicaldata</code> is successfully loaded. We can obtain a general summary of the variables available in the dataset, for example, using the command <code>tbl_summary</code> from the <code>gtsummary</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -753,7 +756,7 @@ Table&nbsp;1: Summary statistics of the variables in the Streptomycin for Tuberc
 }
 </style>
 
-<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <colgroup>
 <col style="width: 50%">
 <col style="width: 50%">
@@ -1010,7 +1013,7 @@ Table&nbsp;1: Summary statistics of the variables in the Streptomycin for Tuberc
 <h2 class="anchored" data-anchor-id="baseline-characteristics">Baseline characteristics</h2>
 <p>A summary of the key baseline characteristics reported in the original article can be obtained as follows.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> arm,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">include =</span> <span class="fu">c</span>(baseline_condition, baseline_temp, baseline_esr, gender),</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">statistic =</span> <span class="fu">list</span>(</span>
@@ -1020,7 +1023,7 @@ Table&nbsp;1: Summary statistics of the variables in the Streptomycin for Tuberc
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="dv">2</span>,</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#    label = list(grade = "Tumor Grade"),</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing_text =</span> <span class="st">"(Missing)"</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1478,7 +1481,7 @@ Table&nbsp;2: Summary statistics of key baseline variables by study arm.
 }
 </style>
 
-<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <colgroup>
 <col style="width: 33%">
 <col style="width: 33%">
@@ -1617,7 +1620,7 @@ N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:itali
 <h2 class="anchored" data-anchor-id="x-ray-classification">X-ray classification</h2>
 <p><a href="#tbl-3" class="quarto-xref">Table&nbsp;3</a> reports summary statistics by study arm about <code>baseline_cavitation</code> based on X-ray films data, which show how about <span class="math inline">\(58\%\)</span> in both arms were associated with large or multiple cavities in the film taken on admission.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> arm,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">include =</span> <span class="fu">c</span>(baseline_cavitation),</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">statistic =</span> <span class="fu">list</span>(</span>
@@ -1627,7 +1630,7 @@ N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:itali
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="dv">2</span>,</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#    label = list(grade = "Tumor Grade"),</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing_text =</span> <span class="st">"(Missing)"</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-3" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2085,7 +2088,7 @@ Table&nbsp;3: Summary statistics of X-ray films by study arm.
 }
 </style>
 
-<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <colgroup>
 <col style="width: 33%">
 <col style="width: 33%">
@@ -2125,7 +2128,7 @@ N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:itali
 <h2 class="anchored" data-anchor-id="results-at-6-months-follow-up">Results at 6 months follow-up</h2>
 <p><a href="#tbl-4" class="quarto-xref">Table&nbsp;4</a> reports the numbers and proportions of patients associated with different value of <code>radiologic_6m</code>, separately displayed by study arm.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tbl_summary</span>(strep_tb, </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> arm,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">include =</span> <span class="fu">c</span>(radiologic_6m),</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">statistic =</span> <span class="fu">list</span>(</span>
@@ -2135,7 +2138,7 @@ N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:itali
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="dv">2</span>,</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#    label = list(grade = "Tumor Grade"),</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing_text =</span> <span class="st">"(Missing)"</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-4" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2593,7 +2596,7 @@ Table&nbsp;4: Summary statistics of X-ray films by study arm.
 }
 </style>
 
-<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<table class="gt_table do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <colgroup>
 <col style="width: 33%">
 <col style="width: 33%">
@@ -2662,9 +2665,9 @@ N = 55<span class="gt_footnote_marks" style="white-space:nowrap;font-style:itali
 </div>
 <p>A key result which the authors highlight is considerable difference in the death rate between Control (<span class="math inline">\(27\%\)</span>) and Streptomycin (<span class="math inline">\(7\%\)</span>). They also claim it to be statistically significant, which we can easily verify using, for example, a simple <span class="math inline">\(\chi^2\)</span> test.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>strep_tb<span class="sc">$</span>death <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"1_Death"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>strep_tb<span class="sc">$</span>death <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"1_Death"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>death_diff <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>death,strep_tb<span class="sc">$</span>arm, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>death_diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>death_diff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pearson's Chi-squared test
@@ -2675,11 +2678,11 @@ X-squared = 7.3761, df = 1, p-value = 0.00661</code></pre>
 </div>
 <p>The test statistic, computed without any correction method (since no expected cell counts were below <span class="math inline">\(5\)</span>), is 7.38 with a p-value of 0.0066. In <code>R</code>, we may alternatively use a simple Z-test for the difference between two proportions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">&lt;-</span> <span class="fu">nrow</span>(strep_tb[strep_tb<span class="sc">$</span>arm<span class="sc">==</span><span class="st">"Control"</span>,])</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">&lt;-</span> <span class="fu">nrow</span>(strep_tb[strep_tb<span class="sc">$</span>arm<span class="sc">==</span><span class="st">"Control"</span>,])</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="fu">nrow</span>(strep_tb[strep_tb<span class="sc">$</span>arm<span class="sc">==</span><span class="st">"Streptomycin"</span>,])</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>n0_dead <span class="ot">&lt;-</span> <span class="fu">nrow</span>(strep_tb[strep_tb<span class="sc">$</span>arm<span class="sc">==</span><span class="st">"Control"</span> <span class="sc">&amp;</span> strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"1_Death"</span>,])</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>n1_dead <span class="ot">&lt;-</span> <span class="fu">nrow</span>(strep_tb[strep_tb<span class="sc">$</span>arm<span class="sc">==</span><span class="st">"Streptomycin"</span> <span class="sc">&amp;</span> strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"1_Death"</span>,])</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="fu">c</span>(n0_dead, n1_dead), <span class="at">n =</span> <span class="fu">c</span>(n0, n1), <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="fu">c</span>(n0_dead, n1_dead), <span class="at">n =</span> <span class="fu">c</span>(n0, n1), <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     2-sample test for equality of proportions without continuity correction
@@ -2696,9 +2699,9 @@ sample estimates:
 </div>
 <p>which returns exactly the same result in terms of test statistic and p-value. The authors clarify that an assessment of the condition at the end of the six-months period should be based on a judicious combination of changes in the radiological picture, changes in general condition, temperature, weight, sedimentation rate, and bacillary content of the sputum. To partly address this, they performed a preliminary analysis based on changes in the radiological picture alone, this being in their opinion the most important single factor to consider. The overall results given in <a href="#tbl-4" class="quarto-xref">Table&nbsp;4</a> show differences in the two series that support this argument, especially with respect to the numbers related to a “considerable improvement” in the radiological picture, i.e.&nbsp;those for whom at the end of the six-months period there was a reasonable prospect of recovery. Indeed, a total of <span class="math inline">\(51\%\)</span> of the Streptomycin patients were considerably improved, compared with only <span class="math inline">\(\8%\)</span> of the Control patients. Again, we can check the statistical significance related to this comparison as we did before, for example by doing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>strep_tb<span class="sc">$</span>cons_impr <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"6_Considerable_improvement"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>strep_tb<span class="sc">$</span>cons_impr <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(strep_tb<span class="sc">$</span>radiologic_6m<span class="sc">==</span><span class="st">"6_Considerable_improvement"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cons_impr_diff <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>cons_impr,strep_tb<span class="sc">$</span>arm, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cons_impr_diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cons_impr_diff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pearson's Chi-squared test
@@ -2709,8 +2712,8 @@ X-squared = 23.815, df = 1, p-value = 1.061e-06</code></pre>
 </div>
 <p>They also state that results were comparable between genders, for which no statistical association with death was found. We can again check this by checking the pairwise associations between <code>gender</code> and <code>arm</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gender_arm <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>gender,strep_tb<span class="sc">$</span>arm, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>gender_arm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gender_arm <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>gender,strep_tb<span class="sc">$</span>arm, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>gender_arm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pearson's Chi-squared test
@@ -2721,8 +2724,8 @@ X-squared = 0.068484, df = 1, p-value = 0.7936</code></pre>
 </div>
 <p>and between <code>gender</code> and <code>death</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gender_death <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>gender,strep_tb<span class="sc">$</span>death, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>gender_death</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gender_death <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(strep_tb<span class="sc">$</span>gender,strep_tb<span class="sc">$</span>death, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>gender_death</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pearson's Chi-squared test
@@ -2734,9 +2737,9 @@ X-squared = 1.1623, df = 1, p-value = 0.281</code></pre>
 <p>As it can be seen, no statistically significant association is detected between <code>gender</code> and any of the other two variables.</p>
 <p>Finally, we may think to assess the association between <code>death</code> and <code>arm</code> while also accounting for possible baseline differences in the available baseline variables in <code>strep_tb</code>, which the authors considered to be important for assessing these results, namely <code>baseline_condition</code>, <code>baseline_temp</code> and <code>baseline_esr</code>. We can do this, for example, by means of a logistic regression</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>death_lr <span class="ot">&lt;-</span> <span class="fu">glm</span>(death <span class="sc">~</span> arm <span class="sc">+</span> baseline_condition <span class="sc">+</span> baseline_temp <span class="sc">+</span> baseline_esr, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>death_lr <span class="ot">&lt;-</span> <span class="fu">glm</span>(death <span class="sc">~</span> arm <span class="sc">+</span> baseline_condition <span class="sc">+</span> baseline_temp <span class="sc">+</span> baseline_esr, </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">'logit'</span>), <span class="at">data =</span> strep_tb)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(death_lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(death_lr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -2783,7 +2786,7 @@ Number of Fisher Scoring iterations: 19</code></pre>
 </div>
 <p>As it can be seen, results for the coefficient associated with <code>arm</code> remain statistically significant, even after accounting for the different baseline variables included in the model. If we want to look at more interpretable results, we can re-scale the coefficient estimates on the exponential scale so to look at the odds ratios instead of their logarithmic value</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(death_lr<span class="sc">$</span>coefficients)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(death_lr<span class="sc">$</span>coefficients)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                    (Intercept) 
                                    2.241304e-09 
@@ -2811,8 +2814,8 @@ baseline_temp3_100-100.9F/37.8-38.2C/37.8-38.2C
 </div>
 <p>We can also do the same to look at the corresponding <span class="math inline">\(95\%\)</span> confidence intervals related to the regression coefficients</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>death_lr_ci <span class="ot">&lt;-</span> <span class="fu">confint</span>(death_lr, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(death_lr_ci)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>death_lr_ci <span class="ot">&lt;-</span> <span class="fu">confint</span>(death_lr, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(death_lr_ci)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                                        2.5 %        97.5 %
 (Intercept)                                     1.214625e-116  8.313032e+91
@@ -2891,13 +2894,14 @@ Crofton, John, and DA Mitchison. 1948. <span>“Streptomycin Resistance in Pulmo
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

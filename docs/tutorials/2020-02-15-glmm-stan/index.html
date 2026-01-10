@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -334,7 +337,7 @@ window.Quarto = {
 <h1>Loading the data</h1>
 <p>I start by loading libraries, reading in the data and preprocessing it for <code>Stan</code>. In the original verison of the analysis I used <code>JAGS</code> and a slightly more complicated model which I do not consider here, but that you may consult in my paper if interested (<span class="citation" data-cites="gabrio2020bayesian">Gabrio (<a href="#ref-gabrio2020bayesian" role="doc-biblioref">2020</a>)</span>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
@@ -364,16 +367,16 @@ window.Quarto = {
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>atteff2.cen<span class="ot">&lt;-</span>data<span class="sc">$</span>atteff2<span class="sc">-</span><span class="fu">mean</span>(data<span class="sc">$</span>atteff2)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>sereff2.cen<span class="ot">&lt;-</span>data<span class="sc">$</span>sereff2<span class="sc">-</span><span class="fu">mean</span>(data<span class="sc">$</span>sereff2)</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>bloeff2.cen<span class="ot">&lt;-</span>data<span class="sc">$</span>bloeff2<span class="sc">-</span><span class="fu">mean</span>(data<span class="sc">$</span>bloeff2)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>defeff2.cen<span class="ot">&lt;-</span>data<span class="sc">$</span>defeff2<span class="sc">-</span><span class="fu">mean</span>(data<span class="sc">$</span>defeff2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>defeff2.cen<span class="ot">&lt;-</span>data<span class="sc">$</span>defeff2<span class="sc">-</span><span class="fu">mean</span>(data<span class="sc">$</span>defeff2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="data-check" class="level2">
 <h2 class="anchored" data-anchor-id="data-check">Data check</h2>
 <p>How are the number of points for each team in a volleyball match distributed? Well, let’s start by assuming that both teams have many chances at making a point and that each team have the same probability of scoring each point chance. Given these assumptions the distribution of the number of points for each team should be well captured by a Poisson distribution. A quick and dirty comparison between the actual distribution of the number of scored goals and a Poisson distribution having the same mean number of scored goals support this notion.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">c</span>(data<span class="sc">$</span>y2, data<span class="sc">$</span>y1), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">120</span>), <span class="at">breaks =</span> <span class="dv">8</span>,<span class="at">main =</span> <span class="st">"Distribution of the number of points</span><span class="sc">\n</span><span class="st">scored by a team in a match."</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mean_goals <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">c</span>(data<span class="sc">$</span>y2, data<span class="sc">$</span>y1))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rpois</span>(<span class="dv">9999</span>, mean_goals), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">120</span>), <span class="at">breaks =</span> <span class="dv">8</span> ,<span class="at">main =</span> <span class="st">"Random draw from a Poisson distribution with</span><span class="sc">\n</span><span class="st">the same mean as the distribution above."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rpois</span>(<span class="dv">9999</span>, mean_goals), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">120</span>), <span class="at">breaks =</span> <span class="dv">8</span> ,<span class="at">main =</span> <span class="st">"Random draw from a Poisson distribution with</span><span class="sc">\n</span><span class="st">the same mean as the distribution above."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -431,7 +434,7 @@ d^s \sim \text{Bernoulli}(\pi^s) \;\;\; \text{and} \;\;\; d^g \sim \text{Bernoul
 \]</span></p>
 <p>so that teams are assumed to have similar but not identical mean and variance parameters for thier skill parameters. Turning this into a <code>Stan</code> model requires some minor adjustments. I have to “anchor” the sum of team skills to a constant otherwise the mean skill can drift away freely (<em>sum to zero constraint</em>) and the model cannot be identified. Doing these adjustments results in the following model description:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rstanString<span class="ot">&lt;-</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rstanString<span class="ot">&lt;-</span><span class="st">"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">int&lt;lower=1&gt; nteams; // number of teams</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">int&lt;lower=1&gt; ngames; // number of games</span></span>
@@ -546,11 +549,11 @@ d^s \sim \text{Bernoulli}(\pi^s) \;\;\; \text{and} \;\;\; d^g \sim \text{Bernoul
 <span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString, <span class="at">con =</span> <span class="st">"Modelbasic.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString, <span class="at">con =</span> <span class="st">"Modelbasic.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we put the data into a list to be passed to <code>Stan</code>, define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#prepare data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#prepare data</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y1<span class="ot">&lt;-</span>data<span class="sc">$</span>y1</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y2<span class="ot">&lt;-</span>data<span class="sc">$</span>y2</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>ngames<span class="ot">&lt;-</span><span class="fu">max</span>(data<span class="sc">$</span>Game)</span>
@@ -588,13 +591,13 @@ d^s \sim \text{Bernoulli}(\pi^s) \;\;\; \text{and} \;\;\; d^g \sim \text{Bernoul
 <span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">2000</span></span>
 <span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Start the <code>Stan</code> model (check the model, load data into the model, specify the number of chains and compile the model). Run the <code>Stan</code> code via the <code>rstan</code> package and the <code>stan</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model_stan<span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> datalist, <span class="at">file =</span> <span class="st">"Modelbasic.stan"</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model_stan<span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> datalist, <span class="at">file =</span> <span class="st">"Modelbasic.stan"</span>, </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -647,9 +650,9 @@ NA Chain 2:                75.791 seconds (Sampling)
 NA Chain 2:                137.113 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(model_stan, <span class="at">pars =</span><span class="fu">c</span>(<span class="st">"mu"</span>,<span class="st">"home"</span>,<span class="st">"gamma"</span>,<span class="st">"delta"</span>,<span class="st">"beta0_att"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(model_stan, <span class="at">pars =</span><span class="fu">c</span>(<span class="st">"mu"</span>,<span class="st">"home"</span>,<span class="st">"gamma"</span>,<span class="st">"delta"</span>,<span class="st">"beta0_att"</span>,</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"beta0_def"</span>,<span class="st">"beta1_att"</span>,<span class="st">"beta1_def"</span>,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"beta1_ser"</span>,<span class="st">"beta1_blo"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"beta1_ser"</span>,<span class="st">"beta1_blo"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=1000; warmup=500; thin=1; 
@@ -828,7 +831,7 @@ NA convergence, Rhat=1).</code></pre>
 </div>
 <p>The diagnostic results are not perfect, perhaps I should run the algorithm a bit longer to get better results as a total of <span class="math inline">\(1000\)</span> iterations does not seem enough. Here I do not bother to save time. To get an idea about posterior results I can plot at the average marginal mean offensive and defensive skills for each of the <span class="math inline">\(12\)</span> teams in the league using the following code.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot att vs def effext by team</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot att vs def effext by team</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model_stan_par<span class="ot">&lt;-</span><span class="fu">extract</span>(model_stan)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>beta0.att<span class="ot">&lt;-</span><span class="fu">apply</span>(model_stan_par<span class="sc">$</span>beta0_att, <span class="dv">2</span>, mean)</span>
@@ -839,7 +842,7 @@ NA convergence, Rhat=1).</code></pre>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(beta0.att,beta0.def, <span class="at">pch=</span><span class="dv">16</span>, <span class="at">col=</span><span class="st">"red"</span>,<span class="at">cex =</span> <span class="fl">1.2</span>)</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="dv">0</span>)</span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="dv">0</span>)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(beta0.att,beta0.def,names,<span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">adj =</span> <span class="fu">c</span>(<span class="fl">0.4</span>,<span class="fl">1.3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(beta0.att,beta0.def,names,<span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">adj =</span> <span class="fu">c</span>(<span class="fl">0.4</span>,<span class="fl">1.3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -854,8 +857,8 @@ NA convergence, Rhat=1).</code></pre>
 <h2 class="anchored" data-anchor-id="mcmc-diagnostics">MCMC diagnostics</h2>
 <p>Using the generated MCMC samples I can now look at some diagnostic measures. For example, we can assess convergence of the chains using the function <code>mcmc_combo</code> in the package <code>bayesplot</code> which provides a summary of convergence diagnostics using different graphics. We consider the marginal skill parameters for four teams to give an example.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(model_stan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">"beta0_att[1]"</span>,<span class="st">"beta0_att[2]"</span>,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"beta0_att[3]"</span>,<span class="st">"beta0_att[4]"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(model_stan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">"beta0_att[1]"</span>,<span class="st">"beta0_att[2]"</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"beta0_att[3]"</span>,<span class="st">"beta0_att[4]"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -863,8 +866,8 @@ NA convergence, Rhat=1).</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(model_stan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">"beta0_def[1]"</span>,<span class="st">"beta0_def[2]"</span>,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"beta0_def[3]"</span>,<span class="st">"beta0_def[4]"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(model_stan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">"beta0_def[1]"</span>,<span class="st">"beta0_def[2]"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"beta0_def[3]"</span>,<span class="st">"beta0_def[4]"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -878,7 +881,7 @@ NA convergence, Rhat=1).</code></pre>
 <h2 class="anchored" data-anchor-id="model-validation">Model validation</h2>
 <p>We can finally assess the fit of the model to the data by computing posterior predictive checks, where we use the posterior values of the parameters to sample a large number of replications for the data. We then use these to generate different types of results and compare them with the actual results to detect possible misfits of the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain parameters to generate replications</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain parameters to generate replications</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>y1.pred<span class="ot">&lt;-</span>y2.pred<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">length</span>(model_stan_par<span class="sc">$</span>home),<span class="dv">132</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ds.pred<span class="ot">&lt;-</span>dg.pred<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">length</span>(model_stan_par<span class="sc">$</span>home),<span class="dv">132</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>pi.s<span class="ot">&lt;-</span>pi.g<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">length</span>(model_stan_par<span class="sc">$</span>home),<span class="dv">132</span>)</span>
@@ -1042,16 +1045,16 @@ NA convergence, Rhat=1).</code></pre>
 <span id="cb12-162"><a href="#cb12-162" aria-hidden="true" tabindex="-1"></a>tot.wins.prop<span class="ot">&lt;-</span>tot.wins<span class="sc">/</span><span class="dv">22</span></span>
 <span id="cb12-163"><a href="#cb12-163" aria-hidden="true" tabindex="-1"></a>tot.wins.obs.prop<span class="ot">&lt;-</span>tot.wins.obs<span class="sc">/</span><span class="dv">22</span></span>
 <span id="cb12-164"><a href="#cb12-164" aria-hidden="true" tabindex="-1"></a>tot.wins.med<span class="ot">&lt;-</span><span class="fu">apply</span>(tot.wins, <span class="dv">2</span>, median)</span>
-<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>tot.wins.final<span class="ot">&lt;-</span><span class="fu">cbind</span>(tot.wins.obs,tot.wins.med)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>tot.wins.final<span class="ot">&lt;-</span><span class="fu">cbind</span>(tot.wins.obs,tot.wins.med)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Here, for each team, we compare the predicted and observed total number of points scored in the matches, the number of won/lost matches, and the league points scored based on a replicated and the original season results.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise pred results</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise pred results</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>res.final.obs<span class="ot">&lt;-</span><span class="fu">cbind</span>(res.y[,<span class="dv">1</span>],res.y.neg[,<span class="dv">1</span>],tot.wins.final[,<span class="dv">1</span>],tot.scores.final[,<span class="dv">1</span>])</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>res.final.pred<span class="ot">&lt;-</span><span class="fu">cbind</span>(res.y[,<span class="dv">2</span>],res.y.neg[,<span class="dv">2</span>],tot.wins.final[,<span class="dv">2</span>],tot.scores.final[,<span class="dv">2</span>])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>res.final<span class="ot">&lt;-</span><span class="fu">cbind</span>(res.final.obs,res.final.pred)</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(res.final)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"scored"</span>,<span class="st">"conc'd"</span>,<span class="st">"wins"</span>,<span class="st">"points"</span>,<span class="st">"scored"</span>,<span class="st">"conc'd"</span>,<span class="st">"wins"</span>,<span class="st">"points"</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(res.final, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(res.final, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -1206,7 +1209,7 @@ NA convergence, Rhat=1).</code></pre>
 </div>
 <p>Predicted results (the last four columns in the table) are not so bad, especially when looking at the number of league points scored by the teams between the replicated and observed season which are quite similar. These results suggest that the model seems to predict in a reasonable way the league results. To further assess this aspect, we consider two plots. The first compares the ranking of the teams across a large number of replications of the season based on the number of wins, losses and league points gained for each team.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise pred results</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise pred results</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>res.matrix<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">length</span>(tot.team.list),<span class="dv">12</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(res.matrix)<span class="ot">&lt;-</span>names</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>){</span>
@@ -1270,7 +1273,7 @@ NA convergence, Rhat=1).</code></pre>
 <span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">percent_format</span>()) <span class="sc">+</span></span>
 <span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y=</span><span class="st">""</span>, <span class="at">x=</span><span class="st">""</span>) <span class="sc">+</span> <span class="fu">scale_fill_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span> </span>
 <span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(), <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(), <span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"white"</span>),</span>
-<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> <span class="st">"black"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> <span class="st">"black"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1282,7 +1285,7 @@ NA convergence, Rhat=1).</code></pre>
 <p>The mean rankings of the teams are in line with those observed in the actual season, while also providing uncertainty about the chance of each team to end in a particular position in the league (only percentages above <span class="math inline">\(10\%\)</span> are shown for clarity).</p>
 <p>The second plot compares the points trend throughout the season for each team with respect to the trend predicted by the model based on the replicated results for each match in the season.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">#########plot for cumlative points over simulated season</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">#########plot for cumlative points over simulated season</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>points.list<span class="ot">&lt;-</span>cum.points.list<span class="ot">&lt;-</span><span class="fu">list</span>()</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(res.matrix)){</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  points.list[[i]]<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="dv">22</span>,<span class="dv">12</span>)</span>
@@ -1346,7 +1349,7 @@ NA convergence, Rhat=1).</code></pre>
 <span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>),obs.cum.points[,i], <span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">1</span>,<span class="at">col=</span><span class="st">"black"</span>)</span>
 <span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>), cum.points.list[[<span class="dv">7</span>]][,i], <span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">1</span>,<span class="at">col=</span><span class="st">"red"</span>)</span>
 <span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="dv">5</span>,<span class="dv">50</span>,<span class="fu">unique</span>(<span class="fu">levels</span>(names))[i],<span class="at">pos =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="dv">1</span>)</span>
-<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1431,13 +1434,14 @@ Stan Development Team. 2018. <span>“<span>RStan</span>: The <span>R</span> Int
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

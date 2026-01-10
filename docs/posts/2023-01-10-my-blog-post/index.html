@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -259,7 +262,7 @@ window.Quarto = {
 <p>Today I wanted to look at the importance that the violation of the assumption of Normality for health economics data, e.g.&nbsp;typically costs but also QALYs, may have on the final results of a typical trial-based analyis. In addition, as perhaps those familiar with this filed knows, presence of substantial level of <strong>skewness</strong> (and so clear indication of non-Normality) often characterises HE data in combination with small sample sizes which, in turn, may lead to results that are not robust to departures from the Normality assumption. This is often true for costs (by definition on how this variable is computed - positive skewness) but also for the effects (e.g.&nbsp;QALYs - negative or positive skewness) in many other cases. As usual, in order to deal with these concepts in a simplified framework, I will focus in my examples on total costs and QALYs variables that are assumed to be computed on all individuals in a trial after aggregating the individual costs and utilities collected at each time point during the trial (see previous posts to know more about this). In addition to what we saw so far, we now also incorporate the element of <strong>correlation</strong> between the two outcomes that was introduced in the last post, therefore taking into account the association between the two non-Normally distributed variables.</p>
 <p>For example, let’s start by simulating some non-Normal bivariate cost and QALY data for a total of <span class="math inline">\(300\)</span> patients assigned to two competing intervention groups (<span class="math inline">\(t=0,1\)</span>). Typically, costs are skewed to the right with a few individuals presenting very high cost values and the majority having small costs; the nature of the distribution of the QALYs can be quite different depending on the field considered: in a context of relatively healthy subjects and a non-life threatening intervention, QALYs can be expected to have a distribution skewed to the left. When generating the data, we can try to mimic these features by using alternative distributions to the Normal that possess such characteristics, e.g.&nbsp;Gamma for costs and Beta for QALYs.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
@@ -289,22 +292,22 @@ window.Quarto = {
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">c</span>(c1,c2)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, QALYs, Costs)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code above I simulated first QALY data within each arm and then specified the conditional mean of the cost variables given the effect values generated in the respective arm. This way I can generate the two variables in each arm while also capturing the dependence between the variables expressed in terms of the regression coefficient linking the conditional mean costs to the QALYs variables. To have a better understanding of how suc coefficient <span class="math inline">\(\beta\)</span> may impact the correlation between the two variables we can simulate the data with different values of <span class="math inline">\(\beta\)</span> affects the final correlation value between the variables by treatment group.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8399915</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>QALYs, <span class="at">y=</span>Costs)) <span class="sc">+</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>, <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -315,7 +318,7 @@ window.Quarto = {
 </div>
 <p>Both the computed correlation and graphs clearly indicate the existence of a strong positive correlation between the outcomes within each arm. The use of Beta and Gamma distribution also ensures that such variables are non-Normally distributed, and we can check this by plotting an histogram of the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>QALY_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>QALYs))<span class="sc">+</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
@@ -323,7 +326,7 @@ window.Quarto = {
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Tcost_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>Costs))<span class="sc">+</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -342,7 +345,7 @@ window.Quarto = {
 </ol>
 <p>As we saw in past posts, in <code>R</code>, we can for example use the <code>boot</code> package which allows to flexibly define our bootstrapping procedure and to include within the procedure our linear regression model using the following commands:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>boot_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(data, i){</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  data2 <span class="ot">&lt;-</span> data[i,]</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  lm.boot.Q <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALYs <span class="sc">~</span> trtf, <span class="at">data =</span> data2)</span>
@@ -362,11 +365,11 @@ window.Quarto = {
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>delta_e_boot<span class="ot">&lt;-</span>boot_est_lm<span class="sc">$</span>t[,<span class="dv">1</span>]</span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>mu_e_boot<span class="ot">&lt;-</span><span class="fu">cbind</span>(boot_est_lm<span class="sc">$</span>t[,<span class="dv">3</span>],boot_est_lm<span class="sc">$</span>t[,<span class="dv">4</span>])</span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>delta_tc_boot<span class="ot">&lt;-</span>boot_est_lm<span class="sc">$</span>t[,<span class="dv">2</span>]</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>mu_tc_boot<span class="ot">&lt;-</span><span class="fu">cbind</span>(boot_est_lm<span class="sc">$</span>t[,<span class="dv">5</span>],boot_est_lm<span class="sc">$</span>t[,<span class="dv">6</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>mu_tc_boot<span class="ot">&lt;-</span><span class="fu">cbind</span>(boot_est_lm<span class="sc">$</span>t[,<span class="dv">5</span>],boot_est_lm<span class="sc">$</span>t[,<span class="dv">6</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The code above proceeds to create a function that repeat the same process a given number of times, equivalent to <span class="math inline">\(B=1000\)</span>, the number bootstrap samples. The higher <span class="math inline">\(B\)</span> the more robust will be the final estimate of the mean outcomes. Within the function, <code>R</code> fits separate linear regression to the QALY and Cost data to retrieve the corresponding mean estimates and differentials between groups. The process is finally iterated via the <code>boot</code> function to generate the bootstrap samples using sampling with replacement and I set the number of replications that I want to use in the argument <code>R</code>. Finally, after the command has finished running, I create objects containing the set of bootstrapped values for each of the stored quantities by extracting these from the output of the boot function. For example, we can inspect the mean estimates for QALYs and Total costs by group by typing:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_est_mean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">c</span>(mu_e_boot[,<span class="dv">1</span>],mu_e_boot[,<span class="dv">2</span>], mu_tc_boot[,<span class="dv">1</span>], mu_tc_boot[,<span class="dv">2</span>]))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_est_mean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">c</span>(mu_e_boot[,<span class="dv">1</span>],mu_e_boot[,<span class="dv">2</span>], mu_tc_boot[,<span class="dv">1</span>], mu_tc_boot[,<span class="dv">2</span>]))</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data_est_mean)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"value"</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>data_est_mean<span class="sc">$</span>outcome <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"QALY"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]<span class="sc">*</span><span class="dv">2</span>), <span class="fu">rep</span>(<span class="st">"Cost"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]<span class="sc">*</span><span class="dv">2</span>))</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data_est_mean<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"control"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]), <span class="fu">rep</span>(<span class="st">"intervention"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]), <span class="fu">rep</span>(<span class="st">"control"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]), <span class="fu">rep</span>(<span class="st">"intervention"</span>,<span class="fu">dim</span>(mu_e_boot)[<span class="dv">1</span>]))</span>
@@ -375,7 +378,7 @@ window.Quarto = {
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_est_mean, <span class="fu">aes</span>(<span class="at">x=</span>value))<span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"mean"</span>)<span class="sc">+</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span> <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>( <span class="sc">~</span> outcome <span class="sc">+</span> trt, <span class="at">scales =</span> <span class="st">"free"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>( <span class="sc">~</span> outcome <span class="sc">+</span> trt, <span class="at">scales =</span> <span class="st">"free"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -441,13 +444,14 @@ window.Quarto = {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

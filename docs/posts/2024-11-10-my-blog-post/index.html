@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -340,11 +343,11 @@ Table&nbsp;1: Example Transition Matrix on Experimental Treatment after 1 Month 
 </div>
 <p>Let’s also assume that patients were randomised to one of two treatments, namely Experimental vs Control, and they were considered to be in either a Well or Sick state. From <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>, we can see that the proportion of patients who started the hypothetical trial at baseline in a Well state and then remained in the same state after treatment was <span class="math inline">\(45\%\)</span>, very few patients (<span class="math inline">\(5\%\)</span>) who started the trial in a Sick state improved into a Well state at follow up, and <span class="math inline">\(60\%\)</span> of patients who were in the Sick state did not change states after starting treatment. In order to compute what the transition matrix will look like after <span class="math inline">\(1\)</span> month, we need to know the initial probabilities (or the probabilities at baseline), say equal to the first row of <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>. After <span class="math inline">\(1\)</span> month of treatment, the transition matrix is updated by multiplying the initial probabilities by the <span class="math inline">\(3\times3\)</span> transition matrix in <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tm_update <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.05</span>,<span class="dv">0</span>,<span class="fl">0.35</span>,<span class="fl">0.6</span>,<span class="dv">0</span>,<span class="fl">0.2</span>,<span class="fl">0.35</span>,<span class="dv">1</span>),<span class="dv">3</span>,<span class="dv">3</span>) </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tm_update <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.05</span>,<span class="dv">0</span>,<span class="fl">0.35</span>,<span class="fl">0.6</span>,<span class="dv">0</span>,<span class="fl">0.2</span>,<span class="fl">0.35</span>,<span class="dv">1</span>),<span class="dv">3</span>,<span class="dv">3</span>) </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tm_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.35</span>,<span class="fl">0.2</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>tm_1m <span class="ot">&lt;-</span> tm_init<span class="sc">%*%</span>tm_update</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>tm_1m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>tm_1m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1]   [,2]   [,3]
 [1,] 0.22 0.3675 0.4125</code></pre>
@@ -404,7 +407,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 </div>
 <p>We can therefore update the transition matrices of the two treatments over <span class="math inline">\(5\)</span> cycles, each of <span class="math inline">\(1\)</span> month, by doing the following</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental treatment</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental treatment</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tm_exp_update <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.05</span>,<span class="dv">0</span>,<span class="fl">0.35</span>,<span class="fl">0.6</span>,<span class="dv">0</span>,<span class="fl">0.2</span>,<span class="fl">0.35</span>,<span class="dv">1</span>),<span class="dv">3</span>,<span class="dv">3</span>) </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>tm_exp_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.35</span>,<span class="fl">0.2</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#update over 5 cycles</span></span>
@@ -425,13 +428,13 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>tm_ctr_5m <span class="ot">&lt;-</span> tm_ctr_4m<span class="sc">%*%</span>tm_ctr_update</span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental TM at the end of 5th cycle</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>tm_exp_5m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>tm_exp_5m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           [,1]      [,2]    [,3]
 [1,] 0.02642064 0.1077694 0.86581</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control TM at the end of 5th cycle</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tm_ctr_5m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control TM at the end of 5th cycle</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tm_ctr_5m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            [,1]       [,2]      [,3]
 [1,] 0.005600547 0.01602453 0.9783749</code></pre>
@@ -440,7 +443,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <p>Once the transition probabilities over the desired number of cycles are estimated, further data manipulation can be carried out to estimate the expected costs and effects, which can be included in an additional vector and then multiplied with the elements of the matrices after each cycle to generate the expected total costs and effects. As an example, let’s assume that patients were treated for <span class="math inline">\(3\)</span> months but followed up for <span class="math inline">\(12\)</span> months during the trial and that costs were collected from patients files and measured in euros, while effects were collected via self-reported questionnaires (e.g.&nbsp;EQ-5D) and measured via utilities. We need to associate to each health state and treatment in the model a corresponding value for each of the outcomes that we want to measure, i.e.&nbsp;costs and utilities. Thus, we may assume that (monthly) utilities for each health state are <span class="math inline">\(u^{well}=0.78\)</span>, <span class="math inline">\(u^{sick}=0.40\)</span>, and <span class="math inline">\(u^{dead}=0\)</span>, but are constant across treatments. Conversely, we may assume that (monthly) costs are constant across health states but vary between treatment groups, i.e.&nbsp;<span class="math inline">\(c_{exp}=954\)</span> and <span class="math inline">\(c^{ctr}=435\)</span>. Next, we need to determine the number of cycles of the model. In this case, we will use <span class="math inline">\(12\)</span> cycles given that we focus over a <span class="math inline">\(1\)</span> year follow-up, with each cycle being <span class="math inline">\(1\)</span> month long. Hence, the expected costs and QALYs for each month will be generated and then added up.</p>
 <p>The proportion of patients in each of the health states at the start of the model needs to be determined, typically an arbitrary large number, e.g.&nbsp;<span class="math inline">\(10000\)</span>, since the idea is to estimate the cumulative costs and effects over the <span class="math inline">\(10000\)</span> patients for each group. We can now proceed to calculate the transition matrices and total costs and QALYs associated with both treatment groups over <span class="math inline">\(12\)</span> months via our Markov Model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initial transition probs by arm</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tm_exp_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.35</span>,<span class="fl">0.2</span>)</span>
@@ -540,12 +543,12 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a><span class="co">#run the function and get the output</span></span>
 <span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>mm_res <span class="ot">&lt;-</span> <span class="fu">mm_sim</span>(<span class="at">tm_exp_init =</span> tm_exp_init, <span class="at">tm_ctr_init =</span> tm_ctr_init, <span class="at">tm_exp_update =</span> tm_exp_update,</span>
 <span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>       <span class="at">tm_ctr_update =</span> tm_ctr_update, <span class="at">u_well =</span> u_well, <span class="at">u_sick =</span> u_sick, <span class="at">u_dead =</span> u_dead, <span class="at">c_exp =</span> c_exp,</span>
-<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>       <span class="at">c_ctr =</span> c_ctr, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>       <span class="at">c_ctr =</span> c_ctr, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For example, we can extract information regarding the number of patients associated with each health state at each cycle of the model for both intervention groups:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>npatients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>npatients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Well       Sick     Dead
  [1,] 2200.00000 3675.00000 4125.000
@@ -561,8 +564,8 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 [11,]   23.57227  106.72203 9869.706
 [12,]   15.94362   72.28351 9911.773</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>npatients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>npatients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             Well        Sick     Dead
  [1,] 875.0000000 1750.000000 7375.000
@@ -581,8 +584,8 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 </div>
 <p>or the costs and QALYs accrued at each cycle across the alive patients</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           costs
  [1,] 560.475000
@@ -598,7 +601,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 [11,]  12.430076
 [12,]   8.416869</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            QALYs
  [1,] 0.318600000
@@ -614,8 +617,8 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 [11,] 0.006107518
 [12,] 0.004134943</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>costs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>costs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            costs
  [1,] 114.1875000
@@ -631,7 +634,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 [11,]   0.2257655
 [12,]   0.1212548</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mm_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             QALYs
  [1,] 0.1382500000
@@ -650,7 +653,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 </div>
 <p>from which an estimate of the mean costs and QALYs (and the group differences) over the <span class="math inline">\(12\)</span> months period (without discounting) can be obtained by taking the sum across these accrued expected values at each cycle</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>mu_c_exp <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>mu_e_exp <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs)</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -659,7 +662,7 @@ Table&nbsp;2: Example Transition Matrices on Experimental and Control Treatment 
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>mu_e_ctr <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs)</span>
 <span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>mu_c_diff <span class="ot">&lt;-</span> mu_c_exp<span class="sc">-</span>mu_c_ctr</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and from this an estimate of the ICER can be obtained:</p>
 <p><span class="math display">\[
@@ -727,13 +730,14 @@ Khan, Iftekhar. 2015. <em>Design &amp; Analysis of Clinical Trials for Economic 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -33,14 +33,15 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -85,7 +86,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -110,6 +111,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -214,7 +217,7 @@ g_e(\phi_{ie})= \alpha_0 \,\,[+ \ldots]
 g\_c(\phi\_{ic}) = \beta\_{0} + \beta\_{1}(e\_{i}-\mu\_{e})\,\,[+\ldots]
 \tag{3}\]</span></span></p>
 <p>Here, <span class="math inline">\((e_i-\mu_e)\)</span> is the centered version of the QALYs, while <span class="math inline">\(\beta_{1}\)</span> quantifies the correlation between costs and QALYs. Assuming other covariates are either also centered or absent, <span class="math inline">\(\mu_c = g_c^{-1}(\beta_{0})\)</span> is the estimated population average cost. The <a href="#fig-modelag" class="quarto-xref">Figure&nbsp;1</a> shows a graphical representation of the general modelling framework.</p>
-<div id="fig-modelag" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="60%">
+<div id="fig-modelag" class="quarto-float quarto-figure quarto-figure-center anchored" width="60%" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-modelag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="modelAG.jpg" class="img-fluid figure-img">
@@ -230,7 +233,7 @@ Figure&nbsp;1: Modelling framework.
 <section id="example" class="level1">
 <h1>Example</h1>
 <p>Three model specifications are considered and applied to QALY data from a RCT case study: 1) Normal marginal for the QALYs and Normal conditional for the costs (which is identical to a Bivariate Normal distribution for the two outcomes); 2) Beta marginal for the QALYs and Gamma conditional for the costs; and 3) Hurdle Model. <a href="#fig-imput" class="quarto-xref">Figure&nbsp;2</a> shows the observed QALYs in both treatment groups (indicated with black crosses) as well as summaries of the posterior distributions for the imputed values, obtained from each model. Imputations are distinguished based on whether the corresponding baseline utility value is observed or missing (blue or red lines and dots, respectively) and are summarised in terms of posterior mean and <span class="math inline">\(90\%\)</span> HPD intervals.</p>
-<div id="fig-imput" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="60%">
+<div id="fig-imput" class="quarto-float quarto-figure quarto-figure-center anchored" width="60%" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-imput-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="imputations.jpg" class="img-fluid figure-img">
@@ -308,13 +311,14 @@ Figure&nbsp;2: Imputed QALYs under alternative model specifications.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

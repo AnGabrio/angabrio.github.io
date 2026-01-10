@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -359,7 +362,7 @@ Table&nbsp;1: Example Transition Matrix on Experimental Treatment after 1 Month 
 <p>Let’s also assume that patients were randomised to one of two treatments, namely Experimental vs Control, and they were considered to be in either a Well or Sick state. From <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>, we can see that the proportion of patients who started the hypothetical trial at baseline in a Well state and then remained in the same state after treatment was <span class="math inline">\(45\%\)</span>, very few patients (<span class="math inline">\(5\%\)</span>) who started the trial in a Sick state improved into a Well state at follow up, and <span class="math inline">\(60\%\)</span> of patients who were in the Sick state did not change states after starting treatment.</p>
 <p>Normally, if we kept the assumption of constant transition probabilities within the model, I would be able to compute what the transition matrix will look like after, say, <span class="math inline">\(1\)</span> month by simply multiplying the initial probabilities (e.g.&nbsp;equal to the first row of <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>) by the <span class="math inline">\(3\times3\)</span> transition matrix in <a href="#tbl-example" class="quarto-xref">Table&nbsp;1</a>. In general, one can compute the proportion of patients for the <span class="math inline">\(n+1\)</span>-th step in any of these three health states by simply multiplying the updated transition matrix at step <span class="math inline">\(n\)</span> by the given transition matrix. However, if we relax the assumption of constant transition probabilities over time, we need to create an entirely new transition matrix and specify how its entries changes over time. For this example, to ease exposition, I will focus on the first type of time-dependency where the relation between probabilities and time is expressed in terms of the age of the cohort, i.e.&nbsp;the number of cycles <span class="math inline">\(T\)</span> passed in the model. This can be achieved in <code>R</code> by creating an array of dimensions <span class="math inline">\(3\times3\times T\)</span>, representing the entries of the <span class="math inline">\(3\times3\)</span> transition matrix at each of the <span class="math inline">\(T\)</span> cycles of the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set model parameters</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set model parameters</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n_t <span class="ot">&lt;-</span> <span class="dv">12</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n_s <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_c <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
@@ -390,7 +393,7 @@ Table&nbsp;1: Example Transition Matrix on Experimental Treatment after 1 Month 
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>tm[<span class="dv">1</span>,<span class="dv">1</span>,] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (tm[<span class="dv">1</span>,<span class="dv">2</span>,]<span class="sc">+</span>tm[<span class="dv">1</span>,<span class="dv">3</span>,])</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>tm[<span class="dv">2</span>,<span class="dv">2</span>,] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (tm[<span class="dv">2</span>,<span class="dv">1</span>,]<span class="sc">+</span>tm[<span class="dv">2</span>,<span class="dv">3</span>,])</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>tm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>tm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>, , cycle = 1
 
@@ -539,7 +542,7 @@ Table&nbsp;2: Example Transition Matrices on Control Treatment after 1 Month Pos
 </div>
 <p>Next, we define the full transition matrix over time for the Control group as we did for the Experimental group before.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create empty transition matrix</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create empty transition matrix</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tm_control <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,<span class="at">dim=</span><span class="fu">c</span>(n_s,n_s,n_t), </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="at">from=</span>state_names,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">to =</span> state_names,</span>
@@ -563,12 +566,12 @@ Table&nbsp;2: Example Transition Matrices on Control Treatment after 1 Month Pos
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>tm_control[<span class="dv">2</span>,<span class="dv">1</span>,] <span class="ot">&lt;-</span> <span class="fu">rep</span>(tm_control[<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>],n_t)</span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#fill in all other probabilities</span></span>
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>tm_control[<span class="dv">1</span>,<span class="dv">1</span>,] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (tm_control[<span class="dv">1</span>,<span class="dv">2</span>,]<span class="sc">+</span>tm_control[<span class="dv">1</span>,<span class="dv">3</span>,])</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>tm_control[<span class="dv">2</span>,<span class="dv">2</span>,] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (tm_control[<span class="dv">2</span>,<span class="dv">1</span>,]<span class="sc">+</span>tm_control[<span class="dv">2</span>,<span class="dv">3</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>tm_control[<span class="dv">2</span>,<span class="dv">2</span>,] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> (tm_control[<span class="dv">2</span>,<span class="dv">1</span>,]<span class="sc">+</span>tm_control[<span class="dv">2</span>,<span class="dv">3</span>,])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Once the transition probabilities over the desired number of cycles are estimated/filled in, further data manipulation can be carried out to estimate the expected costs and effects, which can be included in an additional vector and then multiplied with the elements of the matrices after each cycle to generate the expected total costs and effects. As an example, let’s assume that patients were treated for <span class="math inline">\(3\)</span> months but followed up for <span class="math inline">\(12\)</span> months during the trial and that costs were collected from patients files and measured in euros, while effects were collected via self-reported questionnaires (e.g.&nbsp;EQ-5D) and measured via utilities. We need to associate to each health state and treatment in the model a corresponding value for each of the outcomes that we want to measure, i.e.&nbsp;costs and utilities. Thus, we may assume that (monthly) utilities for each health state and treatment are <span class="math inline">\(u^{well}=(0.78,0.70)\)</span>, <span class="math inline">\(u^{sick}=(0.40,0.35)\)</span>, and <span class="math inline">\(u^{dead}=(0,0)\)</span>. We may also assume that (monthly) costs vary between treatment groups and health states, i.e.&nbsp;<span class="math inline">\(c_{exp}=(954,1516,0)\)</span> and <span class="math inline">\(c^{ctr}=(435,780,0)\)</span>. Next, we need to determine the number of cycles of the model. In this case, we will use <span class="math inline">\(12\)</span> cycles given that we focus over a <span class="math inline">\(1\)</span> year follow-up, with each cycle being <span class="math inline">\(1\)</span> month long. Hence, the expected costs and QALYs for each month will be generated and then added up.</p>
 <p>The proportion of patients in each of the health states at the start of the model needs to be determined, typically an arbitrary large number, e.g.&nbsp;<span class="math inline">\(1000\)</span>, since the idea is to estimate the cumulative costs and effects over the <span class="math inline">\(1000\)</span> patients for each group. We can now proceed to calculate the transition matrices and total costs and QALYs associated with both treatment groups over <span class="math inline">\(12\)</span> months via our Markov Model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#utilities and costs by health state and treatment</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>u_well <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.78</span>,<span class="fl">0.70</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>u_sick <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.4</span>,<span class="fl">0.35</span>)</span>
@@ -642,12 +645,12 @@ Table&nbsp;2: Example Transition Matrices on Control Treatment after 1 Month Pos
 <span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="co">#run the function and get the output</span></span>
 <span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>mm_td_res <span class="ot">&lt;-</span> <span class="fu">mm_td_sim</span>(<span class="at">tm_exp=</span>tm,<span class="at">tm_ctr=</span>tm_control,</span>
 <span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>                    <span class="at">u_well=</span>u_well,<span class="at">u_sick=</span>u_sick,<span class="at">u_dead=</span>u_dead,</span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>                    <span class="at">c_exp=</span>c_exp,<span class="at">c_ctr=</span>c_ctr,<span class="at">n_cycle=</span>n_t,<span class="at">n_pat=</span>n_c,<span class="at">n_state=</span>n_s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>                    <span class="at">c_exp=</span>c_exp,<span class="at">c_ctr=</span>c_ctr,<span class="at">n_cycle=</span>n_t,<span class="at">n_pat=</span>n_c,<span class="at">n_state=</span>n_s)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For example, we can extract information regarding the number of patients associated with each health state at each cycle of the model for both intervention groups:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>npatients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>npatients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     state
 cycle        Well       Sick     Dead
@@ -664,8 +667,8 @@ cycle        Well       Sick     Dead
    11    2.059281   3.745816 994.1949
    12    1.021025   1.461167 997.5178</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>npatients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>npatients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     state
 cycle        Well       Sick     Dead
@@ -685,30 +688,30 @@ cycle        Well       Sick     Dead
 </div>
 <p>or the costs and QALYs accrued at each cycle across the alive patients</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3          4          5          6          7 
 954000.000 959959.000 758127.676 538076.576 355833.802 221393.359 129579.984 
          8          9         10         11         12 
  71054.191  36323.668  17261.102   7643.211   3189.187 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3          4          5          6          7 
 780.000000 488.110000 312.733386 200.777148 126.816074  77.673308  45.608914 
          8          9         10         11         12 
  25.444611  13.399562   6.641105   3.104565   1.380866 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>costs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#control</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>costs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3          4          5          6          7 
 435000.000 469087.500 378152.350 270630.645 179599.884 111873.755  65463.358 
          8          9         10         11         12 
  35850.314  18285.629   8660.457   3817.523   1583.856 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         1          2          3          4          5          6          7 
 700.000000 434.875000 277.375010 177.627964 112.054858  68.602092  40.286064 
@@ -718,7 +721,7 @@ cycle        Well       Sick     Dead
 </div>
 <p>from which an estimate of the mean costs and QALYs (and the group differences) over the <span class="math inline">\(12\)</span> months period (without discounting) can be obtained by taking the sum across these accrued expected values at each cycle</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>mu_c_exp <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>costs)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>mu_e_exp <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_td_res<span class="sc">$</span>Experimental<span class="sc">$</span>QALYs)</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -727,7 +730,7 @@ cycle        Well       Sick     Dead
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>mu_e_ctr <span class="ot">&lt;-</span> <span class="fu">sum</span>(mm_td_res<span class="sc">$</span>Control<span class="sc">$</span>QALYs)</span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>mu_c_diff <span class="ot">&lt;-</span> mu_c_exp<span class="sc">-</span>mu_c_ctr</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and from this an estimate of the ICER can be obtained:</p>
 <p><span class="math display">\[
@@ -795,13 +798,14 @@ Caldwell, Deborah. 2007. <span>“Decision Modelling for Health Economic Evaluat
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

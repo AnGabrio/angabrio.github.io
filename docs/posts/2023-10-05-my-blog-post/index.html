@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -265,7 +268,7 @@ window.Quarto = {
 <p>Hello dear audience and welcome back to my regular post updates. This time I would like to continue discussing the application of Bayesian methods in HTA that I picked-up in my previous post and show some customisation options of the modelling strategy that may come in handy when dealing with such analyses. More specifically, a notorious problem affecting trial-based economic evaluations is the presence of skewed data which, when coupled with small sample sizes, may question the validity of mean estimate based on normal distribution assumptions. In the previous post I provided a simple modelling framework based on normal distributions for both CEA aggregated outcomes, namely effectiveness (usually in terms of QALYs) and total costs computed over the study period. Today, I would like to show how, within a Bayesian setting, the use of alternative parametric distributions is relatively simple and allows to tackle issues such as skewness while simultaneously dealing with uncertainty quantification for each unknown quantity in the model. This is extremely helpful in that there is no need to reply on re-sampling methods (e.g.&nbsp;bootstrapping) to generate uncertainty around the desired estimates and to combine such methods with alternative modelling approaches, e.g.&nbsp;need to specify how bootstrapping should be done when using non-Normal distributions, multilevel models, or even missing data.</p>
 <p>Let’s take the same example I simulated in my previous post and re-perform the exact same analysis based on Normal distributions and then try to compare its results to an analysis based on alternative, more flexible, parametric distributions that can better capture the features of the data (e.g.&nbsp;skewness). We start by simulating some non-Normal bivariate cost and QALY data from an hypothetical study for a total of <span class="math inline">\(300\)</span> patients assigned to two competing intervention groups (<span class="math inline">\(t=0,1\)</span>). When generating the data, we can try to mimic the typical skewness features of the outcome data by using alternative distributions such as Gamma for costs and Beta for QALYs.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
@@ -295,11 +298,11 @@ window.Quarto = {
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">c</span>(c1,c2)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, QALYs, Costs)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can now inspect the empirical distributions of the two outcomes by treatment group to have an idea of the level of the associated skewness.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
@@ -312,7 +315,7 @@ window.Quarto = {
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Tcost_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>Costs))<span class="sc">+</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -325,7 +328,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="step-1-fit-a-standard-normal-model">Step 1: fit a standard normal model</h2>
 <p>As in the previous post, we rely on factoring the joint distribution <span class="math inline">\(p(e,c\mid  \boldsymbol \theta)\)</span> into the product of a marginal distribution <span class="math inline">\(p(e\mid \boldsymbol \theta_e)\)</span> of the effects and a conditional distribution <span class="math inline">\(p(c \mid e, \boldsymbol \theta_c)\)</span> of the cost given the effects, each indexed by corresponding set of parameters. We can rely on the freely-available Bayesian software named <a href="https://mcmc-jags.sourceforge.io/"><strong>JAGS</strong></a> to fit the model. We write the model code into a txt file and save it into our current wd to be called from R. Then, we load the package <strong>R2jags</strong> which allows to call the software from R through the function <strong>jags</strong> and after providing the data and some technical parameters needed to run the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">dim</span>(data_sim_ec)[<span class="dv">1</span>]</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>QALYs</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>Costs</span>
@@ -346,7 +349,7 @@ window.Quarto = {
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#fit model</span></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>jmodel_bn<span class="ot">&lt;-</span><span class="fu">jags</span>(<span class="at">data=</span>datalist,<span class="at">inits=</span><span class="fu">list</span>(inits1,inits2),</span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">parameters.to.save=</span>params,<span class="at">model.file=</span>filein,</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Compiling model graph
    Resolving undeclared variables
@@ -361,7 +364,7 @@ Initializing model</code></pre>
 </div>
 <p>We then proceed to extract the key quantities of interest of this analysis by post-processing the model estimates via simulation methods, with the aim to obtain the mean effects and costs outcome posterior distributions <span class="math inline">\((\mu_e,\mu_c)\)</span> in each treatment group.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract estimates for each mean parameter by trt group</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>nu_e0 <span class="ot">&lt;-</span> jmodel_bn<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>nu_e[,trt<span class="sc">==</span><span class="dv">0</span>]</span>
@@ -390,14 +393,14 @@ Initializing model</code></pre>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate mean differences</span></span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>Delta_e <span class="ot">&lt;-</span> mu_e1 <span class="sc">-</span> mu_e0</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>Delta_c <span class="ot">&lt;-</span> mu_c1 <span class="sc">-</span> mu_c0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>Delta_c <span class="ot">&lt;-</span> mu_c1 <span class="sc">-</span> mu_c0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="step-2-fit-a-beta-gamma-model" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-fit-a-beta-gamma-model">Step 2: fit a Beta-Gamma model</h2>
 <p>As a comparative approach, we now try to directly address the skewness in the observed data by using a Beta distribution for modelling the QALYs and a Gamma distribution for the Total costs. The main idea is that, by using distributions that can naturally allow for non-symmetric data, estimates will likely be more robust and uncertainty concerning such estimates will be more properly quantified. We begin by writing the model file and save it as a txt file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_bg <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_bg <span class="ot">&lt;-</span> <span class="st">"</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">#model specification</span></span>
@@ -425,11 +428,11 @@ Initializing model</code></pre>
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model_bg, <span class="at">con =</span> <span class="st">"model_bg.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model_bg, <span class="at">con =</span> <span class="st">"model_bg.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We then proceed to pass the data and algorithm parameters to fit the model in JAGS. It is important to stress that, since Gamma and Beta are defined within bounds of <span class="math inline">\((0,+\infty)\)</span> and <span class="math inline">\((0,1)\)</span>, then we need to “modify” the data to ensure that such extremes are not present (in case they occur). This is often done by adding/subtracting a small constant to the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">dim</span>(data_sim_ec)[<span class="dv">1</span>]</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>QALYs <span class="sc">-</span> <span class="fl">0.001</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>Costs <span class="sc">+</span> <span class="fl">0.001</span></span>
@@ -451,7 +454,7 @@ Initializing model</code></pre>
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#fit model</span></span>
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>jmodel_bg<span class="ot">&lt;-</span><span class="fu">jags</span>(<span class="at">data=</span>datalist,<span class="at">inits=</span><span class="fu">list</span>(inits1,inits2),</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">parameters.to.save=</span>params,<span class="at">model.file=</span>filein,</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Compiling model graph
    Resolving undeclared variables
@@ -466,7 +469,7 @@ Initializing model</code></pre>
 </div>
 <p>We then proceed to extract the key quantities of interest of this analysis by post-processing the model estimates via simulation methods, with the aim to obtain the mean effects and costs outcome posterior distributions <span class="math inline">\((\mu_e,\mu_c)\)</span> in each treatment group.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract estimates for each mean parameter by trt group</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>shape1_e0 <span class="ot">&lt;-</span> jmodel_bg<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>shape1[,trt<span class="sc">==</span><span class="dv">0</span>]</span>
@@ -500,12 +503,12 @@ Initializing model</code></pre>
 <span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate mean differences</span></span>
 <span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>Delta_e_bg <span class="ot">&lt;-</span> mu_e1_bg <span class="sc">-</span> mu_e0_bg</span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>Delta_c_bg <span class="ot">&lt;-</span> mu_c1_bg <span class="sc">-</span> mu_c0_bg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>Delta_c_bg <span class="ot">&lt;-</span> mu_c1_bg <span class="sc">-</span> mu_c0_bg</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>At this point it would be wise to check the results of both models and compare them in terms of some measures of relative or absolute performance, such as information criteria or posterior predictive checks. In general, the idea is that IC should reveal a better performance of the distributions that better fit the observed data, while PPCs can be used to detect possible problems in the model replications that may fail to capture some aspects of the observed data. These can be used to decide which model should be trusted more in terms of relative fit to the data. For the sake of simplicity, here I omit these comparisons as it is something I would like to dedicate a more substantial discussion.</p>
 <p>Finally, we can then produce all standard CEA output, e.g.&nbsp;CEAC or CE Plane, by post-processing these posterior distributions and compare the cost-effectiveness results of the two models fitted. If you want to skip the fun, we can take advantage of the <code>R</code> package <strong>BCEA</strong> which is dedicated to post-processing the results from a Bayesian CEA model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package and provide means e and c by group as input </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package and provide means e and c by group as input </span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BCEA)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mu_e_bn <span class="ot">&lt;-</span> <span class="fu">cbind</span>(mu_e0,mu_e1)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>mu_c_bn <span class="ot">&lt;-</span> <span class="fu">cbind</span>(mu_c0,mu_c1)</span>
@@ -524,7 +527,7 @@ Initializing model</code></pre>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>ceac_bn <span class="ot">&lt;-</span> <span class="fu">ceac.plot</span>(cea_res_bn, <span class="at">graph =</span> <span class="st">"ggplot2"</span>)</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>ceac_bg <span class="ot">&lt;-</span> <span class="fu">ceac.plot</span>(cea_res_bg, <span class="at">graph =</span> <span class="st">"ggplot2"</span>)</span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(cep_bn, cep_bg, ceac_bn, ceac_bg, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(cep_bn, cep_bg, ceac_bn, ceac_bg, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -532,8 +535,8 @@ Initializing model</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#other output</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res_bn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#other output</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res_bn)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Cost-effectiveness analysis summary 
@@ -557,7 +560,7 @@ Optimal intervention (max expected net benefit) for k = 25000: intervention 2
                 
 EVPI -1.5852e-13</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res_bg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res_bg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Cost-effectiveness analysis summary 
@@ -639,13 +642,14 @@ EVPI -6.3236e-13</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

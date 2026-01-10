@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -329,7 +332,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <h1>Example</h1>
 <p>Here I will try to empirically show the differences between RR and OR in a hypothetical scenario. First I generate data for a population of 1 million people, and this population will be divided in <span class="math inline">\(25\%\)</span> who smoke and <span class="math inline">\(75\%\)</span> who do not smoke, where smoking is the exposure variable <span class="math inline">\(X\)</span>. I set a RR of 2 when considering the probability of someone who smokes to get cancer, the disease variable <span class="math inline">\(Y\)</span>. Thus, I set <span class="math inline">\(5\%\)</span> of the smoking population to have cancer, and <span class="math inline">\(2.5\%\)</span> of the nonsmoking population to have cancer.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">smoke =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"Smokes"</span>, <span class="st">"NeverSmoked"</span>), <span class="fl">1e6</span>, <span class="at">prob =</span> <span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.75</span>), <span class="at">rep=</span> T))</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pop[<span class="fu">which</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"Smokes"</span>), <span class="st">"cancer"</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"Cancer"</span>, <span class="st">"Healthy"</span>), <span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"Smokes"</span>), <span class="at">prob =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.95</span>), <span class="at">rep=</span> T)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pop[<span class="fu">which</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"NeverSmoked"</span>), <span class="st">"cancer"</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"Cancer"</span>, <span class="st">"Healthy"</span>), <span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"NeverSmoked"</span>), <span class="at">prob =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>), <span class="at">rep=</span> T)</span>
@@ -342,7 +345,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pop2, <span class="fu">aes</span>(<span class="at">x =</span> cancer, <span class="at">y =</span> counts, <span class="at">fill =</span> smoke)) <span class="sc">+</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -353,7 +356,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 </div>
 <p>To simulate a cohort study we need to draw a sample from this population.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine sample size with alpha = 5% and power = 80%</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine sample size with alpha = 5% and power = 80%</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sample.size <span class="ot">&lt;-</span> <span class="fu">power.prop.test</span>(<span class="at">p1 =</span> <span class="fl">0.02</span>, <span class="at">p2 =</span> <span class="fl">0.01</span>, <span class="at">power =</span> <span class="fl">0.8</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Now let's draw this amount of patients from each condition in our dataset.</span></span>
@@ -365,14 +368,14 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Check our RR</span></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">sum</span>(sample.smokes<span class="sc">$</span>cancer <span class="sc">==</span> <span class="st">"Cancer"</span>)<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">nrow</span>(sample.smokes))</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">sum</span>(sample.neversmoked<span class="sc">$</span>cancer <span class="sc">==</span> <span class="st">"Cancer"</span>)<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">nrow</span>(sample.neversmoked))</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>a<span class="sc">/</span>b </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>a<span class="sc">/</span>b </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.758621</code></pre>
 </div>
 </div>
 <p>We see that everytime this script is run, it returns a different value for RR. This is because sampling error occurs, that is why alpha is <span class="math inline">\(5\%\)</span> and power is <span class="math inline">\(80\%\)</span>. We expect a rate of false positives and false negatives. We can plot the differences in RR after 100 different measurements (which is equivalent to 100 different studies looking at the same population, each one finding a different RR value.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Real RR</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Real RR</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"Smokes"</span> <span class="sc">&amp;</span> pop<span class="sc">$</span>cancer<span class="sc">==</span><span class="st">"Cancer"</span>)<span class="sc">/</span><span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"Smokes"</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"NeverSmoked"</span> <span class="sc">&amp;</span> pop<span class="sc">$</span>cancer<span class="sc">==</span><span class="st">"Cancer"</span>)<span class="sc">/</span><span class="fu">sum</span>(pop<span class="sc">$</span>smoke<span class="sc">==</span><span class="st">"NeverSmoked"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>RealRR <span class="ot">&lt;-</span> a<span class="sc">/</span>b</span>
@@ -390,7 +393,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">RR =</span> <span class="fu">c</span>(RealRR, SampleRR), </span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                         <span class="at">Group =</span> <span class="fu">c</span>(<span class="st">"Real"</span>, <span class="fu">rep</span>(<span class="st">"Sample"</span>, <span class="dv">100</span>))), <span class="fu">aes</span>(<span class="at">x =</span> Group, <span class="at">y =</span> RR))<span class="sc">+</span> <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">colour=</span>Group)) <span class="sc">+</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="fu">aes</span>(<span class="at">colour=</span>Group)) <span class="sc">+</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -401,7 +404,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 </div>
 <p>Now, let’s proceed to get the estimate of the OR in a case-control simulation. For a case-control study, we draw a sample from random people who have cancer, and the same number of people who do not have cancer, and check if they have smoked or not in the past.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the sample size for a case-control study</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the sample size for a case-control study</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(epiR)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>sample.size.cc <span class="ot">&lt;-</span> <span class="fu">epi.sscc</span>(<span class="at">OR =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fl">0.2</span>, <span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">n =</span> <span class="cn">NA</span>)<span class="sc">$</span>n.case</span>
@@ -425,7 +428,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                         <span class="at">Group =</span> <span class="fu">c</span>(<span class="st">"Real"</span>, <span class="fu">rep</span>(<span class="st">"Odds Ratio"</span>, <span class="dv">100</span>))),<span class="fu">aes</span>(<span class="at">x =</span> Group, <span class="at">y =</span> RR)) <span class="sc">+</span></span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">colour=</span>Group)) <span class="sc">+</span></span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="fu">aes</span>(<span class="at">colour=</span>Group)) <span class="sc">+</span></span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -436,12 +439,12 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 </div>
 <p>Finally, let’s compare the OR and the RR obtained previously.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">RR =</span> <span class="fu">c</span>(RealRR, SampleRR, OR80), </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">RR =</span> <span class="fu">c</span>(RealRR, SampleRR, OR80), </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">Group =</span> <span class="fu">c</span>(<span class="st">"Real"</span>, <span class="fu">rep</span>(<span class="st">"Risk Ratio"</span>, <span class="dv">100</span>), <span class="fu">rep</span>(<span class="st">"Odds Ratio"</span>, <span class="dv">100</span>))),</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x =</span> Group, <span class="at">y =</span> RR)) <span class="sc">+</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">colour=</span>Group)) <span class="sc">+</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="fu">aes</span>(<span class="at">colour=</span>Group))<span class="sc">+</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -452,7 +455,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 </div>
 <p>We can see very clearly than under optimal circumstances, the OR is very close to the RR, which in turn is a good, but far from perfect, estimate of the true risk. Not let’s try something forbidden by the rules of statistics. The Risk Ratio should not be calculated using a case-control design, but let’s do it here to show what it produces. Additionally, I will calculate an OR from the cohort study as well.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine 100 forbidden RR calculations from case-control studies</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine 100 forbidden RR calculations from case-control studies</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>forbiddenRR <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>){</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  sample.cancer <span class="ot">&lt;-</span> pop[<span class="fu">which</span>(pop<span class="sc">$</span>cancer<span class="sc">==</span><span class="st">"Cancer"</span>),][<span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">sum</span>(pop<span class="sc">$</span>cancer<span class="sc">==</span><span class="st">"Cancer"</span>)), sample.size.cc, <span class="at">replace =</span> F),]</span>
@@ -489,7 +492,7 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
 <span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Study.type, <span class="at">y =</span> RR)) <span class="sc">+</span></span>
 <span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">colour=</span>Effect.size)) <span class="sc">+</span></span>
 <span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width=</span><span class="fl">0.75</span>), <span class="fu">aes</span>(<span class="at">colour=</span>Effect.size))<span class="sc">+</span></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -560,13 +563,14 @@ P(Y=1 \mid X=1)= \frac{P(Y=1)P(X=1 \mid Y=1)}{P(X=1)} \;\;\; \text{and} \;\;\; P
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

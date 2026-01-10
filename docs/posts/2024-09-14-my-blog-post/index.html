@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -253,13 +256,13 @@ window.Quarto = {
 <p>What I am focussing today is still about using some Dutch-province level data, this time taken directly from the <a href="https://opendata.cbs.nl/statline/#/CBS/en/dataset/84710eng/table?ts=1726493735067">CBS website</a> and related to the average number of travels per person per year. My basic idea is very simple. Which province has the largest average number of travels per year? and can we also identify some temporal trend? in order to answer this question I have taken from the above link information about the average number of travels per person per year for each of the <span class="math inline">\(12\)</span> provinces of the Netherlands over a period of <span class="math inline">\(6\)</span> years, between 2018 and 2023.</p>
 <p>As usual, let’s start by drawing a map of the country divided into provinces:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmap)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmap)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(NLD_prov)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(NLD_prov) <span class="sc">+</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">lwd=</span><span class="dv">2</span>) <span class="sc">+</span> </span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"name"</span>) <span class="sc">+</span> </span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_format</span>(<span class="st">"NLD"</span>, <span class="at">title=</span><span class="st">"Dutch provinces"</span>, <span class="at">bg.color=</span><span class="st">"white"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_format</span>(<span class="st">"NLD"</span>, <span class="at">title=</span><span class="st">"Dutch provinces"</span>, <span class="at">bg.color=</span><span class="st">"white"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -270,7 +273,7 @@ window.Quarto = {
 </div>
 <p>Next, let’s download the CBS data we are interested as a <code>.csv</code> file, import it into <code>R</code> and let’s explore the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"per_person__travel_modes__travel_purpose_16092024_155133.csv"</span>, <span class="at">header =</span> T, <span class="at">sep =</span> <span class="st">";"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"per_person__travel_modes__travel_purpose_16092024_155133.csv"</span>, <span class="at">header =</span> T, <span class="at">sep =</span> <span class="st">";"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#create a subset of the dataset and rename the variables</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel <span class="ot">&lt;-</span> NLD_prov_travel[,<span class="dv">5</span><span class="sc">:</span><span class="dv">7</span>]</span>
@@ -280,7 +283,7 @@ window.Quarto = {
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel_2023 <span class="ot">&lt;-</span> NLD_prov_travel[NLD_prov_travel<span class="sc">$</span>Year<span class="sc">==</span><span class="dv">2023</span>,]</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#see the data</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel_2023</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>NLD_prov_travel_2023</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             Province Year Travels
 6      Groningen (PV) 2023     994
@@ -299,7 +302,7 @@ window.Quarto = {
 </div>
 <p>We can see that in 2023 it appears that Overijssel, Gelderland, Utrecht, and Noord-Brabant were the provinces associated with most average number of travels per person (above <span class="math inline">\(1020\)</span> travels). It could interesting to get some information about how the number of travels has changed over time for each province. To achieve this we can try to compute some summary statistics:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#create custom summary function</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>my.summary <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">na.rm=</span><span class="cn">TRUE</span>){<span class="fu">list</span>(<span class="at">n=</span> <span class="fu">length</span>(x),</span>
@@ -313,7 +316,7 @@ window.Quarto = {
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#extract and display relevant data</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>sum_data_travel.dt <span class="ot">&lt;-</span> sum_data_travel[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">8</span><span class="sc">:</span><span class="dv">13</span>)] </span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>sum_data_travel.dt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>sum_data_travel.dt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              Province Travels.n Travels.Mean Travels.SD Travels.Median
                 &lt;char&gt;     &lt;int&gt;        &lt;num&gt;      &lt;num&gt;          &lt;num&gt;
@@ -347,8 +350,8 @@ window.Quarto = {
 </div>
 <p>Creating summary statistics per Province over a period of 6 years (2018-2023), we can see that on average Overijssel still places at the top with a mean number of travels per person of <span class="math inline">\(1002\)</span>, followed by Gelderland (<span class="math inline">\(999\)</span>) and Utrecht (<span class="math inline">\(992\)</span>), while all other Provinces seem to fall a bit behind with very similar values between <span class="math inline">\(900\)</span> and <span class="math inline">\(976\)</span>. However, we also notice that, for some Provinces, median values are a bit different from means (typically higher), with also some minimum and maximum values that can be quite extreme in some cases. So, let’s have a look at the shape of the data distribution. For example, we may plot via histograms the travel data by Province over the 6-year period considered.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> NLD_prov_travel, <span class="fu">aes</span>(<span class="at">x =</span> Travels)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>, <span class="at">fill=</span><span class="st">"white"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>Province, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> NLD_prov_travel, <span class="fu">aes</span>(<span class="at">x =</span> Travels)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>, <span class="at">fill=</span><span class="st">"white"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>Province, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -364,7 +367,7 @@ window.Quarto = {
 \]</span></p>
 <p>where: <span class="math inline">\(\text{Travel}_{ij}\)</span> refers to the number of travels per person for Province <span class="math inline">\(i\)</span> in Year <span class="math inline">\(j\)</span>, while <span class="math inline">\(\beta_0\)</span> is the intercept, <span class="math inline">\(\beta_1\)</span> is the year regression coefficient, <span class="math inline">\(\varepsilon_{ij}\)</span> and <span class="math inline">\(\omega_j\)</span> are the random error term and the Province-specific random effect term.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fm <span class="ot">&lt;-</span> <span class="fu">lmer</span>(Travels <span class="sc">~</span> Year <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> Province), <span class="at">data =</span> NLD_prov_travel)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#define new data for prediction</span></span>
@@ -377,7 +380,7 @@ window.Quarto = {
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fm_pred) <span class="ot">&lt;-</span> <span class="fu">unique</span>(NLD_prov_travel<span class="sc">$</span>Province)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#look at predictions</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>fm_pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>fm_pred</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Groningen (PV)       Fryslân (PV)       Drenthe (PV)    Overijssel (PV) 
           948.6030           955.9821           962.0137           972.0237 
@@ -389,7 +392,7 @@ window.Quarto = {
 </div>
 <p>We can see that, according to the model predictions Overijssel still is associated with the largest number of travels even in 2024, followed by Gelderland and Utrecht, although the difference now seems a little bit smaller compared to what observed from the descriptive analysis of the data. Finally, we can also try to obtain an estimate of the average number of travels across Years and Provinces. This can be done, if we consider Year as a continuous variable, by setting its value equal to the average across the years considered (<span class="math inline">\(\bar{\text{Year}}=\text{E}[\text{Year}]_i\)</span>, for <span class="math inline">\(i=,2018,2019,\ldots,2023\)</span>), generate the predictions by Province, and then take the expectation across them.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define new data for prediction</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define new data for prediction</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Year =</span> <span class="fu">c</span>(<span class="fu">mean</span>(<span class="dv">2018</span><span class="sc">:</span><span class="dv">2023</span>)),</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Province =</span> <span class="fu">unique</span>(NLD_prov_travel<span class="sc">$</span>Province)</span>
@@ -399,7 +402,7 @@ window.Quarto = {
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fm_pred_avg) <span class="ot">&lt;-</span> <span class="fu">unique</span>(NLD_prov_travel<span class="sc">$</span>Province)</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#look at predictions</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(fm_pred_avg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(fm_pred_avg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 961.5278</code></pre>
 </div>
@@ -461,13 +464,14 @@ window.Quarto = {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

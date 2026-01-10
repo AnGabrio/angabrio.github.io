@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -263,7 +266,7 @@ P(Y_{ik}=1 | \theta_i,a_k,b_k) = \frac{\text{exp}(a_k\theta_i-b_k)}{1+\text{exp}
 <p>where <span class="math inline">\(Y_{ik}\)</span> denotes the response on item <span class="math inline">\(k\)</span> for individual <span class="math inline">\(i\)</span>, whose probability of being correct (i.e.&nbsp;equal to <span class="math inline">\(1\)</span>) is determined on the logistic scale as a function of some individual <strong>latent ability</strong> parameter <span class="math inline">\(\theta_i\)</span>, an item <strong>difficulty</strong> parameter <span class="math inline">\(b_k\)</span> (determining the position of the ICC), and an item <strong>discriminability</strong> parameter <span class="math inline">\(a_k\)</span> (determining the steepness of slope of the ICC).</p>
 <p>Now, let’s try to see how we can implement this model to analyse some multi-item questionnaire data in <code>R</code> and, more specifically, using functions from the packages <strong>ltm</strong> and <strong>psych</strong>. As motivating example we use the dataset from the <strong>ltm</strong> package named <strong>LSAT</strong> which is a classical example in educational testing for measuring ability traits, consisting in a dataframe with the responses of <span class="math inline">\(1000\)</span> individuals to <span class="math inline">\(5\)</span> questions. After loading the dataset, we proceed to fit the two-parameter logistic IRT model using the function <code>ltm</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ltm)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ltm)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(psych)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#load data</span></span>
@@ -271,7 +274,7 @@ P(Y_{ik}=1 | \theta_i,a_k,b_k) = \frac{\text{exp}(a_k\theta_i-b_k)}{1+\text{exp}
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#fit 2-PLM via ltm</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>PL2.rasch <span class="ot">&lt;-</span> <span class="fu">ltm</span>(lsat.df<span class="sc">~</span>z1)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PL2.rasch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PL2.rasch)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -306,11 +309,11 @@ quasi-Newton: BFGS </code></pre>
 </div>
 <p>The <code>summary</code> function allows to display key results from fitting the model, namely the different estimates for the item discrimination and difficulty parameters <span class="math inline">\(a_k\)</span> and <span class="math inline">\(b_k\)</span> based on the observed data. Higher difficulty values indicate that the item is harder (i.e.&nbsp;require a higher latent ability to answer correctly); higher discriminability estimates indicate that the item has better ability to tell the difference between different levels of latent ability. These can both be made clearer in the ICC plots, which we can draw using the function <code>plot</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ltm)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ltm)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(psych)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#plot ICC</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"ICC"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"ICC"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -323,8 +326,8 @@ quasi-Newton: BFGS </code></pre>
 <p>A <strong>note</strong> about difficulty: because of the differing slopes, the rank-order of item difficulty changes across different latent ability levels. We can see that item 3 is generally the most difficult item (i.e.&nbsp;lowest probability of getting correct for most latent trait values), while items 1 and 5 are roughly the easiest.</p>
 <p>Next, we may display the <strong>item information curve</strong> (IIC) using again the <code>plot</code> function. IICs show how much “information” about the latent trait ability an item gives. Mathematically, these are the first derivatives of the ICCs. Item information curves peak at the difficulty value (point where the item has the highest discrimination), with less information at ability levels farther from the difficulty estimate. Practically speaking, we can see how a very difficult item will provide very little information about persons with low ability (because the item is already too hard), and very easy items will provide little information about persons with high ability levels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot ICC</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"IIC"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot ICC</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"IIC"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -336,8 +339,8 @@ quasi-Newton: BFGS </code></pre>
 <p>Similar to the ICCs, we see that item 3 provides the most information about high ability levels (the peak of its IIC is farthest to the right) and item 1 and 5 provides the most information about lower ability levels (the peak of their IICs is farthest to the left). While all ICCs and IICs for the items have the same shape in the one-parameter model (i.e.&nbsp;all items are equally good at providing information about the latent trait), instead, in the two-parameter model this does not have to be the case.</p>
 <p>Next, we plot the information curve for the whole test. This is simply the sum of the individual IICs above. Ideally, we want a test which provides fairly good coverage of a wide range of latent ability levels. Otherwise, the test is only good at identifying a limited range of ability levels.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot IC test</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"IIC"</span>),<span class="at">items=</span><span class="fu">c</span>(<span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plot IC test</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PL2.rasch,<span class="at">type=</span><span class="fu">c</span>(<span class="st">"IIC"</span>),<span class="at">items=</span><span class="fu">c</span>(<span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -348,8 +351,8 @@ quasi-Newton: BFGS </code></pre>
 </div>
 <p>The IIC for the whole test shows that the test provides the most information for lower-than average ability levels (about <span class="math inline">\(\theta=-2\)</span>), but does not provide much information about higher ability levels. Next, we test how well the two-parameter model fits the data using the <code>item.fit</code> function to test whether individual items fit the two-parameter logistic IRT model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit of the model</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">item.fit</span>(PL2.rasch,<span class="at">simulate.p.value=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit of the model</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">item.fit</span>(PL2.rasch,<span class="at">simulate.p.value=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Item-Fit Statistics and P-values
@@ -371,14 +374,14 @@ Item 5 400.3201   0.1188</code></pre>
 </div>
 <p>We see from this all items fit the model well (large p-values). We then estimate the individual latent ability scores using the <code>factor.scores</code> function and plot the density curve of the estimated ability scores.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#estimate theta and plot density curve of estimated theta</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#estimate theta and plot density curve of estimated theta</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>theta.rasch <span class="ot">&lt;-</span> ltm<span class="sc">::</span><span class="fu">factor.scores</span>(PL2.rasch)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta.rasch<span class="sc">$</span>score.dat<span class="sc">$</span>z1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(theta.rasch<span class="sc">$</span>score.dat<span class="sc">$</span>z1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 -1.8953 -1.0026 -0.5397 -0.6629 -0.3572  0.6064 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta.rasch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(theta.rasch)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -389,8 +392,8 @@ Item 5 400.3201   0.1188</code></pre>
 </div>
 <p>We see that the estimated ability scores are roughly normally distributed, with mean <span class="math inline">\(-0.7\)</span> and standard deviation <span class="math inline">\(0.5\)</span>. We test for unidimensionality (i.e.&nbsp;is there a single trait <span class="math inline">\(\theta\)</span> being measured here?) using the <code>unidimTest</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#test unidim</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unidimTest</span>(PL2.rasch,lsat.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#test unidim</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unidimTest</span>(PL2.rasch,lsat.df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Unidimensionality Check using Modified Parallel Analysis
@@ -472,13 +475,14 @@ p-value: 0.6634</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

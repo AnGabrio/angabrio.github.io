@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -258,7 +261,7 @@ window.Quarto = {
 <p><em>The dataset XXX comprises 40 countries (Country) in the world with populations of more than 20 million as of 1990 and records the life expectancy at birth (Lex), the number of people per television set (Ptel), and the number of people per physician (Pphy). The average life expectancies between males and females are provided as the country’s overall life expectancy.</em></p>
 <p>This text will directly appear on the final document as you typed in the <code>Rmd</code> file. So for it works like a standard word file but it is now that the magic happens. We can create <strong>chunks</strong> of <code>R</code> code and embed them within the Rmd file and use different options to decide whether to show or not such code lines. For example, let’s say we want to generate the data of the above mentioned dataset. We can create a new chunk which incorporates the following R code that simulates the desired variables, their relationships, and combine them together into the new dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">40</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ln_pphy <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="fl">7.2</span>, <span class="fl">1.3</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ln_ptel <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="fl">2.38</span>, <span class="fl">1.56</span>)</span>
@@ -267,7 +270,7 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>error <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">6</span>)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>lex <span class="ot">&lt;-</span> <span class="dv">70</span> <span class="sc">-</span> <span class="fl">0.023</span><span class="sc">*</span>ptel <span class="sc">-</span> <span class="fl">0.001</span><span class="sc">*</span>pphy <span class="sc">+</span> error</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>country <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Argentina"</span>, <span class="st">"Bangladesh"</span>, <span class="st">"Brazil"</span>, <span class="st">"Canada"</span>, <span class="st">"China"</span>, <span class="st">"Colombia"</span>, <span class="st">"Egypt"</span>, <span class="st">"Ethiopia"</span>, <span class="st">"France"</span>, <span class="st">"Germany"</span>, <span class="st">"India"</span>, <span class="st">"Indonesia"</span>, <span class="st">"Iran"</span>, <span class="st">"Italy"</span>, <span class="st">"Japan"</span>, <span class="st">"Kenya"</span>, <span class="st">"Korea North"</span>, <span class="st">"Korea South"</span>, <span class="st">"Mexico"</span>, <span class="st">"Morocco"</span>, <span class="st">"Myanmar Bur"</span>, <span class="st">"Pakistan"</span>, <span class="st">"Peru"</span>, <span class="st">"Philippines"</span>, <span class="st">"Poland"</span>, <span class="st">"Romania"</span>, <span class="st">"Russia"</span>, <span class="st">"South Afric"</span>, <span class="st">"Spain"</span>, <span class="st">"Sudan"</span>, <span class="st">"Taiwan"</span>, <span class="st">"Tanzania"</span>, <span class="st">"Thailand"</span>, <span class="st">"Turkey"</span>, <span class="st">"Ukraine"</span>, <span class="st">"UK"</span>, <span class="st">"USA"</span>, <span class="st">"Venezuela"</span>, <span class="st">"Vietnam"</span>, <span class="st">"Zaire"</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_le_tv_sim <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(country, lex, ptel, pphy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_le_tv_sim <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(country, lex, ptel, pphy)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now all the generated variables, namely <em>lex</em>, <em>ptel</em>, <em>pphy</em> and <em>country</em>, are included into the data frame called <em>data_le_tv_sim</em> which has been created in the R workspace. If the focus on the tutorial is not on coding, it is desirable to hide the R code from the final document so that it is not displayed (but is still present and saved within <code>R</code>). <code>R</code> markdown allows you to do this in a really straightforward way by means of <strong>chunk options</strong> which can be customised for each created chunk. For example,</p>
 <ol type="1">
@@ -280,7 +283,7 @@ window.Quarto = {
 <p><strong>a</strong>. <em>Examine and comment on the distributions of each variable separately (descriptives, histograms etc).</em></p>
 <p>Well we can answer our own question (i.e.&nbsp;we give ourselves the solutions) by creating a new chunk in which we generate the desired output in <code>R</code>. Since we generated the dataset in the chunk before, it is still available within the <code>R</code> environment and we do not need to re-create it!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>hist_lex <span class="ot">&lt;-</span> r2spss<span class="sc">::</span><span class="fu">histogram</span>(data_le_tv_sim, <span class="at">variable =</span> <span class="st">"lex"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"life expectancy"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>hist_ptel <span class="ot">&lt;-</span> r2spss<span class="sc">::</span><span class="fu">histogram</span>(data_le_tv_sim, <span class="at">variable =</span> <span class="st">"ptel"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"people per television"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>hist_pphy <span class="ot">&lt;-</span> r2spss<span class="sc">::</span><span class="fu">histogram</span>(data_le_tv_sim, <span class="at">variable =</span> <span class="st">"pphy"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"people per physician"</span>)</span>
@@ -288,7 +291,7 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>box_ptel <span class="ot">&lt;-</span> r2spss<span class="sc">::</span><span class="fu">box_plot</span>(data_le_tv_sim, <span class="at">variables =</span> <span class="st">"ptel"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"people per television"</span>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>box_pphy <span class="ot">&lt;-</span> r2spss<span class="sc">::</span><span class="fu">box_plot</span>(data_le_tv_sim, <span class="at">variables =</span> <span class="st">"pphy"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"people per physician"</span>)</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(hist_lex, hist_ptel, hist_pphy,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>             box_lex, box_ptel, box_pphy, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>             box_lex, box_ptel, box_pphy, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -298,7 +301,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Here I used some <em>ggplot2</em> coding to generate some boxplots and histograms of the data but of course the choice is entirely yours to decide which graphs or summaries should be provided by the students. For generating tables, we can also take advantage of the package <strong>knitr</strong> and its function <strong>kable</strong> which allows to display standard <code>R</code> tables in a much prettier format.</p>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>d.summary.extended <span class="ot">&lt;-</span> data_le_tv_sim <span class="sc">%&gt;%</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(lex, ptel, pphy) <span class="sc">%&gt;%</span></span>
@@ -306,8 +309,8 @@ window.Quarto = {
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>(<span class="at">rownames=</span><span class="st">"rowname"</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>d.summary <span class="ot">&lt;-</span> d.summary.extended <span class="sc">%&gt;%</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="at">var=</span>rowname, min, <span class="at">q25=</span>Q0<span class="fl">.25</span>, median, <span class="at">q75=</span>Q0<span class="fl">.75</span>, max, mean, sd)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(d.summary, <span class="at">caption =</span> <span class="st">"Summary statistics"</span>, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<table class="caption-top table" data-quarto-postprocess="true">
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(d.summary, <span class="at">caption =</span> <span class="st">"Summary statistics"</span>, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
 <caption>Summary statistics</caption>
 <thead>
 <tr class="header">
@@ -358,13 +361,13 @@ window.Quarto = {
 <p><strong>b</strong>. <em>Would you expect an association between a country’s life expectancy and its density of people per television set? If yes, would that be positive or negative (use the scatter plot function)?</em></p>
 <p>To answer this question we could produce some scatter plots between the variables in <code>R</code>. An alternative would be to calculate the Pearson’s correlation coefficient as an indicative number. We could obtain such number by creating a corresponding chunk code but given that we only need a number it is actually more convenient to generate it within our line of text. How can we do that? simple, in the <code>Rmd</code> file you can include some inline R code by using the quotes signs. This means that instead of having:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#corr coeff</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(lex, ptel, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"pearson"</span>)), <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#corr coeff</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(lex, ptel, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"pearson"</span>)), <span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -0.76</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#corr coeff test</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(<span class="fu">cor.test</span>(lex, ptel, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"pearson"</span>))[<span class="st">"p.value"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#corr coeff test</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(<span class="fu">cor.test</span>(lex, ptel, <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"pearson"</span>))[<span class="st">"p.value"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.70736e-08</code></pre>
 </div>
@@ -378,16 +381,16 @@ window.Quarto = {
 <p><strong>e</strong>. <em>Perform a procedure that predicts life expectancy from people per television</em></p>
 <p>In the following code I run the model and save some key output that I will need to display later on. A convenient feature of <code>R</code> markdown writing is that, after running a code chunk, everything that was successfully run is saved in the current R workspace and can be called back later on in the document very easily.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fitm1_r <span class="ot">&lt;-</span> <span class="fu">lm</span>(lex <span class="sc">~</span> ptel, <span class="at">data =</span> data_le_tv_sim)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fitm1_r <span class="ot">&lt;-</span> <span class="fu">lm</span>(lex <span class="sc">~</span> ptel, <span class="at">data =</span> data_le_tv_sim)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fitm1rsq <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">summary</span>(fitm1_r)<span class="sc">$</span>r.square, <span class="at">digits =</span> <span class="dv">2</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fitm1RSS <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">anova</span>(fitm1_r)[<span class="st">"ptel"</span>, <span class="st">"Sum Sq"</span>], <span class="at">digits =</span> <span class="dv">2</span>)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>fitm1ESS <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">anova</span>(fitm1_r)[<span class="st">"Residuals"</span>, <span class="st">"Sum Sq"</span>], <span class="at">digits =</span> <span class="dv">2</span>)</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>fitm1TSS <span class="ot">&lt;-</span> fitm1RSS <span class="sc">+</span> fitm1ESS</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>fitm1pval <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">summary</span>(fitm1_r)<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>], <span class="at">digits =</span> <span class="dv">4</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>fitm1pval <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">summary</span>(fitm1_r)<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>], <span class="at">digits =</span> <span class="dv">4</span>)  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can then decide whether we want to show the summary results directly from the <code>R</code> output</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fitm1_r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fitm1_r)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -472,13 +475,14 @@ F-statistic: 50.66 on 1 and 38 DF,  p-value: 1.707e-08</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

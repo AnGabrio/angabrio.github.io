@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -329,7 +332,7 @@ window.Quarto = {
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#generate multivariate trial CUA data (utilities)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#generate multivariate trial CUA data (utilities)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mvtnorm) <span class="co">#load library to generate multivariate normal data</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">&lt;-</span> n1 <span class="ot">&lt;-</span> <span class="dv">2000</span> <span class="co">#sample size for control (0) and new trt (1)</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co">#n of time points</span></span>
@@ -372,12 +375,12 @@ window.Quarto = {
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co">#make trt a factor variable (old,new)</span></span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>dataset<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">factor</span>(trt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"old"</span>, <span class="st">"new"</span>))</span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co">#randomly shuffle rows of the dataset</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dataset)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dataset)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can inspect the first few rows of the generated data stored in the <code>R</code> object <code>dataset</code>, for example by typing the following command</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        u_base      u_6m     u_12m      QALY trt
 1851 0.6649710 0.6695179 0.6385095 0.6606291 old
@@ -423,10 +426,10 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit OLS regression adjusting for baseline utility</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit OLS regression adjusting for baseline utility</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>lm_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALY <span class="sc">~</span> trt <span class="sc">+</span> u_base, <span class="at">data =</span> dataset)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise output</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_adj)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_adj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -455,7 +458,7 @@ F-statistic: 1.284e+04 on 2 and 3997 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract regression coefficients</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract regression coefficients</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>betas <span class="ot">&lt;-</span> <span class="fu">coef</span>(lm_adj)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract error standard deviation</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">summary</span>(lm_adj)<span class="sc">$</span>sigma</span>
@@ -486,16 +489,16 @@ F-statistic: 1.284e+04 on 2 and 3997 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>mean_new_summary <span class="ot">&lt;-</span> <span class="fu">c</span>(mean_new,std.err_new,mean_new_lower.CI,mean_new_upper.CI)</span>
 <span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co">#attach names to each value</span></span>
 <span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_old_summary) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_new_summary) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_new_summary) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can also rely on the pre-built function <code>emmean</code> from the <code>R</code> package <code>emmeans</code> to compute the mean QALYs in each treatment group in a more automatic way. For example, we can type the following</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load library to obtain marginal means</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load library to obtain marginal means</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>lm_adj_em <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_adj, <span class="sc">~</span> trt) <span class="co">#compute mean outcome by level of trt</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>lm_adj_em</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>lm_adj_em</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> trt emmean       SE   df lower.CL upper.CL
@@ -509,12 +512,12 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>QALY_new_vs_old <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"New vs Old"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#compute linear combination</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>lm_adj_em_delta_e <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lm_adj_em, QALY_new_vs_old) </span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain results in terms of confidence intervals</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_adj_em_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_adj_em_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast   estimate      SE   df lower.CL upper.CL
@@ -555,7 +558,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#remove scientific notation to be displayed by R</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#remove scientific notation to be displayed by R</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen=</span><span class="dv">999</span>) </span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#generate data</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mvtnorm) <span class="co">#load package to generate multivariate normal data</span></span>
@@ -597,12 +600,12 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(QALY,TC,u,c,trt)</span>
 <span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>dataset<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">factor</span>(trt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"old"</span>, <span class="st">"new"</span>))</span>
 <span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="co">#randomly shuffle rows of the dataset</span></span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dataset)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dataset)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Again, let’s inspect the first few rows of the newly-generated data by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         QALY       TC           u         c trt
 16  0.5702695 324.0702 -0.13975216  23.94076 old
@@ -617,7 +620,7 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <p>We can also check the level of <em>Pearson</em>’s correlation between QALY and TC variables by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dataset<span class="sc">$</span>QALY,dataset<span class="sc">$</span>TC, <span class="at">method =</span> <span class="st">"pearson"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dataset<span class="sc">$</span>QALY,dataset<span class="sc">$</span>TC, <span class="at">method =</span> <span class="st">"pearson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6244816</code></pre>
 </div>
@@ -657,12 +660,12 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit) <span class="co">#load package to fit SUR</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit) <span class="co">#load package to fit SUR</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#fit SUR to QALY and TC separate regressions</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>sur_ec <span class="ot">&lt;-</span> <span class="fu">systemfit</span>(<span class="fu">list</span>(<span class="at">QALYreg =</span> QALY<span class="sc">~</span>trt <span class="sc">+</span> u, <span class="at">TCreg =</span> TC<span class="sc">~</span>trt <span class="sc">+</span> c), </span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">method=</span><span class="st">"SUR"</span>, <span class="at">data=</span>dataset)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise output</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sur_ec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sur_ec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -729,7 +732,7 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract regression coefficients for QALY model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract regression coefficients for QALY model</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>betas <span class="ot">&lt;-</span> <span class="fu">coef</span>(sur_ec<span class="sc">$</span>eq[[<span class="dv">1</span>]])</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract error standard deviation for QALY model</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">summary</span>(sur_ec<span class="sc">$</span>eq[[<span class="dv">1</span>]])<span class="sc">$</span>sigma</span>
@@ -784,14 +787,14 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>mean_old_summary_c <span class="ot">&lt;-</span> <span class="fu">c</span>(mean_old_c,std.err_old_c,mean_old_lower.CI_c,mean_old_upper.CI_c)</span>
 <span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>mean_new_summary_c <span class="ot">&lt;-</span> <span class="fu">c</span>(mean_new_c,std.err_new_c,mean_new_lower.CI_c,mean_new_upper.CI_c)</span>
 <span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_old_summary_c) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span>
-<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_new_summary_c) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mean_new_summary_c) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Unfortunately, the convenient functions to automatically derive marginal mean estimates from regression models in the <code>R</code> package <code>emmeans</code> are not compatible with <code>R</code> objects generated via functions from the <code>systemfit</code> package. This means that estimates for the marginal means of each outcome need to be derived manually as shown in the (folded) code part above. As a quick example, I will show now how estimates and related measures of uncertainty may be derived for the mean QALY/TC difference represented by the parameters <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\alpha_1\)</span> in <a href="#eq-4" class="quarto-xref">Equation&nbsp;4</a>.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract coefficient for QALY difference from model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract coefficient for QALY difference from model</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>beta1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(sur_ec<span class="sc">$</span>eq[[<span class="dv">1</span>]])[<span class="st">"trtnew"</span>]</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract standard error for QALY difference from model</span></span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>SE_beta1 <span class="ot">&lt;-</span> <span class="fu">summary</span>(sur_ec<span class="sc">$</span>eq[[<span class="dv">1</span>]])<span class="sc">$</span>coefficients[<span class="st">"trtnew"</span>,<span class="st">"Std. Error"</span>]</span>
@@ -812,7 +815,7 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(delta_c_sur) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Estimate"</span>,<span class="st">"SE"</span>,<span class="st">"CI(low)"</span>,<span class="st">"CI(high)"</span>)</span>
 <span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">#print results</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>delta_e_sur</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>delta_e_sur</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Estimate         SE    CI(low)   CI(high) 
@@ -820,7 +823,7 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>delta_c_sur</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>delta_c_sur</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Estimate         SE    CI(low)   CI(high) 
@@ -839,7 +842,7 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bootstrap) <span class="co">#package to use bootstrap procedure </span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>boot_ec <span class="ot">&lt;-</span> <span class="cf">function</span>(data, B, QALYreg, TCreg, <span class="at">method =</span> <span class="st">"OLS"</span>,</span>
@@ -924,18 +927,18 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a>  res_ec_b_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"QALY_boot"</span><span class="ot">=</span>res_e_b_list,<span class="st">"TC_boot"</span><span class="ot">=</span>res_c_b_list,<span class="st">"inputs"</span><span class="ot">=</span>input_list)</span>
 <span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(res_ec_b_list) <span class="ot">&lt;-</span> <span class="st">"bootCE"</span></span>
 <span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res_ec_b_list)</span>
-<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can now apply the newly created bootstrap function called <code>boot_res</code> to our generated dataset to obtain <span class="math inline">\(B=200\)</span> bootstrapped estimates for the parameters of interest, which are here stored in a list object called <code>boot_res</code>.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>)</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to dataset</span></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>boot_res <span class="ot">&lt;-</span> <span class="fu">boot_ec</span>(<span class="at">data =</span> dataset, <span class="at">QALYreg =</span> QALY <span class="sc">~</span> trt <span class="sc">+</span> u,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">TCreg =</span> TC <span class="sc">~</span> trt <span class="sc">+</span> c, <span class="at">method =</span> <span class="st">"OLS"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">TCreg =</span> TC <span class="sc">~</span> trt <span class="sc">+</span> c, <span class="at">method =</span> <span class="st">"OLS"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can access the bootstrapped estimates for a given quantity, eg mean QALY and TC difference between treatment groups (New vs Old), by typing <code>boot_res$QALY_boot$Delta_e</code> and <code>boot_res$QALY_boot$Delta_c</code>, respectively. Once extracted, we can then inspect the distribution of <span class="math inline">\(\Delta_e\)</span>, for example, with an histogram.</p>
@@ -955,7 +958,7 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#jackknife sampling function (used to compute BCa interval inside main boot_ci function)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#jackknife sampling function (used to compute BCa interval inside main boot_ci function)</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>jk_ec <span class="ot">&lt;-</span> <span class="cf">function</span>(data,QALYreg,TCreg,trt_pos,profile_QALY_ctr,profile_QALY_int,</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                   profile_TC_ctr,profile_TC_int,or_method){</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">dim</span>(data)[<span class="dv">1</span>]</span>
@@ -1077,16 +1080,16 @@ Multiple R-Squared: 0.000907 Adjusted R-Squared: -0.005821 </code></pre>
 <span id="cb25-120"><a href="#cb25-120" aria-hidden="true" tabindex="-1"></a>  <span class="co">#organise and return results</span></span>
 <span id="cb25-121"><a href="#cb25-121" aria-hidden="true" tabindex="-1"></a>  res_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"Delta_e"</span><span class="ot">=</span>ci_Delta_e,<span class="st">"Delta_c"</span><span class="ot">=</span>ci_Delta_c,<span class="st">"mu_e_ctr"</span><span class="ot">=</span>ci_mu_e_ctr,<span class="st">"mu_e_int"</span><span class="ot">=</span>ci_mu_e_int,<span class="st">"mu_c_ctr"</span><span class="ot">=</span>ci_mu_c_ctr,<span class="st">"mu_c_int"</span><span class="ot">=</span>ci_mu_c_int)</span>
 <span id="cb25-122"><a href="#cb25-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res_list)</span>
-<span id="cb25-123"><a href="#cb25-123" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-123"><a href="#cb25-123" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>As an example, we can now apply the newly created bootstrap function called <code>boot_ci</code> to our bootstrap results stored in the object <code>boot_res</code> to compute bootstrapped confidence intervals for all stored quantities using either the percentile or BCa approach (selected through the argument <code>method</code>).</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to bootstrap results</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to bootstrap results</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>boot_ci_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci</span>(<span class="at">x =</span> boot_res, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>boot_ci_bca</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>boot_ci_bca</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Delta_e
@@ -1142,7 +1145,7 @@ $mu_c_int
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set parameter values for generating data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set parameter values for generating data</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>n_sam <span class="ot">&lt;-</span> <span class="dv">20</span> <span class="co">#sample size</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>mu_u <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.86</span>,<span class="fl">0.9</span>)</span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>sigma_u <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>,<span class="fl">0.2</span>)</span>
@@ -1172,12 +1175,12 @@ $mu_c_int
 <span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="co">#randomly shuffle rows of the dataset</span></span>
 <span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>dataset_sam_skew.df <span class="ot">&lt;-</span> dataset_sam_skew.df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dataset_sam_skew.df)), ]</span>
 <span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="co">#define trt indicator as factor</span></span>
-<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>dataset_sam_skew.df<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">factor</span>(dataset_sam_skew.df<span class="sc">$</span>trt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>dataset_sam_skew.df<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">factor</span>(dataset_sam_skew.df<span class="sc">$</span>trt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can inspect the first few rows of the newly-generated data by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset_sam_skew.df, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset_sam_skew.df, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        QALY        TC        u        c trt
 16 0.9966611 118.19067 1.315029 51.47245 new
@@ -1192,7 +1195,7 @@ $mu_c_int
 </div>
 <p>As an example, we can visually check the level of <em>skewness</em> for QALYs using boxplots, by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(dataset_sam_skew.df<span class="sc">$</span>QALY, <span class="at">ylab=</span><span class="st">""</span>,<span class="at">xlab=</span><span class="st">"QALY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(dataset_sam_skew.df<span class="sc">$</span>QALY, <span class="at">ylab=</span><span class="st">""</span>,<span class="at">xlab=</span><span class="st">"QALY"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1220,13 +1223,13 @@ $mu_c_int
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mfx) <span class="co">#load package to fit beta regression</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mfx) <span class="co">#load package to fit beta regression</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co">#fit Beta regression to QALY assuming logit link</span></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>glm_e <span class="ot">&lt;-</span> <span class="fu">betareg</span>(QALY <span class="sc">~</span> trt <span class="sc">+</span> u, <span class="at">data =</span> dataset_sam_skew.df,  <span class="at">link =</span> <span class="st">"logit"</span>)</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">#fit Gamma regression to TC assuming identity link</span></span>
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>glm_c <span class="ot">&lt;-</span> <span class="fu">glm</span>(TC <span class="sc">~</span> trt <span class="sc">+</span> c, <span class="at">data =</span> dataset_sam_skew.df, <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"identity"</span>))</span>
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="co">#summarise output</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_e)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -1256,7 +1259,7 @@ Number of iterations: 37 (BFGS) + 5 (Fisher scoring) </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -1285,12 +1288,12 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute mean QALY and TC by arm on original scale</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute mean QALY and TC by arm on original scale</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>glm_e.em <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(glm_e, <span class="sc">~</span> trt)</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>glm_c.em <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(glm_c, <span class="sc">~</span> trt)</span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co">#print results for QALYs (example)</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>glm_e.em</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>glm_e.em</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> trt emmean     SE  df asymp.LCL asymp.UCL
@@ -1301,13 +1304,13 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#specify and compute mean differences between groups (New - Old)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#specify and compute mean differences between groups (New - Old)</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>diff_NewvsOld <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"New vs Old"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>glm_em_delta_e <span class="ot">&lt;-</span> <span class="fu">confint</span>(<span class="fu">contrast</span>(glm_e.em, diff_NewvsOld))</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>glm_em_delta_c <span class="ot">&lt;-</span> <span class="fu">confint</span>(<span class="fu">contrast</span>(glm_c.em, diff_NewvsOld))</span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co">#print results for QALYs difference (example)</span></span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>glm_em_delta_e</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>glm_em_delta_e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast   estimate     SE  df asymp.LCL asymp.UCL
@@ -1320,7 +1323,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#note that compared to the function developed before for OLS/SUR models, this one</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#note that compared to the function developed before for OLS/SUR models, this one</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co">#does not require to provide profiles for the computation of mean estimates but instead relies on the emmeans function to obtain these estimates without manual computation. Because of this the function is less flexible and can only evaluate mean estimates assuming a single profile for both QALY and TC models (the one used by emmeans to compute these quantities). However, the function needs the user to specify different distributions and link functions for the QALY and TC models. </span></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
@@ -1419,19 +1422,19 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>  res_ec_b_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"QALY_boot"</span><span class="ot">=</span>res_e_b_list,<span class="st">"TC_boot"</span><span class="ot">=</span>res_c_b_list,<span class="st">"inputs"</span><span class="ot">=</span>input_list)</span>
 <span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(res_ec_b_list) <span class="ot">&lt;-</span> <span class="st">"bootCE_glm"</span></span>
 <span id="cb40-99"><a href="#cb40-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res_ec_b_list)</span>
-<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can now apply the newly created bootstrap function called <code>boot_ec_glm</code> to our generated dataset to obtain <span class="math inline">\(B=200\)</span> bootstrapped estimates for the parameters of interest, which are here stored in a list object called <code>boot_res_glm</code>.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>)</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to dataset</span></span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>boot_res_glm <span class="ot">&lt;-</span> <span class="fu">boot_ec_glm</span>(<span class="at">data =</span> dataset, <span class="at">QALYreg =</span> QALY <span class="sc">~</span> trt <span class="sc">+</span> u,</span>
 <span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">TCreg =</span> TC <span class="sc">~</span> trt <span class="sc">+</span> c, <span class="at">QALY_dist =</span> <span class="st">"Beta"</span>, <span class="at">TC_dist =</span> <span class="st">"Gamma"</span>,</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">QALY_link =</span> <span class="st">"logit"</span>, <span class="at">TC_link =</span> <span class="st">"inverse"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">QALY_link =</span> <span class="st">"logit"</span>, <span class="at">TC_link =</span> <span class="st">"inverse"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Note that, depending on the selected distribution and link function, GLMs may encounter problems in estimation and sometimes may not be even fit to some specific data. For example, if QALYs contain some negative values (which is theoretically possible), then Beta distributions will never be able to fit since these are defined on the interval <span class="math inline">\((0,1)\)</span>. These problems are also more likely to occur when implementing GLMs within a bootstrap procedure, since the resampling done at each iteration may lead to some data structures that do not fit well the assumed distributions.</p>
@@ -1439,7 +1442,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#jackknife sampling function (used to compute BCa interval inside main boot_ci function)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#jackknife sampling function (used to compute BCa interval inside main boot_ci function)</span></span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>jk_ec_glm <span class="ot">&lt;-</span> <span class="cf">function</span>(data,QALYreg,TCreg,trt_pos,QALY_dist,TC_dist,</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                   QALY_link,TC_link){</span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">dim</span>(data)[<span class="dv">1</span>]</span>
@@ -1631,7 +1634,7 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb42-190"><a href="#cb42-190" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb42-191"><a href="#cb42-191" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb42-192"><a href="#cb42-192" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to bootstrap results generated using the function boot_ec_glm to compute bootstrapped confidence intervals for all stored quantities using either the percentile or BCa approach (selected through the argument `method`).</span></span>
-<span id="cb42-193"><a href="#cb42-193" aria-hidden="true" tabindex="-1"></a>boot_ci_glm_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci_glm</span>(<span class="at">x =</span> boot_res_glm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb42-193"><a href="#cb42-193" aria-hidden="true" tabindex="-1"></a>boot_ci_glm_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci_glm</span>(<span class="at">x =</span> boot_res_glm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1657,7 +1660,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set parameter values for generating data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set parameter values for generating data</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="co">#sample size by cluster</span></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>J <span class="ot">&lt;-</span> <span class="dv">26</span> <span class="co">#n of clusters</span></span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>beta0_c <span class="ot">&lt;-</span> <span class="dv">100</span></span>
@@ -1699,12 +1702,12 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a>data.clus.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, QALY,TC,trt,cluster)</span>
 <span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a>data.clus.df<span class="sc">$</span>trt <span class="ot">&lt;-</span> <span class="fu">factor</span>(data.clus.df<span class="sc">$</span>trt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>))</span>
 <span id="cb43-42"><a href="#cb43-42" aria-hidden="true" tabindex="-1"></a><span class="co">#randomly shuffle rows of the dataset</span></span>
-<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a>data.clus.df <span class="ot">&lt;-</span> data.clus.df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data.clus.df)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a>data.clus.df <span class="ot">&lt;-</span> data.clus.df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data.clus.df)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can inspect the first few rows of the newly-generated data by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.clus.df, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.clus.df, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       id       QALY       TC trt cluster
 2228  728 1.23285753 108.9805 new      23
@@ -1719,12 +1722,12 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <p>and, as an example, we look at summary statistics for TC between two different clusters by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data.clus.df<span class="sc">$</span>TC[data.clus.df<span class="sc">$</span>cluster<span class="sc">==</span><span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data.clus.df<span class="sc">$</span>TC[data.clus.df<span class="sc">$</span>cluster<span class="sc">==</span><span class="dv">1</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   24.10   54.12   74.48   76.33   95.71  139.58 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data.clus.df<span class="sc">$</span>TC[data.clus.df<span class="sc">$</span>cluster<span class="sc">==</span><span class="dv">15</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data.clus.df<span class="sc">$</span>TC[data.clus.df<span class="sc">$</span>cluster<span class="sc">==</span><span class="dv">15</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   63.24  105.11  128.03  125.58  143.45  190.73 </code></pre>
@@ -1765,11 +1768,11 @@ u_{jc}\\
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4) <span class="co">#load package to fit MLM</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4) <span class="co">#load package to fit MLM</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme) <span class="co">#load package to fit MLM</span></span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co">#fit MLM to QALY regression</span></span>
 <span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>mlm_e <span class="ot">&lt;-</span> <span class="fu">lme</span>(QALY <span class="sc">~</span> trt, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span><span class="sc">|</span>cluster, <span class="at">data =</span> data.clus.df)</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mlm_e) <span class="co">#summarise output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mlm_e) <span class="co">#summarise output</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by REML
@@ -1799,9 +1802,9 @@ Number of Groups: 26 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit MLM to QALY regression</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit MLM to QALY regression</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>mlm_c <span class="ot">&lt;-</span> <span class="fu">lme</span>(TC <span class="sc">~</span> trt, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span><span class="sc">|</span>cluster, <span class="at">data =</span> data.clus.df)</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mlm_c) <span class="co">#summarise output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mlm_c) <span class="co">#summarise output</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by REML
@@ -1834,9 +1837,9 @@ Number of Groups: 26 </code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load library to obtain marginal means</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load library to obtain marginal means</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>mlm1em_e <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(mlm_e, <span class="sc">~</span> trt) <span class="co">#compute mean outcome by level of trt</span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>mlm1em_e</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>mlm1em_e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> trt emmean     SE df lower.CL upper.CL
@@ -1851,12 +1854,12 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>QALY_new_vs_old <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"New vs Old"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="co">#compute linear combination</span></span>
 <span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>mlm1em_delta_e <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mlm1em_e, QALY_new_vs_old)</span>
 <span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain results in terms of confidence intervals</span></span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mlm1em_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mlm1em_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast   estimate    SE df lower.CL upper.CL
@@ -1871,7 +1874,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bootstrap) <span class="co">#package to use bootstrap procedure </span></span>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
 <span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
@@ -2082,7 +2085,7 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb58-209"><a href="#cb58-209" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb58-210"><a href="#cb58-210" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb58-211"><a href="#cb58-211" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to MLM results</span></span>
-<span id="cb58-212"><a href="#cb58-212" aria-hidden="true" tabindex="-1"></a>boot_ci_mlm_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci_mlm</span>(<span class="at">x =</span> boot_res_mlm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb58-212"><a href="#cb58-212" aria-hidden="true" tabindex="-1"></a>boot_ci_mlm_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci_mlm</span>(<span class="at">x =</span> boot_res_mlm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>An alternative approach to handle clustering in CEA is to combine standard statistical methods that ignore clustering (eg OLS, SUR or GLM) with a modified version of non-parametric bootstrapping, which takes the name of <strong>Two-Stage Bootstrapping</strong> (TSB). The key change consists in the way the sampling with replacement is performed from the original sample so to take into account the two-level data structure represented by clusters and individuals within clusters at each bootstrap iteration <span class="citation" data-cites="gomes2012developing">(<a href="#ref-gomes2012developing" role="doc-biblioref">Gomes, Ng, et al. 2012</a>)</span>. In short, the TSB procedure can be summarised in the following steps:</p>
@@ -2098,7 +2101,7 @@ Confidence level used: 0.95 </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table) <span class="co">#package to handle datasets more efficiently</span></span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bootstrap) <span class="co">#package to use bootstrap procedure </span></span>
 <span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
 <span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>tsboot_ec <span class="ot">&lt;-</span> <span class="cf">function</span>(data, B, QALYreg, TCreg, <span class="at">method =</span> <span class="st">"OLS"</span>, cluster, <span class="at">unbalclus=</span><span class="st">"donner"</span>,</span>
@@ -2247,26 +2250,26 @@ Confidence level used: 0.95 </code></pre>
 <span id="cb59-147"><a href="#cb59-147" aria-hidden="true" tabindex="-1"></a>  res_ec_tsb_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"QALY_boot"</span><span class="ot">=</span>res_e_tsb_list,<span class="st">"TC_boot"</span><span class="ot">=</span>res_c_tsb_list,<span class="st">"inputs"</span><span class="ot">=</span>input_list)</span>
 <span id="cb59-148"><a href="#cb59-148" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(res_ec_tsb_list) <span class="ot">&lt;-</span> <span class="st">"tsbootCE"</span></span>
 <span id="cb59-149"><a href="#cb59-149" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res_ec_tsb_list)</span>
-<span id="cb59-150"><a href="#cb59-150" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb59-150"><a href="#cb59-150" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can now apply the newly created TSB function called <code>tsboot_res</code> to our generated dataset to obtain <span class="math inline">\(B=200\)</span> bootstrapped estimates for the parameters of interest, which are here stored in a list object called <code>tsboot_res</code>.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>)</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to dataset</span></span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>tsboot_res <span class="ot">&lt;-</span> <span class="fu">tsboot_ec</span>(<span class="at">data =</span> data.clus.df, <span class="at">QALYreg =</span> QALY <span class="sc">~</span> trt, <span class="at">cluster =</span> <span class="st">"cluster"</span>, <span class="at">TCreg =</span> TC <span class="sc">~</span> trt, <span class="at">method =</span> <span class="st">"OLS"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>tsboot_res <span class="ot">&lt;-</span> <span class="fu">tsboot_ec</span>(<span class="at">data =</span> data.clus.df, <span class="at">QALYreg =</span> QALY <span class="sc">~</span> trt, <span class="at">cluster =</span> <span class="st">"cluster"</span>, <span class="at">TCreg =</span> TC <span class="sc">~</span> trt, <span class="at">method =</span> <span class="st">"OLS"</span>, <span class="at">B=</span><span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Next, we can use the functions <code>jk_ec</code> and <code>boot_ci</code> shown in <a href="#sec-corr" class="quarto-xref">Section&nbsp;2</a> to compute bootstrapped confidence intervals. As an example, we can now apply the newly created bootstrap function called <code>boot_ci</code> to our bootstrap results stored in the object <code>tsboot_res</code> to compute bootstrapped confidence intervals for all stored quantities using either the BCa approach (selected through the argument <code>method</code>).</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to TSB results</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#apply function to TSB results</span></span>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>tsboot_ci_bca <span class="ot">&lt;-</span> <span class="fu">boot_ci</span>(<span class="at">x =</span> tsboot_res, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span>
-<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>tsboot_ci_bca</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>tsboot_ci_bca</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Delta_e
@@ -2298,7 +2301,7 @@ $mu_c_int
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co">#note that compared to the function developed before for OLS/SUR models, this one</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co">#note that compared to the function developed before for OLS/SUR models, this one</span></span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="co">#does not require to provide profiles for the computation of mean estimates but instead relies on the emmeans function to obtain these estimates without manual computation. Because of this the function is less flexible and can only evaluate mean estimates assuming a single profile for both QALY and TC models (the one used by emmeans to compute these quantities). However, the function needs the user to specify different distributions and link functions for the QALY and TC models. </span></span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
 <span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
@@ -2472,7 +2475,7 @@ $mu_c_int
 <span id="cb63-172"><a href="#cb63-172" aria-hidden="true" tabindex="-1"></a>                    <span class="at">QALY_link =</span> <span class="st">"identity"</span>, <span class="at">TC_link =</span> <span class="st">"identity"</span>, <span class="at">B=</span><span class="dv">200</span>)</span>
 <span id="cb63-173"><a href="#cb63-173" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-174"><a href="#cb63-174" aria-hidden="true" tabindex="-1"></a><span class="co">#apply CI function to TSB results for GLMs</span></span>
-<span id="cb63-175"><a href="#cb63-175" aria-hidden="true" tabindex="-1"></a>tsboot_ci_bca_glm <span class="ot">&lt;-</span> <span class="fu">boot_ci_glm</span>(<span class="at">x =</span> tsboot_res_glm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-175"><a href="#cb63-175" aria-hidden="true" tabindex="-1"></a>tsboot_ci_bca_glm <span class="ot">&lt;-</span> <span class="fu">boot_ci_glm</span>(<span class="at">x =</span> tsboot_res_glm, <span class="at">method =</span> <span class="st">"BCa"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -2508,7 +2511,7 @@ $mu_c_int
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co">#simulate data and missing under different mechanisms</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co">#simulate data and missing under different mechanisms</span></span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>)</span>
 <span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="co">#set up parameter values to generate data</span></span>
@@ -2568,12 +2571,12 @@ $mu_c_int
 <span id="cb64-58"><a href="#cb64-58" aria-hidden="true" tabindex="-1"></a>full.mar <span class="ot">&lt;-</span> full.mar[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(full.mar)), ]</span>
 <span id="cb64-59"><a href="#cb64-59" aria-hidden="true" tabindex="-1"></a><span class="co">#keep only relevant variables and rename them</span></span>
 <span id="cb64-60"><a href="#cb64-60" aria-hidden="true" tabindex="-1"></a>dataset.mis <span class="ot">&lt;-</span> full.mar[,<span class="fu">c</span>(<span class="st">"QALY_obs"</span>,<span class="st">"TC_obs"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)]</span>
-<span id="cb64-61"><a href="#cb64-61" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dataset.mis) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-61"><a href="#cb64-61" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dataset.mis) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can inspect the first few rows of the generated data stored in the <code>R</code> object <code>full.mar</code> to see the variable showing the observed QALY values (<code>QALY</code>) and TC values (<code>TC</code>), which were generated under a MAR mechanism conditional on the fully observed baseline utilities (<code>u</code>) and costs (<code>c</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset.mis, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset.mis, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         QALY       TC trt         u         c
 34  0.6891580 378.6541 new 0.3518463  91.95314
@@ -2603,7 +2606,7 @@ $mu_c_int
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice) <span class="co">#load package to implement MICE</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice) <span class="co">#load package to implement MICE</span></span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="co">#split data by treatment group (Old and New)</span></span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>dataset.mis_Old <span class="ot">&lt;-</span> dataset.mis[dataset.mis<span class="sc">$</span>trt<span class="sc">==</span><span class="st">"old"</span>,]</span>
 <span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>dataset.mis_New <span class="ot">&lt;-</span> dataset.mis[dataset.mis<span class="sc">$</span>trt<span class="sc">==</span><span class="st">"new"</span>,]</span>
@@ -2634,12 +2637,12 @@ $mu_c_int
 <span id="cb67-29"><a href="#cb67-29" aria-hidden="true" tabindex="-1"></a>mice_New_fit <span class="ot">&lt;-</span> <span class="fu">mice</span>(dataset.mis_New, <span class="at">predictorMatrix =</span> pM_New, <span class="at">method=</span>meth_New, <span class="at">m =</span> M, <span class="at">print =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb67-30"><a href="#cb67-30" aria-hidden="true" tabindex="-1"></a><span class="co">#combine the imputed datasets across groups</span></span>
 <span id="cb67-31"><a href="#cb67-31" aria-hidden="true" tabindex="-1"></a>mice_fit <span class="ot">&lt;-</span> <span class="fu">rbind</span>(mice_Old_fit, mice_New_fit)</span>
-<span id="cb67-32"><a href="#cb67-32" aria-hidden="true" tabindex="-1"></a><span class="co">#lme_mice_data &lt;- with(mice_data, lm(QALY_obs ~ trt + u))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb67-32"><a href="#cb67-32" aria-hidden="true" tabindex="-1"></a><span class="co">#lme_mice_data &lt;- with(mice_data, lm(QALY_obs ~ trt + u))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>The object <code>mice_fit</code> contains the results of the MICE imputation algorithm, which was implemented separately by treatment group for QALY and TC variables according to the imputation model specification given above. It is generally a good idea to check the results generated using the function <code>mice</code> to make sure that no general problems occurred in the algorithm convergence or no implausible imputations were generated for all variables. For example, we can check for possible convergence problems using the <code>plot</code> function which, when applied to a <code>mice</code> object, produces the following plot</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mice_fit, <span class="at">y=</span><span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mice_fit, <span class="at">y=</span><span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2650,7 +2653,7 @@ $mu_c_int
 </div>
 <p>which shows the convergence pattern of mean and standard deviation statistics for QALY and TC variables with respect to each of the 30 imputed values (lines) across the algorithm iterations (default set to <span class="math inline">\(5\)</span> but can be modified within <code>mice</code> using the argument <code>maxit</code>). Overall, a random pattern like the one shown in this case suggests that no evident convergence problems seem to affect the imputed variables. We can also look at the density distribution of the imputed values and compare it to that of the observed data for each imputed variable using the function <code>densityplot</code> (usually helpful for numeric variables), which produces the following plot.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">densityplot</span>(mice_fit, <span class="sc">~</span> QALY<span class="sc">+</span> TC<span class="sc">|</span>trt, <span class="at">layout=</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">densityplot</span>(mice_fit, <span class="sc">~</span> QALY<span class="sc">+</span> TC<span class="sc">|</span>trt, <span class="at">layout=</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2664,18 +2667,18 @@ $mu_c_int
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit QALY and TC model in each completed dataset and store results</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit QALY and TC model in each completed dataset and store results</span></span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>lm_mice_e <span class="ot">&lt;-</span> <span class="fu">with</span>(mice_fit, <span class="fu">lm</span>(QALY <span class="sc">~</span> trt <span class="sc">+</span> u))</span>
-<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>lm_mice_c <span class="ot">&lt;-</span> <span class="fu">with</span>(mice_fit, <span class="fu">lm</span>(TC <span class="sc">~</span> trt <span class="sc">+</span> c))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>lm_mice_c <span class="ot">&lt;-</span> <span class="fu">with</span>(mice_fit, <span class="fu">lm</span>(TC <span class="sc">~</span> trt <span class="sc">+</span> c))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>The generated objects <code>lm_mice_e</code> and <code>lm_mice_c</code> contain the <span class="math inline">\(M\)</span> different parameter estimates of the OLS regressions fitted to each completed dataset stored in <code>mice_fit</code>. Pooled estimates for these parameters across the <span class="math inline">\(M\)</span> values, obtained using Rubin’s rules, can be generated by using the <code>pool</code> function. For example, for the QALY model, we can obtain and summarise the pooled point and uncertainty estimates for all model parameters by typing</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co">#pool regression results across imputations for QALY model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co">#pool regression results across imputations for QALY model</span></span>
 <span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>pool_lm_mice_e <span class="ot">&lt;-</span> <span class="fu">pool</span>(lm_mice_e)</span>
-<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pool_lm_mice_e, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pool_lm_mice_e, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>         term  estimate  std.error statistic        df
@@ -2696,12 +2699,12 @@ $mu_c_int
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load package to compute marginal means</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans) <span class="co">#load package to compute marginal means</span></span>
 <span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain marginal means for QALY and TC across imputations</span></span>
 <span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>em_lm_mice_e_ctr <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_mice_e, <span class="sc">~</span> trt)</span>
 <span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>em_lm_mice_c_ctr <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_mice_c, <span class="sc">~</span> trt)</span>
 <span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>em_lm_mice_e_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>em_lm_mice_e_ctr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> trt emmean      SE  df lower.CL upper.CL
@@ -2712,7 +2715,7 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>em_lm_mice_c_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>em_lm_mice_c_ctr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> trt emmean   SE  df lower.CL upper.CL
@@ -2723,13 +2726,13 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co">#take difference as - Old + New = New - Old</span></span>
 <span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>new_vs_old <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"New vs Old"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="co">#compute linear combinations to get incremental estimates</span></span>
 <span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>lm_mice_delta_e <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em_lm_mice_e_ctr, new_vs_old) </span>
 <span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>lm_mice_delta_c <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em_lm_mice_c_ctr, new_vs_old) </span>
 <span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain results in terms of confidence intervals</span></span>
-<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_mice_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_mice_delta_e, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast   estimate     SE  df lower.CL upper.CL
@@ -2739,7 +2742,7 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_mice_delta_c, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(lm_mice_delta_c, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast   estimate   SE  df lower.CL upper.CL
@@ -3006,13 +3009,14 @@ Willan, Andrew R, Andrew H Briggs, and Jeffrey S Hoch. 2004. <span>“Regression
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

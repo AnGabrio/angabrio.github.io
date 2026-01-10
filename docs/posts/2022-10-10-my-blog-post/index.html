@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -268,7 +271,7 @@ window.Quarto = {
 <p>As perhaps you noticed, it is possible to simply ignore the longitudinal nature of the data by first computing the aggregated outcome measures (QALYs and Total costs) and fit the statistical models directly to these quantities to derive the treatment effect of interest, e.g.&nbsp;mean incremental QALYs and Total costs between a new intervention (<span class="math inline">\(t=1\)</span>) and a control (<span class="math inline">\(t=0\)</span>) group. This also simplified the modelling task substantially since the complexities associated with the intrinsic dependence between outcome observations collected from the same individuals over time can be ignored (i.e.&nbsp;it is already summarised into the aggregated measures). However, there are situations in which it would be preferable to fit the model using the original longitudinal data collected throughout the trial and use the estimated quantitis from this model to derive the main treatment effects of interest, i.e.&nbsp;mean incremental QALYs and Total costs between treatment groups. See reference paper <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510">here</a>.</p>
 <p>First, let’s simulate some longitudinal health economics data. For the sake of this exercise I will create a balanced design in which utilities and costs are collected at three equally spaced time points (baseline, 6 and 12 months) on <span class="math inline">\(n=300\)</span> individuals randomised to two interventions (new and old group) over a period of 1 year.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
@@ -292,12 +295,12 @@ window.Quarto = {
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>u_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(u_t0[,<span class="dv">3</span>],u_t1[,<span class="dv">3</span>])</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>c_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(c_t0[,<span class="dv">3</span>],c_t1[,<span class="dv">3</span>])</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>data_sim_uc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, u_1, c_1, u_2, c_2, u_3, c_3)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>data_sim_uc <span class="ot">&lt;-</span> data_sim_uc[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_uc)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>data_sim_uc <span class="ot">&lt;-</span> data_sim_uc[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_uc)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>With the above commands I have generated, separately for each treatment group, utility and cost data at three different time points assuming a multivariate normal distribution assuming independence over time. Although this is a rather strong assumption in real scenarios here I merely focus on the implementation of the models for longitudinal data. In future posts I will provide more realistic examples to show how changing the data structure actually requires an accurate choice of the methods to deal with them to avoid bias or misleading inferences.</p>
 <p>We can inspect the generated data using histograms:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data_sim_uc<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_uc<span class="sc">$</span>trt)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_uc<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>u1_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_uc, <span class="fu">aes</span>(<span class="at">x=</span>u_1))<span class="sc">+</span></span>
@@ -319,7 +322,7 @@ window.Quarto = {
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u1_hist, c1_hist, u2_hist, c2_hist, u3_hist, c3_hist, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u1_hist, c1_hist, u2_hist, c2_hist, u3_hist, c3_hist, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -329,7 +332,7 @@ window.Quarto = {
 </div>
 </div>
 <p>From the graphs it is apparent that the new intervention is associated with higher costs compared to the old one when focussing on the follow-up period. We can then inspect some summary statistics to have a better idea about these differences:</p>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data_sim_uc_stats <span class="ot">&lt;-</span> data_sim_uc[,<span class="fu">c</span>(<span class="st">"u_1"</span>,<span class="st">"c_1"</span>,<span class="st">"u_2"</span>,<span class="st">"c_2"</span>,<span class="st">"u_3"</span>,<span class="st">"c_3"</span>,<span class="st">"trtf"</span>)]</span>
@@ -342,8 +345,8 @@ window.Quarto = {
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanu3 =</span> <span class="fu">mean</span>(u_3), <span class="at">sdu3 =</span> <span class="fu">sd</span>(u_3), </span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">meanc3 =</span> <span class="fu">mean</span>(c_3), <span class="at">sdc3 =</span> <span class="fu">sd</span>(c_3)</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(d.summary, <span class="at">caption =</span> <span class="st">"Summary statistics"</span>, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<table class="caption-top table" data-quarto-postprocess="true">
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(d.summary, <span class="at">caption =</span> <span class="st">"Summary statistics"</span>, <span class="at">format =</span> <span class="st">"html"</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
 <caption>Summary statistics</caption>
 <thead>
 <tr class="header">
@@ -398,14 +401,14 @@ window.Quarto = {
 <p>We can see that both groups have similar sd while the means show some noticeable differences with <span class="math inline">\(t=1\)</span> being associated with both higher utility and cost post-baseline values (<span class="math inline">\(j&gt;1\)</span>). How do we proceed from here? Normally the approach consists in computing QALYs and Total costs and fit models to these data (see previous post). However, it is also possible to fit models directly to the utility and cost data in the form of <strong>linear mixed or random-effects regression models</strong>. The main idea behind this models is to treat individuals as random effects so that the observations collected at each time can be assigned a two-level multilevel structure in which individuals are nested within time points. In this way dependence between observations for the same individual is taken into account by means of random effects specification, thus preserving the dependence relationships present in the longitudinal data.</p>
 <p>Before fitting the model it is necessary to re-arrange out current dataset (wide-format) into a longitudinal format where the utility and cost outcome variables consists in single vectors each of length <span class="math inline">\(n \times J\)</span> and for each outcome value create an indicator variable associated with the different time at which each value refers to (i.e.&nbsp;taking value 1, 2 or 3). This can be achieved as follows:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="ot">&lt;-</span><span class="fu">reshape</span>(data_sim_uc, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"u_1"</span>,<span class="st">"u_2"</span>,<span class="st">"u_3"</span>,<span class="st">"c_1"</span>,<span class="st">"c_2"</span>,<span class="st">"c_3"</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">direction =</span> <span class="st">"long"</span>,<span class="at">idvar =</span> <span class="st">"id"</span>,<span class="at">sep =</span> <span class="st">"_"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>time_2<span class="ot">&lt;-</span><span class="fu">ifelse</span>(data_long_uc<span class="sc">$</span>time <span class="sc">==</span> <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>time_3<span class="ot">&lt;-</span><span class="fu">ifelse</span>(data_long_uc<span class="sc">$</span>time <span class="sc">==</span> <span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>trt_time_2<span class="ot">&lt;-</span>data_long_uc<span class="sc">$</span>trt<span class="sc">*</span>data_long_uc<span class="sc">$</span>time_2</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>trt_time_3<span class="ot">&lt;-</span>data_long_uc<span class="sc">$</span>trt<span class="sc">*</span>data_long_uc<span class="sc">$</span>time_3</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>timef <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_uc<span class="sc">$</span>time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>data_long_uc<span class="sc">$</span>timef <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_uc<span class="sc">$</span>time)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code above, in addition to the creation of the variable <code>time</code>, additional indicator variables have been created to denote each individual time point (<code>time_2</code>,<code>time_3</code>) and interaction between time point and treatment assignment (<code>trt_time_2</code>,<code>trt_time_3</code>). Although not necessary, these additional indicators can simply the interpretation of the model specification in terms of retrieving estimates for the main effects of interest, e.g.&nbsp;mean utility and cost at each time point by treatment group. After converting our dataset into long format we can now fit the longitudinal random effects model for the two outcomes separately.</p>
 <p><span class="math display">\[
@@ -421,14 +424,14 @@ c_{ij} = \beta_1\times\text{time}_j + \beta_2 \times \text{trt}\times\text{time}
 </ol>
 <p>Finally, we note that here the models are fitted assuming independence between utilities and costs to make easier to interpret the results from each model, while in reality correlation between outcomes should be taken into account even at the modelling stage. The model can be fitted in <code>R</code> using different packages and functions. Here we use the <code>nlme</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>LMM_u <span class="ot">&lt;-</span> <span class="fu">lme</span>(u <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data =</span> data_long_uc, <span class="at">method =</span> <span class="st">"ML"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>LMM_c <span class="ot">&lt;-</span> <span class="fu">lme</span>(c <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data =</span> data_long_uc, <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>LMM_c <span class="ot">&lt;-</span> <span class="fu">lme</span>(c <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data =</span> data_long_uc, <span class="at">method =</span> <span class="st">"ML"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can look at summary results for the fixed effects components of the model (i.e.&nbsp;regression parameters) by typing:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_u)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_u)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by maximum likelihood
   Data: data_long_uc 
@@ -461,7 +464,7 @@ Standardized Within-Group Residuals:
 Number of Observations: 900
 Number of Groups: 300 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_u, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_u, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Approximate 95% confidence intervals
 
@@ -473,7 +476,7 @@ timef3     0.27666827 0.31229182 0.3479154
 trt_time_2 0.03190217 0.08228147 0.1326608
 trt_time_3 0.14279979 0.19317910 0.2435584</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(LMM_c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed-effects model fit by maximum likelihood
   Data: data_long_uc 
@@ -506,7 +509,7 @@ Standardized Within-Group Residuals:
 Number of Observations: 900
 Number of Groups: 300 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_c, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intervals</span>(LMM_c, <span class="at">level =</span> <span class="fl">0.95</span>, <span class="at">which =</span> <span class="st">"fixed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Approximate 95% confidence intervals
 
@@ -521,9 +524,9 @@ trt_time_3 984.8381 994.5890 1004.3399</code></pre>
 </div>
 <p>and we can derive the marginal mean estimates (and corresponding CIs) for the utility and cost at each time point by treatment group using the <code>emmeans</code> function included in the <code>emmeans</code> package:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mu_u <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(LMM_u, <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_u</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_u</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> timef trt_time_2 trt_time_3 emmean     SE  df lower.CL upper.CL
  1              0          0  0.295 0.0129 596    0.270    0.320
@@ -542,8 +545,8 @@ trt_time_3 984.8381 994.5890 1004.3399</code></pre>
 Degrees-of-freedom method: containment 
 Confidence level used: 0.95 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(LMM_c, <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mu_c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(LMM_c, <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> timef <span class="sc">+</span> trt_time_2 <span class="sc">+</span> trt_time_3)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mu_c</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> timef trt_time_2 trt_time_3 emmean    SE  df lower.CL upper.CL
  1              0          0  502.5 2.489 596    497.7    507.4
@@ -565,9 +568,9 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <p>Finally, we can compute a linear combination of these marginal mean estimates in order to derive the main effects of interest for the analysis, that is the mean QALYs and Total cost estimates evaluated over the whole trial period. Indeed, it suffices to apply the usual formulae used for computing the aggregated quantities to the mean estimates instead, so to derive the corresponding mean estimates for such quantities by group. We can do this as follows:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mu_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">mu_e_old =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="fl">0.25+0.25</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mu_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">mu_e_old =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="fl">0.25+0.25</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">mu_e_new =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25+0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>mu_QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>mu_QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df t.ratio p.value
  mu_e_old    0.316 0.0107 596  29.601  &lt;.0001
@@ -575,7 +578,7 @@ Confidence level used: 0.95 </code></pre>
 
 Degrees-of-freedom method: containment </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_QALYs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_QALYs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df lower.CL upper.CL
  mu_e_old    0.316 0.0107 596    0.295    0.337
@@ -584,9 +587,9 @@ Degrees-of-freedom method: containment </code></pre>
 Degrees-of-freedom method: containment 
 Confidence level used: 0.95 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">mu_tc_old =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">mu_tc_old =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>),</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">mu_tc_new =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mu_Totalcosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast  estimate    SE  df t.ratio p.value
  mu_tc_old     1011 4.979 596 203.022  &lt;.0001
@@ -594,7 +597,7 @@ Confidence level used: 0.95 </code></pre>
 
 Degrees-of-freedom method: containment </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_Totalcosts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(mu_Totalcosts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast  estimate    SE  df lower.CL upper.CL
  mu_tc_old     1011 4.979 596     1001     1021
@@ -606,15 +609,15 @@ Confidence level used: 0.95 </code></pre>
 </div>
 <p>and, in a similar way, we can also compute the incremental means between treatment groups by taking a linear combination of these estimates:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>delta_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">QALYs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="fl">0.25-0.25</span>,<span class="sc">-</span><span class="fl">0.25</span>,<span class="dv">0</span>,<span class="fl">0.25+0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>delta_QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>delta_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_u, <span class="fu">list</span>(<span class="at">QALYs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="fl">0.25-0.25</span>,<span class="sc">-</span><span class="fl">0.25</span>,<span class="dv">0</span>,<span class="fl">0.25+0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>delta_QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df t.ratio p.value
  QALYs      0.0894 0.0144 596   6.219  &lt;.0001
 
 Degrees-of-freedom method: containment </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_QALYs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_QALYs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df lower.CL upper.CL
  QALYs      0.0894 0.0144 596   0.0612    0.118
@@ -622,15 +625,15 @@ Degrees-of-freedom method: containment </code></pre>
 Degrees-of-freedom method: containment 
 Confidence level used: 0.95 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">TCs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">TCs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate   SE  df t.ratio p.value
  TCs          1792 7.04 596 254.515  &lt;.0001
 
 Degrees-of-freedom method: containment </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_Totalcosts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_Totalcosts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate   SE  df lower.CL upper.CL
  TCs          1792 7.04 596     1778     1806
@@ -697,13 +700,14 @@ Confidence level used: 0.95 </code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

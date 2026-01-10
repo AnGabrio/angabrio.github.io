@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -259,7 +262,7 @@ window.Quarto = {
 <p>As perhaps you already know, when analysing bivariate outcome data (such as costs and QALYs), it is important that the potential correlation between the variables is taken into account at the modelling stage of the statistical analysis. Indeed, so far we have ignored correlation and modelled the two outcomes (either at the aggregated or longitudinal level) separately, therefore assuming independence between the two types of variables. This, however, can be a quite strict assumption as in practice it makes sence that the two types of outcome variables show at least some degree of association, i.e.&nbsp;patients receiving a new and more expensive intervention may be more likely to observe higher improvements in their benefit measures compared to those receiving a cheaper control. You can also find the same principle within the more classical statistical analysis framework of hypothesis testing, for example when considering the difference between an independent sample vs paired sample t-test. By recognising the dependence in the data in the calculation of the test statistic (specifically in the standard error calculation), uncertainty about the parameters of interest can be decreased and more accurate inferences can be drawn. The same idea applies also when analysing CEA data in that, when outcomes are strongly associated between each other, proper recognition of this dependence allows to derive more precise (i.e.&nbsp;less uncertain) estimates about the mean cost/QALYs incrementals.</p>
 <p>For example, let’s start by simulating some correlated bivariate CEA data for a total of <span class="math inline">\(300\)</span> patients assigned to two competing intervention groups (<span class="math inline">\(t=0,1\)</span>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
@@ -282,22 +285,22 @@ window.Quarto = {
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> <span class="fu">c</span>(biv_ec1_raw[,<span class="dv">1</span>],biv_ec2_raw[,<span class="dv">1</span>])</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">c</span>(biv_ec1_raw[,<span class="dv">2</span>],biv_ec2_raw[,<span class="dv">2</span>])</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, QALYs, Costs)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code above I simulated first bivariate standard normal data within each arm to ensure the desired correlation level between the variables (easy to specify on standard normal scale) and then apply a transformation to give each arm and variable a pre-defined level of standard deviation and mean. This way, even on a different scale, the correlation between the outcome variables within each arm is (generally) preserved. We can also check this by computing the empirical correlation between the costs and QALYs variables as well as by plotting the bivariate data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8937574</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>QALYs, <span class="at">y=</span>Costs)) <span class="sc">+</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>, <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -315,8 +318,8 @@ window.Quarto = {
 \]</span></p>
 <p>where <span class="math inline">\(\boldsymbol \alpha\)</span> and <span class="math inline">\(\boldsymbol \beta\)</span> are the set of regression coefficients including the intercepts and slopes of the two models, while <span class="math inline">\(\boldsymbol \varepsilon\)</span> is the set of two error terms, each assumed to be normally distributed with mean 0 and variance <span class="math inline">\(\sigma^2_{\varepsilon}\)</span>. If we fit the model in <code>R</code> we obtain:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lm_e <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALYs <span class="sc">~</span> trtf, <span class="at">data =</span> data_sim_ec)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_e)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lm_e <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALYs <span class="sc">~</span> trtf, <span class="at">data =</span> data_sim_ec)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -337,15 +340,15 @@ Residual standard error: 0.1502 on 298 degrees of freedom
 Multiple R-squared:  0.2899,    Adjusted R-squared:  0.2875 
 F-statistic: 121.7 on 1 and 298 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ci_lm_e <span class="ot">&lt;-</span> <span class="fu">confint</span>(lm_e)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ci_lm_e</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ci_lm_e <span class="ot">&lt;-</span> <span class="fu">confint</span>(lm_e)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ci_lm_e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                2.5 %    97.5 %
 (Intercept) 0.4839332 0.5322124
 trtfnew     0.1572113 0.2254883</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>lm_c <span class="ot">&lt;-</span> <span class="fu">lm</span>(Costs <span class="sc">~</span> trtf, <span class="at">data =</span> data_sim_ec)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>lm_c <span class="ot">&lt;-</span> <span class="fu">lm</span>(Costs <span class="sc">~</span> trtf, <span class="at">data =</span> data_sim_ec)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_c)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -366,8 +369,8 @@ Residual standard error: 292.6 on 298 degrees of freedom
 Multiple R-squared:  0.4139,    Adjusted R-squared:  0.4119 
 F-statistic: 210.5 on 1 and 298 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ci_lm_c <span class="ot">&lt;-</span> <span class="fu">confint</span>(lm_c)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ci_lm_c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ci_lm_c <span class="ot">&lt;-</span> <span class="fu">confint</span>(lm_c)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ci_lm_c</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               2.5 %   97.5 %
 (Intercept) 466.0050 560.0242
@@ -384,8 +387,8 @@ trtfnew     423.5962 556.5593</code></pre>
 \]</span></p>
 <p>and in <code>R</code> we can fit the models by typing:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>lm_e2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALYs <span class="sc">~</span> trtf <span class="sc">+</span> Costs, <span class="at">data =</span> data_sim_ec)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_e2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>lm_e2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(QALYs <span class="sc">~</span> trtf <span class="sc">+</span> Costs, <span class="at">data =</span> data_sim_ec)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_e2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -407,8 +410,8 @@ Residual standard error: 0.07965 on 297 degrees of freedom
 Multiple R-squared:  0.8011,    Adjusted R-squared:  0.7997 
 F-statistic:   598 on 2 and 297 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>lm_c2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Costs <span class="sc">~</span> trtf <span class="sc">+</span> QALYs, <span class="at">data =</span> data_sim_ec)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_c2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>lm_c2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Costs <span class="sc">~</span> trtf <span class="sc">+</span> QALYs, <span class="at">data =</span> data_sim_ec)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_c2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -433,29 +436,29 @@ F-statistic:   756 on 2 and 297 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>You see that the estimates for the treatment effect are now off and this is simply because now we also have an additional variable in each model. In order to retrieve the correct estimates in terms of mean difference between arms we can either include the new predictors as centred variables (i.e.&nbsp;mean of 0) or calculate the marginal means of each outcome as linear combinations of the parameters from the model. In <code>R</code> the second approach can be easily achieved using the <code>emmeans</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>mu_e <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_e2, <span class="sc">~</span> trtf <span class="sc">+</span> Costs)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>delta_QALYs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_e, <span class="fu">list</span>(<span class="at">QALYs =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)))</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>delta_QALYs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>delta_QALYs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate      SE  df t.ratio p.value
  QALYs       0.593 0.00756 297  78.345  &lt;.0001</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_QALYs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_QALYs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate      SE  df lower.CL upper.CL
  QALYs       0.593 0.00756 297    0.578    0.608
 
 Confidence level used: 0.95 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_c2, <span class="sc">~</span> trtf <span class="sc">+</span> QALYs)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_c2, <span class="sc">~</span> trtf <span class="sc">+</span> QALYs)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts <span class="ot">&lt;-</span> <span class="fu">contrast</span>(mu_c, <span class="fu">list</span>(<span class="at">Tcosts =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)))</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>delta_Totalcosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate   SE  df t.ratio p.value
  Tcosts        845 13.9 297  60.805  &lt;.0001</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_Totalcosts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(delta_Totalcosts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate   SE  df lower.CL upper.CL
  Tcosts        845 13.9 297      818      872
@@ -473,12 +476,12 @@ Confidence level used: 0.95 </code></pre>
 \]</span></p>
 <p>with the error terms <span class="math inline">\(\boldsymbol \varepsilon\)</span> that are assumed to be independent between observations but that may have cross-equation correlations between observations <span class="math inline">\(i=1,\ldots,n\)</span>, i.e.&nbsp;we assume that <span class="math inline">\(\text{E}[\varepsilon_{ie} \varepsilon_{ic} \mid \text{trt}]=0\)</span> BUT <span class="math inline">\(\text{E}[\varepsilon_{ie} \varepsilon_{je} \mid \text{trt}]=\sigma_{ij}\)</span> and <span class="math inline">\(\text{E}[\varepsilon_{ic} \varepsilon_{jc} \mid \text{trt}]=\sigma_{ij}\)</span>. The main idea behind the approach is that it allows to capture the correlation between different individuals within each outcome regression model. In fact, it can be shown to be equivalent to standard OLS models when no cross-equation correlations between the error terms are present. Since the purpose of this post is to illustrate the approach, rather than a theoretical discussion about it, I will simply avoid a lengthy explanation of the methods and go straight to the point. We can fit these models in <code>R</code> using the <code>systemfit</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>sur_e_formula <span class="ot">&lt;-</span> QALYs <span class="sc">~</span> trtf</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>sur_c_formula <span class="ot">&lt;-</span> Costs <span class="sc">~</span> trtf</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>system <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">QALYs =</span> sur_e_formula, <span class="at">Costs =</span> sur_c_formula)</span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>sur_ec <span class="ot">&lt;-</span> <span class="fu">systemfit</span>(system, <span class="at">data =</span> data_sim_ec)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sur_ec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sur_ec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 systemfit results 
@@ -531,8 +534,8 @@ Number of observations: 300 Degrees of Freedom: 298
 SSR: 25506402.718561 MSE: 85591.955431 Root MSE: 292.561029 
 Multiple R-Squared: 0.41391 Adjusted R-Squared: 0.411943 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>ci_sur_ec <span class="ot">&lt;-</span> <span class="fu">confint</span>(sur_ec)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>ci_sur_ec</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>ci_sur_ec <span class="ot">&lt;-</span> <span class="fu">confint</span>(sur_ec)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>ci_sur_ec</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                    2.5 %  97.5 %
 QALYs_(Intercept)   0.484   0.532
@@ -598,13 +601,14 @@ Costs_trtfnew     423.596 556.559</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

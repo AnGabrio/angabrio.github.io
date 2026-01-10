@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -312,7 +315,7 @@ p(t_u)=1-\frac{\text{exp}\{-H(t)\}}{\text{exp}\{-H(t-u)\}}=1-\text{exp}\{H(t-u)-
 <p>For this example, I will focus on the second type of time-dependency under the assumption that time dependence is related to the time spent in a specific state, which requires expanding the state of interest with as many transient states as the number of cycles required to track the history of the cohort in that state. I will be mostly using references and take inspiration from a very nice example code in <code>R</code> provided by <span class="citation" data-cites="alarid2023tutorial">Alarid-Escudero et al. (<a href="#ref-alarid2023tutorial" role="doc-biblioref">2023</a>)</span>. Make sure to check it out if you want to have a more in-depth look at the code and related explanations. For example, if a transition rate decreases over the first three cycles spent in a state and then is constant from the fourth cycle onward, then four transient or “tunnel” states are needed for that state. The cohort resides in each tunnel state for one cycle, after which they either exit the tunnel or transition to the next tunnel state, with the total number of states being <span class="math inline">\(n_{S\text{tunnel}}=n_{S}+n_{\text{tunnel}}-1\)</span>, where <span class="math inline">\(n_{\text{tunnel}\)</span> is the total number of times a health state needs to be expanded to capture the relevant time dependence. The transition probability matrix also needs to be expanded to incorporate these additional transient states, resulting in a transition probability matrix of dimensions <span class="math inline">\(n_{S\text{tunnel}}\times n_{S\text{tunnel}}\)</span>. If transition probabilities are also dependent on simulation time, then we also need to expand it to a three-dimensional array with dimensions <span class="math inline">\(n_{S\text{tunnel}}\times n_{S\text{tunnel}}\times n_{T}\)</span>.</p>
 <p>We will assume that healthy individuals face an age-specific background mortality. Typically, all-cause mortality rates can be obtained from life tables in the form of age-specific mortality hazard rates <span class="math inline">\(\mu_a\)</span>, where <span class="math inline">\(a\)</span> refers to the specific age considered. Since this is just an example, let’s simulate age-specific mortality rates which are assumed to be specified on a yearly basis for people aged <span class="math inline">\(50-75\)</span> years.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define age intervals by years</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define age intervals by years</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">50</span><span class="sc">:</span><span class="dv">75</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#set length of age vector</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>age_n <span class="ot">&lt;-</span> <span class="fu">length</span>(age)</span>
@@ -321,7 +324,7 @@ p(t_u)=1-\frac{\text{exp}\{-H(t)\}}{\text{exp}\{-H(t-u)\}}=1-\text{exp}\{H(t-u)-
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>data_age <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(age,mu_a)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_age</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_age</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   age        mu_a
 1   50 0.004987521
@@ -357,12 +360,12 @@ p(t_u)=1-\frac{\text{exp}\{-H(t)\}}{\text{exp}\{-H(t-u)\}}=1-\text{exp}\{H(t-u)-
 p_{[\text{Well},\text{Sick},t]}=1-\text{exp}(-\mu_{a_0+t}),
 \]</span> where <span class="math inline">\(a_{0}=50\)</span> is the starting age of the cohort. We transform the vector of age-specific rates to a vector of probabilities by adjusting for the cycle length.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform to age-specific background mortality risk for all cycles adjusting by cycle</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>p_a <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>mu_a<span class="sc">*</span>age_n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform to age-specific background mortality risk for all cycles adjusting by cycle</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>p_a <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>mu_a<span class="sc">*</span>age_n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Because mortality in the state Sick is relative to background mortality which depends on age, mortality in this state will also be age-dependent. To generate the age-specific mortality in this state, we multiply the age-specific background mortality rate <span class="math inline">\(\mu_a\)</span> by the constant hazard ratio for Sick vs Well. We then convert the resulting age-specific mortality rate to probability.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Transition rates (annual), and hazard ratios (HRs) ----</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Transition rates (annual), and hazard ratios (HRs) ----</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>r_ws  <span class="ot">&lt;-</span> <span class="fl">0.15</span>  <span class="co"># constant annual rate of becoming Sick when Well</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p_ws <span class="ot">&lt;-</span>  <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span> r_ws <span class="sc">*</span> age_n)  <span class="co"># constant annual probability of becoming Sick when Healthy conditional on surviving </span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>r_sw  <span class="ot">&lt;-</span> <span class="fl">0.01</span>   <span class="co"># constant annual rate of becoming Well when Sick</span></span>
@@ -372,23 +375,23 @@ p_{[\text{Well},\text{Sick},t]}=1-\text{exp}(-\mu_{a_0+t}),
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Age-specific mortality rate in the Sick state</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>mu_a_sick <span class="ot">&lt;-</span> mu_a <span class="sc">*</span> hr_sick <span class="co"># when Sick</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Age-specific probability of dying in the Sick state</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>p_a_sick <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>mu_a_sick)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>p_a_sick <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>mu_a_sick)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To incorporate simulation-time dependence into the transition probability matrix, we expand the dimensions of the matrix and create a <span class="math inline">\(3\)</span>-dimensional transition probability array, <span class="math inline">\(tm_a\)</span> and use it in <code>R</code>, of dimensions <span class="math inline">\(n_S \times n_S \times n_T\)</span>. The first two dimensions of this array correspond to transitions between states, where the rows determine departing states and columns destination states. The third dimension refers to the time since the simulation started. The <span class="math inline">\(t\)</span>-th element in the third dimension corresponds to the transition probability matrix at cycle <span class="math inline">\(t\)</span>.</p>
 <p>First, we initialize the transition probability array with a default value of zero for all transition probabilities.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set simulation parameters</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set simulation parameters</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>n_t <span class="ot">&lt;-</span> age_n</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>n_s <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>n_c <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>state_names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Well"</span>,<span class="st">"Sick"</span>,<span class="st">"Dead"</span>)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#initialise</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>tm_a <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim=</span><span class="fu">c</span>(n_s,n_s,n_t), <span class="at">dimnames =</span> <span class="fu">list</span>(state_names, state_names, <span class="dv">0</span><span class="sc">:</span>(n_t <span class="sc">-</span> <span class="dv">1</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>tm_a <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim=</span><span class="fu">c</span>(n_s,n_s,n_t), <span class="at">dimnames =</span> <span class="fu">list</span>(state_names, state_names, <span class="dv">0</span><span class="sc">:</span>(n_t <span class="sc">-</span> <span class="dv">1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. Most of this code is equivalent to populating the matrix <code>tm_a</code> for time-independent models. The only difference is the empty index added to the third dimension to represent the vector of transitions over time. For time-varying transitions, we provide a vector of transition probabilities. We only need to provide one value for the transition probability for constant transitions over time, and <code>R</code> replicates the value of such transitions as many times as the number of cycles (<span class="math inline">\(n_T+1\)</span> times in our example). To ensure that the sum of each row of each cycle-specific matrix equals one, we define the probability of staying in each state by subtracting the sum of the exiting probability vectors from one after conditioning on surviving each cycle. Finally, we initialize the transition probability array for an hypothetical control group as a copy of the matrix for the treatment but assuming a different (worse) hazard ratio for moving from Sick to the Dead state.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Fill in array</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Fill in array</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## From Well</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tm_a[<span class="st">"Well"</span>, <span class="st">"Well"</span>, ] <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p_a) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p_ws)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>tm_a[<span class="st">"Well"</span>, <span class="st">"Sick"</span>, ] <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p_a) <span class="sc">*</span> p_ws</span>
@@ -414,11 +417,11 @@ p_{[\text{Well},\text{Sick},t]}=1-\text{exp}(-\mu_{a_0+t}),
 <span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="do">## From Sick</span></span>
 <span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>tm_a0[<span class="st">"Sick"</span>, <span class="st">"Well"</span>, ] <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p_a_sick_0) <span class="sc">*</span> p_sw</span>
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>tm_a0[<span class="st">"Sick"</span>, <span class="st">"Sick"</span>, ] <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> p_a_sick_0) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p_sw)</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>tm_a0[<span class="st">"Sick"</span>, <span class="st">"Dead"</span>, ] <span class="ot">&lt;-</span> p_a_sick_0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>tm_a0[<span class="st">"Sick"</span>, <span class="st">"Dead"</span>, ] <span class="ot">&lt;-</span> p_a_sick_0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we initialise, set up and run the model under the assumption that everyone in the cohort starts in the Well state and progresses towards the Dead state according to age-specific and treatment-specific transition probability matrices.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct state-transition models ----</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct state-transition models ----</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Initial state vector ----</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#* All starting healthy</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>v_m_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">Well =</span> <span class="dv">1</span>, <span class="at">Sick =</span> <span class="dv">0</span>, <span class="at">Dead =</span> <span class="dv">0</span>) <span class="co"># initial state vector</span></span>
@@ -481,7 +484,7 @@ p_{[\text{Well},\text{Sick},t]}=1-\text{exp}(-\mu_{a_0+t}),
 <span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="do">## Store the transition dynamics array for each strategy in a list ----</span></span>
 <span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>l_a_A <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">Control =</span>  arr_0,</span>
 <span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>              <span class="at">Treatment   =</span>  arr_1)</span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(l_a_A) <span class="ot">&lt;-</span> trt_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(l_a_A) <span class="ot">&lt;-</span> trt_names</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The state vector of the cohort’s distribution at cycle <span class="math inline">\(t + 1\)</span> is obtained by applying updating the transition probability matrix, obtained by the the matrix product between the row vector <code>m_M_0[t, ]</code> and the transition probability matrix <code>tm_a0[, , t]</code>. The vectors across all cycles are obtained by iteratively applying this update to each transition probability matrix of <code>tm_a0</code> across the third dimension using a for loop. <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> and <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> shows the cohort’s trace for all cycles of the age-dependent model under the control and treatment group, respectively.</p>
 <div class="cell">
@@ -514,7 +517,7 @@ Figure&nbsp;2: Cohort trace under treatment.
 </div>
 <p>Once the transition probabilities over the desired number of cycles are estimated/filled in, further data manipulation can be carried out to estimate the expected costs and effects, which can be included in an additional vector and then multiplied with the elements of the matrices after each cycle to generate the expected total costs and effects. We need to associate to each health state and treatment in the model a corresponding value for each of the outcomes that we want to measure, i.e.&nbsp;costs and utilities. Thus, we may assume that (yearly) utilities for each health state are <span class="math inline">\(u^{well}=1\)</span>, <span class="math inline">\(u^{sick}=0.75\)</span>, and <span class="math inline">\(u^{dead}=0\)</span> (across treatments). We may also assume that (yearly) costs vary between treatment groups and health states (Well, Sick, Dead), i.e.&nbsp;<span class="math inline">\(c_{trt}=(2000,16000,0)\)</span> and <span class="math inline">\(c^{ctr}=(2000,4000,0)\)</span>. We also include utility and cost specific (yearly) values depending on whether the new treatment was received by the patient, such that: <span class="math inline">\(u^{\text{treated}}=0.95\)</span>, <span class="math inline">\(c^{\text{treated}}=12000\)</span>. Similarly, we introduce some penalties in terms of disutility or costs for those patients moving from Well to Sick or Dead state: <span class="math inline">\(u^{\text{WS}}=-0.01\)</span>, <span class="math inline">\(c^{\text{WS}}=1000\)</span>, <span class="math inline">\(c^{\text{D}}=2000\)</span>. Next, we need to determine the number of cycles of the model. In this case, we will use <span class="math inline">\(26\)</span> cycles with each cycle being <span class="math inline">\(1\)</span> year long. Hence, the expected costs and QALYs for each month will be generated and then added up. Since the assessment covers a period longer than one year, we also apply discounting to utilities and costs using some pre-defined (annual) discount rates: <span class="math inline">\(d^u=0.015\)</span> and <span class="math inline">\(d^c=0.035\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">### State rewards ----</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">### State rewards ----</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">#### Costs ----</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>c_well    <span class="ot">&lt;-</span> <span class="dv">2000</span>  <span class="co"># annual cost of being Well</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>c_sick   <span class="ot">&lt;-</span> <span class="dv">4000</span>  <span class="co"># annual cost of being Sick</span></span>
@@ -572,11 +575,11 @@ Figure&nbsp;2: Cohort trace under treatment.
 <span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute expected outcomes ----</span></span>
 <span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="co">#* Create empty vectors to store total utilities and costs </span></span>
 <span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>v_tot_qaly <span class="ot">&lt;-</span> v_tot_cost <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"numeric"</span>, <span class="at">length =</span> <span class="dv">2</span>)</span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(v_tot_qaly) <span class="ot">&lt;-</span> <span class="fu">names</span>(v_tot_cost) <span class="ot">&lt;-</span> trt_names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(v_tot_qaly) <span class="ot">&lt;-</span> <span class="fu">names</span>(v_tot_cost) <span class="ot">&lt;-</span> trt_names</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We are then ready to compute the expected outcomes based on the model results.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define number of strategies </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define number of strategies </span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>n_str <span class="ot">&lt;-</span> <span class="dv">2</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Loop through each strategy and calculate total utilities and costs ----</span></span>
@@ -621,16 +624,16 @@ Figure&nbsp;2: Cohort trace under treatment.
 <span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>  v_tot_qaly[i] <span class="ot">&lt;-</span> <span class="fu">t</span>(v_qaly_str) <span class="sc">%*%</span> (v_dwe)</span>
 <span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>  <span class="co">#* Costs</span></span>
 <span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>  v_tot_cost[i] <span class="ot">&lt;-</span> <span class="fu">t</span>(v_cost_str) <span class="sc">%*%</span> (v_dwc)</span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can then assess the model results, for example by looking at the total cost and QALY difference over the model time horizon.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>v_tot_cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>v_tot_cost</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Control Treatment 
   32246.3  108303.2 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>v_tot_qaly</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>v_tot_qaly</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Control Treatment 
  7.794361  9.458081 </code></pre>
@@ -638,7 +641,7 @@ Figure&nbsp;2: Cohort trace under treatment.
 </div>
 <p>from which an estimate of the mean costs and QALYs difference between the two groups can be obtained as</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#experimental</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mu_c_exp <span class="ot">&lt;-</span> v_tot_cost[<span class="dv">2</span>]</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_e_exp <span class="ot">&lt;-</span> v_tot_qaly[<span class="dv">2</span>]</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -647,7 +650,7 @@ Figure&nbsp;2: Cohort trace under treatment.
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>mu_e_ctr <span class="ot">&lt;-</span> v_tot_qaly[<span class="dv">1</span>]</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>mu_c_diff <span class="ot">&lt;-</span> mu_c_exp<span class="sc">-</span>mu_c_ctr</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>mu_e_diff <span class="ot">&lt;-</span> mu_e_exp<span class="sc">-</span>mu_e_ctr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and from this an estimate of the ICER can be obtained:</p>
 <p><span class="math display">\[
@@ -718,13 +721,14 @@ Caldwell, Deborah. 2007. <span>“Decision Modelling for Health Economic Evaluat
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

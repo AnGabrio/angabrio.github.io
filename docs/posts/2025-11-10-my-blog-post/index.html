@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -292,7 +295,7 @@ window.Quarto = {
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#simulate data and missing under different mechanisms</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#simulate data and missing under different mechanisms</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#set rng for reproducibility</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#set up parameter values to generate data</span></span>
@@ -352,12 +355,12 @@ window.Quarto = {
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>full.mar <span class="ot">&lt;-</span> full.mar[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(full.mar)), ]</span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="co">#keep only relevant variables and rename them</span></span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>dataset.mis <span class="ot">&lt;-</span> full.mar[,<span class="fu">c</span>(<span class="st">"QALY_obs"</span>,<span class="st">"TC_obs"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)]</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dataset.mis) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dataset.mis) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"QALY"</span>,<span class="st">"TC"</span>,<span class="st">"trt"</span>,<span class="st">"u"</span>,<span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>We can inspect the first few rows of the generated data stored in the <code>R</code> object <code>full.mar</code> to see the variable showing the observed QALY values (<code>QALY</code>) and TC values (<code>TC</code>), which were generated under a MAR mechanism conditional on the fully observed baseline utilities (<code>u</code>) and costs (<code>c</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset.mis, <span class="at">n=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset.mis, <span class="at">n=</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         QALY       TC trt         u         c
 34  0.6891580 378.6541 new 0.3518463  91.95314
@@ -375,7 +378,7 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice) <span class="co">#load package to implement MICE</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice) <span class="co">#load package to implement MICE</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#split data by treatment group (Old and New)</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dataset.mis_Old <span class="ot">&lt;-</span> dataset.mis[dataset.mis<span class="sc">$</span>trt<span class="sc">==</span><span class="st">"old"</span>,]</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>dataset.mis_New <span class="ot">&lt;-</span> dataset.mis[dataset.mis<span class="sc">$</span>trt<span class="sc">==</span><span class="st">"new"</span>,]</span>
@@ -405,7 +408,7 @@ window.Quarto = {
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>mice_Old_fit <span class="ot">&lt;-</span> <span class="fu">mice</span>(dataset.mis_Old, <span class="at">predictorMatrix =</span> pM_Old, <span class="at">method=</span>meth_Old, <span class="at">m =</span> M, <span class="at">print =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>mice_New_fit <span class="ot">&lt;-</span> <span class="fu">mice</span>(dataset.mis_New, <span class="at">predictorMatrix =</span> pM_New, <span class="at">method=</span>meth_New, <span class="at">m =</span> M, <span class="at">print =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#combine the imputed datasets across groups</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>mice_fit <span class="ot">&lt;-</span> <span class="fu">rbind</span>(mice_Old_fit, mice_New_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>mice_fit <span class="ot">&lt;-</span> <span class="fu">rbind</span>(mice_Old_fit, mice_New_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Next, rather then simply fitting the analysis model to each imputed data sets and summarise the output, as it would be the normal approach from statistical analyses, it is necessary to specify how the bootstrapping technique should be combined with MICE in order to generate bootstrapped and multiply-imputed estimates for the CE quantities of interest, i.e.&nbsp;mean incrementals for QLAYs and Total costs between groups. As I briefly mention at the end of my last post, combination of MI with bootstrapping or other non-standard analysis methods can be very challenging and clear guidelines about the performance of the methods when combined together is still lacking <span class="citation" data-cites="schomaker2018bootstrap brand2019combining">(<a href="#ref-schomaker2018bootstrap" role="doc-biblioref">Schomaker and Heumann 2018</a>; <a href="#ref-brand2019combining" role="doc-biblioref">Brand et al. 2019</a>)</span>. In particular, two main distinct combination strategies may be considered:</p>
@@ -419,7 +422,7 @@ window.Quarto = {
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#function and needed packages to generate bootstrap estimates for mean QALY/TC and incremental</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#function and needed packages to generate bootstrap estimates for mean QALY/TC and incremental</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#differences when running a OLS/SUR model after applying MICE to handle missing data</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#note: different ways to combine MI and bootstrapping estimates can be obtained based on the inputs provided</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
@@ -593,14 +596,14 @@ window.Quarto = {
 <span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a>  res_ec_b_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"QALY_boot"</span><span class="ot">=</span>res_e_b_list,<span class="st">"TC_boot"</span><span class="ot">=</span>res_c_b_list,<span class="st">"inputs"</span><span class="ot">=</span>input_list)</span>
 <span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(res_ec_b_list) <span class="ot">&lt;-</span> <span class="st">"bootMICE"</span></span>
 <span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res_ec_b_list)</span>
-<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Next, I show how the above function can be implemented to the generated data to fit either a BM or MB strategy. To avoid a too long computational time and due to the demonstrative purpose of the post, I will fix the number of bootstrap replications to <span class="math inline">\(B=25\)</span>.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#combine MICE with bootstrapping based on OLS/SUR analyses to obtain distributions of statistics of interest </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#combine MICE with bootstrapping based on OLS/SUR analyses to obtain distributions of statistics of interest </span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#such as mean QALY/TC by arm and mean differences between groups</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#get MI and bootstrap results (25 iterations x 5 imputations = 125 replications)</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -646,7 +649,7 @@ window.Quarto = {
 <span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>BM2_res_mu_e_int <span class="ot">&lt;-</span> <span class="fu">c</span>(boot_mi_res<span class="sc">$</span>QALY_boot<span class="sc">$</span>mu_e_int)</span>
 <span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>BM2_res_Delta_c <span class="ot">&lt;-</span> <span class="fu">c</span>(boot_mi_res<span class="sc">$</span>TC_boot<span class="sc">$</span>Delta_c)</span>
 <span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>BM2_res_mu_c_ctr <span class="ot">&lt;-</span> <span class="fu">c</span>(boot_mi_res<span class="sc">$</span>TC_boot<span class="sc">$</span>mu_c_ctr)</span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>BM2_res_mu_c_int <span class="ot">&lt;-</span> <span class="fu">c</span>(boot_mi_res<span class="sc">$</span>TC_boot<span class="sc">$</span>mu_c_int)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>BM2_res_mu_c_int <span class="ot">&lt;-</span> <span class="fu">c</span>(boot_mi_res<span class="sc">$</span>TC_boot<span class="sc">$</span>mu_c_int)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Finally, we can quickly compare the generated incremental quantities <span class="math inline">\(\Delta_e\)</span> distributions under each strategy and aggregation approach, for example using histograms. First, we consider using the averaged <span class="math inline">\(B\)</span> estimates across the <span class="math inline">\(M\)</span> imputations under either MB (red) or BM (blue).</p>
@@ -737,13 +740,14 @@ Schomaker, Michael, and Christian Heumann. 2018. <span>“Bootstrap Inference Wh
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

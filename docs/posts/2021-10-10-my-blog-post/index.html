@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -258,7 +261,7 @@ window.Quarto = {
 <p>Recently I have come across something I found a little odd when performing a statistical analysis of trial-based CEA data and I would like to share here my experience in the hope that anybody may be able to read it (and correct me if I am wrong). It is something related to the implementation of baseline adjustment for utility score data via regression approach.</p>
 <p>To give an idea of the context of the analysis I quickly use some simulated data as an example of a dataset that could be object for this type of analysis. To make things simple, I simulated individual-level utility score data which are measured at baseline (<span class="math inline">\(u_0\)</span>), 6 (<span class="math inline">\(u_1\)</span>) and 12 (<span class="math inline">\(u_12\)</span>) months follow up for two competing intervention groups, say a control (t=0) and an intervention (t=1). Again, to make things super easy I simulated these assuming a multivariate normal distribution with constant variance and no time correlation. Although this is not realistic it only serves the purpose to illustrate the issue I am facing. So let’s simulate the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load and pre-process the simulated dataset</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load and pre-process the simulated dataset</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readstata13)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#wide format</span></span>
@@ -277,7 +280,7 @@ window.Quarto = {
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="ot">&lt;-</span><span class="fu">reshape</span>(data_wide, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"eq5d_1"</span>,<span class="st">"eq5d_2"</span>,<span class="st">"eq5d_3"</span>),</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">direction =</span> <span class="st">"long"</span>,<span class="at">idvar =</span> <span class="st">"id"</span>,<span class="at">sep =</span> <span class="st">"_"</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="sc">$</span>time_u <span class="ot">&lt;-</span> data_long.eq5d<span class="sc">$</span>time</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="ot">&lt;-</span>data_long.eq5d[,<span class="fu">c</span>(<span class="st">"id"</span>,<span class="st">"trt"</span>,<span class="st">"time_u"</span>,<span class="st">"eq5d"</span>,<span class="st">"eq5d0"</span>,<span class="st">"qaly"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data_long.eq5d<span class="ot">&lt;-</span>data_long.eq5d[,<span class="fu">c</span>(<span class="st">"id"</span>,<span class="st">"trt"</span>,<span class="st">"time_u"</span>,<span class="st">"eq5d"</span>,<span class="st">"eq5d0"</span>,<span class="st">"qaly"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, I previously computed individual-level QALYs (<span class="math inline">\(e_i\)</span>) in each group by aggregating the utilities over the duration of the analysis, i.e.&nbsp;1 year, using the AUC formula (see post thumbnail):</p>
 <p><span class="math display">\[
@@ -289,7 +292,7 @@ e_i = \boldsymbol \beta \boldsymbol X_i + \varepsilon_i,
 \]</span></p>
 <p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of regression parameters, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model (including an intercept, trt and <span class="math inline">\(u_{i0}\)</span>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
@@ -300,7 +303,7 @@ e_i = \boldsymbol \beta \boldsymbol X_i + \varepsilon_i,
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ols.cc.wide.qalys<span class="ot">&lt;-</span><span class="fu">lm</span>(qaly <span class="sc">~</span> trtf <span class="sc">+</span> eq5d0,<span class="at">data =</span> data_wide.cc)</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ci_ols.cc_qalys.means<span class="ot">&lt;-</span><span class="fu">emmeans</span>(ols.cc.wide.qalys,<span class="sc">~</span>trtf<span class="sc">+</span> eq5d0)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci_ols.cc_qalys.means)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci_ols.cc_qalys.means)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> trtf eq5d0 emmean     SE  df lower.CL upper.CL
  0    0.718  0.553 0.0152 103    0.523    0.583
@@ -315,7 +318,7 @@ u_{ij} = \boldsymbol \beta \boldsymbol X_i + \omega_i + \varepsilon_{ij},
 \]</span></p>
 <p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of fixed effects, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model. This includes: an intercept; trt; <span class="math inline">\(u_{i0}\)</span> and time, which is often expressed as a dummy-coded variable (with reference time <span class="math inline">\(j=0\)</span>), and the interaction between trt and time. Finally, <span class="math inline">\(\omega_i\)</span> is the random effects term.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform the analysis </span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data_long_cc <span class="ot">&lt;-</span> data_long.eq5d[<span class="sc">!</span><span class="fu">is.na</span>(data_long.eq5d<span class="sc">$</span>qaly),]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data_long_cc<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_cc<span class="sc">$</span>trt)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>data_long_cc<span class="sc">$</span>timef_u <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_long_cc<span class="sc">$</span>time_u)</span>
@@ -327,7 +330,7 @@ u_{ij} = \boldsymbol \beta \boldsymbol X_i + \omega_i + \varepsilon_{ij},
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean QALYs as linear combination of mean utilities</span></span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc.qalys <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em3_u_ml.cc.eq5d,<span class="fu">list</span>(<span class="at">mue1 =</span> <span class="fu">c</span>(<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mue2=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>)))</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>ci.cgm3_u_ml.cc.qalys <span class="ot">&lt;-</span> <span class="fu">confint</span>(cgm3_u_ml.cc.qalys)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df lower.CL upper.CL
  mue1        0.555 0.0126 103    0.530    0.580
@@ -343,13 +346,13 @@ u_{ij} = \boldsymbol \beta \boldsymbol X_i + \omega_i + \varepsilon_{ij},
 \]</span></p>
 <p>where <span class="math inline">\(\boldsymbol \beta\)</span> is the vector of fixed effects, while <span class="math inline">\(\boldsymbol X_i\)</span> is the matrix of predictors in the model. This includes: an intercept; trt; <span class="math inline">\(u_{i0}\)</span> and time, which is often expressed as a dummy-coded variable (with reference time <span class="math inline">\(j=0\)</span>), the interaction between trt and time, and also the interaction between time and <span class="math inline">\(u_{i0}\)</span>. Finally, <span class="math inline">\(\omega_i\)</span> is the random effects term.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc2 <span class="ot">&lt;-</span> <span class="fu">lme</span>(eq5d <span class="sc">~</span> timef_u <span class="sc">*</span> trtf <span class="sc">+</span> timef_u<span class="sc">*</span>eq5d0, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data=</span>data_long_cc, <span class="at">method =</span> <span class="st">"ML"</span>,<span class="at">na.action =</span> na.omit)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc2 <span class="ot">&lt;-</span> <span class="fu">lme</span>(eq5d <span class="sc">~</span> timef_u <span class="sc">*</span> trtf <span class="sc">+</span> timef_u<span class="sc">*</span>eq5d0, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> id, <span class="at">data=</span>data_long_cc, <span class="at">method =</span> <span class="st">"ML"</span>,<span class="at">na.action =</span> na.omit)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean utilities</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>em3_u_ml.cc.eq5d2 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(cgm3_u_ml.cc2,<span class="sc">~</span>timef_u <span class="sc">*</span> trtf <span class="sc">+</span> timef_u<span class="sc">*</span>eq5d0)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#derive mean QALYs as linear combination of mean utilities</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cgm3_u_ml.cc.qalys2 <span class="ot">&lt;-</span> <span class="fu">contrast</span>(em3_u_ml.cc.eq5d2,<span class="fu">list</span>(<span class="at">mue1 =</span> <span class="fu">c</span>(<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mue2=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">13</span><span class="sc">/</span><span class="dv">104</span> <span class="sc">+</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>,<span class="dv">26</span><span class="sc">/</span><span class="dv">104</span>)))</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ci.cgm3_u_ml.cc.qalys2<span class="ot">&lt;-</span><span class="fu">confint</span>(cgm3_u_ml.cc.qalys2)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(ci.cgm3_u_ml.cc.qalys2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> contrast estimate     SE  df lower.CL upper.CL
  mue1        0.553 0.0125 103    0.528    0.578
@@ -416,13 +419,14 @@ Confidence level used: 0.95 </code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

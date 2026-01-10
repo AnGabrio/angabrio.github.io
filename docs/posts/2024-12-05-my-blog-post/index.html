@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -288,7 +291,7 @@ window.Quarto = {
 <p>Throughout this post I will assume that the reader is already familiar with the basic structure of Markov Models and the specific terminology used to denote key components of this approach, including the concepts of <em>transition matrix</em>, <em>transition probability</em>, and <em>cycle</em>. If this is not true, I recommend that you first check some references on the topic or read my previous post about this. I will also consider the same Markov Model example introduced in my previous post, formed by three health states (Well, Sick and Dead), and whose objective is to estimate the expected difference in Costs and QALYs over a period of <span class="math inline">\(12\)</span> cycles, each of <span class="math inline">\(1\)</span> month, between a new Experimental intervention and a Control group.</p>
 <p>For our base-case analysis, let’s assume treatment-specific <span class="math inline">\(3\times3\)</span> transition matrices (<span class="math inline">\(P^{exp},P^{ctr}\)</span>), associating the three health states, and <span class="math inline">\(1\times3\)</span> matrices of initial probabilities (<span class="math inline">\(M^{exp}_0,M^{ctr}_{0}\)</span>). These transition matrices are first used to update the initial probabilities at the end of the first cycle, and then iteratively used to generate updated matrices at each follow-up cycle. As for the health economic outcomes, let’s assume (monthly) utility values for each health state in the model: <span class="math inline">\(u^{well}=0.78\)</span>, <span class="math inline">\(u^{sick}=0.40\)</span>, <span class="math inline">\(u^{dead}=0\)</span>, which are constant across treatments. Conversely, we assume (monthly) costs which are constant across health states but vary between treatment groups: <span class="math inline">\(c_{exp}=954\)</span>, <span class="math inline">\(c^{ctr}=435\)</span>. Let’s set the proportion of patients in each of the health states at the start of the model to be <span class="math inline">\(10000\)</span>, and proceed to calculate the transition matrices and total costs and QALYs associated with both treatment groups over <span class="math inline">\(12\)</span> months via our base-case Markov Model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initial transition probs by arm</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>tm_exp_init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.45</span>,<span class="fl">0.35</span>,<span class="fl">0.2</span>)</span>
@@ -388,7 +391,7 @@ window.Quarto = {
 <span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a><span class="co">#run the function and get the output</span></span>
 <span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>mm_res <span class="ot">&lt;-</span> <span class="fu">mm_sim</span>(<span class="at">tm_exp_init =</span> tm_exp_init, <span class="at">tm_ctr_init =</span> tm_ctr_init, <span class="at">tm_exp_update =</span> tm_exp_update,</span>
 <span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>       <span class="at">tm_ctr_update =</span> tm_ctr_update, <span class="at">u_well =</span> u_well, <span class="at">u_sick =</span> u_sick, <span class="at">u_dead =</span> u_dead, <span class="at">c_exp =</span> c_exp,</span>
-<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>       <span class="at">c_ctr =</span> c_ctr, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>       <span class="at">c_ctr =</span> c_ctr, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Based on the output of the model, we can retrieve an estimate of the mean costs and QALYs (and the group differences) over the <span class="math inline">\(12\)</span> months period (without discounting) by taking the sum across all QALYs and Costs expected values accrued at each cycle. These are summarised and presented in <a href="#tbl-base-mm" class="quarto-xref">Table&nbsp;1</a>.</p>
 <div class="cell">
@@ -436,7 +439,7 @@ Table&nbsp;1: Base-case results from Markov Model
 <p>There are many different types of sensitivity analysis that can be implemented to assess the results of a Markov Model, which are mainly distinguished based the approach used to vary the values of the inputs. One of the simplest form of sensitivity analysis is called <em>One-Way sensitivity analysis</em> and corresponds in varying the values of one input at a time, typically over a pre-defined grid of values (e.g.&nbsp;<span class="math inline">\(2\)</span>), and re-run the model based on the newly updated value for that specific input. This is then repeated for each value chosen for each model input to generate the same type of output of the base-case model but replicated for each new value selected for each model input varied. A slightly more complex approach takes the name of <em>Two-Way sensitivity analysis</em>, where the same procedure of the One-Way approach is used with the difference at each time the model is re-run the value of not one but two model inputs are changed simultaneously when generating the updated results. This is then repeated for each pair of inputs across the range of values that need to be assessed for each model input.</p>
 <p>Although useful, these types of sensitivity analyses, called “deterministic”, are limited in that they can only explore the impact of variation of the input values conditional on all or most of the other input-values remaining constant, which may not be a realistic approach when assessing the impact of uncertainty on multiple model inputs. To overcome these limitations, a different approach called <em>probabilistic sensitivity analysis</em> (PSA) is used to quantify the impact associated with the simultaneous variation of all model inputs on the results. This is typically achieved through the use of probability distributions which allow to parameterise in a convenient way the level of uncertainty associated with each input in the model. For example, we may want to use a Uniform distribution to express our level of uncertainty around the transition probability value between the health state Well and Sick in each treatment arm, centering these distributions around the assumed value in the determinsitic analysis as a good starting point. We can do the same with other model parameters, such as expected QALYs and costs associated with each health state/treatment, taking care that appropriate probability distributions are used to express our level of uncertainty around specific parameter values. Let’s now try to replicate the model run before using these distributions to account for this sort of uncertainty.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of model replications to account for parameter uncertainty</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of model replications to account for parameter uncertainty</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">500</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#set up initial values for the model</span></span>
@@ -599,7 +602,7 @@ Table&nbsp;1: Base-case results from Markov Model
 <span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="co">#run the function and get the output</span></span>
 <span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2345</span>) <span class="co">#set rng seed for replicability</span></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>mm_res_psa <span class="ot">&lt;-</span> <span class="fu">mm_sim_psa</span>(<span class="at">tm_exp_init_mu =</span> tm_exp_init_mu, <span class="at">tm_ctr_init_mu =</span> tm_ctr_init_mu, <span class="at">tm_exp_update_mu =</span> tm_exp_update_mu, <span class="at">tm_ctr_update_mu =</span> tm_ctr_update_mu, <span class="at">u_well_mu =</span> u_well_mu, <span class="at">u_sick_mu =</span> u_sick_mu, <span class="at">u_dead_mu =</span> u_dead_mu, <span class="at">c_exp_mu =</span> c_exp_mu, <span class="at">c_ctr_mu =</span> c_ctr_mu, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat, <span class="at">S=</span>S)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>mm_res_psa <span class="ot">&lt;-</span> <span class="fu">mm_sim_psa</span>(<span class="at">tm_exp_init_mu =</span> tm_exp_init_mu, <span class="at">tm_ctr_init_mu =</span> tm_ctr_init_mu, <span class="at">tm_exp_update_mu =</span> tm_exp_update_mu, <span class="at">tm_ctr_update_mu =</span> tm_ctr_update_mu, <span class="at">u_well_mu =</span> u_well_mu, <span class="at">u_sick_mu =</span> u_sick_mu, <span class="at">u_dead_mu =</span> u_dead_mu, <span class="at">c_exp_mu =</span> c_exp_mu, <span class="at">c_ctr_mu =</span> c_ctr_mu, <span class="at">n_cycle =</span> n_cycle, <span class="at">n_pat =</span> n_pat, <span class="at">S=</span>S)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can now inspect the results of the model based on a total of <span class="math inline">\(S=500\)</span> iterations, i.e.&nbsp;a random value for each model input was generated 500 times from their assumed probability distribution and used in the model to generate the output as in the base-case analysis. This implies that for each output obtained in the base-case, we now obtain a set of values or distribution of values that we can take a look at. By doing so, we are effectively quantifying the degree of uncertainty surrounding each model input. For example, we can inspect the distribution of the expected costs and QALY differences in between the Experimental and Control intervention through histograms, shown in <a href="#fig-hist-ec-psa" class="quarto-xref">Figure&nbsp;1</a>.</p>
 <div class="cell">
@@ -618,11 +621,11 @@ Figure&nbsp;1: Histograms of the distribution of expected costs and QALY differe
 </div>
 <p>We can now replicate the approach used for the base-case model by summarising the results in terms of common health economic measures, such as ICER and NB, assuming a willingness to pay parameter of 2^{4} for decision-making purposes.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create data frame</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create data frame</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mu_res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(mu_c_exp_post,mu_c_ctr_post,mu_e_exp_post,mu_e_ctr_post)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for costs and QALYs by arm across simulations</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mu_res) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mu_res) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> mu_c_exp_post  mu_c_ctr_post    mu_e_exp_post    mu_e_ctr_post   
  Min.   : 965   Min.   : 69.23   Min.   :0.6043   Min.   :0.1755  
@@ -632,16 +635,16 @@ Figure&nbsp;1: Histograms of the distribution of expected costs and QALY differe
  3rd Qu.:1990   3rd Qu.:290.33   3rd Qu.:1.0494   3rd Qu.:0.3193  
  Max.   :2557   Max.   :561.54   Max.   :1.4197   Max.   :0.4490  </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> mu_c_diff_post<span class="sc">/</span>mu_e_diff_post</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> mu_c_diff_post<span class="sc">/</span>mu_e_diff_post</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>mu_e_diff_post <span class="sc">-</span> mu_c_diff_post</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for ICER/NB across simulations</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ICER) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ICER) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    1099    1969    2350    2397    2751    4276 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(NB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(NB)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    6199    9984   11609   11697   13231   18915 </code></pre>
@@ -649,7 +652,7 @@ Figure&nbsp;1: Histograms of the distribution of expected costs and QALY differe
 </div>
 <p>Finally, another typical source of uncertainty in these analyses is around the value of the acceptance threshold itself, as in many cases governments’ decisions are always characterised by some degree of uncertainty around what value for <span class="math inline">\(K\)</span> to use. Often this is quantified by computing the above probability of cost-effectiveness for a range of values of <span class="math inline">\(K\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#range of values to consider for K</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#range of values to consider for K</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>k_value <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">1000</span>, <span class="at">to =</span> <span class="dv">20000</span>, <span class="at">by =</span> <span class="dv">50</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>n_kval <span class="ot">&lt;-</span> <span class="fu">length</span>(k_value)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>NB_k <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="at">nrow =</span> S, <span class="at">ncol =</span> n_kval)</span>
@@ -661,7 +664,7 @@ Figure&nbsp;1: Histograms of the distribution of expected costs and QALY differe
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  NB_k[s,k] <span class="ot">&lt;-</span> k_value[k]<span class="sc">*</span>mu_e_diff_post[s] <span class="sc">-</span> mu_c_diff_post[s]</span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  p_CE_nb_k[k] <span class="ot">&lt;-</span> <span class="fu">sum</span>(NB_k[,k]<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">/</span>S</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and then plot the results in <a href="#fig-pce-mm" class="quarto-xref">Figure&nbsp;2</a> to show what is known as the cost-effectiveness acceptability curve (CEAC), showing how the probability of cost-effectiveness changes as the value of <span class="math inline">\(K\)</span> is varied.</p>
 <div class="cell">
@@ -740,13 +743,14 @@ Khan, Iftekhar. 2015. <em>Design &amp; Analysis of Clinical Trials for Economic 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

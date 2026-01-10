@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -90,14 +90,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -140,7 +141,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -165,6 +166,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -294,7 +297,7 @@ window.Quarto = {
 </ol>
 <p>Now, the objective of decision trees is to estimate the total costs and benefits (in this case measured by QALYs) for the target patient population and the treatments involved so to be able to compare the two alternative options in terms of their total expected costs and benefits generated using standardised health economic measures, e.g.&nbsp;ICER or Net Benefit. For our simple case, we can calculate this in <code>R</code> for an hypothetical patient population cohort of, say, <span class="math inline">\(n=100000\)</span> subjects and using as model inputs the information detailed before for each branch of the decision tree:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of individuals in cohort</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of individuals in cohort</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100000</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#set model inputs</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_a <span class="ot">&lt;-</span> n<span class="sc">/</span><span class="dv">2</span>; n_b <span class="ot">&lt;-</span> n<span class="sc">-</span>n_a</span>
@@ -333,7 +336,7 @@ window.Quarto = {
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>dt_model <span class="ot">&lt;-</span> <span class="fu">dectree</span>(<span class="at">n=</span><span class="dv">100000</span>, <span class="at">p_a=</span><span class="fl">0.5</span>, <span class="at">p_b=</span><span class="fl">0.5</span>, <span class="at">C_a=</span><span class="dv">1000</span>, <span class="at">C_b=</span><span class="dv">500</span>, <span class="at">E_a1=</span><span class="fl">0.9</span>, <span class="at">E_a2=</span><span class="fl">0.6</span>, <span class="at">E_b1=</span><span class="fl">0.8</span>, <span class="at">E_b2=</span><span class="fl">0.6</span>, <span class="at">p_a1=</span><span class="fl">0.6</span>, <span class="at">p_a2=</span><span class="fl">0.4</span>, <span class="at">p_b1=</span><span class="fl">0.3</span>, <span class="at">p_b2=</span><span class="fl">0.7</span>)</span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">#print</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>dt_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>dt_model</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Cost
 $Cost$A
@@ -353,21 +356,21 @@ $QALYs$B
 </div>
 <p>As we can see, the model produced as results the total costs and QALYs associated with each treatment arm assuming an initial population cohort size of 100000 and the other model inputs that we provided. We can then derive the average outcomes per treatment arm by dividing the costs and QALYs by the number of individuals assigned to each arm within the cohort, that is:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mu_cA <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>Cost<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mu_cA <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>Cost<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mu_cB <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>Cost<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mu_eA <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>QALYs<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>mu_eB <span class="ot">&lt;-</span> dt_model<span class="sc">$</span>QALYs<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#avg costs and QALYs in arm A</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>mu_cA; mu_eA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>mu_cA; mu_eA</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1000</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.78</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#avg costs and QALYs in arm B</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mu_cB; mu_eB</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#avg costs and QALYs in arm B</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mu_cB; mu_eB</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 500</code></pre>
 </div>
@@ -377,9 +380,9 @@ $QALYs$B
 </div>
 <p>Using these summarises, we can compute standardised measures of cost-effectiveness when comparing treatment A and B, such as the ICER and the Net Benefit (NB), after we make an assumption about a plausible value for the decision-maker preferences expressed in terms of a decision threshold value, say <span class="math inline">\(K=10000\)</span> in our case.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> (mu_cA <span class="sc">-</span> mu_cB)<span class="sc">/</span>(mu_eA<span class="sc">-</span>mu_eB)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>(mu_eA<span class="sc">-</span>mu_eB) <span class="sc">-</span> (mu_cA <span class="sc">-</span> mu_cB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>(mu_eA<span class="sc">-</span>mu_eB) <span class="sc">-</span> (mu_cA <span class="sc">-</span> mu_cB)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Assuming a value of the threshold parameter of 10000, we can see that treatment A seems to be cost-effective compared to B given the value of the ICER or 4166.6666667 (&lt;K) and a value of the Net Benefit of 700 (&gt;0). Note that for simplicity here I have not considered the need to account for time discount or price inflation which instead may be needed, especially when trying to predict the generation of outcomes in the long term.</p>
 </section>
@@ -387,7 +390,7 @@ $QALYs$B
 <h2 class="anchored" data-anchor-id="what-about-uncertainty">What about uncertainty?</h2>
 <p>Everything seems so easy right? well this is in reality only part of the story since when looking at the values of point statistics such as ICER and NB we are implicitly assuming that there is no uncertainty about these derived values, i.e.&nbsp;everything is obtained in a deterministic way in the model without any source of uncertainty. In reality, decision-makers will never make a decision about reimbursement on the basis of such strong assumptions as the impact of uncertainty on the results should be at least partially captured from the model. This is where <em>uncertainty analysis</em> plays a key role in any type of health economic analysis since it is realistic to assume that there are many possible sources of uncertainty that may affect our results. For example, we may not be so sure about the actual individual implementation/delivery costs per treatment, the actual QALYs associated with presence or absence of relief for each treatment, or even about the chance of experiencing a relief for someone undergoing a given treatment. More realistically, we can use the inputs provided before about all these scenarios as good indicators around which center our model input values but without assuming their values to be constant and identical for everyone in the cohort. To account for this sort of uncertainty about model input values and quantify their impact on the results, probability distributions are often used as they allow to parameterise in a convenient way the level of uncertainty associated with each input in the model. For example, we may want to use a Uniform distribution to express our level of uncertainty around the probability for a patient to experience pain relief or not in each treatment arm, centering these distributions around the assumed value in the determinsitic analysis as good starting point. We can do the same with other model parameters, such as expected QALYs and costs associated with each treatment, taking care that appropriate probability distributions are used to express our level of uncertainty around specific parameter values. Let’s now try to replicate the model run before using these distributions to account for this sort of uncertainty.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of model replications to account for parameter uncertainty</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#set number of model replications to account for parameter uncertainty</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">500</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#create simple function to "run this model"</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>dectree_prob <span class="ot">&lt;-</span> <span class="cf">function</span>(n, p_a, p_b, C_a_mu, C_a_sigma, C_b_mu, C_b_sigma, </span>
@@ -438,7 +441,7 @@ $QALYs$B
 <span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>dt_model_prob <span class="ot">&lt;-</span> <span class="fu">dectree_prob</span>(<span class="at">n=</span><span class="dv">100000</span>, <span class="at">p_a=</span><span class="fl">0.5</span>, <span class="at">p_b=</span><span class="fl">0.5</span>, <span class="at">C_a_mu=</span><span class="dv">1000</span>, <span class="at">C_a_sigma=</span><span class="dv">200</span>, <span class="at">C_b_mu=</span><span class="dv">500</span>, <span class="at">C_b_sigma=</span><span class="dv">150</span>, <span class="at">E_a1_mu=</span><span class="fl">0.9</span>, <span class="at">E_a1_sigma=</span><span class="fl">0.15</span>, <span class="at">E_a2_mu=</span><span class="fl">0.6</span>, <span class="at">E_a2_sigma=</span><span class="fl">0.1</span>, <span class="at">E_b1_mu=</span><span class="fl">0.8</span>, <span class="at">E_b1_sigma=</span><span class="fl">0.15</span>, <span class="at">E_b2_mu=</span><span class="fl">0.6</span>, <span class="at">E_b2_sigma=</span><span class="fl">0.1</span>,<span class="at">p_a1_low=</span><span class="fl">0.35</span>, <span class="at">p_a1_up=</span><span class="fl">0.45</span>, <span class="at">p_b1_low=</span><span class="fl">0.25</span>, <span class="at">p_b1_up=</span><span class="fl">0.35</span>, <span class="at">S=</span>S)</span>
 <span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="co">#show first 10 simulations for total costs and QALY values per arm</span></span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>Cost, head, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>Cost, head, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$A
  [1] 37915244 51911020 68692051 40656708 39710123 45713125 56910465 38386590
@@ -448,7 +451,7 @@ $B
  [1] 12404090 27321412 14019824 25987217 35368975 21888540 19007477 21374435
  [9] 17313133 25258554</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>QALYs, head, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(dt_model_prob<span class="sc">$</span>QALYs, head, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$A
  [1] 35783.21 40150.06 37249.58 39033.29 37068.99 43786.33 29538.04 35267.35
@@ -462,7 +465,7 @@ $B
 <p>We have changed the type of inputs to be provided to the model since now we are using probability distributions to generate input values, which require the need to specify the assumed values associated with the parameters indexing such distributions. For example, we require now the specification of mean and standard deviation for cost inputs per treatment arm (modelled using Gamma distributions), mean and standard deviation for QALY inputs per treatment arm per type of outcome, i.e.&nbsp;pain relief or no relief (modelled using Beta distributions), and lower and upper bounds for the probability of experiencing pain relief in each arm (modelled using Uniform distributions). The core structure of the model remains the same but the need to account for paraemter uncertainty requires the generation of different outcomes depending on the specific values generated by the assumed distributions every time a new “random sample” is drawn from such distributions. The combination of these generated values put together will allow to represent and quantify the uncertainty surrounding the possible outcomes associated with each treatment. In this simple case, we choose a number of replications/simulations equal to 500 but, in general, larger values are typically required to ensure that results are robust to slight variations of the input parameters.</p>
 <p>We can now replicate the approach used for the deterministic model by summarising the results in terms of common health economic measures, such as ICER and NB, assuming a acceptance threshold parameter of 10000 for decision-making purposes.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain mean outcome values per treatment per simulation</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain mean outcome values per treatment per simulation</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mu_cA <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>Cost<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_cB <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>Cost<span class="sc">$</span>B<span class="sc">/</span>n_b</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>mu_eA <span class="ot">&lt;-</span> dt_model_prob<span class="sc">$</span>QALYs<span class="sc">$</span>A<span class="sc">/</span>n_a</span>
@@ -472,7 +475,7 @@ $B
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>mu_res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(mu_cA,mu_cB,mu_eA,mu_eB)</span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for costs and QALYs by arm across simulations</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mu_res) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mu_res) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     mu_cA            mu_cB            mu_eA            mu_eB       
  Min.   : 490.4   Min.   : 202.9   Min.   :0.3749   Min.   :0.3903  
@@ -482,16 +485,16 @@ $B
  3rd Qu.:1127.5   3rd Qu.: 584.1   3rd Qu.:0.7817   3rd Qu.:0.7236  
  Max.   :1565.7   Max.   :1051.5   Max.   :0.9139   Max.   :0.8721  </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> (mu_cA <span class="sc">-</span> mu_cB)<span class="sc">/</span>(mu_eA <span class="sc">-</span> mu_eB)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> (mu_cA <span class="sc">-</span> mu_cB)<span class="sc">/</span>(mu_eA <span class="sc">-</span> mu_eB)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> K<span class="sc">*</span>(mu_eA<span class="sc">-</span>mu_eB) <span class="sc">-</span> (mu_cA <span class="sc">-</span> mu_cB)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#summary statistics for ICER/NB across simulations</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ICER) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ICER) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 -4077649    -2351     2888   -14177     6623   807046 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(NB)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(NB)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 -4096.7  -597.5   124.3   121.1   988.6  3701.5 </code></pre>
@@ -499,17 +502,17 @@ $B
 </div>
 <p>Thanks to the implementation of probability distributions to express the degree of uncertainty around the model inputs, we are now able to produce summary statistics around standard measures of cost-effectiveness, such as ICER and NB. In addition, given <span class="math inline">\(K=10000\)</span>, we can also quantify the probability <span class="math inline">\(p_{AB}\)</span> that treatment A is cost-effective compared to B: using the NB distribution, this is represented by the proportion of NB values that are above <span class="math inline">\(0\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#prob of CE at K=10000</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#prob of CE at K=10000</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>pCE_nb <span class="ot">&lt;-</span> <span class="fu">sum</span>(NB<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">/</span>S </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>pCE_nb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>pCE_nb</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.574</code></pre>
 </div>
 </div>
 <p>Finally, another typical source of uncertainty in these analyses is around the value of the acceptance threshold itself, as in many cases governments’ decisions are always characterised by some degree of uncertainty around what value for <span class="math inline">\(K\)</span> to use. Often this is quantified by computing the above probability of cost-effectiveness for a range of values of <span class="math inline">\(K\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#range of values to consider for K</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#range of values to consider for K</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>k_value <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">1000</span>, <span class="at">to =</span> <span class="dv">20000</span>, <span class="at">by =</span> <span class="dv">50</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>n_kval <span class="ot">&lt;-</span> <span class="fu">length</span>(k_value)</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>NB_k <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="at">nrow =</span> S, <span class="at">ncol =</span> n_kval)</span>
@@ -521,7 +524,7 @@ $B
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  NB_k[s,k] <span class="ot">&lt;-</span> k_value[k]<span class="sc">*</span>(mu_eA[s] <span class="sc">-</span> mu_eB[s]) <span class="sc">-</span> (mu_cA[s] <span class="sc">-</span> mu_cB[s])</span>
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  p_CE_nb_k[k] <span class="ot">&lt;-</span> <span class="fu">sum</span>(NB_k[,k]<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">/</span>S</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>and then plot the results in <a href="#fig-pce" class="quarto-xref">Figure&nbsp;1</a> to show what is known as the cost-effectiveness acceptability curve (CEAC), showing how the probability of cost-effectiveness changes as the value of <span class="math inline">\(K\)</span> is varied.</p>
 <div class="cell">
@@ -600,13 +603,14 @@ Khan, Iftekhar. 2015. <em>Design &amp; Analysis of Clinical Trials for Economic 
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

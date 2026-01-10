@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -365,7 +368,7 @@ y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\alpha\gamma)_{jk} + \epsilon_{
 <h2 class="anchored" data-anchor-id="data-generation">Data generation</h2>
 <p>Imagine we has designed an experiment in which we intend to measure a response (y) to one of treatments (three levels; “a1”, “a2” and “a3”). Unfortunately, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability you decide to apply a design (RCB) in which each of the treatments within each of 35 blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nTreat <span class="ot">&lt;-</span> <span class="dv">3</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>nBlock <span class="ot">&lt;-</span> <span class="dv">35</span></span>
@@ -397,7 +400,7 @@ y_{ijk} = \mu + \beta_i + \alpha_j + \gamma_k + (\alpha\gamma)_{jk} + \epsilon_{
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="do">## and standard deviations of 5</span></span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,lin.pred,sigma)</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>data.rcb <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y, <span class="fu">expand.grid</span>(<span class="at">A=</span>A, <span class="at">Block=</span>Block))</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb)  <span class="co">#print out the first six rows of the data set</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA          y A Block
 NA 1 45.80853 1     1
@@ -413,7 +416,7 @@ NA 6 91.77487 3     2</code></pre>
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
 <p><strong>Normality and Homogeneity of variance</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>A, data.rcb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>A, data.rcb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -433,11 +436,11 @@ NA 6 91.77487 3     2</code></pre>
 </ul>
 <p><strong>Block by within-Block interaction</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rcb, <span class="fu">interaction.plot</span>(A,Block,y))</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#OR with ggplot</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -445,8 +448,8 @@ NA 6 91.77487 3     2</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rcb, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>A, <span class="at">group=</span>Block,<span class="at">color=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rcb, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>A, <span class="at">group=</span>Block,<span class="at">color=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -454,7 +457,7 @@ NA 6 91.77487 3     2</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -468,17 +471,17 @@ NA Block
 NA A                                    
 NA Tukey test   -1.4163           0.1567</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># within the car package</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>A, data.rcb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA       Test     Pvalue 
 NA -1.4163343  0.1566776</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># asbio package</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(asbio)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rcb,<span class="fu">tukey.add.test</span>(y,A,Block))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rcb,<span class="fu">tukey.add.test</span>(y,A,Block))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA Tukey's one df test for additivity 
@@ -521,7 +524,7 @@ y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}= \beta_0 + \beta_i + \gamma_
 <section id="full-means-parameterisation" class="level2">
 <h2 class="anchored" data-anchor-id="full-means-parameterisation">Full means parameterisation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rstanString<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rstanString<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nA;</span></span>
@@ -556,31 +559,31 @@ y_{ijk} \sim N(\mu_{ij}, \sigma^2), \;\;\; \mu_{ij}= \beta_0 + \beta_i + \gamma_
 <span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString, <span class="at">con =</span> <span class="st">"fullModel.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString, <span class="at">con =</span> <span class="st">"fullModel.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">A=</span><span class="fu">as.numeric</span>(A), <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block)),<span class="at">nA=</span><span class="fu">length</span>(<span class="fu">levels</span>(A))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">A=</span><span class="fu">as.numeric</span>(A), <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block)),<span class="at">nA=</span><span class="fu">length</span>(<span class="fu">levels</span>(A))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Start the <code>Stan</code> model (check the model, load data into the model, specify the number of chains and compile the model). Load the <code>rstan</code> package.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"fullModel.stan"</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"fullModel.stan"</span>, </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -633,7 +636,7 @@ NA Chain 2:                0.105 seconds (Sampling)
 NA Chain 2:                0.342 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.c, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.c, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
@@ -651,8 +654,8 @@ NA For each parameter, n_eff is a crude measure of effective sample size,
 NA and Rhat is the potential scale reduction factor on split chains (at 
 NA convergence, Rhat=1).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.c))</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.c.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.c.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.c))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.c.df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA    alpha.1  alpha.2  alpha.3    sigma  sigma_B      lp__
 NA 1 40.92583 67.75321 79.80043 4.655019 10.81956 -319.5226
@@ -662,7 +665,7 @@ NA 4 40.46224 68.34375 80.72886 4.690904 11.07078 -317.4154
 NA 5 38.51851 66.61851 79.33672 4.498886 11.73147 -318.8312
 NA 6 41.81091 69.41454 82.56791 6.062546  9.78244 -322.8856</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.c<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.c)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.c<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.c)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>MCMCsum <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
@@ -670,7 +673,7 @@ NA 6 41.81091 69.41454 82.56791 6.062546  9.78244 -322.8856</code></pre>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x)),<span class="fu">HPDinterval</span>(<span class="fu">as.mcmc</span>(x),<span class="at">p=</span><span class="fl">0.5</span>))</span>
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.c.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.c.df),<span class="dv">2</span>,MCMCsum)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
 NA 1 alpha.1   41.535980   32.655709   40.149101   41.535980   42.944616
@@ -692,7 +695,7 @@ NA 6 -307.824839 -333.210469 -312.359491 -325.688234 -318.38516</code></pre>
 <section id="full-effect-parameterisation" class="level2">
 <h2 class="anchored" data-anchor-id="full-effect-parameterisation">Full effect parameterisation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rstan2String<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rstan2String<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nB;</span></span>
@@ -732,29 +735,29 @@ NA 6 -307.824839 -333.210469 -312.359491 -325.688234 -318.38516</code></pre>
 <span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstan2String, <span class="at">con =</span> <span class="st">"full2Model.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstan2String, <span class="at">con =</span> <span class="st">"full2Model.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data.rcb<span class="sc">$</span>A<span class="sc">==</span><span class="st">'2'</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data.rcb<span class="sc">$</span>A<span class="sc">==</span><span class="st">'2'</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>A3 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data.rcb<span class="sc">$</span>A<span class="sc">==</span><span class="st">'3'</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">A2=</span>A2, <span class="at">A3=</span>A3, <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>,<span class="st">"alpha2"</span>,<span class="st">"alpha3"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>,<span class="st">"alpha2"</span>,<span class="st">"alpha3"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"full2Model.stan"</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"full2Model.stan"</span>, </span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -807,7 +810,7 @@ NA Chain 2:                0.175 seconds (Sampling)
 NA Chain 2:                0.62 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.f, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>, <span class="st">"alpha2"</span>, <span class="st">"alpha3"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.f, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"alpha0"</span>, <span class="st">"alpha2"</span>, <span class="st">"alpha3"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
@@ -825,8 +828,8 @@ NA For each parameter, n_eff is a crude measure of effective sample size,
 NA and Rhat is the potential scale reduction factor on split chains (at 
 NA convergence, Rhat=1).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.f))</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.f.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.f.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.f))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.f.df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA     alpha0   alpha2   alpha3    sigma  sigma_B      lp__
 NA 1 39.95904 28.82693 40.37188 5.244175 11.47116 -318.3557
@@ -836,9 +839,9 @@ NA 4 41.14351 30.10751 40.30998 4.690441 13.88115 -325.3576
 NA 5 42.56938 26.98799 39.34253 5.384412 10.29316 -321.9314
 NA 6 40.45307 29.22397 41.05599 5.021199 12.07345 -314.9324</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.f<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.f)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.f<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.f)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.f.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.f.df),<span class="dv">2</span>,MCMCsum)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
 NA 1  alpha0   41.698390   34.473108   40.246925   41.698390   43.235888
@@ -860,7 +863,7 @@ NA 6 -306.630367 -332.364491 -310.979729 -323.592133 -316.356397</code></pre>
 <section id="matrix-parameterisation" class="level2">
 <h2 class="anchored" data-anchor-id="matrix-parameterisation">Matrix parameterisation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
 <span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
@@ -897,29 +900,29 @@ NA 6 -306.630367 -332.364491 -310.979729 -323.592133 -316.356397</code></pre>
 <span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString2, <span class="at">con =</span> <span class="st">"matrixModel.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(rstanString2, <span class="at">con =</span> <span class="st">"matrixModel.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Arrange the data as a list (as required by <code>Stan</code>). As input, <code>Stan</code> will need to be supplied with: the response variable, the predictor matrix, the number of predictors, the total number of observed items. This all needs to be contained within a list object. We will create two data lists, one for each of the hypotheses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, <span class="at">data=</span>data.rcb)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>Xmat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>A, <span class="at">data=</span>data.rcb)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>data.rcb.list <span class="ot">&lt;-</span> <span class="fu">with</span>(data.rcb, <span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>Xmat, <span class="at">nX=</span><span class="fu">ncol</span>(Xmat),</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">B=</span><span class="fu">as.numeric</span>(Block),</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n=</span><span class="fu">nrow</span>(data.rcb), <span class="at">nB=</span><span class="fu">length</span>(<span class="fu">levels</span>(Block))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"beta"</span>,<span class="st">"sigma"</span>,<span class="st">"sigma_B"</span>)</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> burnInSteps<span class="sc">+</span><span class="fu">ceiling</span>((numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now run the <code>Stan</code> code via the <code>rstan</code> interface.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"matrixModel.stan"</span>, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rcb.list, <span class="at">file =</span> <span class="st">"matrixModel.stan"</span>, </span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -972,7 +975,7 @@ NA Chain 2:                0.127 seconds (Sampling)
 NA Chain 2:                0.465 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.d, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rcb.rstan.d, <span class="at">par =</span> <span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>, <span class="st">"sigma_B"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
@@ -990,8 +993,8 @@ NA For each parameter, n_eff is a crude measure of effective sample size,
 NA and Rhat is the potential scale reduction factor on split chains (at 
 NA convergence, Rhat=1).</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.d))</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.d.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>data.rcb.rstan.d.df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">extract</span>(data.rcb.rstan.d))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rcb.rstan.d.df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA     beta.1   beta.2   beta.3    sigma   sigma_B      lp__
 NA 1 43.53750 26.19984 38.88439 4.383973 11.909139 -311.6449
@@ -1001,9 +1004,9 @@ NA 4 40.53589 28.77436 41.33340 4.601260  9.623768 -316.7945
 NA 5 39.19210 28.78798 41.84681 4.408715 12.655509 -313.2638
 NA 6 41.09020 28.31770 40.18192 4.504707 11.065015 -311.0851</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.d<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.d)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>data.rcb.mcmc.d<span class="ot">&lt;-</span>rstan<span class="sc">:::</span><span class="fu">as.mcmc.list.stanfit</span>(data.rcb.rstan.d)</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.d.df),<span class="dv">2</span>,MCMCsum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>plyr<span class="sc">:::</span><span class="fu">adply</span>(<span class="fu">as.matrix</span>(data.rcb.rstan.d.df),<span class="dv">2</span>,MCMCsum)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA        X1      Median         X0.        X25.        X50.        X75.
 NA 1  beta.1   41.758141   33.279797   40.306435   41.758141   43.178469
@@ -1029,7 +1032,7 @@ NA 6 -306.91630 -332.294151 -311.520232 -324.167208 -316.967283</code></pre>
 <h2 class="anchored" data-anchor-id="data-generation-1">Data generation</h2>
 <p>Imagine now that we has designed an experiment to investigate the effects of a continuous predictor (<span class="math inline">\(x\)</span>, for example time) on a response (<span class="math inline">\(y\)</span>). Again, the system that we intend to sample is spatially heterogeneous and thus will add a great deal of noise to the data that will make it difficult to detect a signal (impact of treatment). Thus in an attempt to constrain this variability, we again decide to apply a design (RCB) in which each of the levels of <span class="math inline">\(X\)</span> (such as time) treatments within each of <span class="math inline">\(35\)</span> blocks dispersed randomly throughout the landscape. As this section is mainly about the generation of artificial data (and not specifically about what to do with the data), understanding the actual details are optional and can be safely skipped.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>slope <span class="ot">&lt;-</span> <span class="dv">30</span></span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>intercept <span class="ot">&lt;-</span> <span class="dv">200</span></span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>nBlock <span class="ot">&lt;-</span> <span class="dv">35</span></span>
@@ -1074,7 +1077,7 @@ NA 6 -306.91630 -332.294151 -311.520232 -324.167208 -316.967283</code></pre>
 <span id="cb46-43"><a href="#cb46-43" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb46-44"><a href="#cb46-44" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> lin.pred <span class="sc">+</span> eps</span>
 <span id="cb46-45"><a href="#cb46-45" aria-hidden="true" tabindex="-1"></a>data.rm <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y, dt)</span>
-<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rm)  <span class="co">#print out the first six rows of the data set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data.rm)  <span class="co">#print out the first six rows of the data set</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA          y Time Block
 NA 1 282.1142    1     1
@@ -1084,7 +1087,7 @@ NA 4 285.8709    4     1
 NA 5 336.6390    5     1
 NA 6 333.5961    6     1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time)) <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>Block)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time)) <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>Block)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1098,7 +1101,7 @@ NA 6 333.5961    6     1</code></pre>
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis-1">Exploratory data analysis</h2>
 <p><strong>Normality and Homogeneity of variance</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Time, data.rm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(y<span class="sc">~</span>Time, data.rm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1106,7 +1109,7 @@ NA 6 333.5961    6     1</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span><span class="fu">factor</span>(Time))) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span><span class="fu">factor</span>(Time))) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1126,7 +1129,7 @@ NA 6 333.5961    6     1</code></pre>
 </ul>
 <p><strong>Block by within-Block interaction</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm, <span class="fu">interaction.plot</span>(Time,Block,y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm, <span class="fu">interaction.plot</span>(Time,Block,y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1134,8 +1137,8 @@ NA 6 333.5961    6     1</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time, <span class="at">color=</span>Block, <span class="at">group=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data.rm, <span class="fu">aes</span>(<span class="at">y=</span>y, <span class="at">x=</span>Time, <span class="at">color=</span>Block, <span class="at">group=</span>Block)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1143,7 +1146,7 @@ NA 6 333.5961    6     1</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1157,16 +1160,16 @@ NA Block
 NA Time         -0.7274           0.4675
 NA Tukey test   -0.9809           0.3267</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the Tukey's non-additivity test by itself can be obtained via an internal function</span></span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="co"># within the car package</span></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>car<span class="sc">:::</span><span class="fu">tukeyNonaddTest</span>(<span class="fu">lm</span>(y<span class="sc">~</span>Block<span class="sc">+</span>Time, data.rm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA       Test     Pvalue 
 NA -0.9808606  0.3266615</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively, there is also a Tukey's non-additivity test within the</span></span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co"># asbio package</span></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm,<span class="fu">tukey.add.test</span>(y,Time,Block))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(data.rm,<span class="fu">tukey.add.test</span>(y,Time,Block))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA Tukey's one df test for additivity 
@@ -1180,9 +1183,9 @@ NA F = 0.3997341   Denom df = 305    p-value = 0.5277003</code></pre>
 <p><strong>Sphericity</strong></p>
 <p>Since the levels of Time cannot be randomly assigned, it is likely that sphericity is not met. We can explore whether there is an auto-correlation patterns in the residuals. Note, as there was only ten time periods, it does not make logical sense to explore lags above <span class="math inline">\(10\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>data.rm.lme <span class="ot">&lt;-</span> <span class="fu">lme</span>(y<span class="sc">~</span>Time, <span class="at">random=</span><span class="sc">~</span><span class="dv">1</span><span class="sc">|</span>Block, <span class="at">data=</span>data.rm)</span>
-<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(<span class="fu">resid</span>(data.rm.lme), <span class="at">lag=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(<span class="fu">resid</span>(data.rm.lme), <span class="at">lag=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1200,7 +1203,7 @@ NA F = 0.3997341   Denom df = 305    p-value = 0.5277003</code></pre>
 <section id="matrix-parameterisation-1" class="level2">
 <h2 class="anchored" data-anchor-id="matrix-parameterisation-1">Matrix parameterisation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>rstanString2<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
@@ -1253,7 +1256,7 @@ NA F = 0.3997341   Denom df = 305    p-value = 0.5277003</code></pre>
 <span id="cb60-51"><a href="#cb60-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-52"><a href="#cb60-52" aria-hidden="true" tabindex="-1"></a>data.rm.rstan.d  <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rm.list, <span class="at">file =</span> <span class="st">"matrixModel2.stan"</span>, </span>
 <span id="cb60-53"><a href="#cb60-53" aria-hidden="true" tabindex="-1"></a>                            <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb60-54"><a href="#cb60-54" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-54"><a href="#cb60-54" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -1306,7 +1309,7 @@ NA Chain 2:                0.283 seconds (Sampling)
 NA Chain 2:                1.493 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
@@ -1326,7 +1329,7 @@ NA convergence, Rhat=1).</code></pre>
 </div>
 <p>Given that Time cannot be randomized, there is likely to be a temporal dependency structure to the data. The above analyses assume no temporal dependency - actually, they assume that the variance-covariance matrix demonstrates a structure known as sphericity. Lets specifically model in a first order autoregressive correlation structure in an attempt to accommodate the expected temporal autocorrelation.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>rstanString3<span class="ot">=</span><span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>rstanString3<span class="ot">=</span><span class="st">"</span></span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="st">data{</span></span>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="st">   int n;</span></span>
 <span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="st">   int nX;</span></span>
@@ -1392,7 +1395,7 @@ NA convergence, Rhat=1).</code></pre>
 <span id="cb64-64"><a href="#cb64-64" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb64-65"><a href="#cb64-65" aria-hidden="true" tabindex="-1"></a>data.rm.rstan.d  <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">data =</span> data.rm.list, <span class="at">file =</span> <span class="st">"matrixModel3.stan"</span>, </span>
 <span id="cb64-66"><a href="#cb64-66" aria-hidden="true" tabindex="-1"></a>                            <span class="at">chains =</span> nChains, <span class="at">pars =</span> params, <span class="at">iter =</span> nIter, </span>
-<span id="cb64-67"><a href="#cb64-67" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-67"><a href="#cb64-67" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warmup =</span> burnInSteps, <span class="at">thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -1445,7 +1448,7 @@ NA Chain 2:                0.483 seconds (Sampling)
 NA Chain 2:                2.826 seconds (Total)
 NA Chain 2:</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>,<span class="st">'ar'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(data.rm.rstan.d , <span class="at">par =</span> <span class="fu">c</span>(<span class="st">'beta'</span>,<span class="st">'sigma'</span>,<span class="st">'sigma_B'</span>,<span class="st">'ar'</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Stan model: anon_model.
 NA 2 chains, each with iter=4500; warmup=3000; thin=1; 
@@ -1532,13 +1535,14 @@ Stan Development Team. 2018. <span>“<span>RStan</span>: The <span>R</span> Int
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -321,7 +324,7 @@ window.Quarto = {
 <p>Unlike other Bayesian software, such as <code>JAGS</code> or <code>OpenBUGS</code>, it is not required to separately install the program and the corresponding frontend <code>R</code> package. Indeed, installing the <code>R</code> package <code>rstan</code> will automatically install <code>Stan</code> on your machine. However, you will also need to make sure to having installed on your pc a <code>C++</code> compiler which is used by <code>rstan</code> to fit the models. Under a Windows OS, for example, this can be done by installing <code>Rtools</code>, a collection of resources for building packages for <code>R</code>, which is freely available from the web <a href="https://cran.r-project.org/bin/windows/Rtools/">repository</a>.</p>
 <p>Next, install the package <code>rstan</code> from within <code>R</code> or <code>Rstudio</code>, via the package installer or by typing in the command line</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"rstan"</span>, <span class="at">dependencies =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"rstan"</span>, <span class="at">dependencies =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>dependencies = TRUE</code> option will automatically install all the packages on which the functions in the <code>rstan</code> package rely.</p>
 </section>
@@ -336,24 +339,24 @@ y = \beta_0 + \beta_1 x + \epsilon
 \]</span></p>
 <p>The <code>R</code> commands which I use to simulate the data are the following:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_sim<span class="ot">=</span><span class="dv">100</span>; <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_sim<span class="ot">=</span><span class="dv">100</span>; <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span><span class="fu">rnorm</span>(n_sim, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>epsilon<span class="ot">=</span><span class="fu">rnorm</span>(n_sim, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>beta0<span class="ot">=</span><span class="fl">1.5</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>beta1<span class="ot">=</span><span class="fl">1.2</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> epsilon</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>n_sim<span class="ot">=</span><span class="fu">as.integer</span>(n_sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>n_sim<span class="ot">=</span><span class="fu">as.integer</span>(n_sim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Then, I define all the data for <code>Stan</code> in a list object</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>datalist<span class="ot">=</span><span class="fu">list</span>(<span class="st">"y"</span><span class="ot">=</span>y,<span class="st">"x"</span><span class="ot">=</span>x,<span class="st">"n_sim"</span><span class="ot">=</span>n_sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>datalist<span class="ot">=</span><span class="fu">list</span>(<span class="st">"y"</span><span class="ot">=</span>y,<span class="st">"x"</span><span class="ot">=</span>x,<span class="st">"n_sim"</span><span class="ot">=</span>n_sim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="model-file" class="level2">
 <h2 class="anchored" data-anchor-id="model-file">Model file</h2>
 <p>Now, I write the model for <code>Stan</code> and save it as a stan file named <code>"basic.mod.stan"</code> in the current working directory</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>basic.mod<span class="ot">=</span> <span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>basic.mod<span class="ot">=</span> <span class="st">"</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">data {</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">int&lt;lower=0&gt; n_sim;</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">vector[n_sim] y;</span></span>
@@ -375,7 +378,7 @@ y = \beta_0 + \beta_1 x + \epsilon
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="st">y~normal(mu,sigma);</span></span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>Stan</code> models are written using an imperative programming language, which means that the order in which you write the elements in your model file matters, i.e.&nbsp;you first need to define your variables (e.g.&nbsp;integers, vectors, matrices, etc.), the constraints which define the range of values your variable can take (e.g.&nbsp;only positive values for standard deviations), and finally define the relationship among the variables (e.g.&nbsp;one is a liner function of another).</p>
 <p>A Stan model is defined by six program blocks:</p>
@@ -390,29 +393,29 @@ y = \beta_0 + \beta_1 x + \epsilon
 <p>For this introduction I consider a very simple model which only requires the specification of four blocks in the <code>Stan</code> model. In the data block, I first define the size of the sample <code>n_sim</code> as a positive integer number using the expression <code>int&lt;lower=0&gt; n_sim</code>; then I declare the two variables <code>y</code> and <code>x</code> as reals (or vectors) with length equal to N. In the parameters block, I define the coefficients for the linear regression <code>beta0</code> and <code>beta1</code> (as two real numbers) and the standard deviation parameter <code>sigma</code> (as a positive real number). In the transformed parameters block, I define the conditional mean <code>mu</code> (a real vector of length <code>N</code>) as a linear function of the intercept <code>beta0</code>, the slope <code>beta1</code>, and the covariate <code>x</code>. Finally, in the model block, I assign weakly informative priors to the regression coefficients and the standard deviation parameters, and I model the outcome data <code>y</code> using a normal distribution indexed by the conditional mean <code>mu</code> and the standard deviation <code>sigma</code> parameters. In many cases, <code>Stan</code> uses sampling statements which can be vectorised, i.e.&nbsp;you do not need to use for loop statements.</p>
 <p>To write and save the model as the text file “basic.mod.stan” in the current working directory, I use the <code>writeLines</code> function</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(basic.mod, <span class="st">"basic.mod.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(basic.mod, <span class="st">"basic.mod.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="pre-processing" class="level2">
 <h2 class="anchored" data-anchor-id="pre-processing">Pre-processing</h2>
 <p>Define the parameters whose posterior distribtuions we are interested in summarising later and set up the initial values for the MCMC sampler in <code>Stan</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>params<span class="ot">=</span><span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>inits<span class="ot">=</span><span class="cf">function</span>(){<span class="fu">list</span>(<span class="st">"beta0"</span><span class="ot">=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="st">"beta1"</span><span class="ot">=</span><span class="fu">rnorm</span>(<span class="dv">1</span>))}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>params<span class="ot">=</span><span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>inits<span class="ot">=</span><span class="cf">function</span>(){<span class="fu">list</span>(<span class="st">"beta0"</span><span class="ot">=</span><span class="fu">rnorm</span>(<span class="dv">1</span>), <span class="st">"beta1"</span><span class="ot">=</span><span class="fu">rnorm</span>(<span class="dv">1</span>))}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The function creates a list that contains one element for each parameter, which gets assigned a random draw from a normal distribution as a strating value for each chain in the model. For simple models like this, it is generally easy to define the intial values for all parameters in the object <code>inits</code> which is then passed to the <code>stan</code> function in <code>rstan</code>. However, for more complex models, this may not be immediate and a lot of trial and error may be required. However, <code>Stan</code> can automatically select the initial values for all parameters randomly. This can be achieved by setting <code>inits="random"</code>, which is then passed to the <code>stan</code> function in <code>rstan</code>.</p>
 <p>Before using <code>rstan</code> for the first time, you need to load the package, and you may want to set a random seed number for making your estimates reproducible</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="fit-the-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-the-model">Fit the model</h2>
 <p>Now, we can fit the model in <code>Stan</code> using the <code>stan</code> function in the <code>rstan</code> package and save it in the object <code>basic.mod</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>basic.mod<span class="ot">&lt;-</span><span class="fu">stan</span>(<span class="at">data =</span> datalist, <span class="at">pars =</span> params, <span class="at">iter =</span> <span class="dv">9000</span>, </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">init =</span> inits, <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">file =</span> <span class="st">"basic.mod.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>basic.mod<span class="ot">&lt;-</span><span class="fu">stan</span>(<span class="at">data =</span> datalist, <span class="at">pars =</span> params, <span class="at">iter =</span> <span class="dv">9000</span>, </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">init =</span> inits, <span class="at">chains =</span> <span class="dv">2</span>, <span class="at">file =</span> <span class="st">"basic.mod.stan"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA 
 NA SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
@@ -468,12 +471,12 @@ NA Chain 2:</code></pre>
 </div>
 <p>Different packages are available to perform diagnostic checks for Bayesian models. Here, I install and load the <code>bayesplot</code> package (<span class="citation" data-cites="gabry2017bayesplot">Gabry and Mahr (<a href="#ref-gabry2017bayesplot" role="doc-biblioref">2017</a>)</span>) to obtain graphical diagnostics and results.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"bayesplot"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"bayesplot"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For example, density and trace plots can be obtained by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(<span class="fu">as.array</span>(basic.mod),<span class="at">regex_pars=</span><span class="st">"beta0|beta1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_combo</span>(<span class="fu">as.array</span>(basic.mod),<span class="at">regex_pars=</span><span class="st">"beta0|beta1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -558,13 +561,14 @@ Stan Development Team. 2018. <span>“<span>RStan</span>: The <span>R</span> Int
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

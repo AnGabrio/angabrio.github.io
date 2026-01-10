@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -145,6 +146,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -266,7 +269,7 @@ window.Quarto = {
 <p>As I already mentioned in previous posts, the usual analysis task in economic evaluation based on individual-level data (e.g.&nbsp;QALYs and Total costs computed over a trial period) can be quite challenging due to the presence of a series of complexities that affect the data that need to be taken into account when choosing the statistical methods to use in the analysis; examples include: <strong>correlation between effects and costs</strong>, <strong>skewness of the outcome data</strong>, <strong>presence of structural values in the data</strong>. We saw before that different types of methods exist to deal with each of these problems but the general challenge comes from the fact that often these elements are present jointly in a single dataset and therefore the different methods used to handle each of them need to be combined in some way to perform the analysis. This, however, is easier said than done since, particularly under a frequentist framework, the complexity of fitting all these methods in combination with the need to quantify the impact of uncertainty on the results (e.g.&nbsp;via <strong>bootstrapping</strong> methods) can lead to extremely difficult-to-fit or expensive-to-implement models. This I believe the key reason why analysts often pretend to ignore some of these problems and prefer to implement easier methods in the hope that results will not be too much affected. Despite understanding their point, I feel that if they knew models that can account for all these problems together, then they would also like to fit them to improve the reliability of the results they obtain. Well, that is why today I talk about fitting the model under a Bayesian framework, which allows to achieve this task at the cost of learning a bit about Bayesian inference and how to interpret it.</p>
 <p>Let’s start by simulating some non-Normal bivariate cost and QALY data from an hypothetical study for a total of <span class="math inline">\(300\)</span> patients assigned to two competing intervention groups (<span class="math inline">\(t=0,1\)</span>). When generating the data, we can try to mimic the typical skewness features of the outcome data by using alternative distributions such as Gamma for costs and Beta for QALYs. We also generate indicator variables that are used in order to determine which individuals should be assigned “structural values”, namely zero costs and one QALYs. The proportions of individuals assigned to these values is obtained by setting the probability of the Bernoulli distribution used to create the indicators.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, n<span class="sc">/</span><span class="dv">2</span>),<span class="fu">rep</span>(<span class="dv">1</span>, n<span class="sc">/</span><span class="dv">2</span>))</span>
@@ -304,22 +307,22 @@ window.Quarto = {
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(d_zeros<span class="sc">==</span><span class="dv">1</span>,<span class="dv">0</span>,Costs)</span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(id, trt, QALYs, Costs, d_zeros, d_ones)</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code above, after simulating QALY and Cost data using Beta and Gamma distribution, indicator variables for the zero and one values were generated for each individual in the sample from a Bernoulli distribution. Whenever the indicator takes value 1, it denotes the presence of a structural value and the corresponding outcome value is then set equal to zero (Costs) or one (QALYs). We can now compute the correlation between variables and plot the two outcome variables against each other to show how the presence of these structural values affect their corresponding association pattern.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#empirical correlation between e and c (across groups)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(data_sim_ec<span class="sc">$</span>QALYs,data_sim_ec<span class="sc">$</span>Costs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.3582116</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>QALYs, <span class="at">y=</span>Costs)) <span class="sc">+</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>, <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>trtf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -330,7 +333,7 @@ window.Quarto = {
 </div>
 <p>In addition, we can also produce histograms of the distribution of the outcomes by treatment group to have a rough idea of the amount of structural values by type of outcome and treatment group in our sample.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>trtf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>trt)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>trtf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>QALY_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>QALYs))<span class="sc">+</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
@@ -338,7 +341,7 @@ window.Quarto = {
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Tcost_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>Costs))<span class="sc">+</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(trtf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(QALY_hist, Tcost_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -355,7 +358,7 @@ p(e,c\mid \boldsymbol \theta) = p(e\mid \boldsymbol \theta_e) p(c \mid e, \bolds
 \]</span></p>
 <p>where <span class="math inline">\(p(e\mid \boldsymbol \theta_e)\)</span> is the marginal distribution of the effects and <span class="math inline">\(p(c \mid e, \boldsymbol \theta_c)\)</span> is the conditional distribution of the cost given the effects, each indexed by corresponding set of parameters. The main reason for factoring the joint distribution into this product is the possibility to specify univariate distributions for <span class="math inline">\(e\)</span> and <span class="math inline">\(c\)</span>, rather than a single bivariate distribution. This can be helpful when, for example, different covariates are considered for the two outcomes as it allows a higher degree of flexibility in specifying the model for each variable. But how are we going to fit the model? well, for that we can rely on freely-available Bayesian software which allows model fitting in a relatively simple way at the cost of learning how to code up the model in this new language. In this post I will consider the <a href="https://mcmc-jags.sourceforge.io/"><strong>JAGS</strong></a> software although this is only one of the many that can be used. For the sake of making things clearer I will not focus here on the details of how the software works and which types of algorithms it uses to implement the model, but I will jump straight into the coding part. First, we need to write the code of the model into a txt file that will then be read by the program after providing the data as input. We can do all this in <code>R</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_bn <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_bn <span class="ot">&lt;-</span> <span class="st">"</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">#model specification</span></span>
@@ -383,11 +386,11 @@ p(e,c\mid \boldsymbol \theta) = p(e\mid \boldsymbol \theta_e) p(c \mid e, \bolds
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model_bn, <span class="at">con =</span> <span class="st">"model_bn.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(model_bn, <span class="at">con =</span> <span class="st">"model_bn.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code above I first specify the model structure, i.e.&nbsp;assign normal distributions to QLAYs and Costs variable indexed by two parameters, the means <span class="math inline">\(\nu\)</span> and precisions <span class="math inline">\(\tau\)</span> (note that precisions correspond to inverse of the variance <span class="math inline">\(\tau=1/\sigma^2\)</span>) since these are the default parameters used by <code>JAGS</code> to specify a normal distribution. For each outcome then I specify the mean structure, i.e.&nbsp;the mean of <span class="math inline">\(e\)</span> depennds only on the treatment indicator while the mean of <span class="math inline">\(c\)</span> depend both on treatment indicator and <span class="math inline">\(e\)</span> (this is a conditional cost model!). Next, I specify the priors for non-deterministic parameters, namely using uniform distributions for standard deviations and normal distributions for regression coefficients. Finally, I save the model as a txt file in the current wd using the <em>writeLines</em> function. The model is now written and we can fit it by calling the JAGS software directly from R through dedicated functions. Before that, we need to convert the data as input for the software. Then, we load the package <strong>R2jags</strong> which allows to call the software from R through the function <strong>jags</strong> and after providing some technical parameters needed to run the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#save data input</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">dim</span>(data_sim_ec)[<span class="dv">1</span>]</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>QALYs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>QALYs</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Costs <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>Costs</span>
@@ -403,14 +406,14 @@ p(e,c\mid \boldsymbol \theta) = p(e\mid \boldsymbol \theta_e) p(c \mid e, \bolds
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#set parameter easimates to save</span></span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>params<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"beta0"</span>,<span class="st">"beta1"</span>,<span class="st">"gamma0"</span>,<span class="st">"gamma1"</span>,<span class="st">"gamma2"</span>,<span class="st">"s_c"</span>,<span class="st">"s_e"</span>,<span class="st">"nu_c"</span>,<span class="st">"nu_e"</span>)</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>filein<span class="ot">&lt;-</span><span class="st">"model_bn.txt"</span> <span class="co">#name of model file</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>n.iter<span class="ot">&lt;-</span><span class="dv">20000</span> <span class="co">#n of iterations</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>n.iter<span class="ot">&lt;-</span><span class="dv">20000</span> <span class="co">#n of iterations</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We are now ready to fit the model, which we can do by typing</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit model</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#fit model</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>jmodel_bn<span class="ot">&lt;-</span><span class="fu">jags</span>(<span class="at">data=</span>datalist,<span class="at">inits=</span><span class="fu">list</span>(inits1,inits2),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">parameters.to.save=</span>params,<span class="at">model.file=</span>filein,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.chains=</span><span class="dv">2</span>,<span class="at">n.iter=</span>n.iter,<span class="at">n.thin=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Compiling model graph
    Resolving undeclared variables
@@ -425,8 +428,8 @@ Initializing model</code></pre>
 </div>
 <p>After some time needed for the model to run, we end up with something like this</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#posterior results</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(jmodel_bn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#posterior results</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(jmodel_bn)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Inference for Bugs model at "model_bn.txt", fit using jags,
  2 chains, each with 20000 iterations (first 10000 discarded)
@@ -1661,7 +1664,7 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 <p>The print function allows to see key posterior summaries for all parameters saved from the model, including values for posterior mean estimates, different quantiles of the posterior distribution for each parameter and diagnostic statistics such as <strong>potential scale-reduction factor</strong> or Rhat and the <strong>number of effective sample size</strong> or n.eff. Here I will not go into details about these quantities but it is enough to say that they can be used to check whether some problems occurred in the algorithm. From a first look everything seems ok. Additional checks should also be done to ensure the model behaves somewhat reasonably (e.g.&nbsp;no incorrect prior specification), such as <strong>posterior predictive checks</strong>, but given the simplicity of the setting I will not go into that now.</p>
 <p>At this point however you should be asking, but what about the quantities I want to estimate, i.e.&nbsp;the mean QALYs and Total costs per treatment arm? how can I obtain these? Well a possible way to retrieve these is to post-process the results of the model. In particular, we can use our estimates for the conditional means <span class="math inline">\(\nu_e, \nu_c\)</span> and standard deviations <span class="math inline">\(s_e,s_c\)</span> in order to generate, through simulation methods, estimates for the marginal means <span class="math inline">\(\mu_e,\mu_c\)</span> we are looking for. Although this process may seem quite complicated it is relatively simple to implement and, most importantly, can be done for most of the models we will fit, even the most complicated ones. So, in <code>R</code>, we do this by typing.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#obtain estimates of means by arm</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#extract estimates for each mean parameter by trt group</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>nu_e0 <span class="ot">&lt;-</span> jmodel_bn<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.list<span class="sc">$</span>nu_e[,trt<span class="sc">==</span><span class="dv">0</span>]</span>
@@ -1686,18 +1689,18 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 <span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a> mu_e1[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rnorm</span>(L,nu_e1[i,],s_e[i]))</span>
 <span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a> mu_c0[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rnorm</span>(L,nu_c0[i,],s_c[i])) </span>
 <span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a> mu_c1[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rnorm</span>(L,nu_c1[i,],s_c[i])) </span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>At this point we obtained the final posterior estimates for our desired quantities, namely <span class="math inline">\(\mu_{ct}\)</span> and <span class="math inline">\(\mu_{et}\)</span>, which can be summarised as usual, or we can even compute the incremental quantities <span class="math inline">\(\Delta_e=\mu_{e1}-\mu_{e0}\)</span> and <span class="math inline">\(\Delta_c=\mu_{c1}-\mu_{c0}\)</span> to see the distribution of the differences between mean outcomes by trt group (i.e.&nbsp;we look at the usual <strong>Cost-Effectivenss Plane</strong>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute differences by arm</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute differences by arm</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Delta_e <span class="ot">&lt;-</span> mu_e1 <span class="sc">-</span> mu_e0</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>Delta_c <span class="ot">&lt;-</span> mu_c1 <span class="sc">-</span> mu_c0</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#plot the differences against each other</span></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>data_delta_ec <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(Delta_e,Delta_c)</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_delta_ec, <span class="fu">aes</span>(<span class="at">x=</span>Delta_e, <span class="at">y=</span>Delta_c)) <span class="sc">+</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>, <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>, <span class="at">shape=</span><span class="dv">16</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1708,7 +1711,7 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 </div>
 <p>We can then produce all standard CEA output, e.g.&nbsp;CEAC or CE Plane, by post-processing these posterior distributions. If you want to skip the fun, we can take advantage of the <code>R</code> package <strong>BCEA</strong> which is dedicated to post-processing the results from a Bayesian CEA model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package and provide means e and c by group as input </span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load package and provide means e and c by group as input </span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BCEA)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mu_e <span class="ot">&lt;-</span> <span class="fu">cbind</span>(mu_e0,mu_e1)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>mu_c <span class="ot">&lt;-</span> <span class="fu">cbind</span>(mu_c0,mu_c1)</span>
@@ -1716,7 +1719,7 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>cea_res <span class="ot">&lt;-</span> <span class="fu">bcea</span>(<span class="at">eff =</span> mu_e, <span class="at">cost =</span> mu_c, <span class="at">ref =</span> <span class="dv">2</span>)</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#CE Plane (set wtp value)</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ceplane.plot</span>(cea_res, <span class="at">graph =</span> <span class="st">"ggplot2"</span>, <span class="at">wtp =</span> <span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ceplane.plot</span>(cea_res, <span class="at">graph =</span> <span class="st">"ggplot2"</span>, <span class="at">wtp =</span> <span class="dv">10000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1724,8 +1727,8 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#CEAC </span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ceac.plot</span>(cea_res, <span class="at">graph =</span> <span class="st">"ggplot2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#CEAC </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ceac.plot</span>(cea_res, <span class="at">graph =</span> <span class="st">"ggplot2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1733,8 +1736,8 @@ DIC is an estimate of expected predictive error (lower deviance is better).</cod
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#other output</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#other output</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cea_res)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Cost-effectiveness analysis summary 
@@ -1816,13 +1819,14 @@ EVPI 0.088877</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

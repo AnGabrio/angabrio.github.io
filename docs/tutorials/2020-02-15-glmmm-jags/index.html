@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,14 +91,15 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -141,7 +142,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -166,6 +167,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -347,7 +350,7 @@ window.Quarto = {
 <h1>Loading the data</h1>
 <p>I start by loading libraries, reading in the data and preprocessing it for <code>JAGS</code>. The last <span class="math inline">\(50\)</span> matches have unknown outcomes and I create a new data frame <code>d</code> holding only matches with known outcomes. I will come back to the unknown outcomes later when it is time to use the model for prediction. I also load a <code>R</code> function called <code>plotPost</code> which was previously coded in order to facilitate the plotting of the posterior results of the model. All information about the model structure, data and functions can be found on the webpage of the original post of the author or in his technical report (<span class="citation" data-cites="baaaath2015modeling">Bååth (<a href="#ref-baaaath2015modeling" role="doc-biblioref">2015</a>)</span>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(R2jags)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mcmcplots)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
@@ -379,7 +382,7 @@ window.Quarto = {
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(name, <span class="st">"["</span>, <span class="fu">paste</span>(..., <span class="at">sep =</span> <span class="st">","</span>), <span class="st">"]"</span>)</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>data_list<span class="sc">$</span>n_seasons<span class="ot">&lt;-</span><span class="cn">NULL</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>data_list<span class="sc">$</span>Season<span class="ot">&lt;-</span><span class="cn">NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>data_list<span class="sc">$</span>Season<span class="ot">&lt;-</span><span class="cn">NULL</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="modeling-match-results" class="level1">
@@ -388,10 +391,10 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="data-check">Data check</h2>
 <p>How are the number of goals for each team in a football match distributed? Well, let’s start by assuming that all football matches are roughly equally long, that both teams have many chances at making a goal and that each team have the same probability of making a goal each goal chance. Given these assumptions the distribution of the number of goals for each team should be well captured by a Poisson distribution. A quick and dirty comparison between the actual distribution of the number of scored goals and a Poisson distribution having the same mean number of scored goals support this notion.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">c</span>(d<span class="sc">$</span>AwayGoals, d<span class="sc">$</span>HomeGoals), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">8</span>), <span class="at">breaks =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">9</span> <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Distribution of the number of goals</span><span class="sc">\n</span><span class="st">scored by a team in a match."</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mean_goals <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">c</span>(d<span class="sc">$</span>AwayGoals, d<span class="sc">$</span>HomeGoals))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rpois</span>(<span class="dv">9999</span>, mean_goals), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">8</span>), <span class="at">breaks =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">9</span> <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Random draw from a Poisson distribution with</span><span class="sc">\n</span><span class="st">the same mean as the distribution above."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rpois</span>(<span class="dv">9999</span>, mean_goals), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">8</span>), <span class="at">breaks =</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">9</span> <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Random draw from a Poisson distribution with</span><span class="sc">\n</span><span class="st">the same mean as the distribution above."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -431,7 +434,7 @@ window.Quarto = {
 \]</span></p>
 <p>so that teams are assumed to have similar but not identical mean and variance parameters for thier skill parameters. These priors are made vague. For example, the prior on the baseline have a SD of <code>4</code> but since this is on the log scale of the mean number of goals it corresponds to one SD from the mean <code>0</code> covering the range of <code>[0.02,54.6]</code> goals. Turning this into a <code>JAGS</code> model requires some minor adjustments. The model have to loop over all the match results, which adds some for-loops. <code>JAGS</code> parameterises the normal distribution with precision (the reciprocal of the variance) instead of variance so the hyperpriors have to be converted. Finally I have to “anchor” the skill of one team to a constant otherwise the mean skill can drift away freely (<em>conrner constraint</em>) and the model cannot be identified. Doing these adjustments results in the following model description:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m1_string <span class="ot">&lt;-</span> <span class="st">"model {</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m1_string <span class="ot">&lt;-</span> <span class="st">"model {</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">for(i in 1:n_games) {</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">  HomeGoals[i] ~ dpois(lambda_home[HomeTeam[i],AwayTeam[i]])</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">  AwayGoals[i] ~ dpois(lambda_away[HomeTeam[i],AwayTeam[i]])</span></span>
@@ -457,26 +460,26 @@ window.Quarto = {
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m1_string, <span class="at">con =</span> <span class="st">"model1.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m1_string, <span class="at">con =</span> <span class="st">"model1.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we define the nodes (parameters and derivatives) to monitor and the chain parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"baseline"</span>, <span class="st">"skill"</span>, <span class="st">"group_skill"</span>, <span class="st">"group_sigma"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"baseline"</span>, <span class="st">"skill"</span>, <span class="st">"group_skill"</span>, <span class="st">"group_sigma"</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>numSavedSteps <span class="ot">=</span> <span class="dv">15000</span>  <span class="co">#across all chains</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>nIter <span class="ot">=</span> <span class="fu">ceiling</span>(burnInSteps <span class="sc">+</span> (numSavedSteps <span class="sc">*</span> thinSteps)<span class="sc">/</span>nChains)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>nIter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 10500</code></pre>
 </div>
 </div>
 <p>Start the <code>JAGS</code> model (check the model, load data into the model, specify the number of chains and compile the model). Run the <code>JAGS</code> code via the <code>R2jags</code> interface and the <code>jags</code> function. Note that the first time jags is run after the <code>R2jags</code> package is loaded, it is often necessary to run any kind of randomisation function just to initiate the .Random.seed variable.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model1.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -488,7 +491,7 @@ NA    Total graph size: 9151
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m1.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m1.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "model1.txt", fit using jags,
 NA  2 chains, each with 10500 iterations (first 3000 discarded)
@@ -575,8 +578,8 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="mcmc-diagnostics">MCMC diagnostics</h2>
 <p>Using the generated MCMC samples I can now look at the credible skill values of any team. Let’s look at the trace plot and the distribution of the skill parameters for FC Sevilla and FC Valencia.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>team_par<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">which</span>(teams <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"FC Sevilla"</span>)), <span class="fu">which</span>(teams <span class="sc">==</span> <span class="st">"FC Valencia"</span>))</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m1.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"Sevilla"</span>,<span class="st">"Valenica"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>team_par<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="fu">which</span>(teams <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"FC Sevilla"</span>)), <span class="fu">which</span>(teams <span class="sc">==</span> <span class="st">"FC Valencia"</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m1.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"Sevilla"</span>,<span class="st">"Valenica"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -584,7 +587,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m1.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"Sevilla"</span>,<span class="st">"Valenica"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m1.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"Sevilla"</span>,<span class="st">"Valenica"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -598,7 +601,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="model-validation">Model validation</h2>
 <p>Seems like Sevilla and Valencia have similar skill with Valencia being slightly better. Using the MCMC samples it is not only possible to look at the distribution of parameter values but it is also straight forward to simulate matches between teams and look at the credible distribution of number of goals scored and the probability of a win for the home team, a win for the away team or a draw. The following functions simulates matches with one team as home team and one team as away team and plots the predicted result together with the actual outcomes of any matches in the <code>laliga</code> data set.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plots histograms over home_goals, away_goals, the difference in goals</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plots histograms over home_goals, away_goals, the difference in goals</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># and a barplot over match results.</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plot_goals <span class="ot">&lt;-</span> <span class="cf">function</span>(home_goals, away_goals) {</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    n_matches <span class="ot">&lt;-</span> <span class="fu">length</span>(home_goals)</span>
@@ -627,12 +630,12 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    home_goals <span class="ot">&lt;-</span> d<span class="sc">$</span>HomeGoals[d<span class="sc">$</span>HomeTeam <span class="sc">==</span> home_team <span class="sc">&amp;</span> d<span class="sc">$</span>AwayTeam <span class="sc">==</span> away_team]</span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    away_goals <span class="ot">&lt;-</span> d<span class="sc">$</span>AwayGoals[d<span class="sc">$</span>HomeTeam <span class="sc">==</span> home_team <span class="sc">&amp;</span> d<span class="sc">$</span>AwayTeam <span class="sc">==</span> away_team]</span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_goals</span>(home_goals, away_goals)</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Let’s look at Valencia (home team) vs.&nbsp;Sevilla (away team). The graph below shows the simulation on the first row and the historical data on the second row.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ms1<span class="ot">&lt;-</span><span class="fu">as.matrix</span>(m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp1</span>(<span class="st">"FC Valencia"</span>, <span class="st">"FC Sevilla"</span>, ms1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ms1<span class="ot">&lt;-</span><span class="fu">as.matrix</span>(m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp1</span>(<span class="st">"FC Valencia"</span>, <span class="st">"FC Sevilla"</span>, ms1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -650,7 +653,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <section id="model-fitting-1" class="level2">
 <h2 class="anchored" data-anchor-id="model-fitting-1">Model fitting</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model 2</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model 2</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>m2_string <span class="ot">&lt;-</span> <span class="st">"model {</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="st">for(i in 1:n_games) {</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="st">  HomeGoals[i] ~ dpois(lambda_home[HomeTeam[i],AwayTeam[i]])</span></span>
@@ -679,11 +682,11 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m2_string, <span class="at">con =</span> <span class="st">"model2.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m2_string, <span class="at">con =</span> <span class="st">"model2.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And now re-fit the model</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>, <span class="st">"away_baseline"</span>, <span class="st">"skill"</span>, <span class="st">"group_sigma"</span>, <span class="st">"group_skill"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>, <span class="st">"away_baseline"</span>, <span class="st">"skill"</span>, <span class="st">"group_sigma"</span>, <span class="st">"group_skill"</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>nChains <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>burnInSteps <span class="ot">=</span> <span class="dv">3000</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>thinSteps <span class="ot">=</span> <span class="dv">1</span></span>
@@ -692,7 +695,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>m2.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model2.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -704,7 +707,7 @@ NA    Total graph size: 10863
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m2.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m2.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "model2.txt", fit using jags,
 NA  2 chains, each with 10500 iterations (first 3000 discarded)
@@ -793,8 +796,8 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="mcmc-diagnostics-1">MCMC diagnostics</h2>
 <p>Looking at the trace plots and distributions of <code>home_baseline</code> and <code>away_baseline</code> shows that there is a considerable home advantage.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>team_par<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"home_baseline"</span>, <span class="st">"away_baseline"</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m2.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>,<span class="st">"away_baseline"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>team_par<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"home_baseline"</span>, <span class="st">"away_baseline"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m2.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>,<span class="st">"away_baseline"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -802,7 +805,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m2.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>,<span class="st">"away_baseline"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m2.r2jags, <span class="at">parms =</span> team_par, <span class="at">style =</span> <span class="st">"plain"</span>, <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"home_baseline"</span>,<span class="st">"away_baseline"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -816,9 +819,9 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="model-validation-1">Model validation</h2>
 <p>Looking at the difference between <code>exp(home_baseline)</code> and <code>exp(away_baseline)</code> shows that the home advantage is realised as roughly <span class="math inline">\(0.5\)</span> more goals for the home team.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ms2<span class="ot">&lt;-</span><span class="fu">as.matrix</span>(m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ms2<span class="ot">&lt;-</span><span class="fu">as.matrix</span>(m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotPost</span>(<span class="fu">exp</span>(ms2[, <span class="st">"home_baseline"</span>]) <span class="sc">-</span> <span class="fu">exp</span>(ms2[, <span class="st">"away_baseline"</span>]), <span class="at">compVal =</span> <span class="dv">0</span>,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"Home advantage in number of goals"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"Home advantage in number of goals"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -837,17 +840,17 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 </div>
 <p>Comparing the DIC of the of the two models also indicates that the new model is better.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dic_m1<span class="ot">&lt;-</span>m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dic_m1<span class="ot">&lt;-</span>m1.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>dic_m2<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>diff_dic<span class="ot">&lt;-</span>dic_m1 <span class="sc">-</span> dic_m2</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>diff_dic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>diff_dic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 168.7556</code></pre>
 </div>
 </div>
 <p>Finally we’ll look at the simulated results for Valencia (home team) vs Sevilla (away team) using the estimates from the new model with the first row of the graph showing the predicted outcome and the second row showing the actual data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plot_pred_comp2 <span class="ot">&lt;-</span> <span class="cf">function</span>(home_team, away_team, ms) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plot_pred_comp2 <span class="ot">&lt;-</span> <span class="cf">function</span>(home_team, away_team, ms) {</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>))</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    home_baseline <span class="ot">&lt;-</span> ms[, <span class="st">"home_baseline"</span>]</span>
@@ -862,7 +865,7 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_goals</span>(home_goals, away_goals)</span>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp2</span>(<span class="st">"FC Valencia"</span>, <span class="st">"FC Sevilla"</span>, ms2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp2</span>(<span class="st">"FC Valencia"</span>, <span class="st">"FC Sevilla"</span>, ms2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -873,7 +876,7 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 </div>
 <p>And similarly Sevilla (home team) vs Valencia (away team).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp2</span>(<span class="st">"FC Sevilla"</span>, <span class="st">"FC Valencia"</span>, ms2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pred_comp2</span>(<span class="st">"FC Sevilla"</span>, <span class="st">"FC Valencia"</span>, ms2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -891,7 +894,7 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 <section id="data-check-1" class="level2">
 <h2 class="anchored" data-anchor-id="data-check-1">Data check</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(Season, HomeTeam, <span class="at">data =</span> d, <span class="at">ylab =</span> <span class="st">"Team"</span>, <span class="at">xlab =</span> <span class="st">"Particicipation by Season"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(Season, HomeTeam, <span class="at">data =</span> d, <span class="at">ylab =</span> <span class="st">"Team"</span>, <span class="at">xlab =</span> <span class="st">"Particicipation by Season"</span>) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -906,7 +909,7 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 \]</span></p>
 <p>for all different <span class="math inline">\(t\)</span>, except the first season which is given a vague prior. Here <span class="math inline">\(\sigma^2_{\text{season}}\)</span> is a parameter estimated using the whole data set. The home and away baselines are given the same kind of priors and below is the resulting <code>JAGS</code> model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model 3</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model 3</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>m3_string <span class="ot">&lt;-</span> <span class="st">"model {</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="st">for(i in 1:n_games) {</span></span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">  HomeGoals[i] ~ dpois(lambda_home[Season[i], HomeTeam[i],AwayTeam[i]])</span></span>
@@ -949,11 +952,11 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 <span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a><span class="do">## write the model to a text file</span></span>
-<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m3_string, <span class="at">con =</span> <span class="st">"model3.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(m3_string, <span class="at">con =</span> <span class="st">"model3.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And now re-fit the model. These changes to the model unfortunately introduce quite a lot of autocorrelation when running the MCMC sampler. Also, I re-define the data list to include information for the season parameters.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>data_list_m3 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">HomeGoals =</span> d<span class="sc">$</span>HomeGoals, <span class="at">AwayGoals =</span> d<span class="sc">$</span>AwayGoals, <span class="at">HomeTeam =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(d<span class="sc">$</span>HomeTeam,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>data_list_m3 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">HomeGoals =</span> d<span class="sc">$</span>HomeGoals, <span class="at">AwayGoals =</span> d<span class="sc">$</span>AwayGoals, <span class="at">HomeTeam =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(d<span class="sc">$</span>HomeTeam,</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">levels =</span> teams)), <span class="at">AwayTeam =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(d<span class="sc">$</span>AwayTeam, <span class="at">levels =</span> teams)),</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Season =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(d<span class="sc">$</span>Season, <span class="at">levels =</span> seasons)), <span class="at">n_teams =</span> <span class="fu">length</span>(teams),</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_games =</span> <span class="fu">nrow</span>(d), <span class="at">n_seasons =</span> <span class="fu">length</span>(seasons))</span>
@@ -966,7 +969,7 @@ NA Home advantage in number of goals      NA       NA       NA</code></pre>
 <span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>m3.r2jags <span class="ot">&lt;-</span> <span class="fu">jags</span>(<span class="at">data =</span> data_list_m3, <span class="at">inits =</span> <span class="cn">NULL</span>, <span class="at">parameters.to.save =</span> params,</span>
 <span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">model.file =</span> <span class="st">"model3.txt"</span>, <span class="at">n.chains =</span> nChains, <span class="at">n.iter =</span> nIter,</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.burnin =</span> burnInSteps, <span class="at">n.thin =</span> thinSteps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Compiling model graph
 NA    Resolving undeclared variables
@@ -978,7 +981,7 @@ NA    Total graph size: 26525
 NA 
 NA Initializing model</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m3.r2jags)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m3.r2jags)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA Inference for Bugs model at "model3.txt", fit using jags,
 NA  2 chains, each with 10500 iterations (first 3000 discarded)
@@ -1317,7 +1320,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h2 class="anchored" data-anchor-id="mcmc-diagnostics-2">MCMC diagnostics</h2>
 <p>The following graph shows the trace plot and distribution of the <code>season_sigma</code> parameter.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m3.r2jags, <span class="at">parms =</span> <span class="st">"season_sigma"</span>, <span class="at">style =</span> <span class="st">"plain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">denplot</span>(m3.r2jags, <span class="at">parms =</span> <span class="st">"season_sigma"</span>, <span class="at">style =</span> <span class="st">"plain"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1325,7 +1328,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m3.r2jags, <span class="at">parms =</span> <span class="st">"season_sigma"</span>, <span class="at">style =</span> <span class="st">"plain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traplot</span>(m3.r2jags, <span class="at">parms =</span> <span class="st">"season_sigma"</span>, <span class="at">style =</span> <span class="st">"plain"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1336,10 +1339,10 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </div>
 <p>Calculating and comparing the DIC of this model with the former model show no substantial difference.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>dic_m2<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>dic_m2<span class="ot">&lt;-</span>m2.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>dic_m3<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>DIC</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>diff_dic<span class="ot">&lt;-</span>dic_m2 <span class="sc">-</span> dic_m3</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>diff_dic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>diff_dic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] -29.50679</code></pre>
 </div>
@@ -1351,7 +1354,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <h1>Ranking the teams of La Liga</h1>
 <p>We’ll start by ranking the teams of La Liga using the estimated skill parameters from the 2012/2013 season. The values of the skill parameters are difficult to interpret as they are relative to the skill of the team that had its skill parameter “anchored” at zero. To put them on a more interpretable scale I’ll first zero center the skill parameters by subtracting the mean skill of all teams, I then add the home baseline and exponentiate the resulting values. These rescaled skill parameters are now on the scale of expected number of goals when playing home team. Below is a caterpillar plot of the median of the rescaled skill parameters together with the <span class="math inline">\(68\)</span>% and <span class="math inline">\(95\)</span>% credible intervals. The plot is ordered according to the median skill and thus also gives the ranking of the teams.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The ranking of the teams for the 2012/13 season.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The ranking of the teams for the 2012/13 season.</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>ms3<span class="ot">&lt;-</span>m3.r2jags<span class="sc">$</span>BUGSoutput<span class="sc">$</span>sims.matrix</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>team_skill <span class="ot">&lt;-</span> ms3[, <span class="fu">str_detect</span>(<span class="at">string =</span> <span class="fu">colnames</span>(ms3), <span class="st">"skill</span><span class="sc">\\</span><span class="st">[5,"</span>)]</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>team_skill <span class="ot">&lt;-</span> (team_skill <span class="sc">-</span> <span class="fu">rowMeans</span>(team_skill)) <span class="sc">+</span> ms3[, <span class="st">"home_baseline[5]"</span>]</span>
@@ -1359,7 +1362,7 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(team_skill) <span class="ot">&lt;-</span> teams</span>
 <span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>team_skill <span class="ot">&lt;-</span> team_skill[, <span class="fu">order</span>(<span class="fu">colMeans</span>(team_skill), <span class="at">decreasing =</span> T)]</span>
 <span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>), <span class="at">xaxs =</span> <span class="st">"i"</span>)</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="fu">caterplot</span>(team_skill, <span class="at">labels.loc =</span> <span class="st">"above"</span>, <span class="at">val.lim =</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">3.8</span>), <span class="at">style =</span> <span class="st">"plain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="fu">caterplot</span>(team_skill, <span class="at">labels.loc =</span> <span class="st">"above"</span>, <span class="at">val.lim =</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">3.8</span>), <span class="at">style =</span> <span class="st">"plain"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1370,8 +1373,8 @@ NA DIC is an estimate of expected predictive error (lower deviance is better).</
 </div>
 <p>Two teams are clearly ahead of the rest, FC Barcelona and Real Madrid CF. Let’s look at the credible difference between the two teams.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotPost</span>(team_skill[, <span class="st">"FC Barcelona"</span>] <span class="sc">-</span> team_skill[, <span class="st">"Real Madrid CF"</span>], <span class="at">compVal =</span> <span class="dv">0</span>,</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"← Real Madrid     vs     Barcelona →"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotPost</span>(team_skill[, <span class="st">"FC Barcelona"</span>] <span class="sc">-</span> team_skill[, <span class="st">"Real Madrid CF"</span>], <span class="at">compVal =</span> <span class="dv">0</span>,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"← Real Madrid     vs     Barcelona →"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1400,7 +1403,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <li><p>A random sample from the distributions of credible home scores, away scores and match results. This is how La Liga actually could have played out in an alternative reality.</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ms3)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ms3)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>m3_pred <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(laliga), <span class="cf">function</span>(i) {</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  home_team <span class="ot">&lt;-</span> <span class="fu">which</span>(teams <span class="sc">==</span> laliga<span class="sc">$</span>HomeTeam[i])</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  away_team <span class="ot">&lt;-</span> <span class="fu">which</span>(teams <span class="sc">==</span> laliga<span class="sc">$</span>AwayTeam[i])</span>
@@ -1427,11 +1430,11 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">rand_home_goal =</span> home_goals[rand_i], <span class="at">rand_away_goal =</span> away_goals[rand_i],</span>
 <span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">rand_match_result =</span> match_results[rand_i])</span>
 <span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>m3_pred <span class="ot">&lt;-</span> <span class="fu">t</span>(m3_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>m3_pred <span class="ot">&lt;-</span> <span class="fu">t</span>(m3_pred)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>First let’s compare the distribution of the number of goals in the data with the predicted mode, mean and randomised number of goals for all the games (focusing on the number of goals for the home team). First the actual distribution of the number of goals for the home teams.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(laliga<span class="sc">$</span>HomeGoals, <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>), <span class="at">main =</span> <span class="st">"Distribution of the number of goals</span><span class="sc">\n</span><span class="st">scored by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(laliga<span class="sc">$</span>HomeGoals, <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>), <span class="at">main =</span> <span class="st">"Distribution of the number of goals</span><span class="sc">\n</span><span class="st">scored by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1442,8 +1445,8 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>This next plot shows the distribution of the modes from the predicted distribution of home goals from each game. That is, what is the most probable outcome, for the home team, in each game.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"mode_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of predicted most</span><span class="sc">\n</span><span class="st">probable scoreby a home team in</span><span class="sc">\n</span><span class="st">a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"mode_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of predicted most</span><span class="sc">\n</span><span class="st">probable scoreby a home team in</span><span class="sc">\n</span><span class="st">a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1454,8 +1457,8 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>For almost all games the single most likely number of goals is one. Actually, if you know nothing about a La Liga game betting on one goal for the home team is <span class="math inline">\(78\)</span>% of the times the best bet. Lest instead look at the distribution of the predicted mean number of home goals in each game.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"mean_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of predicted mean </span><span class="sc">\n</span><span class="st"> score by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"mean_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of predicted mean </span><span class="sc">\n</span><span class="st"> score by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1466,8 +1469,8 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>For most games the expected number of goals are <span class="math inline">\(2\)</span>. That is, even if your safest bet is one goal you would expect to see around two goals. The distribution of the mode and the mean number of goals doesn’t look remotely like the actual number of goals. This was not to be expected, we would however expect the distribution of randomized goals (where for each match the number of goals has been randomly drawn from that match’s predicted home goal distribution) to look similar to the actual number of home goals. Looking at the histogram below, this seems to be the case.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"rand_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of randomly draw </span><span class="sc">\n</span><span class="st"> score by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"rand_home_goal"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">10</span>),</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Distribution of randomly draw </span><span class="sc">\n</span><span class="st"> score by a home team in a match."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1478,18 +1481,18 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>We can also look at how well the model predicts the data. This should probably be done using cross validation, but as the number of effective parameters are much smaller than the number of data points a direct comparison should at least give an estimated prediction accuracy in the right ballpark.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(laliga<span class="sc">$</span>HomeGoals <span class="sc">==</span> m3_pred[, <span class="st">"mode_home_goal"</span>], <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(laliga<span class="sc">$</span>HomeGoals <span class="sc">==</span> m3_pred[, <span class="st">"mode_home_goal"</span>], <span class="at">na.rm =</span> T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.3318919</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>((laliga<span class="sc">$</span>HomeGoals <span class="sc">-</span> m3_pred[, <span class="st">"mean_home_goal"</span>])<span class="sc">^</span><span class="dv">2</span>, <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>((laliga<span class="sc">$</span>HomeGoals <span class="sc">-</span> m3_pred[, <span class="st">"mean_home_goal"</span>])<span class="sc">^</span><span class="dv">2</span>, <span class="at">na.rm =</span> T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 1.457061</code></pre>
 </div>
 </div>
 <p>So on average the model predicts the correct number of home goals <span class="math inline">\(34\)</span>% of the time and guesses the average number of goals with a mean squared error of <span class="math inline">\(1.45\)</span>. Now we’ll look at the actual and predicted match outcomes. The graph below shows the match outcomes in the data with <span class="math inline">\(1\)</span> being a home win, <span class="math inline">\(0\)</span> being a draw and <span class="math inline">\(-1\)</span> being a win for the away team.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(laliga<span class="sc">$</span>MatchResult, <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Actual match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(laliga<span class="sc">$</span>MatchResult, <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Actual match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1500,7 +1503,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>Now looking at the most probable outcomes of the matches according to the model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"match_result"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Predicted match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"match_result"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Predicted match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1511,7 +1514,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>For almost all matches the safest bet is to bet on the home team. While draws are not uncommon it is never the safest bet. As in the case with the number of home goals, the randomized match outcomes have a distribution similar to the actual match outcomes:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"rand_match_result"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Randomized match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(m3_pred[, <span class="st">"rand_match_result"</span>], <span class="at">breaks =</span> (<span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">main =</span> <span class="st">"Randomized match results."</span>, <span class="at">xlab =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1519,14 +1522,14 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(laliga<span class="sc">$</span>MatchResult <span class="sc">==</span> m3_pred[, <span class="st">"match_result"</span>], <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(laliga<span class="sc">$</span>MatchResult <span class="sc">==</span> m3_pred[, <span class="st">"match_result"</span>], <span class="at">na.rm =</span> T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA [1] 0.5637838</code></pre>
 </div>
 </div>
 <p>The model predicts the correct match outcome <span class="math inline">\(56\)</span>% of the time. Pretty good! Now that we’ve checked that the model reasonably predicts the La Liga history let’s predict the La Liga endgame! The code below displays the predicted mode and mean number of goals for the endgame and the predicted winner of each game.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>laliga_forecast <span class="ot">&lt;-</span> laliga[<span class="fu">is.na</span>(laliga<span class="sc">$</span>HomeGoals), <span class="fu">c</span>(<span class="st">"Season"</span>, <span class="st">"Week"</span>, <span class="st">"HomeTeam"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>laliga_forecast <span class="ot">&lt;-</span> laliga[<span class="fu">is.na</span>(laliga<span class="sc">$</span>HomeGoals), <span class="fu">c</span>(<span class="st">"Season"</span>, <span class="st">"Week"</span>, <span class="st">"HomeTeam"</span>,</span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AwayTeam"</span>)]</span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>m3_forecast <span class="ot">&lt;-</span> m3_pred[<span class="fu">is.na</span>(laliga<span class="sc">$</span>HomeGoals), ]</span>
 <span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>laliga_forecast<span class="sc">$</span>mean_home_goals <span class="ot">&lt;-</span> <span class="fu">round</span>(m3_forecast[, <span class="st">"mean_home_goal"</span>], <span class="dv">1</span>)</span>
@@ -1538,7 +1541,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    laliga_forecast<span class="sc">$</span>AwayTeam, <span class="st">"Draw"</span>))</span>
 <span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(laliga_forecast) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(laliga_forecast, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(laliga_forecast, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -2111,7 +2114,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>While these predictions are good if you want to bet on the likely winner they do not reflect how the actual endgame will play out, e.g., there is not a single draw in the predicted_winner column. So at last let’s look at a possible version of the La Liga endgame by displaying the simulated match results calculated earlier.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>laliga_sim <span class="ot">&lt;-</span> laliga[<span class="fu">is.na</span>(laliga<span class="sc">$</span>HomeGoals), <span class="fu">c</span>(<span class="st">"Season"</span>, <span class="st">"Week"</span>, <span class="st">"HomeTeam"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>laliga_sim <span class="ot">&lt;-</span> laliga[<span class="fu">is.na</span>(laliga<span class="sc">$</span>HomeGoals), <span class="fu">c</span>(<span class="st">"Season"</span>, <span class="st">"Week"</span>, <span class="st">"HomeTeam"</span>,</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AwayTeam"</span>)]</span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>laliga_sim<span class="sc">$</span>home_goals <span class="ot">&lt;-</span> m3_forecast[, <span class="st">"rand_home_goal"</span>]</span>
 <span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>laliga_sim<span class="sc">$</span>away_goals <span class="ot">&lt;-</span> m3_forecast[, <span class="st">"rand_away_goal"</span>]</span>
@@ -2120,7 +2123,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Draw"</span>))</span>
 <span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(laliga_sim) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(laliga_sim, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(laliga_sim, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -2595,7 +2598,7 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <h1>Calculating the Predicted Payout for Sevilla vs Valencia, 2013-06-01</h1>
 <p>At the time when this model was developed (2013-05-28) most of the matches in the 2012/2013 season had been played and Barcelona was already the winner (and the most skilled team as predicted by my model). There were however some matches left, for example, Sevilla (home team) vs Valencia (away team) at the <span class="math inline">\(1\)</span>st of June, 2013. One of the powers with using Bayesian modeling and MCMC sampling is that once you have the MCMC samples of the parameters it is straight forward to calculate any quantity resulting from these estimates while still retaining the uncertainty of the parameter estimates. So let’s look at the predicted distribution of the number of goals for the Sevilla vs Valencia game and see if I can use my model to make some money. I’ll start by using the MCMC samples to calculate the distribution of the number of goals for Sevilla and Valencia.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ms3)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ms3)</span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>home_team <span class="ot">&lt;-</span> <span class="fu">which</span>(teams <span class="sc">==</span> <span class="st">"FC Sevilla"</span>)</span>
 <span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>away_team <span class="ot">&lt;-</span> <span class="fu">which</span>(teams <span class="sc">==</span> <span class="st">"FC Valencia"</span>)</span>
 <span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">which</span>(seasons <span class="sc">==</span> <span class="st">"2012/13"</span>)</span>
@@ -2605,12 +2608,12 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 <span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>away_baseline <span class="ot">&lt;-</span> ms3[, <span class="fu">col_name</span>(<span class="st">"away_baseline"</span>, season)]</span>
 <span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>home_goals <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(home_baseline <span class="sc">+</span> home_skill <span class="sc">-</span> away_skill))</span>
-<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>away_goals <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(away_baseline <span class="sc">+</span> away_skill <span class="sc">-</span> home_skill))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>away_goals <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(away_baseline <span class="sc">+</span> away_skill <span class="sc">-</span> home_skill))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Looking at summary of these two distributions shows that it will be a close game but with a slight advantage for the home team Sevilla.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_goals</span>(home_goals, away_goals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="fl">2.2</span>, <span class="dv">4</span>))</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_goals</span>(home_goals, away_goals)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2621,8 +2624,8 @@ NA ← Real Madrid     vs     Barcelona →      NA       NA       NA</code></pr
 </div>
 <p>When developing the model (2013-05-28) the author got the specific payouts (that is, how much would I get back if my bet was successful) for betting on the outcome of this game on a betting site. Using my simulated distribution of the number of goals I can calculate the predicted payouts of my model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span><span class="fu">c</span>(<span class="at">Sevilla =</span> <span class="fu">mean</span>(home_goals <span class="sc">&gt;</span> away_goals), <span class="at">Draw =</span> <span class="fu">mean</span>(home_goals <span class="sc">==</span> away_goals),</span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">Valencia =</span> <span class="fu">mean</span>(home_goals <span class="sc">&lt;</span> away_goals))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span><span class="fu">c</span>(<span class="at">Sevilla =</span> <span class="fu">mean</span>(home_goals <span class="sc">&gt;</span> away_goals), <span class="at">Draw =</span> <span class="fu">mean</span>(home_goals <span class="sc">==</span> away_goals),</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">Valencia =</span> <span class="fu">mean</span>(home_goals <span class="sc">&lt;</span> away_goals))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>NA  Sevilla     Draw Valencia 
 NA 2.281369 3.841229 3.318584</code></pre>
@@ -2630,7 +2633,7 @@ NA 2.281369 3.841229 3.318584</code></pre>
 </div>
 <p>I should clearly bet on Sevilla as my model predicts a payout of <span class="math inline">\(2.24\)</span> (that is, a likely win for Sevilla) while betsson.com gives me the much higher payout of <span class="math inline">\(3.2\)</span>. It is also possible to bet on the final goal outcome so let’s calculate what payouts my model predicts for different goal outcomes.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>goals_payout <span class="ot">&lt;-</span> <span class="fu">laply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(home_goal) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>goals_payout <span class="ot">&lt;-</span> <span class="fu">laply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(home_goal) {</span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">laply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(away_goal) {</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span><span class="sc">/</span><span class="fu">mean</span>(home_goals <span class="sc">==</span> home_goal <span class="sc">&amp;</span> away_goals <span class="sc">==</span> away_goal)</span>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    })</span>
@@ -2639,7 +2642,7 @@ NA 2.281369 3.841229 3.318584</code></pre>
 <span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(goals_payout) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Valencia"</span>, <span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">sep =</span> <span class="st">" - "</span>)</span>
 <span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(goals_payout) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Sevilla"</span>, <span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">sep =</span> <span class="st">" - "</span>)</span>
 <span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>goals_payout <span class="ot">&lt;-</span> <span class="fu">round</span>(goals_payout, <span class="dv">1</span>)</span>
-<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(goals_payout, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(goals_payout, <span class="st">"pandoc"</span>, <span class="at">align =</span> <span class="st">"c"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -2804,13 +2807,14 @@ Su, Yu-Sung, Masanao Yajima, Maintainer Yu-Sung Su, and JAGS SystemRequirements.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

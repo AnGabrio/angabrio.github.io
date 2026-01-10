@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-54989a6d3e0684930921735f132eff69.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,6 +117,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -239,7 +242,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The paper is constructed in the form of a step-by-step tutorial on performing trial-based CEA using a variety of methods to account for possible issues affecting the data. To demonstrate how the methods can be applied in practice, they simulate a fake RCT dataset of 200 people (106 in the control and 94 in the intervention) together with other baseline variables that include age, sex, utility scores and costs. The construct a treatment variable Tr denoting whether individuals were assigned to the control (0) or intervention (1) group, and generate follow-up outcome variables for both utilities and costs for 3, 6, 9 and 12 months. Finally, they introduce missingness in all outcome follow-up variables according to a <strong>missing at random</strong> (MAR) assumption, where the chance of missingness is made dependent on the observed baseline variables age and sex. Key characteristics of the data that they outlined as important to take into account, and which are typical of most CEAs, include: presence of missing outcome data in both effectiveness and cost post-randomisation variables, high degrees of skewness for all outcome variables, presence of a correlation between utilities and costs, and presence of imbalances between the groups in some baseline variables. To tackle these issues within a single analysis, as it often occurs in practice, they suggest the use of well-known approaches in the literature, including the use of multiple imputation to handle MAR missingness, non-parametric bootstrapping to handle non-normality, seemingly unrelated regression methods to capture correlations, and regression adjustment approaches to account for baseline imbalances. Although all these methods are well known in the literature, they are hardly used <strong>jointly</strong> in a real analysis, even in the presence of all these data features, possibly because of the lack of knowledge of expertise needed in order to implement such approaches in standard software. Because of this, I really think this paper provides some useful and very heplful indications and guidelines to readers interested in these analyses and warn them about the pitfalls of relying on the use of simpler but likely inadequate methods (e.g.&nbsp;simply discarding missing cases or ad-hoc imputing missing values instead of accounting for properly missingness uncertainty).</p>
 <p>For the purpose of this post, I will simulate my own dataset and apply the methods the author proposed to the newly generated data, so keep in mind that results will not be the same as those obtained by the authors using their own simulated data. So, let’s start with simulating a multivariate non-normal outcome variables (utilities and costs) for 200 people at multiple time points (time 0, 1, 2, 3, 4). To simulate these types of outcomes, for example, I can rely on Gamma distributions and link these distributions to each other through a regression to the mean approach in order to ensure some degree of correlation between each pair of variables. As for the temporal association, we can assume a first-order autoregressive structure to simplify the simulation of the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>Tr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">106</span>),<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">94</span>))</span>
@@ -299,11 +302,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c2 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c2<span class="sc">*</span><span class="dv">1000</span></span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c3 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c3<span class="sc">*</span><span class="dv">1000</span></span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>c4 <span class="ot">&lt;-</span> data_sim_ec<span class="sc">$</span>c4<span class="sc">*</span><span class="dv">1000</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>data_sim_ec <span class="ot">&lt;-</span> data_sim_ec[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(data_sim_ec)), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can now inspect the empirical distributions of the two outcomes by treatment group to have an idea of the level of the associated skewness and examine correlation coefficients to see what type of association we should expect to find. For example, let’s examine the pair of u and c variables at time 4:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#scatterplot of e and c data by group</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data_sim_ec<span class="sc">$</span>Trf <span class="ot">&lt;-</span> <span class="fu">factor</span>(data_sim_ec<span class="sc">$</span>Tr)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(data_sim_ec<span class="sc">$</span>Trf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"old"</span>,<span class="st">"new"</span>)</span>
@@ -316,7 +319,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>c4_hist <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_sim_ec, <span class="fu">aes</span>(<span class="at">x=</span>c4))<span class="sc">+</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">"black"</span>, <span class="at">fill=</span><span class="st">"grey"</span>)<span class="sc">+</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Trf <span class="sc">~</span> .) <span class="sc">+</span> <span class="fu">theme_classic</span>()</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u4_hist, c4_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(u4_hist, c4_hist, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -327,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>With a correlation coefficient between the two variables of -0.1962025. Next, we need to introduce some missing values at all follow-up times, using a MAR mechanism dependent on age and sex. We can accomplish this using a series of logistic regression using as outcome the missingness indicator for the corresponding outcome variable and including into those regressions age and sex as predictors. We then need to play around with the regression coefficients to obtain desired amount of missing values for each variable.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">768</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>gamma0_u1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.3</span></span>
@@ -385,11 +388,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c1 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c1<span class="sc">*</span><span class="dv">1000</span></span>
 <span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c2 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c2<span class="sc">*</span><span class="dv">1000</span></span>
 <span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c3 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c3<span class="sc">*</span><span class="dv">1000</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c4 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c4<span class="sc">*</span><span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>data_sim_ec_obs<span class="sc">$</span>c4 <span class="ot">&lt;-</span> data_sim_ec_obs<span class="sc">$</span>c4<span class="sc">*</span><span class="dv">1000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can inspect the data through the command “summary” in order to have an idea about the number and proportions of missing values for each variable in our dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data_sim_ec_obs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data_sim_ec_obs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       id               Tr            age               sex       
  Min.   :  1.00   Min.   :0.00   Min.   :  5.697   Min.   :0.000  
@@ -430,12 +433,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="step-1-imputation">Step 1 Imputation</h2>
 <p>First, the problem of missing values is handled via multiple imputation techniques separately by treatment arm, with particular reference to its <em>multiple imputation by chained equations</em> version. This is typically the type of MI methods used due to the simplicity of implementation (based on univariate regression approaches) and its flexibility in dealing with data-specific features such as high levels of skewness. Indeed, at the imputation step, an imputation model is created using the <em>predictive mean matching</em> approach which allows to preserves the features of the data you are trying to impute (the basic idea is that imputations are generated based on some sampling with replacement approach from the observed data). I this way, M=5 imputed datasets are created and then aggregated quantities in terms of effectiveness (e.g.&nbsp;QALYs) and costs are generated by combining the imputations for each imputed outcome variable across datasets. In my example, since missingness only depends on age and sex, I remove all outcome variables as predictors from the imputation models to simplify the implementation. In general, since MAR cannot be tested, it is always wise to include as many observed variables as possible as predictors in the imputation model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Tr0 <span class="ot">&lt;-</span> <span class="fu">subset</span>(data_sim_ec_obs, Tr<span class="sc">==</span><span class="dv">0</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Tr1 <span class="ot">&lt;-</span> <span class="fu">subset</span>(data_sim_ec_obs, Tr<span class="sc">==</span><span class="dv">1</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pred.Mat <span class="ot">&lt;-</span> <span class="fu">make.predictorMatrix</span>(data_sim_ec_obs)</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pred.Mat[,<span class="fu">c</span>(<span class="st">"Tr"</span>,<span class="st">"id"</span>,<span class="st">"u1"</span>,<span class="st">"c1"</span>,<span class="st">"u2"</span>,<span class="st">"c2"</span>,<span class="st">"u3"</span>,<span class="st">"c3"</span>,<span class="st">"u4"</span>,<span class="st">"c4"</span>)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>imp.Tr0 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr0, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>imp.Tr0 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr0, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  iter imp variable
@@ -465,7 +468,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   5   4  u1  c1  u2  c2  u3  c3  u4  c4
   5   5  u1  c1  u2  c2  u3  c3  u4  c4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>imp.Tr1 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr1, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>imp.Tr1 <span class="ot">&lt;-</span> <span class="fu">mice</span>(Tr1, <span class="at">m=</span><span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">predictorMatrix =</span> pred.Mat, <span class="at">seed =</span> <span class="dv">678</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  iter imp variable
@@ -495,16 +498,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   5   4  u1  c1  u2  c2  u3  c3  u4  c4
   5   5  u1  c1  u2  c2  u3  c3  u4  c4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">rbind</span>(imp.Tr0,imp.Tr1)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">rbind</span>(imp.Tr0,imp.Tr1)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>impdat <span class="ot">&lt;-</span> <span class="fu">complete</span>(imp, <span class="at">action =</span> <span class="st">"long"</span>, <span class="at">include =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> imp[[<span class="st">"m"</span>]]</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>impdat<span class="sc">$</span>Tcosts <span class="ot">&lt;-</span> (impdat<span class="sc">$</span>c1 <span class="sc">+</span> impdat<span class="sc">$</span>c2 <span class="sc">+</span> impdat<span class="sc">$</span>c3 <span class="sc">+</span> impdat<span class="sc">$</span>c4)</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>impdat<span class="sc">$</span>QALY <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span><span class="sc">*</span>(((impdat<span class="sc">$</span>u0 <span class="sc">+</span> impdat<span class="sc">$</span>u1)<span class="sc">*</span><span class="fl">0.25</span>) <span class="sc">+</span> (impdat<span class="sc">$</span>u1 <span class="sc">+</span> impdat<span class="sc">$</span>u2)<span class="sc">*</span><span class="fl">0.25</span> <span class="sc">+</span> (impdat<span class="sc">$</span>u2 <span class="sc">+</span> impdat<span class="sc">$</span>u3)<span class="sc">*</span><span class="fl">0.25</span> <span class="sc">+</span> ((impdat<span class="sc">$</span>u3 <span class="sc">+</span> impdat<span class="sc">$</span>u4)<span class="sc">*</span><span class="fl">0.25</span>))</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>impdata <span class="ot">&lt;-</span> <span class="fu">split</span>(impdat, <span class="at">f =</span> impdat<span class="sc">$</span>.imp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>impdata <span class="ot">&lt;-</span> <span class="fu">split</span>(impdat, <span class="at">f =</span> impdat<span class="sc">$</span>.imp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>One thing that the authors do not mention at this point, which however I think can be quite important, is the need to check convergence of the algorithm behind mice since this is essentially based on the same iterative approach of Markov Chain Monte Carlo methods used for Bayesian inference. The main point being that, in case of potential issues in convergence, then results may change depending on how many iterations you decide to run the model before “sampling” from it the imputations. See <a href="https://stefvanbuuren.name/fimd/sec-diagnostics.html">here</a> for a detailed explanation from the creator of mice, prof. Stef van Buuren, of why this is important to do and the different tools that can be used to do these checks. Some examples of diagnostic tools available in mice to check possible issues in the convergence of the algorithm: the <em>plot</em> function, by default showing the mean and variance of the imputations as a hint of the behaviour of the algorithm; the <em>stripplot</em> and <em>densityplot</em> function, respectively dedicated to compare the distributions and the kernel density estimates of imputed vs observed data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp.Tr0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -526,7 +529,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stripplot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stripplot</span>(imp.Tr0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -534,7 +537,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">densityplot</span>(imp.Tr0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">densityplot</span>(imp.Tr0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -550,7 +553,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Next, we proceed to use a non-parametric bootstrap procedure in combination with a SUR approach fitted at the level of the imputed QALY and TCost variables. These methods, implemented through the <em>boot</em> and <em>systemfit</em> package, account for the skewness of the imputed/observed data as well as the correlation between the outcome variables. These are very typical features of trial-based CEA data which need to be taken into account. In addition, the modelling framework granted by SUR allows the inclusion of predictors into the analysis by means of a regression adjustment approach, therefore allowing us to include important variables as predictors into the model to control for possible baseline imbalances between treatment groups.</p>
 <p>We start by creating a function to fit SUR models to the imputed QALY and TCost data and to extract the model estimates of interest, and then proceed to apply the boot function (here I choose to set the number of bootstrap replications to 1000) to each imputed dataset to retrieve the estimates of interest from each analysis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(boot)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfit)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>fsur <span class="ot">&lt;-</span> <span class="cf">function</span>(x,i){</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a> dataset <span class="ot">&lt;-</span> x[i,]</span>
@@ -562,22 +565,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#ff &lt;- boot(data = impdata[[1]], statistic = fsur, R=1000)</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>bootce <span class="ot">&lt;-</span> <span class="fu">lapply</span>(impdata, <span class="cf">function</span>(x) <span class="fu">boot</span>(<span class="at">data =</span> x, <span class="at">statistic =</span> fsur, <span class="at">R=</span><span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>bootce <span class="ot">&lt;-</span> <span class="fu">lapply</span>(impdata, <span class="cf">function</span>(x) <span class="fu">boot</span>(<span class="at">data =</span> x, <span class="at">statistic =</span> fsur, <span class="at">R=</span><span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The main idea is to fir SUR models to each imputed dataset and, within each of these, run the analysis a sufficiently large amount of times (here 1000), each time sampling with replacement so to obtain a “distribution” of the estimates of interest for each analysis fitted to each of the imputed datasets. You can imagine that this procedure can become quite computationally expensive as soon as either the number of imputations or the number of bootstrap replications are increased. Unfortunately, this is neede in order to retrieve replications of the estimates of interest that capture both sampling uncertainty (by means of boostrapping) and missing data uncertainty (by means of multiple imputations). A quick note I would like to make here is that, despite this being the most easy way to implement this approach, it is not the only one. Indeed, it is also possible to: first generate bootstrap replications of the <strong>observed</strong> data alone leaving missing values as missing, and only then apply the multiple imputation procedure within each of the replicated bootstrapped observed dataset. See for reference the paper from <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.7956">Brand at al.&nbsp;(2018)</a>). In general, the latter is the one that makes ore sense to me since you are not generating bootstrap replications of imputed data which may or may not be an accurate representations of the actual underlying missing values, but only generate imputations after the observed data have been already bootstrapped. However, this procedure has the drawback of being much more challenging to implement due to the fact that, within each of the R boostrapped datasets you need to run M imputations. In addition, no strong evidence was found in the literature about the overperformance of one approach in comparison to the other in terms of estimates validity and efficiency, provided the model and missingness mechanism are correctly specified. In truth, there is no clear theoretical reasoning behind the performance of these approaches and conclusions on their appropriateness are mostly based on simulation results which seem to indicate no substantial difference between the two methods. Personally, I am always a bit hesitant to say that one method is better than the other given that no clear evidence as been found in the literature but I can understand that analysts always prefer the first approach due to its implementation simplicity.</p>
 <p>Moving on, we now proceed to extract the statistics of interest from each imputed dataset as well as from the overall bootstrapped list object. I believe it is important to note that you need to load the packages <em>dplyr</em> and <em>purrr</em> in order to obtain the output described by the author.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">lapply</span>(bootce, <span class="cf">function</span>(x)((x[[<span class="st">"t0"</span>]])))</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">lapply</span>(imputed, setNames, <span class="fu">c</span>(<span class="st">"cost_diff"</span>,<span class="st">"effect_diff"</span>))</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">reduce</span>(imputed, bind_rows))</span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>postboot <span class="ot">&lt;-</span> <span class="fu">lapply</span>(bootce, <span class="cf">function</span>(x) <span class="fu">as.data.frame</span>((x[[<span class="st">"t"</span>]])))</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>postboot <span class="ot">&lt;-</span> <span class="fu">lapply</span>(postboot, setNames, <span class="fu">c</span>(<span class="st">"bootcost_diff"</span>,<span class="st">"booteffect_diff"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>postboot <span class="ot">&lt;-</span> <span class="fu">lapply</span>(postboot, setNames, <span class="fu">c</span>(<span class="st">"bootcost_diff"</span>,<span class="st">"booteffect_diff"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we pooled statistics of interest across imputed datasets via Rubin’rules and get additional information about imutations such as the fraction of missing information and loss of efficiency for both effectiveness and cost differential estimates.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pooled <span class="ot">&lt;-</span> <span class="fu">apply</span>(imputed, <span class="dv">2</span>, mean)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pooled <span class="ot">&lt;-</span> <span class="fu">apply</span>(imputed, <span class="dv">2</span>, mean)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cost_diff_pooled <span class="ot">&lt;-</span> pooled[[<span class="st">"cost_diff"</span>]]</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>effect_diff_pooled <span class="ot">&lt;-</span> pooled[[<span class="st">"effect_diff"</span>]]</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ICER <span class="ot">&lt;-</span> cost_diff_pooled<span class="sc">/</span>effect_diff_pooled</span>
@@ -597,14 +600,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>UL_effect_pooled <span class="ot">&lt;-</span> effect_diff_pooled <span class="sc">+</span> (Za<span class="sc">*</span><span class="fu">sqrt</span>(cov_pooled[<span class="dv">2</span>,<span class="dv">2</span>]))</span>
 <span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>FMI <span class="ot">&lt;-</span> B<span class="sc">/</span>(B<span class="sc">+</span>W)</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>LE <span class="ot">&lt;-</span> FMI<span class="sc">/</span>M</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>LE <span class="ot">&lt;-</span> FMI<span class="sc">/</span>M</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="step-3-cea" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-cea">Step 3 CEA</h2>
 <p>Finally, we conclude the analysis by creating standard summaries of CE results, using the CE plane, net monetary benefit (NMB), and CEA curve. The authors write down their own code for getting this plot and I agree this is a nice idea to show how these are generated. However, for the purpose of analysts I think they can also rely on default package functions, such as bcea in the package <em>BCEA</em>, in order to automatically generate these plots. In case customisation of these is desired, then of course writing down your own code for the plotting is very useful.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpointdensity)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>point <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(imputed)</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>boot <span class="ot">&lt;-</span> <span class="fu">reduce</span>(postboot, bind_rows)</span>
@@ -617,7 +620,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.02</span>)) <span class="sc">+</span></span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">4500</span>,<span class="at">by=</span><span class="dv">1000</span>)) <span class="sc">+</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -627,7 +630,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>wtp <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">80000</span>,<span class="dv">1000</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>wtp <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">80000</span>,<span class="dv">1000</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>CEAC <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(wtp)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>NB <span class="ot">&lt;-</span> (wtp<span class="sc">*</span>effect_diff_pooled) <span class="sc">-</span> cost_diff_pooled</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>varNB <span class="ot">&lt;-</span> wtp<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>cov_pooled[<span class="dv">2</span>,<span class="dv">2</span>] <span class="sc">+</span> cov_pooled[<span class="dv">1</span>,<span class="dv">1</span>] <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span>wtp<span class="sc">*</span>cov_pooled[<span class="dv">1</span>,<span class="dv">2</span>]</span>
@@ -640,7 +643,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y=</span><span class="st">"CEAC"</span>) <span class="sc">+</span></span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -711,13 +714,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
