@@ -1,0 +1,350 @@
+---
+title: "Survival Analysis - Examples"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2026-03-11
+categories: [Quarto, R, Academia, Medical Statistics, Survival Analysis] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+bibliography: references.bib
+nocite: |
+  @*
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello dear readers, I hope everything is well with you. Today, I will just write a quick post as a follow up from the previous talk about the basic elements of **survival analysis**. Make sure to go back to my last post if you would like a re-fresher on the topic or if you feel a bit lost while reading today's post. In particular, I would like here to go over a couple of examples on how simple survival analysis methods may be applied in practice, using some hypothetical case studies as motivating examples. I think this is useful as it allows to see in practice how the methods introduced before, mostly from a theoretical perspective, can be applied in real life situations and when they may come in handy.
+
+Having said so, let's start with the exercises, I hope you find them useful!
+
+# Examples
+
+## Example 1
+
+The following data concern the survival of 8 patients who received an HIV positive diagnosis. The reported data include: patient id, age at diagnosis and at outcome occurrence as well as the type of outcome.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#generate data
+id_ex1 <- seq(1:8)
+age_diag_ex1 <- c(25, 28, 37, 39, 42, 46, 51, 58)
+age_out_ex1 <- c(42, 37, 57, 50, 55, 49, 71, 72)
+outcome_ex1 <- c("Death", "Death", "Alive at end of FU", "Alive at end of FU", "Death", "Death", "Alive at end of FU", "Alive at end of FU")
+df_ex1 <- data.frame(id_ex1, age_diag_ex1, age_out_ex1, outcome_ex1)
+names(df_ex1) <- c("ID", "Age at diagnosis", "Age at outcome", "Outcome")
+df_ex1
+```
+
+Consider the time at "time at risk" to start at diagnosis and to end when a patient dies or at the end of the follow-up (FU). 
+
+  1. Calculate the time at risk for each patient. This is achieved by simply calculating the duration between the start and end time for each patient. In the event the patient did not experienced the event by the end time, what it is known is that the patient has a survival time at least equal to the observed time duration. This defines a right-censoring mechanism, which is recorded using a corresponding censoring indicator (0 for censored observation and 1 otherwise).
+  
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#compute time at risk (survival time)
+df_ex1$time <- df_ex1$`Age at outcome` - df_ex1$`Age at diagnosis`
+df_ex1$cens <- ifelse(df_ex1$Outcome != "Death", 0, 1)
+
+cbind.data.frame(df_ex1$time, df_ex1$cens)
+```
+
+  2. Calculate the overall death rate. This is obtained by first calculating the total time at risk, given by the sum of all patient survival times, and the total number of deaths. Next, the overall death rate is obtained as the ratio between the total number of deaths and the total time at risk.
+  
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#compute overall death rate
+sum(df_ex1$cens == 1) / sum(df_ex1$time)
+```  
+
+  3. Calculate the *Kaplan-Meier* estimate of the survival function. We can manually calculate the KM estimate step by step. First, sort the times in increasing order; second, count the number of patients at risk and number of deaths in each time interval; third, calculate the conditional probabilities of surviving each interval; fourth, calculating the cumulative probabilities of survival from time 0 until the end of each interval, representing the KM estimate.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#manually calculate KM estimate
+#step 1: sort by unique event times and add time origin
+sort_times <- sort(unique(df_ex1$time))
+sort_times0 <- c(0, sort_times[-length(sort_times)])
+
+#step 2-3: count the number at risk (having not experienced event) and number of deaths in each interval [t(j),t(j+1))
+n.atrisk <- n.dead <- rep(NA, length(sort_times))
+for(i in 1:length(sort_times)) {
+  n.atrisk[i] <- nrow(subset(df_ex1, time > sort_times0[i]))
+  n.dead[i] <- nrow(subset(subset(df_ex1, time > sort_times0[i]), 
+                           time <= sort_times[i] & cens == 1))
+}
+
+#step 4: calculate conditional probability of surviving the interval
+p.surv.int <- (n.atrisk - n.dead) / n.atrisk
+
+#step 5: calculate cumulative probability of survival from time zero until end of the interval 
+st_km <- cumprod(p.surv.int)
+
+#put in df from plotting
+km.df <- data.frame(sort_times0, sort_times, n.atrisk, n.dead, p.surv.int, st_km)
+names(km.df) <- c("Survival_time0", "Survival_time", "n", "d", "p", "S_KM")
+
+km.df
+```
+
+We can also double checks our calculations using the function `survfit` inside the package `survival`, which allows to easily retrieve KM estimates with additional output.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#check calculations using survival package
+library(survival)
+km_survfit_ex1 <- survfit(Surv(time, cens) ~ 1, data=df_ex1)
+summary(km_survfit_ex1)
+```
+
+As it can be seen, KM estimates from `survfit` (`"survival"`) coincide with those manually computed (`"S_KM"`), with the only difference that duplicate estimates are removed from the output of the package.
+
+  4. Using the estimates from 3., draw a KM plot and estimate the median survival time. Once estimates for KM probabilities are computed for each interval, we can simply draw them together with the corresponding survival times to obtain the KM plot using a stepwise function. In @fig-km the short vertical bars are used to denote the times where censoring occurs. 
+
+```{R}
+#| eval: true
+#| echo: true
+#| warning: false
+#| error: false
+#| tidy: true 
+#| fig.show: 'hold'
+#| out.width: '80%' 
+#| out.extra: ''
+#| fig.pos: 'h'
+#| label: fig-km
+#| fig.cap: "KM plot."
+
+#add new line to KM data set to make plot start at 1 on Y axis
+line1 <- cbind.data.frame(0,0,8,1,1,1)
+names(line1) <- names(km.df)
+km.df <- rbind.data.frame(line1,km.df)
+
+#manually draw KM plot
+library(ggplot2)
+ggplot(km.df, aes(x=Survival_time, y=S_KM)) +
+  geom_step(color="red", size=1, alpha=0.9, linetype=1) +
+  geom_point(data = km.df[km.df$d==0, ], color = "red", shape = "|", size = 4) +
+  xlab("Survival time (weeks)") + ylab("S(t)=P(T>t)") +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 21)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 1.1)) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), plot.title = element_text(hjust = 0.5), 
+        strip.background =element_rect(fill="white"))
+```
+
+
+Finally, we can also obtain the median survival time for this data set as the smallest time $t$ for which $\hat{S}(t)<0.5$.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#calculate median sruvival time
+min(km.df$Survival_time[km.df$S_KM < 0.5], na.rm = TRUE)
+```
+
+## Example 2
+
+The data below show survival times for a group of patients treated for node positive breast cancer. The time of interest is the time (in days) from treatment until either cancer recurrence or death, with associated censoring indicator. Patients are stratified into two groups: those with a low number of positive lymph nodes ($n=8$); those with a high number of lymph nodes ($n=6$).
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#generate data
+library(kableExtra)
+id_ex2 <- seq(1:14)
+time_ex2 <- c(17, 336, 488, 553, 967, 1434, 1645, 2455, 
+              171, 575, 868, 960, 1142, 1357)
+cens_ex2 <- c(0, 1, 0, 0, 0, 0, 0, 0, 
+              1, 1, 1, 1, 0, 0)
+group_ex2 <- c(rep("low", 8), 
+               rep("high", 6))
+df_ex2 <- data.frame(id_ex2, time_ex2, cens_ex2, group_ex2)
+names(df_ex2) <- c("ID", "time", "cens", "group")
+df_ex2$group <- factor(df_ex2$group, levels = c("low", "high"))
+df_ex2
+```
+
+Perform a log-rank test of the null hypothesis that the survival distributions are the same for the two groups. To compute the test statistic, we can again follow a step procedure: first, sort out the number of unique times; second, count the number at risk and the number of deaths in each time interval separately for each group; third, compute the number of patients alive and uncensored, the number of deaths in each interval across groups, and the number of expected deaths in each group.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#calculate log-rank test statistic
+
+# get group levels and their number
+group.lev <- levels(df_ex2$group)
+n.group.lev <- length(group.lev)
+# sort out unique times
+sort_times <- sort(unique(df_ex2$time))
+sort_times0 <- c(0, sort_times[-length(sort_times)])
+
+# calculate number at risk and dead for each interval by group
+n.atrisk <- n.dead <- matrix(NA, nrow = nrow(df_ex2), ncol = (n.group.lev+1))
+n.atrisk[, 1] <- n.dead[, 1] <- df_ex2$time 
+for(i in 1:length(sort_times)) {
+  for(j in 1:n.group.lev) {
+   n.atrisk[i, j+1] <- nrow(subset(subset(df_ex2, time > sort_times0[i]), group == group.lev[j]))
+   n.dead[i, j+1] <- nrow(subset(subset(df_ex2, time == sort_times[i]), 
+                            cens == 1 & group == group.lev[j]))
+  }
+}
+colnames(n.atrisk) <- c("Time", paste("n", group.lev, sep = "."))
+colnames(n.dead) <- c("Time", paste("d", group.lev, sep = "."))
+tbl.res <- cbind.data.frame(n.atrisk, n.dead[, -1])
+
+# compute number of alive and uncensored, number of deaths in each interval across groups, and the expected number of deaths in each group
+n.all <- apply(tbl.res[, paste("n", group.lev, sep = ".")], 1, sum)
+d.all <- apply(tbl.res[, paste("d", group.lev, sep = ".")], 1, sum)
+n.exp <- tbl.res[, paste("n", group.lev, sep = ".")] * d.all / n.all 
+colnames(n.exp) <- paste("e", group.lev, sep = ".")
+tbl.res <- cbind.data.frame(tbl.res, n.exp)
+
+kbl(tbl.res)
+```
+
+Finally, we can compute the log-rank test statistic and get the corresponding p-value.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#compute chi2 statistic and get p-value
+
+Obs <- apply(tbl.res[, c("d.low", "d.high")], 2, sum)
+Exp <- apply(tbl.res[, c("e.low", "e.high")], 2, sum)
+chi2 <- sum((Obs - Exp)^2 / (Exp))
+
+chi2
+
+df <- length(unique(df_ex2$group)) - 1
+pval <- round(pchisq(chi2, df = df, lower.tail = FALSE), digits = 3)
+
+pval
+```
+
+We can also check the results using the function `survdiff` from `survival`
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#compute chi2 statistic and get p-value using survival package
+survdiff(Surv(time, cens) ~ group, data=df_ex2)
+```
+
+
+## Example 3
+
+The following data were collected during a trial of the drug 6-mercaptopurine (6-MP, $n=21$) compared to placebo ($n=21$) in patients with acute leukemia. The outcome of interest is the length of remission in weeks, with the data showing the lengths of remission (in weeks) for patients in each of the two groups, with associated censoring indicator.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#generate data
+library(survminer)
+id_ex3 <- seq(1:42)
+time_ex3 <- c(6, 6, 6, 6, 7, 9, 10, 10, 11, 13, 16, 17, 19, 20, 22, 23, 25, 32, 32, 34, 35,  
+              1, 1, 2, 2, 3, 4, 4, 5, 5, 8, 8, 8, 8, 11, 11, 12, 12, 15, 17, 22, 23)
+cens_ex3 <- c(1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+              rep(1, 21))
+group_ex3 <- c(rep("6-MP", 21), 
+               rep("pla", 21))
+df_ex3 <- data.frame(id_ex3, time_ex3, cens_ex3, group_ex3)
+names(df_ex3) <- c("ID", "time", "cens", "group")
+df_ex3$group <- factor(df_ex3$group, levels = c("6-MP", "pla"))
+df_ex3
+```
+
+  1. For each group, calculate the KM estimate of the survival function and draw the associated plot. To make things easier, as we have already shown how to manually compute the KM estimates, here we use the `survival` package to directly plot the estimates for both groups. We then use the function `ggsurvplot` from the package `survminer` to draw the plot in `ggplot2`.
+
+```{R}
+#| eval: true
+#| echo: true
+#| warning: false
+#| error: false
+#| tidy: true 
+#| fig.show: 'hold'
+#| out.width: '80%' 
+#| out.extra: ''
+#| fig.pos: 'h'
+#| label: fig-km3
+#| fig.cap: "KM plot for the groups 6-MP and placebo."
+
+#compute KM estimates and draw plot
+km_fit3 <- survfit(Surv(time, cens) ~ group, data=df_ex3)
+
+ggsurvplot(km_fit3, data = df_ex3,
+           palette = c("red", "black"),
+           legend.labs = c("6-MP", "pla")) 
+```
+
+  2. Perform a log-rank test of the null hypothesis that the distributions of the remission time are the same for the two groups. Also here we use the function `survdiff` from `survival` to directly obtain the test statistic esitmate and associated p-value.
+  
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+#compute chi2 statistic and get p-value using survival package
+survdiff(Surv(time, cens) ~ group, data=df_ex3)
+```
+
+So, were these examples helpful? I hope so, as I too find it challenging to have a good understanding of concepts such as KM estimate without having a proper look at some concrete examples and try to compute the quantities myself. Then, it is always good to double check your results with those from standard functions to make sure everything was correct and, if not, try to identify were the issues occurred. 
+
+Below I also leave further references in case you would like to have a look at some papers covering these basic survival analysis elements in a more rigorous and general way. Till next time!
+
+# References
