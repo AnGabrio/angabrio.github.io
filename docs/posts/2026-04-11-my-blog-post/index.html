@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrea Gabrio">
-<meta name="dcterms.date" content="2023-04-10">
+<meta name="dcterms.date" content="2026-11-08">
 
-<title>Some updates … – Andrea Gabrio</title>
+<title>Sample Size Calculations - I – Andrea Gabrio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -72,6 +72,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -137,21 +166,31 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#hyopthesis-test-based-calculations" id="toc-hyopthesis-test-based-calculations" class="nav-link" data-scroll-target="#hyopthesis-test-based-calculations">Hyopthesis test-based calculations</a></li>
+  <li><a href="#sample-size-adjustments" id="toc-sample-size-adjustments" class="nav-link" data-scroll-target="#sample-size-adjustments">Sample size adjustments</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Some updates …</h1>
+<h1 class="title">Sample Size Calculations - I</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Quarto</div>
     <div class="quarto-category">R</div>
     <div class="quarto-category">Academia</div>
-    <div class="quarto-category">publication</div>
-    <div class="quarto-category">conference</div>
+    <div class="quarto-category">Medical Statistics</div>
+    <div class="quarto-category">Sample Size Calculation</div>
   </div>
   </div>
 
@@ -178,7 +217,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 10, 2023</p>
+      <p class="date">November 8, 2026</p>
     </div>
   </div>
   
@@ -190,24 +229,95 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="featured.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<p>Hello folks and welcome back to my regular update on my blog. I am back after a short Easter break and ready to face all teaching and research tasks in the upcoming weeks. Today I feel also a bit energetic and would therefore like to continue my on-going topic of introducing readers to some basic elements of medical statistics. In particular, I would like to discuss the topic of <em>sample size calculation</em>, which has represented an important component in the building and setting-up of a new study although, in my experience, people tend to oversimplify this task, especially non-statisticians. So, what is this about and why it is of such a theoretical and practical importance when designing a study to answer a given research question? let me try to provide some general concepts around it together with a broad overview of different classical approaches to sample size calculations.</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>When designing a research study, it is essential to define how many patients are needed to answer the given research question. If the sample size is too small, there will be a loss of power and/or it will become impossible to distinguish real clinical improvements from chance variation; if the sample size is too large, some resources will be wasted, including the time invested by both patients and investigators. For these reasons, <strong>sample size calculations</strong> are required in many grant applications, research protocols and ethics applications.</p>
+<p>There are different approaches to sample size calculations, whose choice mainly depends on the objective of the study, design of the study and the preference of the investigators. Two classical groups of approaches are: <strong>Hypothesis test-based calculations</strong>; and <strong>Precision-based calculations</strong>.</p>
+<section id="hyopthesis-test-based-calculations" class="level2">
+<h2 class="anchored" data-anchor-id="hyopthesis-test-based-calculations">Hyopthesis test-based calculations</h2>
+<p>Hypothesis test-based approaches are grounded on calculating the sample size needed to perform a <em>statistical test</em> with sufficient <em>power</em>. A typical example is the comparison of a new treatment versus standard of care in terms of means (e.g.&nbsp;via t-test), proportions (e.g.&nbsp;via <span class="math inline">\(\chi^2\)</span> test) or survivor functions (e.g.&nbsp;via log-rank test).</p>
+<p>To illustrate the general idea behind the approach, let us consider an hypothetical trial where the investigators wish to assess whether a new drug is effective in reducing blood pressure in a given patient population. Patients will be randomised to either the new drug (1) or placebo (2), where blood pressure will be measured after the course of the treatment and compared across groups using a t-test at <span class="math inline">\(\alpha=0.05\)</span> level of significance. This research question can be represented in terms of classical hypotheses as: <span class="math inline">\(H_0:\mu_1=\mu_2\)</span> vs <span class="math inline">\(H_1:\mu_1 \neq \mu_2\)</span>. So, how many patients do we need to answer this research question?</p>
+<p>Let us start from the information given.</p>
+<ul>
+<li><p>First, we know that the level of significance or <em>type I error rate</em>, that is the probability of rejecting <span class="math inline">\(H_0\)</span> if it is true, is set to the conventional <span class="math inline">\(\alpha=0.05\)</span>.</p></li>
+<li><p>Second, we also need to define the <em>type II error rate</em>, that is the probability of not rejecting <span class="math inline">\(H_0\)</span> when it is false, which is usually denoted with <span class="math inline">\(\beta\)</span> and whose complement represents the so-called <em>power</em> of the test (<span class="math inline">\(1-\beta\)</span>), representing the probability of correctly rejecting <span class="math inline">\(H_0\)</span> when it is false. In many cases, trials are designed assuming by convention either <span class="math inline">\(0.8\)</span> or <span class="math inline">\(0.9\)</span> power.</p></li>
+<li><p>Third, we need to define the distribution of the test statistic under both <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span>, often by approximating the t-test statistic with that of a z-test: <span class="math inline">\(Z=\frac{(\bar{X}_2-\bar{X}_1)}{\sigma\sqrt{2/n}}\)</span>, where <span class="math inline">\(\bar{X}_1\)</span> and <span class="math inline">\(\bar{X}_2\)</span> are the sample means of the two groups, <span class="math inline">\(\sigma\)</span> is the standard deviation across both groups and <span class="math inline">\(n\)</span> is the number of patients in each group. Assuming normality of the outcome variable, we know the z statistic to be distributed as:</p></li>
+</ul>
+<p><span class="math display">\[
+Z \sim N(\frac{\mu_2-\mu_1}{\sigma \sqrt{2/n}}, 1),
+\]</span></p>
+<p>and statistical significance is achieved at <span class="math inline">\(\alpha=0.05\)</span> if <span class="math inline">\(\mid Z \mid &gt; 1.96\)</span>. Based on the information given before, we require that the trial has <span class="math inline">\(0.9\)</span> power and <span class="math inline">\(0.05\)</span> type I error rate:</p>
+<p><span class="math display">\[
+P(\mid Z \mid &gt; 1.96 \mid H_0)=0.05 \;\;\; \text{and} \;\;\; P(\mid Z \mid &gt; 1.96 \mid H_1) \geq 0.9
+\]</span> To derive the distribution of the z-test statistic under <span class="math inline">\(H_0\)</span>, we can simply observe that <span class="math inline">\(\mu_2-\mu_1=0\)</span>, which means <span class="math inline">\(Z \sim N(0,1)\)</span>, and thus <span class="math inline">\(P(\mid Z \mid &gt; 1.96 \mid H_0)=0.05\)</span>. The entire distribution of Z under <span class="math inline">\(H_0\)</span> can be graphically obtained as shown in <a href="#fig-ztesth0" class="quarto-xref">Figure&nbsp;1</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ztesth0" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="h">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ztesth0-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-ztesth0-1.png" class="img-fluid figure-img" style="width:80.0%" data-fig-pos="h">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ztesth0-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Distribution of Z under H0
+</figcaption>
 </figure>
 </div>
-<p>Hello guys, I hope everything is well with you and that you had some nice Easter break (at least I did). Personally, I really needed this break as I was quite tired and without energy due to the heavy workload in the past months. Now I feel refreshed and ready to start anew (let’s see how long this can last). Anyway, today I wanted to give some updates about what is up for me in the upcoming months as it has been a while that I have not made a post like this.</p>
-<p>First of all, I am happy to announce that my working paper has been accepted fot discussion at <a href="https://www.eur.nl/en/events/lolahesg-2023-05-25">lolaHESG</a>, which is the corresponding Dutch conference to the popular Health Economics Study Group conference in the UK, dedicated to researchers involved in health economics’ topics. I already attened last year’s edition, held in Maastricht, which was a blast. Amazing people and colleagues to talk to, nice food and accommodation, and most importantly lots of different presentations to attend and opening up of new connections and work relationships. Similarly, to last year, also for this year I am going to present some on-going work focussed on the modelling of health economics trial-based data which takes inspriation from <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510">one of my most recently published papers</a> about the use of longitudinal linear mixed models for the analysis of health economics trial data. The paper was a simple introduction to practitioners to the use and specification of mixed models for the analysis of trial-based health economics data, with a practical illustration on how to specify the models in software such as <code>STATA</code> or <code>R</code>, full code available on my <a href="https://github.com/AnGabrio/Code/tree/master/lmm_in_CEA">GitHub</a>. In the work I am going to present at lolaHESG, I hope can start from this introductory and applied paper and perform some simulations to assess the performance of the proposed methods across different missingness and data structure scenarios. It takes a bit of time but I think it will definitely be worth it, at least so that I can get some feedback form the other attendees on how to extend the work further (perhaps for a future paper). I am finalising the work in these days but I need to hurry up as the deadline for the submission of the full paper is the end of this week, I hope I can make it! I also have some nice ideas to further extend the work but I need to have some feedback on what I have done so far first.</p>
-<p>Second, and a bit unrelated to what I said, I wanted to breifly comment a recent tweet from Gelman</p>
-<p></p><div id="tweet-50273"></div><script>tweet={"url":"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657","author_name":"Andrew Gelman et al.","author_url":"https:\/\/twitter.com\/StatModeling","html":"\u003Cblockquote class=\"twitter-tweet\" align=\"center\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003E4 different meanings of p-value (and how my thinking has changed) \u003Ca href=\"https:\/\/t.co\/xY7vFX3IYf\"\u003Ehttps:\/\/t.co\/xY7vFX3IYf\u003C\/a\u003E\u003C\/p\u003E&mdash; Andrew Gelman et al. (@StatModeling) \u003Ca href=\"https:\/\/twitter.com\/StatModeling\/status\/1646866253544390657?ref_src=twsrc%5Etfw\"\u003EApril 14, 2023\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n\n","width":550,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"};document.getElementById("tweet-50273").innerHTML = tweet["html"];</script><p></p>
-<p>which I find it extremely interesting from a purely statistical perspective (sorry health economist audience!). The tweet links back to his blog on a post about a discussion on the concept and definition of the term p-value under a classical statistical framework which, unlike what we are told in basic statistics course, is not so clear-cut across all scenarios. Indeed, he refers to four different alternative definitions of p-values, which vary depending on the specific <em>quantity</em> the researcher refers to with the concept of p-value. In some scenarios, and typically these are the cases encountered in basic analysis problems, these definitions coincide and we have our usual description of a p-value. However, when we go outside such simple scenarios and focus more on what we mean by the term p-value, e.g.&nbsp;based on an test statistic or family of hypothesis tests. This is very interesting to me as the already quite confusing concept of a p-value and its relevance in the context of hypothesis testing framework is further subjected to easy misunderstandings. The whole discussion is <strong>about how can we define in an unique way the concept of p-value</strong> and the answer, as it usually is in these cases, is that there is no unique definition as it depends on what we mean by the quantity that we define with p-value, e.g.&nbsp;probability statement or a general summary of the data without any probabilistic meaning attached to it. As also Gelman points out in his post, also my thinking about p-values has changed over time. From necessary evils to be used to achieve some statistical conclusions about the likely existence of an effect to until confusing terms that people tend to misinterpret and based on which no critical decision should be based blindly. Regardless of this rumble of thoughts about p-values, I too think that it is not a problem that p-values are used in their common interpretation even though a general an unique definition for such term may not be possible. What is important I feel is that people are aware of the possibly confusing term that a p-value is and that they need to not blindly trust and interpret such values as if they were true statements, as what is meant by such statement may not be fully clear from the start.</p>
-<p>Let’s think careful when we do data analysis!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://gifer.com/en/1qsy.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</div>
+</div>
+<p>To derive the distribution of Z under <span class="math inline">\(H_1\)</span>, we need to specify the anticipated difference in means and the standard deviation. For example, assume the new drug will on average reduce blood pressure by <span class="math inline">\(5\)</span> mmHg (<span class="math inline">\(\mu_2-\mu_1=5\)</span>) and the standard deviation of the outcome across both groups is known to be <span class="math inline">\(10\)</span> mmHg (<span class="math inline">\(\sigma=10\)</span>). Then, we obtain</p>
+<p><span class="math display">\[
+Z \sim N \bigg(\frac{\sqrt{n}}{2\sqrt{2}},1\bigg),
+\]</span></p>
+<p>which shows how the distribution of Z under <span class="math inline">\(H_1\)</span> depends on the sample size <span class="math inline">\(n\)</span>. A graphical comparison of the assumed distribution of Z under <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span> is given in <a href="#fig-ztesth1" class="quarto-xref">Figure&nbsp;2</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ztesth1" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="h">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ztesth1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-ztesth1-1.png" class="img-fluid figure-img" style="width:80.0%" data-fig-pos="h">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ztesth1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Distribution of Z under H0 and H1
+</figcaption>
 </figure>
 </div>
+</div>
+</div>
+<p>If we require a power of <span class="math inline">\(0.9\)</span>, then we can use the above information to derive the value of <span class="math inline">\(n\)</span> needed in order to obtain a power of at least <span class="math inline">\(0.9\)</span>, given values for <span class="math inline">\(\alpha\)</span>, <span class="math inline">\((\mu_2-\mu_1)\)</span> and <span class="math inline">\(\sigma\)</span>. In general, we require that <span class="math inline">\(P(Z \mid H_1 &gt; z_{1-\alpha/2})=1-\beta\)</span> and solving for <span class="math inline">\(n\)</span> we obtain</p>
+<p><span class="math display">\[
+n = \frac{2\sigma^2(z_{1-\alpha/2}+z_{1-\beta})^2}{(\mu_2-\mu_1)^2},
+\]</span></p>
+<p>where in out case: <span class="math inline">\(z_{0.975}=1.96\)</span>; <span class="math inline">\(z_{0.9}=1.28\)</span>; <span class="math inline">\(\sigma=10\)</span>, <span class="math inline">\(\mu_2-\mu_1=5\)</span>. <strong>Note</strong>: it is also possible to derive the power <span class="math inline">\((1-\beta)\)</span> if we fixed <span class="math inline">\(n\)</span> first from the above formula. Often, the sample size equation is shortened to</p>
+<p><span class="math display">\[
+n = \frac{2(z_{1-\alpha/2}+z_{1-\beta})^2}{\Delta^2},
+\]</span> where <span class="math inline">\(\Delta=\frac{\mu_2-\mu_1}{\sigma}\)</span> is known as the <em>standardised</em> effect size.</p>
+<p>To illustrate how sample size calculations can be performed under different types of outcomes, let us now consider a trial investigating whether a given thrombolytic intervention reduces the risk of death following a heart attack. The aim is to establish whether this intervention has a lower one-year mortality risk (<span class="math inline">\(\pi_1\)</span>) compared to placebo (<span class="math inline">\(\pi_2\)</span>). Usually, we compare mortality using a z-test by setting: <span class="math inline">\(H_0:\pi_1=\pi_2\)</span> vs <span class="math inline">\(H_1:\pi_1 \neq \pi_2\)</span>. So, how many patients are needed?</p>
+<p>It is possible to follow the same approach, as shown for the continuous outcome, to derive a sample size equation for a binary outcome:</p>
+<p><span class="math display">\[
+n = \frac{(z_{1-\alpha/2}\sqrt{2\bar{\pi}(1-\bar{\pi})}+z_{1-\beta}\sqrt{\pi_1(1-\pi_1)+\pi_2(1-\pi_2)})^2}{(\pi_2-\pi_2)^2},
+\]</span></p>
+<p>where <span class="math inline">\(\pi_1\)</span> and <span class="math inline">\(\pi_2\)</span> are the expected proportions of deaths in the two groups, <span class="math inline">\(\bar{\pi}=\frac{\pi_1+\pi_2}{2}\)</span> is the overall proportion of deaths. The equation is often approximated as:</p>
+<p><span class="math display">\[
+n = \frac{2(z_{1-\alpha/2}+z_{1-\beta})^2}{\Delta^2},
+\]</span> where <span class="math inline">\(\Delta=\frac{(\pi_2-\pi_1)}{\sqrt{(\bar{\pi}(1-\bar{\pi}))}}\)</span> is the <em>standardised</em> effect size.</p>
+<p>Let us consider the following hypothetical data: <span class="math inline">\(\pi_2=0.2\)</span>, <span class="math inline">\(\pi_1=0.15\)</span>, <span class="math inline">\(\alpha=0.05\)</span> and <span class="math inline">\(\beta=0.2\)</span>. Then, we have <span class="math inline">\(\pi_2-\pi_1=0.05\)</span>, <span class="math inline">\(\bar{\pi}=0.175\)</span>, <span class="math inline">\(z_{0.975}=1.96\)</span> and <span class="math inline">\(z_{0.8}=0.84\)</span>. Next, we can fill all these values into the sample size equation to obtain <span class="math inline">\(n=906\)</span> in each group.</p>
+</section>
+<section id="sample-size-adjustments" class="level2">
+<h2 class="anchored" data-anchor-id="sample-size-adjustments">Sample size adjustments</h2>
+<p>In practice, we need to inflate the sample size as calculated from the above equations due to possible <em>drop-out</em> from the study or <em>lack of compliance</em> of some patients with the study medication. In addition, sample size also needs to be inflated when planning a study with <em>unequal randomisation</em>.</p>
+<p>To illustrate typical examples of these adjustments, let us now consider a trial comparing a new intervention and placebo for the treatment of spasticity due to multiple sclerosis, where the outcome is given by a muscle tone score (continuous) assuming an expected difference of <span class="math inline">\(2.5\)</span> units, a standard deviation of <span class="math inline">\(6.5\)</span> units, and a significance level and power of <span class="math inline">\(0.05\)</span> and <span class="math inline">\(0.8\)</span>, respectively. Using the formula for the Z test, we end up with <span class="math inline">\(n=107\)</span> needed in each group.</p>
+<p>We now consider the possibility of some of the patients in the study to drop out, who would cause a loss in power. To offset this loss, then sample size should be inflated accordingly. Assuming the anticipated drop-out proportion is <span class="math inline">\(d\)</span>, then the original sample size should be multiplied by an <em>inflation factor</em> of <span class="math inline">\(IF_d=1/(1-d)\)</span> to adjust for this expected drop-out proportion. For example, if <span class="math inline">\(d=0.1\)</span>, then <span class="math inline">\(IF_d=1.11\)</span> and the required total sample size after adjustment becomes <span class="math inline">\(N=2\times 107 \times 1.11=238\)</span>.</p>
+<p>If we consider the situation where some patients do not comply with the research protocol (i.e.&nbsp;patients not taking the assigned treatment), then we end up with a <em>dilution</em> of the effect size. To compensate this effect, we then need to multiply the original sample size by a different <em>inflation factor</em> of <span class="math inline">\(IF_{nc}=1/(1-NC_1-NC_2)^2\)</span>, where <span class="math inline">\(NC_1\)</span> and <span class="math inline">\(NC_2\)</span> denote the proportions of patients in the two groups who are non-compliant. For example, assume the expected proportion of non-compliant patients is <span class="math inline">\(0.3\)</span> in group 1 and <span class="math inline">\(0\)</span> in group 2; then we have <span class="math inline">\(IF_{nc}=2.04\)</span> and the updated total sample size can be obtained as <span class="math inline">\(N=2\times n \times IF_{nc}\)</span>.</p>
+<p>In case studies do not have an equal number of patients in each arm, the allocation of the number of patients to each group in the study is defined based on a so-called <em>allocation ratio</em> <span class="math inline">\(r\)</span>, i.e.&nbsp;<span class="math inline">\(1:r\)</span> allocation. Then, the sample size in group 1 can be obtained as</p>
+<p><span class="math display">\[
+n_1=\frac{(r+1)n}{2r},
+\]</span> and then derive <span class="math inline">\(n_2=r \times n_1\)</span>. For example, let us assume we want to use a <span class="math inline">\(1:2\)</span> (drug:placebo) allocation, which means <span class="math inline">\(r=2\)</span>. Then, we can obtain the number of patients in group 1 as <span class="math inline">\(n_1=3 \times n / 4\)</span>, and those in group 2 as <span class="math inline">\(n_2=n_1 \times 2\)</span>.</p>
+<p>I think for today this is it. I would like to continue the topic in my next update if possible as there still some topics I would like to touch, such as sample size calculation for survival outcomes and precision-based methods. However, time is up for me today. Maybe, see you in my next post if you liked this one!</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -628,5 +738,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<script src="https://platform.twitter.com/widgets.js"></script>
 </body></html>
