@@ -1,0 +1,184 @@
+---
+title: "Sample Size Calculations - II"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2026-05-07
+categories: [Quarto, R, Academia, Medical Statistics, Sample Size Calculation] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+#bibliography: references.bib
+#nocite: |
+#  @*
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello dear readers and welcome back to my usual update on my blog. Today I will simply continue and (hopefully) conclude the topic initiated in my previous post about some sample size calculation introductory elements. Last time we saw the basics behind theoretical sample size calculation formulae for continuous and binary outcomes as well as how to apply some adjustments to account for possible dropout, non-adherence and unequal allocation. Today we continue focussing on survival outcomes and introduce the topic of precision-based calculations and some miscellanea. Buckle up and get ready!
+
+# Hyopthesis test-based calculations
+
+## Sample size calculation for surival outcomes
+
+When the main outcome for the sample size calculation of the trial is some measure of survival (see previous posts for an overview of how this is often expressed), interest often lies in performing some *log-rank* test to compare the survival between two groups under the following hypothesis framework:
+
+$$
+H_0 : \text{HR}=1 \;\;\; \text{vs} \;\;\; H_1 : \text{HR}\neq 1,
+$$
+where $\text{HR}=\frac{h_{1t}}{h_{2t}}$ denotes the **hazard ratio** given by the ratio of the hazards of the two interventions, i.e. the instantaneous risk of failure (i.e. death). 
+
+Under $H_1$ the anticipated hazard ratio can be calculated from the expected ratio of median survival times 
+
+$$
+\text{HR}_{\text{exp}}=\frac{M_2}{M_1},
+$$
+
+where $M_i$ is the median survival time for treatment $i=1,2$. It is also possible to calculate $\text{HR}_{\text{exp}}$ from the expected proportions of who will survive until the end of the study in each intervention:
+
+$$
+\text{HR}_{\text{exp}}=\frac{\log \pi_1}{\log \pi_2},
+$$
+where $\pi_i$ denotes the expected survival proportion for treatment $i=1,2$. In theory, proportions $\pi_i$ measured at any time point during the study could be used to specify $\text{HR}_{\text{exp}}$. However, using the proportions at the end of the study is typically better as it allows to adjust for possible censoring.
+
+The total number of events (i.e. failures) required is the given by:
+
+$$
+n_e=(z_{1-\alpha/2}+z_{1-\beta})^2\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2,
+$$
+and the sample size in each group (assuming censoring) is then obtained as:
+
+$$
+n=\frac{(z_{1-\alpha/2}+z_{1-\beta})^2}{(2-\pi_1-\pi_2)}\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2.
+$$
+
+
+## Example
+
+As an example, let's assume a study aims to compare two forms of surgical resection for patients with gastric cancer, where the outcome is measured by time to death with survival at $5$ years which is expected to be increased from $\pi_2=0.2$ to $\pi_1=0.34$ when using the most recent intervention ($i=1$) so that $\text{HR}_{\text{exp}}=\frac{\log 0.34}{\log 0.2}=0.67$. Assume a significance level of $\alpha=0.05$ and power of $0.8$ for performing the statistical comparison of the hazards.
+
+By using the formula for the sample size calculation, we then obtain the total number of events as:
+
+$$
+n_e=(z_{1-0.05/2}+z_{1-0.8})^2\times \Bigg( \frac{0.67+1}{0.67-1} \Bigg)^2=(1.96+0.84)^2 \times 25.60973=200.7803 \approx 202,
+$$
+and the sample size in each group (with censoring) as:
+
+$$
+n=\frac{(z_{1-\alpha/2}+z_{1-\beta})^2}{(2-\pi_1-\pi_2)}\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2 = \frac{(1.96+0.84)^2}{2-0.2-0.4} \times 25.60973=102.4389 \approx 103.
+$$
+
+# Precision-based calculations
+
+Precision-based calculations are aimed at obtaining the total number of individuals in a study to ensure a *confidence interval* of a sufficiently (pre-determined) narrow width around the main quantity of interest for inference, e.g. a mean or proportion.
+
+Assume the aim is to estimate some unknown population mean $\mu$, which is assumed to be close to some expected value $\mu_{\text{exp}}$ based on some expected standard deviation $\sigma_{\text{exp}}$. Provided a sufficiently large sample size $n$ can be obtained, then a $(1-\alpha)100\%$ confidence interval for $\mu$ is given by
+
+$$
+\mu_{\text{exp}} \pm z_{1-\alpha/2} \times \frac{\sigma_{\text{exp}}}{\sqrt{n}}.
+$$
+The *expected width* of the interval is therefore:
+
+$$
+w_{\text{exp}}=2 \times z_{1-\alpha/2} \times \frac{\sigma_{\text{exp}}}{\sqrt{n}},
+$$
+which means that the required sample size needed to obtain $w_{\text{exp}}$ is:
+
+$$
+n = 4 \times z^2_{1-\alpha/2} \times \frac{\sigma^2_{\text{exp}}}{w^2_{\text{exp}}}.
+$$
+If instead interest is in estimating a population proportion $\pi$, for a required width $w_{\text{exp}}$ and expected proportion $\pi_{\text{exp}}$, the corresponding sample size calculation formula is
+
+$$
+n = 4 \times z^2_{1-\alpha/2} \times \frac{\pi_{\text{exp}}\times (1- \pi_{\text{exp}})}{w^2_{\text{exp}}}.
+$$
+
+
+## Examples
+
+Consider the situation where researchers want to estimate the mean forced expiratory volume (FEV) in a population of young men and: require a precision of $\pm 0.2$ litres, i.e. $w_{\text{exp}}=0.4$, for a $95\%$ CI ($z_{0.975}=1.96$); assume $\sigma_{\text{exp}}=0.67$. We can then calculate the required sample size as: 
+
+$$
+n = 4 \times 1.96^2 \times \frac{0.67^2}{0.4^2}=43.1124 \approx 44.
+$$
+
+Consider now a situation where a small study found that the *sensitivity* of a new technique to detect MRSA was $\pi_{\text{exp}}=0.9$, i.e. the probability of detecting the disease in those having the disease. Then, how large should a new study be to estimate this sensitivity assuming a $95\%$ CI of $w_{\text{exp}}=0.06$? The sample size required can then be obtained as
+
+$$
+n = 4 \times 1.96^2 \times \frac{0.9 \times (1-0.9)}{0.06^2}=384.16 \approx 385.
+$$
+
+# Miscellanea
+
+## Presenting sample size calculations
+
+It is very important that formulae and assumptions made for calculating sample sizes are made transparent and clear, References to formulae and estimates used therein may be included inside the corresponding section of a study protocol alongside detailed information about: 
+
+  - The exact **number of patients** calculated in each group
+  
+  - The exact estimate of the **effect size** used in the calculation (or estimates of parameters used to compute the effect size) - for hypothesis-based calculations
+  
+  - The exact estimate of the required **confidence interval width** used in the calculation - for precision-based calculations
+  
+  - The type of **statistical test** that will be used to make the comparison between groups, which should be in line with the specific approach used to calculate the sample size
+  
+  - The exact estimate of **nuisance parameters** (if needed) used in the calculation, i.e. standard deviations.
+  
+  - The assumed **level of significance** $\alpha$ and **power** $1-\beta$ (if used in the calculations).
+  
+  - The type of **adjustments** applied to the final sample size, i.e. dropout, together with estimates of the parameters used to make the adjustments, i.e. expected dropout rate.
+
+
+## Case-control studies
+
+In case-control studies the $X^2$ test is used to analyse the data and, assuming the number of cases and controls are equal, the test compares the proportion of exposed patients in both groups. As a result, we can use the sample size formula for proportions to estimate the required sample size:
+
+$$
+n = \frac{(z_{1-\alpha/2}\times \sqrt{2\times\bar{\pi}\times(1-\bar{\pi})} + z_{1-\beta} \times \sqrt{\pi_1\times (1-\pi_1)+\pi_0\times(1-\pi_0)})^2}{(\pi_1-\pi_0)^2},
+$$
+
+where $\pi_i$ is the proportion of exposures in the cases ($i=1$) and controls ($i=0$), while $\bar{\pi}=(\pi_1+\pi_0)/2$ is the overall proportion of exposed patients. Often, information on the expected proportions of exposed patients $\pi_1$ is not directly available from previous studies. However, this can be retrieved based on expected odds ratio (OR):
+
+$$
+\pi_1=\frac{\pi_0 \times OR}{1+\pi_0\times(OR-1)},
+$$
+where $OR=\frac{\pi_1/(1-\pi_1)}{\pi_0/(1-\pi_0)}$.
+
+As an example, let's consider a case-control study investigating whether bottle-fed infants are at increased risk of acute respiratory infections compared to breast-fed infants. In this contest, we can define infants with respiratory infections as *cases*, while those without infections are the *controls*. Based on information retrieved from the mothers, it is expected that $40\%$ of control infants are bottle-fed, i.e. $\pi_0=0.4$, and the researchers wish to detect an odds ratio of $2$.
+
+First, we can calculate the expected proportion of bottle-fed infants among cases as
+
+$$
+\pi_1=\frac{0.4\times2}{1+0.4\times(2-1)}=0.571,
+$$
+from which, assuming $\alpha=0.05$ and $\beta=0.1$, we can compute the required number of patients in each group as
+
+$$
+n = \frac{(1.96 \times \sqrt{2 \times 0.4855(1-0.4855)} + 1.28 \times \sqrt{0.571(1-0.571)+0.4(1-0.4)})^2}{(0.571-0.4)^2} = 177.2675 \approx 178.
+$$
+
+## Regression models
+
+Simple calculations are often used for exploratory studies involving regression models, under the assumption that they have enough data to obtain a reasonable estimate. A general **rule of 10** states that the sample size should be at least 10 times the number of parameters in the regression model excluding the intercept/baseline hazard. 
+
+The actual definition of sample size depends on the context and type of model: 
+
+  - number of observations - for *linear regression models*.
+
+  - number of events - for *logistic/survival regression models*.
+  
+For example, consider some investigators who wish to develop a logistic regression model to predict surgical mortality following heart valve surgery, and assume they intend to use only the following factors: age, ejection fraction, and sex. How big the sample size should be? 
+
+Assuming a prevalence of surgical mortality of $5\%$ and using a model with 4 parameters, the rule of 10 suggests that we require at least $40$ events, corresponding to $40/0.05=800$ patients.
+
+# Conclusion
+
+In my discussions about sample size calculation I have focussed on the basics of the approach, therefore ignoring more complex (i.e. multicentre studies) or special (i.e. single arm studies) study designs. If time will allow, I will touch upon this topic in the future and perhaps I will also try to provide an introduction to some of these more advanced topics. 
+
+I still have a couple of practical examples I would like to share to show how sample size calculations can be done to address some research questions using some real numbers. Perhaps I will try to provide some of these examples in my next post just to round up the topic before moving on to the next one. 
+
+I hope at least some of you find this useful!
+

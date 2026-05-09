@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2026-05-07">
 
-<title>A Bayesian modelling framework for health care resource use and costs in trial-based economic evaluations – Andrea Gabrio</title>
+<title>Sample Size Calculations - II – Andrea Gabrio</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -44,8 +46,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap-0ab08c5169d9eb6d75e34d6b2d34aa8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -171,9 +171,22 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#modelling-framework" id="toc-modelling-framework" class="nav-link" data-scroll-target="#modelling-framework">Modelling Framework</a></li>
-  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#hyopthesis-test-based-calculations" id="toc-hyopthesis-test-based-calculations" class="nav-link active" data-scroll-target="#hyopthesis-test-based-calculations">Hyopthesis test-based calculations</a>
+  <ul class="collapse">
+  <li><a href="#sample-size-calculation-for-surival-outcomes" id="toc-sample-size-calculation-for-surival-outcomes" class="nav-link" data-scroll-target="#sample-size-calculation-for-surival-outcomes">Sample size calculation for surival outcomes</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
+  <li><a href="#precision-based-calculations" id="toc-precision-based-calculations" class="nav-link" data-scroll-target="#precision-based-calculations">Precision-based calculations</a>
+  <ul class="collapse">
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  </ul></li>
+  <li><a href="#miscellanea" id="toc-miscellanea" class="nav-link" data-scroll-target="#miscellanea">Miscellanea</a>
+  <ul class="collapse">
+  <li><a href="#presenting-sample-size-calculations" id="toc-presenting-sample-size-calculations" class="nav-link" data-scroll-target="#presenting-sample-size-calculations">Presenting sample size calculations</a></li>
+  <li><a href="#case-control-studies" id="toc-case-control-studies" class="nav-link" data-scroll-target="#case-control-studies">Case-control studies</a></li>
+  <li><a href="#regression-models" id="toc-regression-models" class="nav-link" data-scroll-target="#regression-models">Regression models</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -182,14 +195,42 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">A Bayesian modelling framework for health care resource use and costs in trial-based economic evaluations</h1>
-</div>
+<h1 class="title">Sample Size Calculations - II</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Medical Statistics</div>
+    <div class="quarto-category">Sample Size Calculation</div>
+  </div>
+  </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 7, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -199,31 +240,122 @@ window.Quarto = {
 </header>
 
 
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<p>Building on the existent literature, we propose a novel Bayesian framework for the modelling of HRU data in trial-based economic evaluations, which allows a flexible model specification and the handling of missing data at HRU level. The choice of a Bayesian approach provides practical advantages compared to a standard frequentist framework, including: 1) use of a modular structure to increase model complexity in a relatively easy way; 2) natural interpretation of cost-effectiveness results in probabilistic terms; 3) direct implementation of Probabilistic Sensitivity Analysis (PSA), consisting in the quantification of the impact of parameters’ uncertainty on the economic conclusions. We show the benefits of using our framework on a real case study, with a focus on appropriately modelling partially-observed HRU values and its implications in terms of inferences and, crucially, cost-effectiveness results.</p>
+<p>Hello dear readers and welcome back to my usual update on my blog. Today I will simply continue and (hopefully) conclude the topic initiated in my previous post about some sample size calculation introductory elements. Last time we saw the basics behind theoretical sample size calculation formulae for continuous and binary outcomes as well as how to apply some adjustments to account for possible dropout, non-adherence and unequal allocation. Today we continue focussing on survival outcomes and introduce the topic of precision-based calculations and some miscellanea. Buckle up and get ready!</p>
+<section id="hyopthesis-test-based-calculations" class="level1">
+<h1>Hyopthesis test-based calculations</h1>
+<section id="sample-size-calculation-for-surival-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="sample-size-calculation-for-surival-outcomes">Sample size calculation for surival outcomes</h2>
+<p>When the main outcome for the sample size calculation of the trial is some measure of survival (see previous posts for an overview of how this is often expressed), interest often lies in performing some <em>log-rank</em> test to compare the survival between two groups under the following hypothesis framework:</p>
+<p><span class="math display">\[
+H_0 : \text{HR}=1 \;\;\; \text{vs} \;\;\; H_1 : \text{HR}\neq 1,
+\]</span> where <span class="math inline">\(\text{HR}=\frac{h_{1t}}{h_{2t}}\)</span> denotes the <strong>hazard ratio</strong> given by the ratio of the hazards of the two interventions, i.e.&nbsp;the instantaneous risk of failure (i.e.&nbsp;death).</p>
+<p>Under <span class="math inline">\(H_1\)</span> the anticipated hazard ratio can be calculated from the expected ratio of median survival times</p>
+<p><span class="math display">\[
+\text{HR}_{\text{exp}}=\frac{M_2}{M_1},
+\]</span></p>
+<p>where <span class="math inline">\(M_i\)</span> is the median survival time for treatment <span class="math inline">\(i=1,2\)</span>. It is also possible to calculate <span class="math inline">\(\text{HR}_{\text{exp}}\)</span> from the expected proportions of who will survive until the end of the study in each intervention:</p>
+<p><span class="math display">\[
+\text{HR}_{\text{exp}}=\frac{\log \pi_1}{\log \pi_2},
+\]</span> where <span class="math inline">\(\pi_i\)</span> denotes the expected survival proportion for treatment <span class="math inline">\(i=1,2\)</span>. In theory, proportions <span class="math inline">\(\pi_i\)</span> measured at any time point during the study could be used to specify <span class="math inline">\(\text{HR}_{\text{exp}}\)</span>. However, using the proportions at the end of the study is typically better as it allows to adjust for possible censoring.</p>
+<p>The total number of events (i.e.&nbsp;failures) required is the given by:</p>
+<p><span class="math display">\[
+n_e=(z_{1-\alpha/2}+z_{1-\beta})^2\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2,
+\]</span> and the sample size in each group (assuming censoring) is then obtained as:</p>
+<p><span class="math display">\[
+n=\frac{(z_{1-\alpha/2}+z_{1-\beta})^2}{(2-\pi_1-\pi_2)}\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2.
+\]</span></p>
 </section>
-<section id="modelling-framework" class="level1">
-<h1>Modelling Framework</h1>
-<p>We first present our modelling framework building upon previously-introduced approaches, starting at the level of total costs and QALYs or costs and utilities at different times22;23, and then extend these to account for partially-observed HRU data. The framework allows for typical features of cost-effectiveness data (e.g.&nbsp;skewness, correlation, structural values) while also handling missing HRU data without the need to rely on ad-hoc assumptions (e.g.&nbsp;assumed zeros).</p>
-<p>The framework allows the modelling of different types of variables, namely HRU and HrQol data, costs and utilities at each time, and total costs and QALYs. From a modelling perspective, it is often desirable to focus at the most aggregated level (e.g.&nbsp;cross-sectional modelling instead of longitudinal). However, in reality, the occurrence of missing values at the most disaggregated level (i.e.&nbsp;HRU and HrQol) is unavoidable, with proportions of unobserved values which are usually substantial5;6. This introduces the problem that individual-level cost values may not be computed and, when item non-response occurs, modelling at aggregated levels may result in considerable loss of information</p>
-<p><a href="#fig-framework" class="quarto-xref">Figure&nbsp;1</a> shows the joint outcomes distribution, expressed in terms of a conditional distributions for utilities, non-zero and structural zero HRUs at time <span class="math inline">\(j\)</span> given outcomes at time <span class="math inline">\(j−1\)</span>, respectively indicated with a blue, red and green line. The parameters indexing the corresponding distributions or “modules” are indicated with different Greek letters, while <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> denote the individual and time index. The black, magenta and green solid arrows show the dependence relationships between the parameters within and between the models and between times, respectively. The dashed arrows denote deterministic relationships.</p>
-<div id="fig-framework" class="quarto-float quarto-figure quarto-figure-center anchored" width="60%" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="model_diag_template_DI_v2.jpg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Schematic representation of the modelling framework for handling missing HRUs in trial-based CEA.
-</figcaption>
-</figure>
-</div>
-<p>The proposed framework more challenging to implement compared to the modelling of QALYs/Total costs and utilities/costs due to multiple HRU variables, each consisting in a two-part mixture for the non-zero and structural zero components. However, by defining the model at the most disaggregated level, the framework provides the most efficient way to handle partially-observed HRUs. This may become a considerable advantage when applied to questionnaire data affected by item non-response and outweigh the additional complexity required to fit these models.</p>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<p>As an example, let’s assume a study aims to compare two forms of surgical resection for patients with gastric cancer, where the outcome is measured by time to death with survival at <span class="math inline">\(5\)</span> years which is expected to be increased from <span class="math inline">\(\pi_2=0.2\)</span> to <span class="math inline">\(\pi_1=0.34\)</span> when using the most recent intervention (<span class="math inline">\(i=1\)</span>) so that <span class="math inline">\(\text{HR}_{\text{exp}}=\frac{\log 0.34}{\log 0.2}=0.67\)</span>. Assume a significance level of <span class="math inline">\(\alpha=0.05\)</span> and power of <span class="math inline">\(0.8\)</span> for performing the statistical comparison of the hazards.</p>
+<p>By using the formula for the sample size calculation, we then obtain the total number of events as:</p>
+<p><span class="math display">\[
+n_e=(z_{1-0.05/2}+z_{1-0.8})^2\times \Bigg( \frac{0.67+1}{0.67-1} \Bigg)^2=(1.96+0.84)^2 \times 25.60973=200.7803 \approx 202,
+\]</span> and the sample size in each group (with censoring) as:</p>
+<p><span class="math display">\[
+n=\frac{(z_{1-\alpha/2}+z_{1-\beta})^2}{(2-\pi_1-\pi_2)}\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2 = \frac{(1.96+0.84)^2}{2-0.2-0.4} \times 25.60973=102.4389 \approx 103.
+\]</span></p>
 </section>
-<section id="conclusions" class="level1">
-<h1>Conclusions</h1>
-<p>We have presented a general modelling framework to handle item-level HRU missingness without requiring any ah-hoc imputation. The framework takes advantage of the Bayesian setting to handle different features of the data while also directly quantifying the impact of missingness uncertainty on cost-effectiveness results. Our approach represents an improvement with respect to the current practice and can be implemented in a relatively easy way using freely available software.</p>
-<p><span style="text-align: center; font-size: 2rem"><a href="https://journals.sagepub.com/doi/full/10.1177/0272989X251376026"><i class="fa-solid fa-file-pdf" aria-label="file-pdf"></i></a> &nbsp; <a href="https://github.com/AnGabrio/Code/tree/master/hruZero"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
+</section>
+<section id="precision-based-calculations" class="level1">
+<h1>Precision-based calculations</h1>
+<p>Precision-based calculations are aimed at obtaining the total number of individuals in a study to ensure a <em>confidence interval</em> of a sufficiently (pre-determined) narrow width around the main quantity of interest for inference, e.g.&nbsp;a mean or proportion.</p>
+<p>Assume the aim is to estimate some unknown population mean <span class="math inline">\(\mu\)</span>, which is assumed to be close to some expected value <span class="math inline">\(\mu_{\text{exp}}\)</span> based on some expected standard deviation <span class="math inline">\(\sigma_{\text{exp}}\)</span>. Provided a sufficiently large sample size <span class="math inline">\(n\)</span> can be obtained, then a <span class="math inline">\((1-\alpha)100\%\)</span> confidence interval for <span class="math inline">\(\mu\)</span> is given by</p>
+<p><span class="math display">\[
+\mu_{\text{exp}} \pm z_{1-\alpha/2} \times \frac{\sigma_{\text{exp}}}{\sqrt{n}}.
+\]</span> The <em>expected width</em> of the interval is therefore:</p>
+<p><span class="math display">\[
+w_{\text{exp}}=2 \times z_{1-\alpha/2} \times \frac{\sigma_{\text{exp}}}{\sqrt{n}},
+\]</span> which means that the required sample size needed to obtain <span class="math inline">\(w_{\text{exp}}\)</span> is:</p>
+<p><span class="math display">\[
+n = 4 \times z^2_{1-\alpha/2} \times \frac{\sigma^2_{\text{exp}}}{w^2_{\text{exp}}}.
+\]</span> If instead interest is in estimating a population proportion <span class="math inline">\(\pi\)</span>, for a required width <span class="math inline">\(w_{\text{exp}}\)</span> and expected proportion <span class="math inline">\(\pi_{\text{exp}}\)</span>, the corresponding sample size calculation formula is</p>
+<p><span class="math display">\[
+n = 4 \times z^2_{1-\alpha/2} \times \frac{\pi_{\text{exp}}\times (1- \pi_{\text{exp}})}{w^2_{\text{exp}}}.
+\]</span></p>
+<section id="examples" class="level2">
+<h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<p>Consider the situation where researchers want to estimate the mean forced expiratory volume (FEV) in a population of young men and: require a precision of <span class="math inline">\(\pm 0.2\)</span> litres, i.e.&nbsp;<span class="math inline">\(w_{\text{exp}}=0.4\)</span>, for a <span class="math inline">\(95\%\)</span> CI (<span class="math inline">\(z_{0.975}=1.96\)</span>); assume <span class="math inline">\(\sigma_{\text{exp}}=0.67\)</span>. We can then calculate the required sample size as:</p>
+<p><span class="math display">\[
+n = 4 \times 1.96^2 \times \frac{0.67^2}{0.4^2}=43.1124 \approx 44.
+\]</span></p>
+<p>Consider now a situation where a small study found that the <em>sensitivity</em> of a new technique to detect MRSA was <span class="math inline">\(\pi_{\text{exp}}=0.9\)</span>, i.e.&nbsp;the probability of detecting the disease in those having the disease. Then, how large should a new study be to estimate this sensitivity assuming a <span class="math inline">\(95\%\)</span> CI of <span class="math inline">\(w_{\text{exp}}=0.06\)</span>? The sample size required can then be obtained as</p>
+<p><span class="math display">\[
+n = 4 \times 1.96^2 \times \frac{0.9 \times (1-0.9)}{0.06^2}=384.16 \approx 385.
+\]</span></p>
+</section>
+</section>
+<section id="miscellanea" class="level1">
+<h1>Miscellanea</h1>
+<section id="presenting-sample-size-calculations" class="level2">
+<h2 class="anchored" data-anchor-id="presenting-sample-size-calculations">Presenting sample size calculations</h2>
+<p>It is very important that formulae and assumptions made for calculating sample sizes are made transparent and clear, References to formulae and estimates used therein may be included inside the corresponding section of a study protocol alongside detailed information about:</p>
+<ul>
+<li><p>The exact <strong>number of patients</strong> calculated in each group</p></li>
+<li><p>The exact estimate of the <strong>effect size</strong> used in the calculation (or estimates of parameters used to compute the effect size) - for hypothesis-based calculations</p></li>
+<li><p>The exact estimate of the required <strong>confidence interval width</strong> used in the calculation - for precision-based calculations</p></li>
+<li><p>The type of <strong>statistical test</strong> that will be used to make the comparison between groups, which should be in line with the specific approach used to calculate the sample size</p></li>
+<li><p>The exact estimate of <strong>nuisance parameters</strong> (if needed) used in the calculation, i.e.&nbsp;standard deviations.</p></li>
+<li><p>The assumed <strong>level of significance</strong> <span class="math inline">\(\alpha\)</span> and <strong>power</strong> <span class="math inline">\(1-\beta\)</span> (if used in the calculations).</p></li>
+<li><p>The type of <strong>adjustments</strong> applied to the final sample size, i.e.&nbsp;dropout, together with estimates of the parameters used to make the adjustments, i.e.&nbsp;expected dropout rate.</p></li>
+</ul>
+</section>
+<section id="case-control-studies" class="level2">
+<h2 class="anchored" data-anchor-id="case-control-studies">Case-control studies</h2>
+<p>In case-control studies the <span class="math inline">\(X^2\)</span> test is used to analyse the data and, assuming the number of cases and controls are equal, the test compares the proportion of exposed patients in both groups. As a result, we can use the sample size formula for proportions to estimate the required sample size:</p>
+<p><span class="math display">\[
+n = \frac{(z_{1-\alpha/2}\times \sqrt{2\times\bar{\pi}\times(1-\bar{\pi})} + z_{1-\beta} \times \sqrt{\pi_1\times (1-\pi_1)+\pi_0\times(1-\pi_0)})^2}{(\pi_1-\pi_0)^2},
+\]</span></p>
+<p>where <span class="math inline">\(\pi_i\)</span> is the proportion of exposures in the cases (<span class="math inline">\(i=1\)</span>) and controls (<span class="math inline">\(i=0\)</span>), while <span class="math inline">\(\bar{\pi}=(\pi_1+\pi_0)/2\)</span> is the overall proportion of exposed patients. Often, information on the expected proportions of exposed patients <span class="math inline">\(\pi_1\)</span> is not directly available from previous studies. However, this can be retrieved based on expected odds ratio (OR):</p>
+<p><span class="math display">\[
+\pi_1=\frac{\pi_0 \times OR}{1+\pi_0\times(OR-1)},
+\]</span> where <span class="math inline">\(OR=\frac{\pi_1/(1-\pi_1)}{\pi_0/(1-\pi_0)}\)</span>.</p>
+<p>As an example, let’s consider a case-control study investigating whether bottle-fed infants are at increased risk of acute respiratory infections compared to breast-fed infants. In this contest, we can define infants with respiratory infections as <em>cases</em>, while those without infections are the <em>controls</em>. Based on information retrieved from the mothers, it is expected that <span class="math inline">\(40\%\)</span> of control infants are bottle-fed, i.e.&nbsp;<span class="math inline">\(\pi_0=0.4\)</span>, and the researchers wish to detect an odds ratio of <span class="math inline">\(2\)</span>.</p>
+<p>First, we can calculate the expected proportion of bottle-fed infants among cases as</p>
+<p><span class="math display">\[
+\pi_1=\frac{0.4\times2}{1+0.4\times(2-1)}=0.571,
+\]</span> from which, assuming <span class="math inline">\(\alpha=0.05\)</span> and <span class="math inline">\(\beta=0.1\)</span>, we can compute the required number of patients in each group as</p>
+<p><span class="math display">\[
+n = \frac{(1.96 \times \sqrt{2 \times 0.4855(1-0.4855)} + 1.28 \times \sqrt{0.571(1-0.571)+0.4(1-0.4)})^2}{(0.571-0.4)^2} = 177.2675 \approx 178.
+\]</span></p>
+</section>
+<section id="regression-models" class="level2">
+<h2 class="anchored" data-anchor-id="regression-models">Regression models</h2>
+<p>Simple calculations are often used for exploratory studies involving regression models, under the assumption that they have enough data to obtain a reasonable estimate. A general <strong>rule of 10</strong> states that the sample size should be at least 10 times the number of parameters in the regression model excluding the intercept/baseline hazard.</p>
+<p>The actual definition of sample size depends on the context and type of model:</p>
+<ul>
+<li><p>number of observations - for <em>linear regression models</em>.</p></li>
+<li><p>number of events - for <em>logistic/survival regression models</em>.</p></li>
+</ul>
+<p>For example, consider some investigators who wish to develop a logistic regression model to predict surgical mortality following heart valve surgery, and assume they intend to use only the following factors: age, ejection fraction, and sex. How big the sample size should be?</p>
+<p>Assuming a prevalence of surgical mortality of <span class="math inline">\(5\%\)</span> and using a model with 4 parameters, the rule of 10 suggests that we require at least <span class="math inline">\(40\)</span> events, corresponding to <span class="math inline">\(40/0.05=800\)</span> patients.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In my discussions about sample size calculation I have focussed on the basics of the approach, therefore ignoring more complex (i.e.&nbsp;multicentre studies) or special (i.e.&nbsp;single arm studies) study designs. If time will allow, I will touch upon this topic in the future and perhaps I will also try to provide an introduction to some of these more advanced topics.</p>
+<p>I still have a couple of practical examples I would like to share to show how sample size calculations can be done to address some research questions using some real numbers. Perhaps I will try to provide some of these examples in my next post just to round up the topic before moving on to the next one.</p>
+<p>I hope at least some of you find this useful!</p>
 
 
 </section>
