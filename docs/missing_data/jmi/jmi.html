@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -11,6 +11,9 @@
 
 <title>Joint Multiple Imputation – Andrea Gabrio</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -26,7 +29,6 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
-  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -55,15 +57,14 @@ div.csl-indent {
 <link href="../../img/icon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-91b29bb7e9f3845f2a6022c76ce085c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-0ab08c5169d9eb6d75e34d6b2d34aa8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -93,7 +94,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -131,8 +132,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrea Gabrio</span>
     </a>
@@ -287,7 +286,7 @@ T_{H}=\bar{V}_H + \frac{H+1}{H}B_{H},
 \hat{\theta}_{t} \sim p(\theta \mid y^{obs}, \hat{y}^{mis}_{t})
 \]</span></p>
 <p>And reiterate the steps 2 and 3 until convergence, where the stopping rule typically consists in imposing that the change in the parameters between iterations <span class="math inline">\(t-1\)</span> and <span class="math inline">\(t\)</span> should be smaller than a predefined “small” threshold <span class="math inline">\(\epsilon\)</span>. <span class="citation" data-cites="schafer1997analysis">Schafer (<a href="#ref-schafer1997analysis" role="doc-biblioref">1997</a>)</span> showed that imputations generated under the multivariate Normal model can be robust to non-normal data, even though it is generally more efficient to transform the data towards normality, especially when the parameters of interest are difficult to estimate, such as quantiles and variances.</p>
-<p>The multivariate Normal model is also often applied to categorical data, with different types of specifications that have been proposed in the literature (<span class="citation" data-cites="schafer1997analysis">Schafer (<a href="#ref-schafer1997analysis" role="doc-biblioref">1997</a>)</span>,<span class="citation" data-cites="horton2003potential">Horton, Lipsitz, and Parzen (<a href="#ref-horton2003potential" role="doc-biblioref">2003</a>)</span>,<span class="citation" data-cites="allison2005imputation">Allison (<a href="#ref-allison2005imputation" role="doc-biblioref">2005</a>)</span>,<span class="citation" data-cites="bernaards2007robustness">Bernaards, Belin, and Schafer (<a href="#ref-bernaards2007robustness" role="doc-biblioref">2007</a>)</span>,<span class="citation" data-cites="yucel2008using">Yucel, He, and Zaslavsky (<a href="#ref-yucel2008using" role="doc-biblioref">2008</a>)</span>,<span class="citation" data-cites="demirtas2009rounding">Demirtas (<a href="#ref-demirtas2009rounding" role="doc-biblioref">2009</a>)</span>). For examples, missing data in contingency tables can be imputed using log-linear models (<span class="citation" data-cites="schafer1997analysis">Schafer (<a href="#ref-schafer1997analysis" role="doc-biblioref">1997</a>)</span>); mixed continuous-categorical data can be imputed under the general location model which combines a log-linear and multivariate Normal model (<span class="citation" data-cites="olkin1961multivariate">Olkin, Tate, et al. (<a href="#ref-olkin1961multivariate" role="doc-biblioref">1961</a>)</span>); two-way imputation can be applied to missing test item responses by imputing missing categorical data by conditioning on the row and column sum scores of the multivariate data (<span class="citation" data-cites="van2007two">Van Ginkel et al. (<a href="#ref-van2007two" role="doc-biblioref">2007</a>)</span>).</p>
+<p>The multivariate Normal model is also often applied to categorical data, with different types of specifications that have been proposed in the literature (<span class="citation" data-cites="schafer1997analysis">Schafer (<a href="#ref-schafer1997analysis" role="doc-biblioref">1997</a>)</span>,<span class="citation" data-cites="horton2003potential">Horton et al. (<a href="#ref-horton2003potential" role="doc-biblioref">2003</a>)</span>,<span class="citation" data-cites="allison2005imputation">Allison (<a href="#ref-allison2005imputation" role="doc-biblioref">2005</a>)</span>,<span class="citation" data-cites="bernaards2007robustness">Bernaards et al. (<a href="#ref-bernaards2007robustness" role="doc-biblioref">2007</a>)</span>,<span class="citation" data-cites="yucel2008using">Yucel et al. (<a href="#ref-yucel2008using" role="doc-biblioref">2008</a>)</span>,<span class="citation" data-cites="demirtas2009rounding">Demirtas (<a href="#ref-demirtas2009rounding" role="doc-biblioref">2009</a>)</span>). For examples, missing data in contingency tables can be imputed using log-linear models (<span class="citation" data-cites="schafer1997analysis">Schafer (<a href="#ref-schafer1997analysis" role="doc-biblioref">1997</a>)</span>); mixed continuous-categorical data can be imputed under the general location model which combines a log-linear and multivariate Normal model (<span class="citation" data-cites="olkin1961multivariate"><span class="nocase">Olkin et al.</span> (<a href="#ref-olkin1961multivariate" role="doc-biblioref">1961</a>)</span>); two-way imputation can be applied to missing test item responses by imputing missing categorical data by conditioning on the row and column sum scores of the multivariate data (<span class="citation" data-cites="van2007two">Van Ginkel et al. (<a href="#ref-van2007two" role="doc-biblioref">2007</a>)</span>).</p>
 </section>
 <section id="references" class="level1">
 
@@ -296,7 +295,7 @@ T_{H}=\bar{V}_H + \frac{H+1}{H}B_{H},
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-allison2005imputation" class="csl-entry" role="listitem">
 Allison, Paul D. 2005. <span>“Imputation of Categorical Variables with PROC MI.”</span> <em>SUGI 30 Proceedings</em> 113 (30): 1–14.
 </div>
@@ -325,16 +324,16 @@ Little, Roderick JA, and Donald B Rubin. 2019. <em>Statistical Analysis with Mis
 Molenberghs, Geert, Garrett Fitzmaurice, Michael G Kenward, Anastasios Tsiatis, and Geert Verbeke. 2014. <em>Handbook of Missing Data Methodology</em>. Chapman; Hall/CRC.
 </div>
 <div id="ref-olkin1961multivariate" class="csl-entry" role="listitem">
-Olkin, Ingram, Robert Fleming Tate, et al. 1961. <span>“Multivariate Correlation Models with Mixed Discrete and Continuous Variables.”</span> <em>The Annals of Mathematical Statistics</em> 32 (2): 448–65.
+<span class="nocase">Olkin, Ingram, Robert Fleming Tate, et al.</span> 1961. <span>“Multivariate Correlation Models with Mixed Discrete and Continuous Variables.”</span> <em>The Annals of Mathematical Statistics</em> 32 (2): 448–65.
 </div>
 <div id="ref-rubin1978multiple" class="csl-entry" role="listitem">
 Rubin, Donald B. 1978. <span>“Multiple Imputations in Sample Surveys a Phenomenological Bayesian Approach to Nonresponse.”</span> <em>Proceedings of the Survey Research Methods Section of the American Statistical Association</em> 1: 20–34.
 </div>
 <div id="ref-rubin1996multiple" class="csl-entry" role="listitem">
-———. 1996. <span>“Multiple Imputation After 18 Years.”</span> <em>Journal of the American Statistical Association</em> 91 (434): 473–89.
+Rubin, Donald B. 1996. <span>“Multiple Imputation After 18 Years.”</span> <em>Journal of the American Statistical Association</em> 91 (434): 473–89.
 </div>
 <div id="ref-rubin2004multiple" class="csl-entry" role="listitem">
-———. 2004. <em>Multiple Imputation for Nonresponse in Surveys</em>. John Wiley &amp; Sons.
+Rubin, Donald B. 2004. <em>Multiple Imputation for Nonresponse in Surveys</em>. John Wiley &amp; Sons.
 </div>
 <div id="ref-rubin1987interval" class="csl-entry" role="listitem">
 Rubin, Donald B, and Nathaniel Schenker. 1987. <span>“Interval Estimation from Multiply Imputed Data: A Case Study Using Census Agriculture Industry Codes.”</span> <em>Journal of Official Statistics</em> 3 (4): 375.
@@ -343,7 +342,7 @@ Rubin, Donald B, and Nathaniel Schenker. 1987. <span>“Interval Estimation from
 Schafer, Joseph L. 1997. <em>Analysis of Incomplete Multivariate Data</em>. Chapman; Hall/CRC.
 </div>
 <div id="ref-schafer1999multiple" class="csl-entry" role="listitem">
-———. 1999. <span>“Multiple Imputation: A Primer.”</span> <em>Statistical Methods in Medical Research</em> 8 (1): 3–15.
+Schafer, Joseph L. 1999. <span>“Multiple Imputation: A Primer.”</span> <em>Statistical Methods in Medical Research</em> 8 (1): 3–15.
 </div>
 <div id="ref-schafer2002missing" class="csl-entry" role="listitem">
 Schafer, Joseph L, and John W Graham. 2002. <span>“Missing Data: Our View of the State of the Art.”</span> <em>Psychological Methods</em> 7 (2): 147.
