@@ -41,7 +41,7 @@ Let us start from the information given.
   - Third, we need to define the distribution of the test statistic under both $H_0$ and $H_1$, often by approximating the t-test statistic with that of a z-test: $Z=\frac{(\bar{X}_2-\bar{X}_1)}{\sigma\sqrt{2/n}}$, where $\bar{X}_1$ and $\bar{X}_2$ are the sample means of the two groups, $\sigma$ is the standard deviation across both groups and $n$ is the number of patients in each group. Assuming normality of the outcome variable, we know the z statistic to be distributed as:
   
 $$
-Z \sim N(\frac{\mu_2-\mu_1}{\sigma \sqrt{2/n}}, 1),
+Z \sim N\Bigg(\frac{\mu_2-\mu_1}{\sigma \sqrt{2/n}}, 1 \Bigg),
 $$
 
 and statistical significance is achieved at $\alpha=0.05$ if $\mid Z \mid > 1.96$. Based on the information given before, we require that the trial has $0.9$ power and $0.05$ type I error rate:
@@ -145,7 +145,7 @@ ggplot(df, aes(x=z0)) +
 If we require a power of $0.9$, then we can use the above information to derive the value of $n$ needed in order to obtain a power of at least $0.9$, given values for $\alpha$, $(\mu_2-\mu_1)$ and $\sigma$. In general, we require that $P(Z \mid H_1 > z_{1-\alpha/2})=1-\beta$ and solving for $n$ we obtain
 
 $$
-n = \frac{2\sigma^2(z_{1-\alpha/2}+z_{1-\beta})^2}{(\mu_2-\mu_1)^2},
+n = \frac{2\times\sigma^2\times(z_{1-\alpha/2}+z_{1-\beta})^2}{(\mu_2-\mu_1)^2},
 $$
 
 where in out case: $z_{0.975}=1.96$; $z_{0.9}=1.28$; $\sigma=10$, $\mu_2-\mu_1=5$. **Note**: it is also possible to derive the power $(1-\beta)$ if we fixed $n$ first from the above formula. Often, the sample size equation is shortened to 
@@ -160,13 +160,13 @@ To illustrate how sample size calculations can be performed under different type
 It is possible to follow the same approach, as shown for the continuous outcome, to derive a sample size equation for a binary outcome:
 
 $$
-n = \frac{(z_{1-\alpha/2}\sqrt{2\bar{\pi}(1-\bar{\pi})}+z_{1-\beta}\sqrt{\pi_1(1-\pi_1)+\pi_2(1-\pi_2)})^2}{(\pi_2-\pi_2)^2},
+n = \frac{(z_{1-\alpha/2}\sqrt{2\bar{\pi}(1-\bar{\pi})}+z_{1-\beta}\sqrt{\pi_1(1-\pi_1)+\pi_2(1-\pi_2)})^2}{(\pi_2-\pi_1)^2},
 $$
 
 where $\pi_1$ and $\pi_2$ are the expected proportions of deaths in the two groups, $\bar{\pi}=\frac{\pi_1+\pi_2}{2}$ is the overall proportion of deaths. The equation is often approximated as:
 
 $$
-n = \frac{2(z_{1-\alpha/2}+z_{1-\beta})^2}{\Delta^2},
+n = \frac{2\times(z_{1-\alpha/2}+z_{1-\beta})^2}{\Delta^2},
 $$
 where $\Delta=\frac{(\pi_2-\pi_1)}{\sqrt{(\bar{\pi}(1-\bar{\pi}))}}$ is the *standardised* effect size. 
 
@@ -213,7 +213,7 @@ If we consider the situation where some patients do not comply with the research
 In case studies do not have an equal number of patients in each arm, the allocation of the number of patients to each group in the study is defined based on a so-called *allocation ratio* $r$, i.e. $1:r$ allocation. Then, the sample size in group 1 can be obtained as
 
 $$
-n_1=\frac{(r+1)n}{2r},
+n_1=\frac{(r+1)\times n}{2\times r},
 $$
 and then derive $n_2=r \times n_1$. For example, let us assume we want to use a $1:2$ (drug:placebo) allocation, which means $r=2$. Then, we can obtain the number of patients in group 1 as $n_1=3 \times n / 4$, and those in group 2 as $n_2=n_1 \times 2$.
 

@@ -1,0 +1,338 @@
+---
+title: "Sample Size Calculations - Examples"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2026-06-04
+categories: [Quarto, R, Academia, Medical Statistics, Sample Size Calculation] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.jpg
+#bibliography: references.bib
+#nocite: |
+#  @*
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello folks and welcome back to my regular blog update. Today I would like to finish off the series of introduction posts on sample size calculation approaches by showing some simple examples and illustrating how to use the formulae described in previous posts to address these problems. I apologise for the lack of theoretical discussion for today's post but, unfortunately, it is a very busy period which prevents me from opening up the discussion of a new topic. I promise this will be the focus for my next post. In the meantime, I hope you can still find these exercises useful! Enjoy!
+
+# Examples
+
+## Example 1
+
+Let us consider a new trial which is planned to investigate the performance of a new weight loss programme, where participants are randomised either to the new programme or to a standard of care group. The primary outcome of the trial is weight (Kg) at six months follow-up and will be analysed using a t-test at $5\%$ significance level. From a pilot work the researchers estimate the standard deviation of weight to be $6$ Kg and hope to show that the programme results in an average weight loss of $2$ Kg.
+
+  1. How many participants must be recruited to ensure a power of $80\%$ ?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# available data
+alpha <- 0.05
+beta <- 0.2
+power <- 1 - beta
+z_crit_a <- round(qnorm(1-alpha),2)
+z_crit_b <- round(qnorm(1-beta),2)
+sigma <- 6
+mud <- 2
+n1 <- (2*sigma^2*(z_crit_a + z_crit_b)^2)/(mud^2)
+```
+
+Given that the primary outcome (weight in Kg) is continuous and average differences between the two intervention groups in this outcome at one time point will be analysed using a t-test, we can use the standard sample size calculation formula to estimate the required sample size in each group $n$:
+
+$$
+n = \frac{2\times \sigma^2(z_{1-\alpha}+z_{1-\beta})^2}{(\mu_2-\mu_1)^2} = \frac{2 \times 6^2 \times (`r z_crit_a` + `r z_crit_b`)^2}{2^2} = `r n1` = \approx `r round(n1)`,
+$$ {#eq-ssc-tstt}
+
+which results in a total sample size of $N=`r round(n1)`\times 2 = `r round(n1)*2`$.
+
+  2. It is anticipated that $25\%$ of subjects will drop out of the study, and that $20\%$ of the remaining subjects (on the active arm) will not follow the weight loss programme. Adjust the required sample size obtained before.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# adjustments
+N <- n1*2
+d <- 0.25
+IF_d <- 1/(1-d)
+N_adj1 <- N*IF_d
+IF_nc <- 1/(1-0.2-0)^2
+N_adj2 <- N_adj1*IF_nc
+```
+
+To adjust the sample size calculation for the expected dropout and non-adherence proportions, we need to multiply the final estimate by the appropriate inflation factors. For dropout, the inflation factor is $IF_d=\frac{1}{1-d}=\frac{1}{1-0.25}$, which leads to an adjusted total sample size of $N^{\star}=N \times \frac{1}{1-d}=`r N` \times \frac{1}{1-0.25}=`r N*IF_d` \approx `r round(N_adj1)`$. For non-adherence, the inflation factor is $IF_{nc}=1/(1-NC_1-NC_2)^2=1/(1-0.2-0)$, which leads to a final adjusted total sample size of $N^{\star\star}=N^{\star} \times 1/(1-NC_1-NC_2)^2=`r N_adj1` \times 1/(1-0.2)^2=`r N_adj1*IF_nc` \approx `r round(N_adj2)`$
+
+  3. Suppose that the new programme only allows to recruit up to $200$ participants. What power will the study have for this number of subjects (ignoring dropout and non-adherence)?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# power
+N_prior <- 200
+n1_prior <- N_prior/2
+z_crit_b <- sqrt((n1_prior * (mud^2))/(2*sigma^2)) - z_crit_a 
+power <- pnorm(z_crit_b)
+```
+
+If the total number of subjects is fixed and equal to $N=200$ (so that in each group we have $n=100$), then we can simply fill in this value in @eq-ssc-tstt and solve for $z_{1-\beta}$ and so also for $1-\beta$. In our case, the calculation should given $1-\beta \approx `r round(power,2)`$.
+
+  4. To reduce the costs of the study the researchers plan to randomise using a $1:3$ ratio (intervention:control). Adjust the required sample size accordingly.
+  
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# adjustments 2
+r <- 3
+n1_ratio <- (r+1)*n1/(2*r)
+n2_ratio <- n1_ratio*r
+```
+
+To adjust the sample size using the proposed ratio $r=3$, we need to first derive the adjusted sample size in the intervention group as $n_1=\frac{(r+1)n}{2r}=\frac{(3+1)\times `n1`}{2\times 3} \approx `r n1_ratio`$, and the obtain the sample in the other group as $n_2=r \times n_1 = 3 \times ` n1_ratio` \approx `r n2_ratio`$.
+
+
+## Example 2
+
+A multi-national clinical trial investigates the value of gradually increasing dose schedule of a beta blocker in the treatment of severe heart failure. The trial will be randomised, double blind and placebo controlled, where each patient is followed for $2$ years and the main treatment comparison is for all cause mortality. Previous studies suggest a $2$ year mortality of around $36\%$, and the researchers believe that a one third reduction in mortality would be important to detect at a significance level of $5\%$, power of $90\%$ and an equal number of patients in each group. The trial is to be analysed via a comparison of proportions.
+
+  1. How many patient should be recruited?
+  
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# available data
+alpha <- 0.05
+beta <- 0.1
+power <- 1 - beta
+z_crit_a <- round(qnorm(1-alpha),2)
+z_crit_b <- round(qnorm(1-beta),2)
+pi1 <- 0.36 
+pi2 <- 0.36 + (1/3)*0.36
+pid <- pi2 - pi1
+pibar <- (pi1+pi2)/2
+n1 <- (z_crit_a*sqrt(2*pibar*(1-pibar))+z_crit_b*sqrt(pi1*(1-pi1)+pi2*(1-pi2)))^2/(pid^2)
+delta <- (pi2-pi1)/sqrt(pibar*(1-pibar))
+n1_v2 <- (2*(z_crit_a + z_crit_b)^2)/(delta^2)
+```
+
+Given that the outcome of interest (all cause mortality) is binary and proportion differences between the two intervention groups in this outcome at one time point will be analysed, we can use the dedicated sample size calculation formula to estimate the required sample size in each group $n$:
+
+$$
+n = \frac{(z_{1-\alpha}\sqrt{2\bar{\pi}(1-\bar{\pi})}+z_{1-\beta}\sqrt{\pi_1(1-\pi_1)+\pi_2(1-\pi_2)})^2}{(\pi_2-\pi_1)^2} = \frac{(`r z_crit_a`\sqrt{2`r pibar`(1-`r pibar`)}+`r z_crit_b`\sqrt{`r pi1`(1-`r pi1`)+`r pi2`(1-`r pi1`)})^2}{(`r pi2`-`r pi1`)^2} \approx `r round(n1)`,
+$$ {#eq-ssc-tp}
+
+which results in a total sample size of $N=`r round(n1)`\times 2 = `r round(n1)*2`$. Alternatively, the following approximation formula may also be used instead:
+
+$$
+n = \frac{2\times(z_{1-\alpha}+z_{1-\beta})^2}{\Delta^2} = \frac{2\times(`r z_crit_a`+`r z_crit_b`)^2}{`r delta`^2} \approx `r round(n1_v2)`,
+$$
+where $\Delta = \frac{(\pi_2-\pi_1)}{\sqrt{(\bar{\pi}(1-\bar{\pi}))}}$.
+
+  2. How much the sample size changes if the power is reduced to $80\%$?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# new power
+beta <- 0.2
+power <- 1 - beta
+z_crit_b <- round(qnorm(1-beta),2)
+n1_star <- (z_crit_a*sqrt(2*pibar*(1-pibar))+z_crit_b*sqrt(pi1*(1-pi1)+pi2*(1-pi2)))^2/(pid^2)
+```
+
+We just need to update @eq-ssc-tp using $1-\beta=0.8$ (and so $z_{1-1-\beta}=`r round(qnorm(1-0.2),2)`$), which should give $n^{\star}=`r round(n1_star)`$ and a total sample size of $N=n^{\star} \times 2 = `r round(n1_star*2)`$.
+
+  3. How much the sample size changes if the expected reduction in mortality is $6\%$ (i.e. $36\%$ vs $30\%$)?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# new reduction
+alpha <- 0.05
+beta <- 0.1
+power <- 1 - beta
+z_crit_a <- round(qnorm(1-alpha),2)
+z_crit_b <- round(qnorm(1-beta),2)
+pi1 <- 0.30 
+pi2 <- 0.36
+pid <- pi2 - pi1
+pibar <- (pi1+pi2)/2
+n1_star2 <- (z_crit_a*sqrt(2*pibar*(1-pibar))+z_crit_b*sqrt(pi1*(1-pi1)+pi2*(1-pi2)))^2/(pid^2)
+```
+
+Again, we update @eq-ssc-tp using $\pi_1=0.30$ and $\pi_2=0.36$ (and so $\bar{\pi}=`r pibar`$), which should give $n^{\star\star}=`r round(n1_star2)`$ and a total sample size of $N=n^{\star\star} \times 2 = `r round(n1_star2*2)`$.
+
+
+## Example 3
+
+A trial involving patients with bedsores is planned under the hypothesis that ultrasound treatment will halve the healing time of these sores with respect to standard treatment. The investigators would like to test this difference using a $5\%$ significance level and a $90\%$ power.
+
+  1. How many participants should be recruited assuming that all people will be followed until they are healed?
+  
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# available data
+alpha <- 0.05
+beta <- 0.1
+power <- 1 - beta
+z_crit_a <- round(qnorm(1-alpha),2)
+z_crit_b <- round(qnorm(1-beta),2)
+HR <- 2
+ne <- (z_crit_a + z_crit_b)^2*((HR+1)/(HR-1))^2
+```
+
+Given that the outcome of interest (time to heal) is survival and differences between the two intervention groups in this outcome at one time point will be analysed, we can use the dedicated sample size calculation formula to estimate the required sample size in each group $n$ in terms of number of events (i.e. failures):
+
+$$
+n_e=(z_{1-\alpha/2}+z_{1-\beta})^2\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2 = (`r z_crit_a` + `r z_crit_b`)^2 \times \Bigg(\frac{2+1}{2-1}\Bigg)^2 \approx `r round(ne)` ,
+$$ {#eq-ssc-hr}
+
+which corresponds to the sample size in each group assuming no censoring with an anticipated hazard ratio of $\text{HR}_{\text{exp}}=2$. 
+
+
+  2. If participants can only be followed up to $21$ days, with an expected healing rate of $70\%$ within this time, then how does this affect the required sample size?
+  
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# censoring 
+pi2 <- 1 - 0.7
+pi1 <- pi2/2
+HR <- log(pi1) / log(pi2)
+ne_v2 <- (z_crit_a + z_crit_b)^2*((HR+1)/(HR-1))^2
+n <- (((z_crit_a + z_crit_b)^2)/(2-pi1-pi2))*((HR+1)/(HR-1))^2
+```
+  
+If censoring occurs, and the survival proportions in the two groups can be estimated, then we can these to update the estimate for $\text{HR}_{\text{exp}}=\frac{\log \pi_1}{\log \pi_2}=\frac{`r log(pi1)`}{`r log(pi2)`} \approx `r round(HR,2)`$, which can then be used in @eq-ssc-hr to derive the expected number of events in each group:
+
+$$
+n_e= (`r z_crit_a` + `r z_crit_b`)^2 \times \Bigg(\frac{`r round(HR,2)`+1}{`r round(HR,2)`-1}\Bigg)^2 \approx `r round(ne_v2)`,
+$$
+
+as well as an estimate of the sample size in each group (assuming censoring) via:
+
+$$
+n=\frac{(z_{1-\alpha/2}+z_{1-\beta})^2}{(2-\pi_1-\pi_2)}\times \Bigg( \frac{\text{HR}_{\text{exp}}+1}{\text{HR}_{\text{exp}}-1} \Bigg)^2 = \frac{(`r z_crit_a` + `r z_crit_b`)^2}{(2-`r pi1` - `r pi2`)} \times \Bigg(\frac{`r round(HR,2)`+1}{`r round(HR,2)`-1}\Bigg)^2 \approx `r round(n)`,
+$$
+
+for a total sample size of $N=n\times 2=`r round(2*n)`$.
+
+
+## Example 4
+
+A study is carried out to estimate the mean latency of the auditory P300 in schizophrenic patients. A $95\%$ confidence interval of width less than $20$ ms is required and a previous study suggests a standard deviation of the measurements of $27$ ms.
+
+  1. How many patients are required?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# available data
+alpha <- 0.05
+z_crit_a <- round(qnorm(1-alpha/2),2)
+width <- 20
+sigma <- 27
+N <- 4 * (z_crit_a^2)*(sigma^2/width^2)
+```
+
+Given that the primary outcome (auditory P300 in ms) is continuous and a desired value for the width of a $95\%$ confidence interval around the population mean is known, we can use the precision-based sample size calculation formula to estimate the required total sample size:
+
+$$
+N = 4 \times z^2_{1-\alpha/2} \times \frac{\sigma^2_{\text{exp}}}{w^2_{\text{exp}}} = 4 \times `r z_crit_a`^2 \times \frac{`r sigma`^2}{`r width`^2} \approx `r round(N)`.
+$$
+
+
+## Example 5
+
+Researchers plan to conduct a case-control study to investigate the effectiveness of an existing flu vaccine in preventing swine flu, where cases are defined as subjects admitted to hospital with a diagnosis of swine flu whereas controls as subjects admitted with a respiratory disease other than influenza. They estimate that $30\%$ of the controls would have had the flu vaccine prior to admission, with the aim of the study being to detect an odds ratio of $0.5$ with $80\%$ power assuming a $5\%$ significance level. It is hypothesised that the odds of a person contracting swine flu is $50\%$ lower if they have had a flu vaccine, and that the odds of a case having had the vaccine should be $50\%$ lower than that of a control.
+
+  1. What percentage of cases is estimated to have had the vaccine prior to admission if the odds ratio is $0.5$?
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# available data
+alpha <- 0.05
+beta <- 0.1
+power <- 1 - beta
+z_crit_a <- round(qnorm(1-alpha/2),2)
+z_crit_b <- round(qnorm(1-beta),2)
+pi0 <- 0.3
+OR <- 0.5
+pi1 <- (pi0*OR)/(1+pi0*(OR-1))
+pid <- pi1 - pi0
+pibar <- (pi0+pi1)/2
+n1 <- (z_crit_a*sqrt(2*pibar*(1-pibar))+z_crit_b*sqrt(pi1*(1-pi1)+pi0*(1-pi0)))^2/(pid^2)
+```
+
+Given that we are dealing with a case-control study, and that information on the proportion of controls who had the vaccine prior to admission and assumed odds ratio is available ($\pi_0=`r pi0`$ and $\text{OR}=0.5$), then we can estimate the corresponding proportion of cases who had the vaccine prior to admission as:
+
+$$
+\pi_1=\frac{\pi_0 \times OR}{1+\pi_0\times(OR-1)} = \frac{`r pi0` \times `r OR`}{1+`r pi0`\times(`r OR`-1)} \approx `r round(pi1,2)`.
+$$
+
+  2. What sample size is required for the study?
+
+Using the estimate of $\pi_1$ retrieved before, we can now use standard sample size calculation formula for two proportions to derive an estimate of the sample size in each group:
+
+$$
+n = \frac{(z_{1-\alpha/2}\times \sqrt{2\times\bar{\pi}\times(1-\bar{\pi})} + z_{1-\beta} \times \sqrt{\pi_1\times (1-\pi_1)+\pi_0\times(1-\pi_0)})^2}{(\pi_1-\pi_0)^2} = \frac{(`r z_crit_a`\times \sqrt{2\times`r pibar`\times(1-`r pibar`)} + `r z_crit_b` \times \sqrt{`r pi1`\times (1-`r pi1`)+`r pi0`\times(1-`r pi0`)})^2}{(`r pi1`-`r pi0`)^2} \approx `r round(n1)`,
+$$
+
+which leads to a total sample size of $N=n\times 2= `r round(n1*2)`$.
+
+
+# Conclusion
+
+This concludes the topic of the sample size calculation, at least for these few introductory examples and formulae. I hope to resume this topic later on (perhaps those specifically related to cost-effectiveness analysis) but, for now, let me stop here. I hope some of the information I shared was useful and perhaps interesting.
+
+See you at the next update!
+
