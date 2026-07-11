@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2026-07-09">
 
-<title>Linear mixed models to handle missing at random data in trial based economic evaluations – Andrea Gabrio</title>
+<title>Logistic Regression - I – Andrea Gabrio</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -44,8 +46,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap-0ab08c5169d9eb6d75e34d6b2d34aa8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -73,6 +73,10 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -172,8 +176,9 @@ window.Quarto = {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
-  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression</a></li>
+  <li><a href="#predicted-values" id="toc-predicted-values" class="nav-link" data-scroll-target="#predicted-values">Predicted Values</a></li>
+  <li><a href="#multiple-predictors" id="toc-multiple-predictors" class="nav-link" data-scroll-target="#multiple-predictors">Multiple Predictors</a></li>
   </ul>
 </nav>
     </div>
@@ -182,14 +187,42 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Linear mixed models to handle missing at random data in trial based economic evaluations</h1>
-</div>
+<h1 class="title">Logistic Regression - I</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Medical Statistics</div>
+    <div class="quarto-category">Logistic Regression</div>
+  </div>
+  </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 9, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -199,40 +232,254 @@ window.Quarto = {
 </header>
 
 
+<p>Hello folks and welcome back to a new monthly post on my blog. Today I would like to move on from the topic covered in my past posts related to sample size calculation towards another key statistical concepts representing one of the most important fundamental of introductory statistics: <strong>logistic regression</strong>. So far we have encountered different types of statistical summaries (e.g.&nbsp;mean or risk difference, risk or odds ratio, hazard ratio, rate ratio) whose suitability and relevance to address the research question of a study change depending on the <em>type of outcome variables</em> (i.e.&nbsp;numerical, binary, survival, rate) and <em>study design</em> considered (i.e.&nbsp;cohort, cross-sectional, case-control study). Today’s post will focus on a statistical technique which is tailored to the analysis of <strong>binary</strong> outcome variables, which may arise in different types of study designs.</p>
+<p>I hope you will find this introduction to the topic of interest and feel free to let me know if you have any questions or suggestions related to this. I plan to use this kind of blog content as possible starting point for drafting future study materials for 1st year bachelor students in one of my introductory statistics courses. Any feedback is welcomed!</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>Cost‐effectiveness analyses (CEAs) conducted alongside randomised controlled trials are an important source of information for decision-makers in the process of technology appraisal (Ramsey et al., 2015). The analysis is based on healthcare outcome data and health service use, typically collected at multiple time points and then combined into overall measures of effectiveness and cost. A popular approach to handle missingness is to discard the participants with incomplete observations (complete case analysis or CCA), allowing for derivation of the overall measures based on the completers alone. We note that slightly different definitions of CCA are possible, depending on the form of the model of interest, the type of missingness and the inclusion of observed covariates. This approach, although appealing by its simplicity, has well-recognised limitations including loss of efficiency and an increased risk of bias. We propose the use of linear mixed effects models (LMMs) as an alternative approach under MAR. LMMs are commonly used for the modelling of dependent data (e.g.&nbsp;repeated-measures) and belong to the general class of likelihood-based methods. LMMs appear surprisingly uncommon for the analysis of repeated measures in trial-based CEA, perhaps because of a lack of awareness or familiarity with fitting LMMs.</p>
-</section>
-<section id="methods" class="level1">
-<h1>Methods</h1>
-<p>Linear mixed model extends the usual linear model framework by the addition of “random effect” terms, which can take into account the dependence between observations.</p>
-<p><span id="eq-lmm"><span class="math display">\[
-Y_{ij}=\beta_1+\beta_2 X_{i1}+\ldots+\beta_(P+1) X_{iP}+\omega_i+\epsilon_{ij},
-\tag{1}\]</span></span></p>
-<p>where <span class="math inline">\(Y_{ij}\)</span> denotes the outcome repeatedly collected for each individual <span class="math inline">\(i=1,\ldots,N\)</span> at multiple times <span class="math inline">\(j=1,\ldots,J\)</span>. The model parameters commonly referred to as fixed effects include an intercept <span class="math inline">\(\beta_1\)</span> and the coefficients <span class="math inline">\((\beta_2,\ldots,\beta_{(P+1)})\)</span> associated with the predictors <span class="math inline">\(X_{i1},\ldots,X_{iP}\)</span>, while <span class="math inline">\(\omega_i\)</span> and <span class="math inline">\(\epsilon_{ij}\)</span> are two random terms: <span class="math inline">\(\epsilon_{ij}\)</span> is the usual error term and <span class="math inline">\(\omega_i\)</span> is a random intercept which captures variation in outcomes between individuals. The models can be extended to deal with more complex structures, for example by allowing the effect of the covariates to vary across individuals (random slope) or a different covariance structure of the errors. LMMs can be fitted even if some outcome data are missing and provide correct inferences under MAR.</p>
-<p>A particular type of LMMs commonly used in the analysis of repeated measures in clinical trials is referred to as Mixed Model for Repeated Measurement (MMRM). The model includes a categorical effect for time, an interaction between time and treatment arm, and allows errors to have different variance and correlation over time (i.e.&nbsp;unstructured covariance structure). <a href="#fig-covstruct" class="quarto-xref">Figure&nbsp;1</a> shows some examples of possible covariance structures that may be explored for LMMs.</p>
-<div id="fig-covstruct" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="60%">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-covstruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="cov_struct_lmm.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-covstruct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Some examples of covariance structures in LMM
+<p>Logistic regression has many applications and uses:</p>
+<ul>
+<li>perform adjusted and/or subgroup analyses</li>
+<li>estimate the effect of an intervention/exposure while adjusting for possible confounders</li>
+<li>investigate risk factors / develop a risk prediction model</li>
+<li>analyse case-control studies</li>
+</ul>
+<p>Consider the following data from a trial where infants were randomised to either diagnostic ultrasound or no ultrasound in the management of suspected hip dysplasia and where the primary outcome of interest was binary “any hip treatment” (yes/no). <a href="#tbl-ex1" class="quarto-xref">Table&nbsp;1</a> shows the distribution of the outcome variable by treatment group in the trial in the form of a <span class="math inline">\(2\times2\)</span> contingency table.</p>
+<div id="tbl-ex1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
 </figcaption>
+<div aria-describedby="tbl-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code>                Ultrasound - Yes Ultrasound - No
+Treatment - Yes              126             188
+Treatment - No               159             156</code></pre>
+</div>
+</div>
 </figure>
 </div>
-<p>Incremental (between-group) or marginal (within-group) estimates for aggregated outcomes over the trial period, such as quality-adjusted life years (QALYs) or total costs can be retrieved as linear combinations of the parameter estimates from <a href="#eq-lmm" class="quarto-xref">Equation&nbsp;1</a>. For example, the mean difference in total cost is obtained by summing up the estimated differences at each follow-up point, while differences on a QALY scale can be obtained as weighted linear combinations of the coefficient estimates of the utility model.</p>
+<p>Based on the notions taught so far, we would usually analyse these data by calculating risk difference, risk or odds ratio (with associated <span class="math inline">\(95\%\)</span> confidence interval) and perform a test of association (<span class="math inline">\(\chi^2\)</span> test). For example, the <strong>odds ratio</strong> (OR) comparing the odds of having ultrasound between the treatment and no treatment group is:</p>
+<p><span class="math display">\[
+\text{OR}=\frac{126/188}{159/156}=0.66
+\]</span></p>
+<p>with associated <span class="math inline">\(95\%\)</span> confidence interval (on the log scale) being</p>
+<p><span class="math display">\[
+\log \text{OR}\pm 1.96 \times \text{SE} \log \text{OR} = -0.4155 \pm 1.96 \times 0.1611 = (-0.7313; -0.9051),
+\]</span> where <span class="math inline">\(\text{SE} \log \text{OR}=\sqrt{1/126+1/159+1/188+1/156}=0.1611062\)</span> and the <span class="math inline">\(95\%\)</span> CI for <span class="math inline">\(\text{OR}=(0.48;0.90)\)</span> is obtained by taking the exponential of the CI bounds on the log scale.</p>
+<p>Similarly, the <span class="math inline">\(\chi^2\)</span> test of association between treatment and ultrasound is based on the test statistic <span class="math inline">\(\chi^2=6.796\)</span> with <span class="math inline">\(\nu=1\)</span> degree of freedom and a p-value of <span class="math inline">\(0.009\)</span>, suggesting to reject the null hypothesis of no association between the variables (i.e.&nbsp;that receiving ultrasound leads to a odds reduction of <span class="math inline">\(\approx 34\%\)</span> with respect to no ultrasound).</p>
+<p>We could alternatively analyse the data using <em>logistic regression</em> to model the relationship between the outcome variable “any hip treatment” (Y) as a function of the predictor variable “ultrasound” (X). To this end, it is essential to code the binary outcome variable as <span class="math inline">\(1\)</span> (hip treatment) and <span class="math inline">\(0\)</span> (no hip treatment) based on the different event experienced by each infant and, in this case, to similarly code the predictor variable as <span class="math inline">\(1\)</span> (ultrasound) and <span class="math inline">\(0\)</span> (no ultrasound). This last change ensures that the reference group represented by the <span class="math inline">\(0\)</span> group for the predictor variable is used as reference for interpretation purposes.</p>
+<p>An example of the re-coded data are shown in <a href="#tbl-ex2" class="quarto-xref">Table&nbsp;2</a>.</p>
+<div class="cell">
+<div id="tbl-ex2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ultrasound</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">628</td>
+<td style="text-align: right;">629</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
 </section>
-<section id="conclusions" class="level1">
-<h1>Conclusions</h1>
-<p>We believe LMMs represent an alternative approach which can overcome some of these limitations.</p>
+<section id="logistic-regression" class="level1">
+<h1>Logistic Regression</h1>
+<p>We assume the binary outcome <span class="math inline">\(Y\)</span> is Bernoulli distributed and wish to estimate the probability of “any hip treatment”, i.e.&nbsp;<span class="math inline">\(P(Y_i=1)=E(Y_i)=\pi_i\)</span>. The logistic regression models the <strong>log-odds</strong> of the outcome as a function of the predictor X:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi_i}{1-\pi_i}\Bigg) = \beta_0 + \beta_1 \times x_i,
+\]</span> where the likelihood function is:</p>
+<p><span class="math display">\[
+L=\Pi_{i=1}^n \pi_i^{y_i} \times (1-\pi_i)^{1-y_i}.
+\]</span> Estimation of the regression coefficients <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> is achieved by maximising the log-likelihood, while confidence intervals are calculated assuming Normality of the estimator. For example, a <span class="math inline">\(95\%\)</span> CI for the regression slope estimator is obtained as:</p>
+<p><span class="math display">\[
+\hat{\beta}_1 \pm 1.96 \times \text{SE}(\hat{\beta}_1).
+\]</span></p>
+<p>In our case, the estimated regression model is given by:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\hat{\pi}}{1-\hat{\pi}}\Bigg) = 0.019 - 0.419 \times x,
+\]</span> where <span class="math inline">\(\pi\)</span> is the probability of “any hip treatment”. In the above model:</p>
+<ol type="1">
+<li><p><span class="math inline">\(\beta_0\)</span> represents the log-odds of “any hip treatment” (<span class="math inline">\(Y=1\)</span>) for someone who does not receive ultrasound treatment (<span class="math inline">\(X=0\)</span>).</p></li>
+<li><p><span class="math inline">\(\beta_1\)</span> represents the <em>increase</em> in the log-odds of “any hip treatment” (<span class="math inline">\(Y=1\)</span>) for someone who receives ultrasound treatment (<span class="math inline">\(X=1\)</span>).</p></li>
+</ol>
+<p>Thus, <span class="math inline">\(\beta_1\)</span> is the main parameter of interest since it represents the difference in log-odds between the “ultrasound” and “no ultrasound” treatment:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi_{x=1}}{1-\pi_{x=1}}\Bigg) - \log\Bigg(\frac{\pi_{x=0}}{1-\pi_{x=0}}\Bigg) = \log\Bigg(\frac{\pi_{x=1}/1-\pi_{x=1}}{\pi_{x=0}/1-\pi_{x=0}}\Bigg)
+\]</span> and, exponentiating its value will therefore provide an estimate for the corresponding odds ratio (OR):</p>
+<p><span class="math display">\[
+\text{exp}(\beta_1) = \frac{\pi_{x=1}/1-\pi_{x=1}}{\pi_{x=0}/1-\pi_{x=0}} = \text{OR}.
+\]</span> In our case, the estimated value is <span class="math inline">\(\text{exp}(\hat{\beta}_1)=\text{exp}(-0.419)=0.658\)</span> with associated <span class="math inline">\(95\%\)</span> CI given by <span class="math inline">\((0.48; 0.90)\)</span>, obtained after taking the exponential of the bounds calculated under the usual Normality assumption on the log-odds scale. Similarly, <span class="math inline">\(\text{exp}(\hat{\beta}_0)=\text{exp}(0.019)=1.019\)</span> represents the odds of “any hip treatment” (<span class="math inline">\(Y=1\)</span>) for the reference group (no ultrasound) of the predictor (<span class="math inline">\(X=0\)</span>).</p>
+<p>Often logistic regression results are directly presented in terms of estimated odds ratios with associated <span class="math inline">\((1-\alpha)100\%\)</span> confidence interval, where inclusion of <span class="math inline">\(1\)</span> into the interval suggests the lack of enough counter evidence to reject the null hypothesis of no difference in odds of “any hip treatment” between the ultrasound and no ultrasound treatment.</p>
+</section>
+<section id="predicted-values" class="level1">
+<h1>Predicted Values</h1>
+<p>We may also be interested in obtaining <strong>fitted values</strong> or predictions from the model for a specific infant profile. For example, the predicted risk of “any hip treatment” for either an infant receiving no ultrasound (<span class="math inline">\(X=0\)</span>) and an infant receiving ultrasound (<span class="math inline">\(X=1\)</span>) can be calculated from the estimated regression model as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log\Bigg(\frac{\hat{\pi}_0}{1-\hat{\pi}_0}\Bigg) =&amp; 0.019 - 0.419 \times 0 \\
+\Bigg(\frac{\hat{\pi}_0}{1-\hat{\pi}_0}\Bigg)=&amp; \text{exp}(0.019) = 1.019 \\
+\hat{\pi}_0=&amp; 0.505
+\end{aligned}
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log\Bigg(\frac{\hat{\pi}_1}{1-\hat{\pi}_1}\Bigg) =&amp; 0.019 - 0.419 \times 1 = -0.4 \\
+\Bigg(\frac{\hat{\pi}_1}{1-\hat{\pi}_1}\Bigg)=&amp; \text{exp}(0.019 - 0.419) = 0.67 \\
+\hat{\pi}_1=&amp; 0.401.
+\end{aligned}
+\]</span> Finally, some useful relationships that may come in handy when dealing with logistic regression are the following:</p>
 <ul>
-<li><p>First, practitioners may be more comfortable with the standard regression framework.</p></li>
-<li><p>Second, LMMs can be tailored to address other data features (e.g.&nbsp;cluster-randomised trials or non-normal distribution) while also easily combined with bootstrapping.</p></li>
-<li><p>Third, LMMs do not rely on imputation, and results are therefore deterministic and easily reproducible, whereas the Monte Carlo error associated with multiple imputation may cause results to vary from one imputation to another, unless the number of imputations is sufficiently large.</p></li>
+<li><p><span class="math inline">\(\text{odds} = \frac{\pi}{1-\pi}=\text{exp}(\beta_0+\beta_1 \times x)\)</span></p></li>
+<li><p><span class="math inline">\(\text{risk} = \pi = \frac{\text{exp}(\beta_0+\beta_1 \times x)}{1+\text{exp}(\beta_0+\beta_1 \times x)}\)</span></p></li>
 </ul>
-<p>Although the methodology illustrated is already known, particularly in the area of statistical analyses, to our knowledge LMMs have rarely been applied to health economic data collected alongside randomised trials. We believe the proposed methods is preferable to a complete-case analysis when CEA data are incomplete, and that it can offer an interesting alternative to imputation methods.</p>
-<p><span style="text-align: center; font-size: 2rem"><a href="https://onlinelibrary.wiley.com/doi/full/10.1002/hec.4510"><i class="fa-solid fa-file-pdf" aria-label="file-pdf"></i></a> &nbsp; <a href="https://github.com/AnGabrio/Code/tree/master/lmm_in_CEA"><i class="fa-solid fa-code" aria-label="code"></i></a></span></p>
+</section>
+<section id="multiple-predictors" class="level1">
+<h1>Multiple Predictors</h1>
+<p>It is relatively easy to extend the model to include <span class="math inline">\(Q\geq 2\)</span> predictor variables</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi_i}{1-\pi_i}\Bigg) = \beta_0 + \beta_1 \times x_{i1} + \ldots + \beta_q \times x_{iq},
+\]</span></p>
+<p>often under the assumption that the predictor effects are <em>additive</em> on the log-odds scale.</p>
+<p>Let us consider a cohort study designed to investigate risk factors for short term mortality following surgery, where:</p>
+<ul>
+<li><p>the binary outcome is surgical mortality (yes/no), with an observed risk of death in the trial of <span class="math inline">\(50/1500=3.3\%\)</span></p></li>
+<li><p>a first risk factor is a previous experience of a heart attack (yes/no)</p></li>
+<li><p>a second risk factor is the status of the ejection fraction (good/fair/poor)</p></li>
+<li><p>a third risk factor is the age (years)</p></li>
+</ul>
+<p>We now consider a logistic model with two predictors, namely past heart attack (HA) and status of ejection fraction (EF), where the latter has three levels. One of these levels must be chosen as reference (i.e.&nbsp;good) and indicator variables for the other levels must be created to be included into the model (but without including the original EF variable). For example, let’s select the group “good” as the reference and create the indicator variables for: “fair” (EFF=1 if ejection fraction is fair) and “poor” (EFP=1 if ejection fraction is poor).</p>
+<p>An example of the re-coded data are shown in <a href="#tbl-ex3" class="quarto-xref">Table&nbsp;3</a>.</p>
+<div class="cell">
+<div id="tbl-ex3" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3
+</figcaption>
+<div aria-describedby="tbl-ex3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">HA</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">EFF</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">EFP</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">dead</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The following model estimates the effect of past HA and EF on surgical outcome</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg) = \beta_0 + \beta_1 \times \text{HA} + \beta_2 \times \text{EFF} + \beta_3 \times \text{EFP},
+\]</span> where <span class="math inline">\(\text{exp}(\beta_1)\)</span> is the OR for HA (yes vs no), adjusted for EF, <span class="math inline">\(\text{exp}(\beta_2)\)</span> is the OR for EFF (fair vs good), adjusted for HA, and <span class="math inline">\(\text{exp}(\beta_2)\)</span> is the OR for EFP (poor vs good), adjusted for HA.</p>
+<p>Filling-in the estimated regression coefficients, the model becomes:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\hat{\pi}}{1-\hat{\pi}}\Bigg) = -4.1618 + 0.14495  \times \text{HA} + 0.9036  \times \text{EFF} + 1.8316 \times \text{EFP},
+\]</span> from which, we can derive estimates for the corresponding OR and associated <span class="math inline">\(95\%\)</span> CI:</p>
+<ul>
+<li><p>OR - HA (yes vs no): <span class="math inline">\(\text{exp}(\beta_1)=1.16 (0.61; 2.18)\)</span></p></li>
+<li><p>OR - EFF (fair vs good): <span class="math inline">\(\text{exp}(\beta_2)=2.47 (1.21; 5.04)\)</span></p></li>
+<li><p>OR - EFP (poor vs good): <span class="math inline">\(\text{exp}(\beta_3)=6.24 (2.89; 13.48)\)</span></p></li>
+</ul>
+<p>I think I will end my post here, for this time. My apologies if the content I provided the latest posts was not quite dense but it has been a quite busy period both for teaching and research and I tried my best to provide at least some snapshots of the different arguments I wanted to discuss here. I hope you do not mind too much and can bear with me for a little longer. In the upcoming posts, I will try to condense the material I have organised in a more a dense way (hopefully I will find the time to do so). In any case, thanks for tuning in and I hope this general introduction was not completely useless. Next time we move forward and see how logistic regression can be used to test different types of hypotheses related to model fit, predictor effects and interaction effects. Stay tuned if you are interested!</p>
 
 
 </section>

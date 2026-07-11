@@ -1,0 +1,247 @@
+---
+title: "Logistic Regression - I"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2026-07-09
+categories: [Quarto, R, Academia, Medical Statistics, Logistic Regression] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+#bibliography: references.bib
+#nocite: |
+#  @*
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello folks and welcome back to a new monthly post on my blog. Today I would like to move on from the topic covered in my past posts related to sample size calculation towards another key statistical concepts representing one of the most important fundamental of introductory statistics: **logistic regression**. So far we have encountered different types of statistical summaries (e.g. mean or risk difference, risk or odds ratio, hazard ratio, rate ratio) whose suitability and relevance to address the research question of a study change depending on the *type of outcome variables* (i.e. numerical, binary, survival, rate) and *study design* considered (i.e. cohort, cross-sectional, case-control study). Today's post will focus on a statistical technique which is tailored to the analysis of **binary** outcome variables, which may arise in different types of study designs.
+
+I hope you will find this introduction to the topic of interest and feel free to let me know if you have any questions or suggestions related to this. I plan to use this kind of blog content as possible starting point for drafting future study materials for 1st year bachelor students in one of my introductory statistics courses. Any feedback is welcomed!
+
+# Introduction
+
+Logistic regression has many applications and uses: 
+
+  - perform adjusted and/or subgroup analyses
+  - estimate the effect of an intervention/exposure while adjusting for possible confounders
+  - investigate risk factors / develop a risk prediction model
+  - analyse case-control studies
+
+Consider the following data from a trial where infants were randomised to either diagnostic ultrasound or no ultrasound in the management of suspected hip dysplasia and where the primary outcome of interest was binary "any hip treatment" (yes/no). @tbl-ex1 shows the distribution of the outcome variable by treatment group in the trial in the form of a $2\times2$ contingency table.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex1
+
+#generate data
+ultra_y <- c(126,188)
+ultra_n <- c(159,156)
+ultra_tab <- rbind(ultra_y,ultra_n)
+colnames(ultra_tab) <- c("Ultrasound - Yes","Ultrasound - No")
+rownames(ultra_tab) <- c("Treatment - Yes","Treatment - No")
+ultra_tab
+```
+
+Based on the notions taught so far, we would usually analyse these data by calculating risk difference, risk or odds ratio (with associated $95\%$ confidence interval) and perform a test of association ($\chi^2$ test). For example, the **odds ratio** (OR) comparing the odds of having ultrasound between the treatment and no treatment group is:
+
+$$
+\text{OR}=\frac{126/188}{159/156}=0.66
+$$
+
+with associated $95\%$ confidence interval (on the log scale) being
+
+$$
+\log \text{OR}\pm 1.96 \times \text{SE} \log \text{OR} = -0.4155 \pm 1.96 \times 0.1611 = (-0.7313; -0.9051),
+$$
+where $\text{SE} \log \text{OR}=\sqrt{1/126+1/159+1/188+1/156}=0.1611062$ and the $95\%$ CI for $\text{OR}=(0.48;0.90)$ is obtained by taking the exponential of the CI bounds on the log scale.
+
+Similarly, the $\chi^2$ test of association between treatment and ultrasound is based on the test statistic $\chi^2=6.796$ with $\nu=1$ degree of freedom and a p-value of $0.009$, suggesting to reject the null hypothesis of no association between the variables (i.e. that receiving ultrasound leads to a odds reduction of $\approx 34\%$ with respect to no ultrasound).
+
+We could alternatively analyse the data using *logistic regression* to model the relationship between the outcome variable "any hip treatment" (Y) as a function of the predictor variable "ultrasound" (X). To this end, it is essential to code the binary outcome variable as $1$ (hip treatment) and $0$ (no hip treatment) based on the different event experienced by each infant and, in this case, to similarly code the predictor variable as $1$ (ultrasound) and $0$ (no ultrasound). This last change ensures that the reference group represented by the $0$ group for the predictor variable is used as reference for interpretation purposes.
+
+An example of the re-coded data are shown in @tbl-ex2.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex2
+
+#generate re-coded data
+library(kableExtra)
+library(dplyr)
+
+n <- 629
+id <- rep(1:n)
+ultrasound <- rbinom(n, size = 1, prob = 0.45)
+treatment <- rbinom(n, size = 1, prob = 0.5)
+ultra.df <- data.frame(id, ultrasound, treatment)
+ultra.df[n-1,] <- c(NA, NA, NA) 
+ultra.df_print <- rbind.data.frame(head(ultra.df, 5), 
+                                   tail(ultra.df, 2)) 
+rownames(ultra.df_print) <- c(rownames(ultra.df_print)[1:5], "", rownames(ultra.df_print)[6])
+
+options(knitr.kable.NA = '-')
+
+ultra.df_print %>%
+  kbl() %>%
+  kable_styling()
+```
+
+# Logistic Regression
+
+We assume the binary outcome $Y$ is Bernoulli distributed and wish to estimate the probability of "any hip treatment", i.e. $P(Y_i=1)=E(Y_i)=\pi_i$. The logistic regression models the **log-odds** of the outcome as a function of the predictor X:
+
+$$
+\log\Bigg(\frac{\pi_i}{1-\pi_i}\Bigg) = \beta_0 + \beta_1 \times x_i,
+$$
+where the likelihood function is:
+
+$$
+L=\Pi_{i=1}^n \pi_i^{y_i} \times (1-\pi_i)^{1-y_i}. 
+$$
+Estimation of the regression coefficients $\beta_0$ and $\beta_1$ is achieved by maximising the log-likelihood, while confidence intervals are calculated assuming Normality of the estimator. For example, a $95\%$ CI for the regression slope estimator is obtained as: 
+
+$$
+\hat{\beta}_1 \pm 1.96 \times \text{SE}(\hat{\beta}_1).
+$$
+
+In our case, the estimated regression model is given by:
+
+$$
+\log\Bigg(\frac{\hat{\pi}}{1-\hat{\pi}}\Bigg) = 0.019 - 0.419 \times x,
+$$
+where $\pi$ is the probability of "any hip treatment". In the above model:
+
+  1. $\beta_0$ represents the log-odds of "any hip treatment" ($Y=1$) for someone who does not receive ultrasound treatment ($X=0$).
+  
+  2. $\beta_1$ represents the *increase* in the log-odds of "any hip treatment" ($Y=1$) for someone who receives ultrasound treatment ($X=1$).
+  
+Thus, $\beta_1$ is the main parameter of interest since it represents the difference in log-odds between the "ultrasound" and "no ultrasound" treatment:
+
+$$
+\log\Bigg(\frac{\pi_{x=1}}{1-\pi_{x=1}}\Bigg) - \log\Bigg(\frac{\pi_{x=0}}{1-\pi_{x=0}}\Bigg) = \log\Bigg(\frac{\pi_{x=1}/1-\pi_{x=1}}{\pi_{x=0}/1-\pi_{x=0}}\Bigg)
+$$
+and, exponentiating its value will therefore provide an estimate for the corresponding odds ratio (OR):
+
+$$
+\text{exp}(\beta_1) = \frac{\pi_{x=1}/1-\pi_{x=1}}{\pi_{x=0}/1-\pi_{x=0}} = \text{OR}.
+$$
+In our case, the estimated value is $\text{exp}(\hat{\beta}_1)=\text{exp}(-0.419)=0.658$ with associated $95\%$ CI given by $(0.48; 0.90)$, obtained after taking the exponential of the bounds calculated under the usual Normality assumption on the log-odds scale. Similarly, $\text{exp}(\hat{\beta}_0)=\text{exp}(0.019)=1.019$ represents the odds of "any hip treatment" ($Y=1$) for the reference group (no ultrasound) of the predictor ($X=0$).
+
+Often logistic regression results are directly presented in terms of estimated odds ratios with associated $(1-\alpha)100\%$ confidence interval, where inclusion of $1$ into the interval suggests the lack of enough counter evidence to reject the null hypothesis of no difference in odds of "any hip treatment" between the ultrasound and no ultrasound treatment. 
+
+# Predicted Values
+
+We may also be interested in obtaining **fitted values** or predictions from the model for a specific infant profile. For example, the predicted risk of "any hip treatment" for either an infant receiving no ultrasound ($X=0$) and an infant receiving ultrasound ($X=1$) can be calculated from the estimated regression model as
+
+$$
+\begin{aligned}
+\log\Bigg(\frac{\hat{\pi}_0}{1-\hat{\pi}_0}\Bigg) =& 0.019 - 0.419 \times 0 \\
+\Bigg(\frac{\hat{\pi}_0}{1-\hat{\pi}_0}\Bigg)=& \text{exp}(0.019) = 1.019 \\
+\hat{\pi}_0=& 0.505
+\end{aligned}
+$$
+
+and
+
+$$
+\begin{aligned}
+\log\Bigg(\frac{\hat{\pi}_1}{1-\hat{\pi}_1}\Bigg) =& 0.019 - 0.419 \times 1 = -0.4 \\
+\Bigg(\frac{\hat{\pi}_1}{1-\hat{\pi}_1}\Bigg)=& \text{exp}(0.019 - 0.419) = 0.67 \\
+\hat{\pi}_1=& 0.401.
+\end{aligned}
+$$
+Finally, some useful relationships that may come in handy when dealing with logistic regression are the following:
+
+  - $\text{odds} = \frac{\pi}{1-\pi}=\text{exp}(\beta_0+\beta_1 \times x)$
+  
+  - $\text{risk} = \pi = \frac{\text{exp}(\beta_0+\beta_1 \times x)}{1+\text{exp}(\beta_0+\beta_1 \times x)}$
+
+
+# Multiple Predictors 
+
+It is relatively easy to extend the model to include $Q\geq 2$ predictor variables
+
+$$
+\log\Bigg(\frac{\pi_i}{1-\pi_i}\Bigg) = \beta_0 + \beta_1 \times x_{i1} + \ldots + \beta_q \times x_{iq},
+$$
+
+often under the assumption that the predictor effects are *additive* on the log-odds scale.
+
+Let us consider a cohort study designed to investigate risk factors for short term mortality following surgery, where: 
+
+  - the binary outcome is surgical mortality (yes/no), with an observed risk of death in the trial of $50/1500=3.3\%$
+  
+  - a first risk factor is a previous experience of a heart attack (yes/no)
+  
+  - a second risk factor is the status of the ejection fraction (good/fair/poor)
+  
+  - a third risk factor is the age (years)
+
+We now consider a logistic model with two predictors, namely past heart attack (HA) and status of ejection fraction (EF), where the latter has three levels. One of these levels must be chosen as reference (i.e. good) and indicator variables for the other levels must be created to be included into the model (but without including the original EF variable). For example, let's select the group "good" as the reference and create the indicator variables for: "fair" (EFF=1 if ejection fraction is fair) and "poor" (EFP=1 if ejection fraction is poor). 
+
+
+An example of the re-coded data are shown in @tbl-ex3.
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+#| label: tbl-ex3
+
+#generate re-coded data
+
+n <- 1500
+id <- rep(1:n)
+HA <- rbinom(n, size = 1, prob = 0.25)
+dead <- rbinom(n, size = 1, prob = 0.0333)
+EFF <- rbinom(n, size = 1, prob = 0.2)
+EFP <- rbinom(n, size = 1, prob = 0.2)
+surg.df <- data.frame(id, HA, EFF, EFP, dead)
+surg.df[5,] <- c(NA, NA, NA, NA, NA) 
+surg.df_print <- head(surg.df, 5) 
+
+options(knitr.kable.NA = '-')
+
+surg.df_print %>%
+  kbl() %>%
+  kable_styling()
+```
+
+The following model estimates the effect of past HA and EF on surgical outcome
+
+$$
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg) = \beta_0 + \beta_1 \times \text{HA} + \beta_2 \times \text{EFF} + \beta_3 \times \text{EFP},
+$$
+where $\text{exp}(\beta_1)$ is the OR for HA (yes vs no), adjusted for EF, $\text{exp}(\beta_2)$ is the OR for EFF (fair vs good), adjusted for HA, and $\text{exp}(\beta_2)$ is the OR for EFP (poor vs good), adjusted for HA.
+
+Filling-in the estimated regression coefficients, the model becomes:
+
+$$
+\log\Bigg(\frac{\hat{\pi}}{1-\hat{\pi}}\Bigg) = -4.1618 + 0.14495  \times \text{HA} + 0.9036  \times \text{EFF} + 1.8316 \times \text{EFP},
+$$
+from which, we can derive estimates for the corresponding OR and associated $95\%$ CI:
+
+  - OR - HA (yes vs no): $\text{exp}(\beta_1)=1.16 (0.61; 2.18)$
+
+  - OR - EFF (fair vs good): $\text{exp}(\beta_2)=2.47 (1.21; 5.04)$
+
+  - OR - EFP (poor vs good): $\text{exp}(\beta_3)=6.24 (2.89; 13.48)$
+
+
+I think I will end my post here, for this time. My apologies if the content I provided the latest posts was not quite dense but it has been a quite busy period both for teaching and research and I tried my best to provide at least some snapshots of the different arguments I wanted to discuss here. I hope you do not mind too much and can bear with me for a little longer. In the upcoming posts, I will try to condense the material I have organised in a more a dense way (hopefully I will find the time to do so). In any case, thanks for tuning in and I hope this general introduction was not completely useless. Next time we move forward and see how logistic regression can be used to test different types of hypotheses related to model fit, predictor effects and interaction effects. Stay tuned if you are interested!
+
+
