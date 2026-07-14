@@ -72,14 +72,13 @@ An example of the re-coded data are shown in @tbl-ex2.
 ```{r}
 #| echo: false 
 #| eval: true
-#| message: false
 #| warning: false
-#| error: false 
 #| label: tbl-ex2
 
 #generate re-coded data
 library(kableExtra)
 library(dplyr)
+options(knitr.kable.NA = '-')
 
 n <- 629
 id <- rep(1:n)
@@ -91,11 +90,8 @@ ultra.df_print <- rbind.data.frame(head(ultra.df, 5),
                                    tail(ultra.df, 2)) 
 rownames(ultra.df_print) <- c(rownames(ultra.df_print)[1:5], "", rownames(ultra.df_print)[6])
 
-options(knitr.kable.NA = '-')
-
-ultra.df_print %>%
-  kbl() %>%
-  kable_styling()
+kbl(ultra.df_print) %>%
+kable_styling()
 ```
 
 # Logistic Regression
@@ -197,9 +193,7 @@ An example of the re-coded data are shown in @tbl-ex3.
 ```{r}
 #| echo: false 
 #| eval: true
-#| message: false
 #| warning: false
-#| error: false 
 #| label: tbl-ex3
 
 #generate re-coded data
@@ -214,11 +208,8 @@ surg.df <- data.frame(id, HA, EFF, EFP, dead)
 surg.df[5,] <- c(NA, NA, NA, NA, NA) 
 surg.df_print <- head(surg.df, 5) 
 
-options(knitr.kable.NA = '-')
-
-surg.df_print %>%
-  kbl() %>%
-  kable_styling()
+kbl(surg.df_print) %>%
+kable_styling()
 ```
 
 The following model estimates the effect of past HA and EF on surgical outcome
