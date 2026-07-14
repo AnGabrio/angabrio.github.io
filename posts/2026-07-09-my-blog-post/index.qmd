@@ -67,13 +67,14 @@ Similarly, the $\chi^2$ test of association between treatment and ultrasound is 
 
 We could alternatively analyse the data using *logistic regression* to model the relationship between the outcome variable "any hip treatment" (Y) as a function of the predictor variable "ultrasound" (X). To this end, it is essential to code the binary outcome variable as $1$ (hip treatment) and $0$ (no hip treatment) based on the different event experienced by each infant and, in this case, to similarly code the predictor variable as $1$ (ultrasound) and $0$ (no ultrasound). This last change ensures that the reference group represented by the $0$ group for the predictor variable is used as reference for interpretation purposes.
 
-An example of the re-coded data are shown in @tbl-ex2.
+An example of the re-coded data is shown in @tbl-ext2
 
 ```{r}
 #| echo: false 
 #| eval: true
 #| warning: false
-#| label: tbl-ex2
+#| label: tbl-ext2
+#| tbl-cap: "Re-coded data for hip tratment study"
 
 #generate re-coded data
 library(kableExtra)
@@ -90,8 +91,8 @@ ultra.df_print <- rbind.data.frame(head(ultra.df, 5),
                                    tail(ultra.df, 2)) 
 rownames(ultra.df_print) <- c(rownames(ultra.df_print)[1:5], "", rownames(ultra.df_print)[6])
 
-kbl(ultra.df_print) %>%
-kable_styling()
+kableExtra::kbl(ultra.df_print) %>%
+  kable_styling()
 ```
 
 # Logistic Regression
@@ -187,14 +188,14 @@ Let us consider a cohort study designed to investigate risk factors for short te
 
 We now consider a logistic model with two predictors, namely past heart attack (HA) and status of ejection fraction (EF), where the latter has three levels. One of these levels must be chosen as reference (i.e. good) and indicator variables for the other levels must be created to be included into the model (but without including the original EF variable). For example, let's select the group "good" as the reference and create the indicator variables for: "fair" (EFF=1 if ejection fraction is fair) and "poor" (EFP=1 if ejection fraction is poor). 
 
-
-An example of the re-coded data are shown in @tbl-ex3.
+An example of the re-coded data is shown in @tbl-ext3
 
 ```{r}
 #| echo: false 
 #| eval: true
 #| warning: false
-#| label: tbl-ex3
+#| label: tbl-ext3
+#| tbl-cap: "Re-coded data for ultrasound treatment study"
 
 #generate re-coded data
 
@@ -208,8 +209,8 @@ surg.df <- data.frame(id, HA, EFF, EFP, dead)
 surg.df[5,] <- c(NA, NA, NA, NA, NA) 
 surg.df_print <- head(surg.df, 5) 
 
-kbl(surg.df_print) %>%
-kable_styling()
+kableExtra::kbl(surg.df_print) %>%
+  kable_styling()
 ```
 
 The following model estimates the effect of past HA and EF on surgical outcome
