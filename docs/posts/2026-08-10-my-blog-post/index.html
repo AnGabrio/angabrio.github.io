@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andrea Gabrio">
+<meta name="dcterms.date" content="2026-08-10">
+
+<title>Logistic Regression - II – Andrea Gabrio</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../img/icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0ab08c5169d9eb6d75e34d6b2d34aa8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andrea Gabrio</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../missing_data.html"> 
+<span class="menu-text">Missing Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../teaching.html"> 
+<span class="menu-text">Teaching</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link active" data-scroll-target="#hypothesis-testing">Hypothesis Testing</a>
+  <ul class="collapse">
+  <li><a href="#wald-test" id="toc-wald-test" class="nav-link" data-scroll-target="#wald-test">Wald Test</a></li>
+  <li><a href="#likelihood-ratio-test" id="toc-likelihood-ratio-test" class="nav-link" data-scroll-target="#likelihood-ratio-test">Likelihood Ratio Test</a></li>
+  </ul></li>
+  <li><a href="#continuous-predictors-and-fitted-values" id="toc-continuous-predictors-and-fitted-values" class="nav-link" data-scroll-target="#continuous-predictors-and-fitted-values">Continuous Predictors and Fitted Values</a></li>
+  <li><a href="#goodness-of-fit" id="toc-goodness-of-fit" class="nav-link" data-scroll-target="#goodness-of-fit">Goodness of Fit</a></li>
+  <li><a href="#interactions" id="toc-interactions" class="nav-link" data-scroll-target="#interactions">Interactions</a></li>
+  <li><a href="#case-control-studies" id="toc-case-control-studies" class="nav-link" data-scroll-target="#case-control-studies">Case-Control Studies</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#linear-regression-with-binary-outcomes" id="toc-linear-regression-with-binary-outcomes" class="nav-link" data-scroll-target="#linear-regression-with-binary-outcomes">Linear Regression with Binary Outcomes</a></li>
+  <li><a href="#investigating-linearity-quadratic-term" id="toc-investigating-linearity-quadratic-term" class="nav-link" data-scroll-target="#investigating-linearity-quadratic-term">Investigating Linearity: Quadratic Term</a></li>
+  <li><a href="#modelling-continuous-predictors" id="toc-modelling-continuous-predictors" class="nav-link" data-scroll-target="#modelling-continuous-predictors">Modelling Continuous Predictors</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Logistic Regression - II</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Academia</div>
+    <div class="quarto-category">Medical Statistics</div>
+    <div class="quarto-category">Logistic Regression</div>
+  </div>
+  </div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://angabrio.github.io/agabriosite2/">Andrea Gabrio</a> <a href="https://orcid.org/0000-0002-7650-4534" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.maastrichtuniversity.nl/research/methodology-and-statistics">
+            Maastricht University
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 10, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Hello dear readers and welcome back to my blog with a new post! Although I am on leave, I would like to keep updating my posts to follow-up from the topic introduced in my last post about <strong>logistic regression</strong> (also because I feel a little guilty for the relatively small introduction I provided last time). Moving from the introductory concepts dealt with in the last post, today I expand the topic to deal with more advanced elements such as hypothesis testing and more complex model specifications.</p>
+<p>As per usual, feel free to let me know if you have any questions on the material and/or you have any suggestions to better introduce the concepts or examples. I will use any type of constructive feedback to improve my educational material for my future students!</p>
+<section id="hypothesis-testing" class="level1">
+<h1>Hypothesis Testing</h1>
+<p>There are different types of tests that can be used to assess the possible association between predictor variables and the binary outcome variable of logistic regression. Common examples include:</p>
+<ul>
+<li><p>the <strong>Wald Test</strong>: for a binary predictor <span class="math inline">\(X_1\)</span>, the tested hypotheses are <span class="math inline">\(H_0: \beta_1=0\)</span> vs <span class="math inline">\(H_1: \beta_1 \neq 0\)</span>, which are equivalent to testing whether <span class="math inline">\(\text{exp}(\beta_1)=1\)</span> under <span class="math inline">\((H_0)\)</span> vs <span class="math inline">\(\text{exp}(\beta_1)\neq 1\)</span> under <span class="math inline">\((H_1)\)</span>.</p></li>
+<li><p>the <strong>Likelihood Ratio Test</strong> (LRT): for a group of indicator predictors <span class="math inline">\(X_2,X_3,\ldots\)</span> (generated from a categorical predictor), the tested hypotheses are <span class="math inline">\(H_0:\beta_2=\beta_3=\ldots=0\)</span> vs <span class="math inline">\(H_1:\)</span> at least one coefficient among <span class="math inline">\(\{\beta_2,\beta_3,\ldots\}\)</span> is <span class="math inline">\(\neq 0\)</span>.</p></li>
+</ul>
+<section id="wald-test" class="level2">
+<h2 class="anchored" data-anchor-id="wald-test">Wald Test</h2>
+<p>The test statistic is the ratio of the coefficient to its standard error, which is assumed to be asymptotically Normally distributed under <span class="math inline">\(H_0\)</span>:</p>
+<p><span class="math display">\[
+\frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)} \sim N(0,1).
+\]</span> For instance, considering the example of surgical mortality introduced in the last post, where death status (dead/not dead) was regressed on past hart attack (yes/no - HA) and ejection fraction status (good/fair/poor - EFF/EFP), the logistic regression model is:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{HA} + \beta_2 \times \text{EFF} + \beta_3 \times \text{EFP}.
+\]</span> Using the estimates <span class="math inline">\(\hat{\beta}_1=0.145\)</span> and <span class="math inline">\(\text{SE}(\hat{\beta}_1)=0.323\)</span>, it is possible to derive the test statistic <span class="math inline">\(\frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}=0.45\)</span> and associated two-sided p-value of <span class="math inline">\(0.65\)</span>.</p>
+</section>
+<section id="likelihood-ratio-test" class="level2">
+<h2 class="anchored" data-anchor-id="likelihood-ratio-test">Likelihood Ratio Test</h2>
+<p>The LRT can be used to compare (log) likelihoods between two <em>nested</em> models. For instance, in our example, we wish to test the effect of ejection fraction and fit two competing models to obtain the associated likelihoods <span class="math inline">\(L_1\)</span> and <span class="math inline">\(L_2\)</span>:</p>
+<ul>
+<li><p>model 1: ejection fraction and past heart attack are included into the model as predictors (for a total of <span class="math inline">\(p=4\)</span> coefficients)</p></li>
+<li><p>model 2: only past heart attack is included into the model as predictor (for a total of <span class="math inline">\(q=2\)</span> coefficients)</p></li>
+</ul>
+<p>The test statistic is calculated as the (log) ratio of the likelihoods of the two models, re-scaled on the so-called <em>deviance</em> scale (i.e.&nbsp;multiplied by <span class="math inline">\(-2\)</span>) which, under <span class="math inline">\(H_0\)</span>, is assumed to follow a <span class="math inline">\(\chi^2\)</span> distribution with <span class="math inline">\(\nu=p-q\)</span> degrees of freedom:</p>
+<p><span class="math display">\[
+-2 \log\Bigg(\frac{L_1}{L_2}\Bigg) = -2 (\log L_2 - \log L_1) \sim \chi^2_{p-q}.
+\]</span> For instance, in our example, the log-likelihood associated with the two models are <span class="math inline">\(\log L_1 = -206.41808\)</span> and <span class="math inline">\(\log L_2=-217.25855\)</span>, with an associated LRT statistic of <span class="math inline">\(-2(-217.25855 + 206.41808)=21.6809\)</span> following a <span class="math inline">\(\chi^2\)</span> with <span class="math inline">\(\nu=2\)</span> degrees of freedom under <span class="math inline">\(H_0\)</span> and an associated p-value of <span class="math inline">\(\approx 0\)</span>.</p>
+<p>The two tests often give the same results for large data sets, but the LRT is more reliable for small data sets with irregular shaped likelihoods.</p>
+</section>
+</section>
+<section id="continuous-predictors-and-fitted-values" class="level1">
+<h1>Continuous Predictors and Fitted Values</h1>
+<p>It is relatively simple to include continuous predictors into logistic regression models. For instance, in our example, we can expand model 1 to further include age (in years) as a new predictor:</p>
+<p><span id="eq-lr3"><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{HA} + \beta_2 \times \text{EFF} + \beta_3 \times \text{EFP} + \beta_4 \times \text{age}.
+\tag{1}\]</span></span></p>
+<p>The interpretation of the coefficient <span class="math inline">\(\beta_4\)</span> is a little different with respect to binary predictors: <span class="math inline">\(\beta_4\)</span> represents the increase in log-odds for a one unit (year) increase in age, while <span class="math inline">\(\text{exp}(\beta_4)\)</span> is the odds ratio for a one year increase in age, adjusted for past hart attack and ejection fraction.</p>
+<p>After fitting <a href="#eq-lr3" class="quarto-xref">Equation&nbsp;1</a>, the estimated value for the age coefficient is <span class="math inline">\(\hat{\beta_4}=0.05827\)</span>, so that <span class="math inline">\(\text{exp}(\hat{\beta}_4)=1.060\)</span> with associated <span class="math inline">\(95\%\)</span> CI of <span class="math inline">\((1.024;1.098)\)</span>. We can interpret this results as follows: there is <span class="math inline">\(6\%\)</span> increase in the odds of surgical mortality for a one year increase in age. The associated Wald test statistic is <span class="math inline">\(\frac{\hat{\beta}_4}{\text{SE}(\hat{\beta}_4)}=\frac{1.060}{0.01888}=3.29\)</span> with a two-sided p-value of <span class="math inline">\(\approx 0\)</span>.</p>
+<p>It is also possible to use the model to generate fitted values (predictions) for specific individual profiles in terms of the predictor variables. For example, for a <span class="math inline">\(60\)</span> year old patient with a past heart attack and poor ejection fraction, the predicted log odds is:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\hat{\pi}}{1-\hat{\pi}}\Bigg)=-7.91 + 0.20 \times 1 + 0.80 \times 0 + 1.64 \times 1 + 0.0586 \times 60 = -2.55,
+\]</span> and a predicted risk of <span class="math inline">\(\hat{\pi}=\frac{\text{exp}(-2.55)}{1+\text{exp}(-2.55)}=0.073\)</span>.</p>
+<p>A possible drawback for this type of regression model rests on its assumption that the log-odds of mortality increases <em>linearly</em> with age. If this assumption is difficult to justify, the association between the variables may be incorrectly modelled, the adjustment for other predictors may be only partial, and predictions may be inaccurate.</p>
+</section>
+<section id="goodness-of-fit" class="level1">
+<h1>Goodness of Fit</h1>
+<p>It is possible to check the fit of the logistic regression model by comparing the observed outcomes to the predicted values using the <strong>Hosmer-Lemeshow</strong> goodness of fit test. First, we assign each patient to one of <span class="math inline">\(10\)</span> equal-sized “risk groups” based on their predicted values with the aim to group patients with similar predictions: <span class="math inline">\(10\%\)</span> of patients (<span class="math inline">\(n_1\)</span>) with the lowest predictions (<span class="math inline">\(G_1\)</span>); <span class="math inline">\(10\%\)</span> of patients (<span class="math inline">\(n_2\)</span>) with the next lowest predictions (<span class="math inline">\(G_2\)</span>); <span class="math inline">\(\ldots\)</span>; <span class="math inline">\(10\%\)</span> of patients (<span class="math inline">\(n_{10}\)</span>) with the highest predictions (<span class="math inline">\(G_{10}\)</span>). The test statistic is</p>
+<p><span class="math display">\[
+\text{HL}=\sum_{j=1}^{10}\frac{(o_j-e_j)^2}{e_j\times (1-e_j/n_j)},
+\]</span> where <span class="math inline">\(o_j=\sum_{i \in G_j}y_i\)</span> is the observed number of surgical deaths, <span class="math inline">\(e_j=\sum_{i \in G_j} \hat{\pi}_i\)</span> is the expected number of surgical deaths, <span class="math inline">\(n_j\)</span> is the size of group <span class="math inline">\(j\)</span>. The test statistic is assumed to follow a <span class="math inline">\(\chi^2_{\nu}\)</span> distribution with <span class="math inline">\(\nu=J-2=8\)</span> degrees of freedom if the model is correctly specified.</p>
+<p><a href="#tbl-ex1" class="quarto-xref">Table&nbsp;1</a> shows an example of the data needed to perform the test.</p>
+<div class="cell">
+<div id="tbl-ex1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1
+</figcaption>
+<div aria-describedby="tbl-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">group</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">obs.y</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">exp.y</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">152</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">155</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">8.8</td>
+<td style="text-align: right;">149</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">16.9</td>
+<td style="text-align: right;">149</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>For instance, group <span class="math inline">\(2\)</span> contributes <span class="math inline">\(\frac{(2-1.6)^2}{1.6\times (1-1.6/155)}=0.11\)</span> to the test statistic. The HL test statistic in this example is <span class="math inline">\(\text{HL}=4.49\)</span> with an associated p-value of <span class="math inline">\(0.8104\)</span> suggesting no evidence of a poor fit. Alternatively, a scatter plot of the observed vs expected values can also be used to assess a possible misfit of the model.</p>
+</section>
+<section id="interactions" class="level1">
+<h1>Interactions</h1>
+<p>The relationship between a predictor and the outcome may be modified by another predictor, which requires the inclusion into the model of an <strong>interaction</strong> term, often used in clinical trials to investigate whether the intervention works for different subgroups. Let us consider the hip dysplasia example where infants were categorised by the level of “clinical suspicion” (strong/moderate) regarding the risk of hip dysplasia:</p>
+<ul>
+<li><span class="math inline">\(61\)</span> infants had “moderate suspicion” and received ultrasound treatment</li>
+<li><span class="math inline">\(73\)</span> infants had “moderate suspicion” and did not receive ultrasound treatment</li>
+<li><span class="math inline">\(65\)</span> infants had “strong suspicion” and received ultrasound treatment</li>
+<li><span class="math inline">\(86\)</span> infants had “strong suspicion” and did not receive ultrasound treatment</li>
+</ul>
+<p>The odds ratios for each “suspicion” group are:</p>
+<ul>
+<li><p><span class="math inline">\(\text{OR}_{\text{mod}}=\frac{61/158}{73/153}=0.81\)</span></p></li>
+<li><p><span class="math inline">\(\text{OR}_{\text{str}}=\frac{65/30}{86/3}=0.08\)</span></p></li>
+</ul>
+<p>The question becomes on whether ultrasound treatment is more effective in the “strong” vs “moderate” suspicion subgroup. A possible approach to address this problem is to fit a logistic regression model to each subgroup separately, although this makes it difficult to perform a simple test (e.g.&nbsp;Wald test) to test the null hypothesis <span class="math inline">\(H_0: \beta_{\text{mod}}=\beta_{\text{str}}\)</span>. Alternatively, we could use interaction terms to fit a single model to the entire sample. This is achieved by creating an indicator variable for “clinical suspicion” (<span class="math inline">\(1\)</span> for strong suspicion and <span class="math inline">\(0\)</span> for moderate suspicion). We then create an interaction between ultrasound and suspicion by multiplying the two associated indicators: <span class="math inline">\(\text{ultrasound} \times \text{suspicion} = 1\)</span> if an infant received ultrasound treatment and had a strong suspicion or <span class="math inline">\(0\)</span> otherwise. <a href="#tbl-ex2" class="quarto-xref">Table&nbsp;2</a> shows an example of the re-coded data.</p>
+<div class="cell">
+<div id="tbl-ex2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ultrasound</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">suspicion</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ultra.susp</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>We then fit the model</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{ultrasound} + \beta_2 \times \text{suspicion} + \beta_3 \times \text{ultrasound} \times \text{suspicion},
+\]</span> where:</p>
+<ul>
+<li><p>for the “moderate” subgroup (<span class="math inline">\(\text{suspicion}=0\)</span>), the model is <span class="math inline">\(\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{ultrasound}\)</span>, and <span class="math inline">\(\beta_1\)</span> represents the ultrasound coefficient.</p></li>
+<li><p>for the “strong” subgroup (<span class="math inline">\(\text{suspicion}=1\)</span>), the model is <span class="math inline">\(\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{ultrasound} + \beta_2 + \beta_3 \times \text{ultrasound}\)</span>, and <span class="math inline">\(\beta_1+\beta_3\)</span> represents the ultrasound coefficient.</p></li>
+</ul>
+<p>After fitting the model, the estimated odds ratios for ultrasound treatment (yes vs no) can be easily derived as:</p>
+<ul>
+<li><p>for the “moderate” subgroup: <span class="math inline">\(\text{exp}(\hat{\beta}_1)=\text{exp}(-0.21)=0.81\)</span></p></li>
+<li><p>for the “strong” subgroup: <span class="math inline">\(\text{exp}(\hat{\beta}_1 + \hat{\beta}_3)=\text{exp}(-0.21 - 2.37)=0.08\)</span></p></li>
+</ul>
+<p>Using this approach, we can formally test for a subgroup by testing the interaction term: <span class="math inline">\(H_0: \beta_3=0\)</span> vs <span class="math inline">\(\beta_3 \neq 0\)</span>. The Wald test statistic is:</p>
+<p><span class="math display">\[
+\frac{\hat{\beta}_3}{\text{SE}(\hat{\beta}_3)}=\frac{-2.3708}{0.66078}=-3.5879,
+\]</span> with an associated two-sided p-value of <span class="math inline">\(\approx 4\times 10^{-4}\)</span>, thus suggesting enough counter evidence against <span class="math inline">\(H_0\)</span>.</p>
+</section>
+<section id="case-control-studies" class="level1">
+<h1>Case-Control Studies</h1>
+<p>Logistic regression is suitable to analyse case-control studies. For instance, consider a study aimed at identifying risk factors for low birth weight (<span class="math inline">\(&lt;2.5\)</span> kg) which collected data on <span class="math inline">\(189\)</span> women, of whom <span class="math inline">\(59\)</span> had low birth weight babies (<em>cases</em>) and <span class="math inline">\(130\)</span> had normal weight babies (<em>controls</em>). Four potential risk factors were considered: age in years, maternal weight before pregnancy in kg (mwt), race (white=1,black=2,3=other), and number of doctor visits in first trimester (visits).</p>
+<p>The binary outcome is represented by the case (1) vs control (0) status (i.e.&nbsp;low birth weight), with a possible logistic regression model to consider being:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_0 + \beta_1 \times \text{age} + \beta_2 \times \text{mwt} + \beta_3 \times \text{rBlack} + \beta_4 \times \text{rOther} + \beta_5 \times \text{visits}.
+\]</span> Estimates of regression coefficients can be interpreted in the usual way. For instance, an estimate of the mwt coefficient of <span class="math inline">\(\hat{\beta}_2=-0.031286\)</span> corresponds to an OR of <span class="math inline">\(\text{exp}(\hat{\beta}_2)=0.97\)</span>, thus suggesting that the odds of a low birth weight baby decreases by <span class="math inline">\(\approx 3\%\)</span> for every 1 kg increase in maternal weight. However, we cannot interpret the intercept (<span class="math inline">\(\hat{\beta}_0\)</span>) nor make predictions <span class="math inline">\(\hat{\pi}\)</span> based on this model.</p>
+<p>Let us consider a new example, where a matched case-control study was conducted to investigate the relationship between presenile dementia and family history: <span class="math inline">\(109\)</span> patients with dementia (cases) were identified and matched by age and sex with community patients without dementia (controls), while information on family history was recorded for all subjects. <a href="#tbl-ex3" class="quarto-xref">Table&nbsp;3</a> shows a snapshot of this data set.</p>
+<div class="cell">
+<div id="tbl-ex3" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-ex3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3
+</figcaption>
+<div aria-describedby="tbl-ex3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Matched Group</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">famHisotry</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Dementia</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>A suitable regression model to analyse these data is:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_{0,1} + \ldots + \beta_{0,109} + \beta_1 \times \text{famHistory},
+\]</span> where a separate intercept is required for each matched pair. However, logistic regression should not be used to estimate this model as estimation problems are likely to arise due to the large number of parameters. Instead, we use <strong>conditional</strong> logistic regression to estimate this model, which relies on conditional likelihood not including the <span class="math inline">\(\beta_{0,j}\)</span> terms and whose results can be interpreted in the same way as logistic regression (but intercepts are not estimated).</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>I hope that, following this introduction to logistic regression, those of you who were not familiar with the method have learned a bit more about:</p>
+<ul>
+<li><p>using logistic or conditional logistic regression models to answer different research questions for different study designs.</p></li>
+<li><p>model binary, categorical and continuous predictors within logistic regression models</p></li>
+<li><p>model non-linearity and interaction terms within logistic regression models</p></li>
+<li><p>assess the fit of logistic regression models</p></li>
+<li><p>calculate the likelihood for a logistic regression model</p></li>
+</ul>
+</section>
+<section id="appendix" class="level1">
+<h1>Appendix</h1>
+<section id="linear-regression-with-binary-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="linear-regression-with-binary-outcomes">Linear Regression with Binary Outcomes</h2>
+<p>There are three main problems when using linear regression, e.g.&nbsp;<span class="math inline">\(\pi = \beta_0 + \beta_1 \times x\)</span>, to estimate a risk parameter <span class="math inline">\(\pi\)</span> associated with a binary outcome variable:</p>
+<ol type="1">
+<li><p>The fitted values (predictions) from the model are not bounded by <span class="math inline">\([0,1]\)</span> and impossible estimates of <span class="math inline">\(\pi\)</span> may be obtained</p></li>
+<li><p>The variance term is not constant as it depends on the mean parameter, i.e.&nbsp;for a binary variable <span class="math inline">\(\text{E}[Y]=\pi\)</span> and <span class="math inline">\(\text{Var}(Y)=\pi \times (1-\pi)\)</span>.</p></li>
+<li><p>Normal distribution theory, i.e.&nbsp;<span class="math inline">\(Y \sim N(\mu,\sigma^2)\)</span>, does not apply and CI and p-values obtained may be incorrect</p></li>
+</ol>
+</section>
+<section id="investigating-linearity-quadratic-term" class="level2">
+<h2 class="anchored" data-anchor-id="investigating-linearity-quadratic-term">Investigating Linearity: Quadratic Term</h2>
+<p>There are many approaches to investigate non-linearity, such as <em>adding</em> a quadratic term to the model along with the linear term:</p>
+<p><span class="math display">\[
+\log\Bigg(\frac{\pi}{1-\pi}\Bigg)=\beta_{0} + \ldots + \beta_{p} \times \text{age} + \beta_{p+1} \times \text{age}^2,
+\]</span> where a test on <span class="math inline">\(\beta_{p+1}\)</span> may be used to check if there is evidence of non-linearity (comparing the model with vs without the non-linear term). For instance, the LRT may be used to assess significance since linear and quadratic terms are often strongly correlated. If evidence of non-linearity is present, we should include an appropriate term into the model.</p>
+</section>
+<section id="modelling-continuous-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="modelling-continuous-predictors">Modelling Continuous Predictors</h2>
+<p>There are many approaches to modelling continuous predictors and checking for non-linearity. Typical examples include:</p>
+<ul>
+<li><p><em>Standard predictor transformation</em> (e.g.&nbsp;logarithm, square root, reciprocal), which requires caution in presence of zero values, or <em>fractional polynomials</em> for more complicated transformations (<span class="citation" data-cites="royston1994regression">Royston and Altman (<a href="#ref-royston1994regression" role="doc-biblioref">1994</a>)</span>).</p></li>
+<li><p><em>Categorised predictors</em>, where the categorical terms can then be tested statistically.</p></li>
+</ul>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-royston1994regression" class="csl-entry" role="listitem">
+Royston, Patrick, and Douglas G Altman. 1994. <span>“Regression Using Fractional Polynomials of Continuous Covariates: Parsimonious Parametric Modelling.”</span> <em>Journal of the Royal Statistical Society Series C: Applied Statistics</em> 43 (3): 429–53.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2024, Andrea Gabrio</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
