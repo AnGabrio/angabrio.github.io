@@ -1,0 +1,337 @@
+---
+title: "Logistic Regression - Examples"
+description: ""
+author:
+  - name: Andrea Gabrio
+    url: https://angabrio.github.io/agabriosite2/
+    orcid: 0000-0002-7650-4534
+    affiliation: Maastricht University
+    affiliation-url: https://www.maastrichtuniversity.nl/research/methodology-and-statistics
+date: 2026-09-03
+categories: [Quarto, R, Academia, Medical Statistics, Logistic Regression] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: featured.png
+#bibliography: references.bib
+#nocite: |
+#  @*
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+Hello dear readers and welcome back to my blog for my usual post appointment. The summer break is now over (sadly) and I am slowly going back to business as usual. Before teaching duties will overwhelm my agenda and time, I take this occasion to wrap up the last topics from my previous posts on the statistical analysis of medical data. I wish today to discuss some concrete examples to put into practice the theoretical basis introduced previously. I hope this could provide a nice conclusion to the topic and be of help to might need to learn or apply such methods. I will also put more emphasis on the actual software commands needed in order to implement the methods illustrated in the previous posts. Now, let's get started!
+
+# Example
+
+For today's content I will use a real clinical trial data set example, the *STARTtrial*, which was a randomised parallel group trial aimed at investigating a new support for cares of people with dementia compared with usual care. The primary outcome was the anxiety sub score (HADS-A) of an anxiety and depression questionnaire collected $8$ months after randomisation, where the depression sub score was a secondary outcome of the trial. In general, higher scores on HADS scales indicate increased anxiety/depression. 
+
+The file containing the trial data has the following variables:
+
+  - id = patient identifier
+  - randgrp = randomised group (0=TAU, 1=intervention)
+  - centre = study centre (from 1 to 4)
+  - agec = carers age at baseline (in years)
+  - genderc = carers gender (0=male, 1=female)
+  - ethnicityc = carers ethnicity (0=other, 1=white)
+  - hadsA_0 = baseline HADS Anxiety score (HADS-A)
+  - hadsD_0 = baseline HADS Depression score (HADS-D)
+  - MH_0 = baseline mental health score
+  - hadsA_8mth = HADS Anxiety score at 8 months follow-up
+  - hadsD_8mth = HADS Depression score at 8 months follow-up
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# load packages
+library(haven)
+library(gt)
+library(gtsummary)
+library(kableExtra)
+
+# load data from .dta file
+STARTtrial <- data.frame(read_dta("STARTtrial.dta"))
+
+#remove scientific notation for numbers
+options(scipen=999)
+#hide NAs from knitr tables
+options(knitr.kable.NA = '')
+#define factor variables
+STARTtrial$randgrp <- factor(STARTtrial$randgrp)
+STARTtrial$genderc <- factor(STARTtrial$genderc)
+STARTtrial$ethnicityc <- factor(STARTtrial$ethnicityc)
+STARTtrial$centre <- factor(STARTtrial$centre)
+
+#generate table of summary demo stats
+gt_sum_demo <-
+  tbl_summary(by = randgrp,
+    STARTtrial,
+    type = list(centre ~ "categorical", agec ~ "continuous2", genderc ~ "categorical", ethnicityc ~ "categorical", hadsA_0 ~ "continuous2", hadsD_0 ~ "continuous2", MH_0 ~ "continuous2"),
+    include = c(centre, agec, genderc, ethnicityc, hadsA_0, hadsD_0, MH_0),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd}) {median} ({IQR})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 2,
+    missing = "ifany",
+    missing_text = "Missing",
+    missing_stat = "{N_miss}") |>
+  add_n() |>
+  modify_header(label ~ "Variable") |>
+  bold_labels() 
+```
+
+Summary statistics for the baseline characteristics of the trial are shown in @tbl-bc-start. 
+
+```{r}
+#| echo: false 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false
+#| label: tbl-bc-start
+#| tbl-cap: "Summary statistics for patient characteristic variables from the study."
+
+#print a fancy table - only visible in html file output
+kbl(gt_sum_demo, booktabs=TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+``` 
+
+## Setting up the data
+
+As the first step, let us open the file *STARTtrial.dta* containing the study data set that will be used in our practical. The *.dta* extension refers to `STATA` data set file, which can be easily read into `R` in different ways. We are going to use the `read_dta` function from the `haven` package. You can achieve this by first installing the package via `install.packages("haven")`, and then typing the commands
+
+```{r}
+#| echo: true 
+#| eval: false
+#| message: false
+#| warning: false
+#| error: false 
+
+# load package
+library(haven)
+# load data from .dta file
+STARTtrial <- read_dta("STARTtrial.dta")
+
+```
+
+## Analyse the primary outcome
+
+We now proceed to generate a table of key summary statistics for the HADS-A score at $8$ months, separately by treatment group. Since HADS scores can be treated as continuous data, we will focus on relevant summary statistics such as mean, standard deviation and sample size.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# generate summary statistics of interest for HADS-A score at 8 months
+# first need to split data set by group (TAU vs intervention) (ignoring missing values using the function complete.cases)
+STARTtrial <- STARTtrial[complete.cases(STARTtrial),] 
+STARTtrial_tau <- STARTtrial[STARTtrial$randgrp==0,]
+STARTtrial_int <- STARTtrial[STARTtrial$randgrp==1,]
+# next calculate summary stats for each subset 
+hadsA_8th_mean <- c(mean(STARTtrial_tau$hadsA_8mth),
+                    mean(STARTtrial_int$hadsA_8mth))
+hadsA_8th_sd <- c(sd(STARTtrial_tau$hadsA_8mth),
+                    sd(STARTtrial_int$hadsA_8mth))
+hadsA_8th_n <- c(length(STARTtrial_tau$hadsA_8mth),
+                    length(STARTtrial_int$hadsA_8mth))
+#put results into table format (and assign names to rows and columns)
+tbl_sum_hadsA_8 <- cbind(hadsA_8th_mean,hadsA_8th_sd,hadsA_8th_n)
+rownames(tbl_sum_hadsA_8) <- c("TAU","INT")
+colnames(tbl_sum_hadsA_8) <- c("mean","sd","n")
+#print results rounding up numbers up to 2 decimals
+print(tbl_sum_hadsA_8, digits = 3)
+```
+
+Next, we fit a regression model to investigate whether there is a treatment effect for the $8$ month HADS-A outcome. The model is a linear regression (since HADS scores are continuous), where HADS-A at $8$ months is the dependent variable while the randomised group indicator is the only predictor included:
+
+$$
+\text{HADS-A}_{8mth}=\beta_0+\beta_1\times \text{Group} + \varepsilon,
+$$
+where $\beta_1$ represents the treatment effect of interest (i.e. difference in outcome between intervention (1) and TAU (0)). We can fit the model using the `lm` function in `R`.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# use lm function to fit linear regression using hadsA_8mth as dependent variable and randgrp as predictor: the symbol ~ is used to separate outcome from independent variables, while the argument data is used to pass the data set from which variable names should be read by the lm function 
+lm_hadsA_8mth <- lm(hadsA_8mth ~ randgrp, data = STARTtrial)
+
+# summarise the regression results using the summary function
+summary(lm_hadsA_8mth)
+
+# extract estimates of interest
+coef(lm_hadsA_8mth)["randgrp1"] # model coefficient for randgrp
+
+# associated 95% confidence interval
+confint(lm_hadsA_8mth, level = 0.95)["randgrp1",]
+
+# and associated p-value
+summary(lm_hadsA_8mth)$coefficients["randgrp1","Pr(>|t|)"]
+```
+
+For the next step, we can quickly check whether the assumptions of the model seem to be satisfied. For example, we can check the assumptions related to normality and homskedasticity of the residuals and presence of possible influential outliers using the function `plot`.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# check model assumptions
+plot(lm_hadsA_8mth, 1) # residuals vs fitted values
+plot(lm_hadsA_8mth, 2) # Q-Q plot for normality
+plot(lm_hadsA_8mth, 4) # Cook's distance
+```
+
+Finally, we can compare the regression results with those from a two-sample t-test using the function `t.test`
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# use t.test function perform t-test on same data 
+tt_hadsA_8mth <- t.test(hadsA_8mth ~ randgrp, data = STARTtrial)
+
+# print summary results
+print(tt_hadsA_8mth)
+```
+
+## Analysis allowing for baseline
+
+We now check for the correlation between HADS-A at $8$ months and its baseline measurement using the `cor` function to return the Pearson's correlation coefficient estimate.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# use cor function to get correlation between HADS-A at follow-up and baseline
+cor(STARTtrial$hadsA_8mth, STARTtrial$hadsA_0, method = "pearson")
+
+```
+
+Due to the substantial association between the measures, it is advisable to adjust our regression analysis for the baseline scores to improve estimation by likely reducing the level of uncertainty surrounding our initial estimate from the unadjusted model. We can do this by simply additively including the predictor `hadsA_0` into our regression model 
+
+$$
+\text{HADS-A}_{8mth}=\beta_0+\beta_1\times \text{Group} + \beta_2\times \text{HADS-A}_{base} +  \varepsilon,
+$$
+
+Using `R` commands:
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# fit same model but also include baseline HADS-A score as independent predictor
+lm_hadsA_8mth_adj <- lm(hadsA_8mth ~ randgrp + hadsA_0, data = STARTtrial)
+
+# summarise the regression results using the summary function
+summary(lm_hadsA_8mth_adj)
+
+# extract estimates of interest
+coef(lm_hadsA_8mth_adj)["randgrp1"] # model coefficient for randgrp
+
+# associated 95% confidence interval
+confint(lm_hadsA_8mth_adj, level = 0.95)["randgrp1",]
+
+# and associated p-value
+summary(lm_hadsA_8mth_adj)$coefficients["randgrp1","Pr(>|t|)"]
+```
+
+## Sub group investigation
+
+If we suspect that the effect of the intervention differs across centres, we might need to further update our regression model to account for this possible interaction by including both centre (expressed as $3$ dummy variables) and the interaction term between centre and group (expressed as separate terms for each dummy variable included).
+
+$$
+\text{HADS-A}_{8mth}=\beta_0+\beta_1\times \text{Group} + \beta_2\times \text{HADS-A}_{base} + \beta_3\times \text{Centre} +\beta_4\times \text{Group} \times \text{Centre} +   \varepsilon,
+$$
+and we can fit the model in `R` by typing
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# fit same model but also include centre and interaction between centre and group (denoted by symbol *) into the model. R recognises that centre is a categorical variable and automatically includes a series of 3 dummies into the model representing this variable (leaving out centre 1 as the reference group)
+lm_hadsA_8mth_int <- lm(hadsA_8mth ~ randgrp + hadsA_0 + centre + randgrp*centre, data = STARTtrial)
+
+# summarise the regression results using the summary function
+summary(lm_hadsA_8mth_int)
+
+# extract estimates of interest (treatment effect now changes by centre and is represented by each interaction term)
+coef(lm_hadsA_8mth_int)["randgrp1"] # trt effect at centre 1 (reference)
+coef(lm_hadsA_8mth_int)["randgrp1:centre2"] # trt effect at centre 2
+coef(lm_hadsA_8mth_int)["randgrp1:centre3"] # trt effect at centre 3
+coef(lm_hadsA_8mth_int)["randgrp1:centre4"] # trt effect at centre 4
+
+# associated 95% confidence intervals
+confint(lm_hadsA_8mth_int, level = 0.95)["randgrp1",]
+confint(lm_hadsA_8mth_int, level = 0.95)["randgrp1:centre2",]
+confint(lm_hadsA_8mth_int, level = 0.95)["randgrp1:centre3",]
+confint(lm_hadsA_8mth_int, level = 0.95)["randgrp1:centre4",]
+
+# and associated p-values
+summary(lm_hadsA_8mth_int)$coefficients["randgrp1","Pr(>|t|)"]
+summary(lm_hadsA_8mth_int)$coefficients["randgrp1:centre2","Pr(>|t|)"]
+summary(lm_hadsA_8mth_int)$coefficients["randgrp1:centre3","Pr(>|t|)"]
+summary(lm_hadsA_8mth_int)$coefficients["randgrp1:centre4","Pr(>|t|)"]
+
+```
+
+Due to multiple testing, if all p-values associated with centre-specific treatment effects need to be interpreted, then some form of adjustment is needed. One simple approach is the so-called *Bonferroni* correction, where statistical significance for each of the above $4$ p-values is judged based on the updated significance level obtained as $\alpha^\star=\alpha/4$. 
+
+## Sensitivity analysis
+
+To account for possible imbalances between group in terms of the baseline variables `agec` and `genderc`, an additional regression analysis can be run where these variables are additively included into the model (assuming no interaction across centres for simplicity). This can be done as usual using the `lm` function in `R`.
+
+```{r}
+#| echo: true 
+#| eval: true
+#| message: false
+#| warning: false
+#| error: false 
+
+# fit same model but also include baseline HADS-A score as independent predictor
+lm_hadsA_8mth_adj2 <- lm(hadsA_8mth ~ randgrp + hadsA_0 + agec + genderc, data = STARTtrial)
+
+# summarise the regression results using the summary function
+summary(lm_hadsA_8mth_adj2)
+
+# extract estimates of interest
+coef(lm_hadsA_8mth_adj2)["randgrp1"] # model coefficient for randgrp
+
+# associated 95% confidence interval
+confint(lm_hadsA_8mth_adj2, level = 0.95)["randgrp1",]
+
+# and associated p-value
+summary(lm_hadsA_8mth_adj2)$coefficients["randgrp1","Pr(>|t|)"]
+```
+
+The treatment effect has somewhat changed compared to the adjusted analysis without these baseline variables, therefore suggesting how their inclusion might be needed. However, the overall conclusion of the study remains unaltered as the overall treatment effect (assuming no interaction) remained statistically significant (and possibly clinically relevant) across all adjusted analyses.
+
+# Conclusion
+
+What do you think, was this exercise useful? I think it is a nice way to show how some methods that we have learned before can be used to perform standard clinical trial analyses within a relatively simple setting. I hope this was useful and would love to receive any kind of feedback you might have on today's content. See you soon!
+
+
+
